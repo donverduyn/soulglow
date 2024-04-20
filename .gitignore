@@ -1,0 +1,62 @@
+# Dependency directories
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+/build
+/dist
+/out
+/.next
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Production files
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE and editors
+/.idea
+/.vscode
+*.swp
+*.swo
+
+# Optional eslint cache
+.eslintcache
+
+# Misc
+/.sass-cache
+.cache
+*.log
+*.csv
+*.dat
+*.out
+*.pid
+*.gz
+
+# MacOS files
+*.DS_Store
+
+# Coverage directory used by tools like istanbul
+/coverage
+/public
+
+# Temporary files
+/tmp
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Others
+*.sublime-workspace
+*.sublime-project
