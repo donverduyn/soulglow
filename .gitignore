@@ -23,7 +23,6 @@ yarn-error.log*
 
 # IDE and editors
 /.idea
-/.vscode
 *.swp
 *.swo
 
@@ -60,3 +59,6 @@ yarn-error.log*
 # Others
 *.sublime-workspace
 *.sublime-project
+
+.vite-inspect
+.analyzer
