@@ -11,5 +11,12 @@
     ],
     "workbench.editorAssociations": {   
         "*.md": "vscode.markdown.preview.editor",
+    },
+    "github-actions.workflows.pinned.workflows": [
+        "./.github/workflows/*.yml",
+        ".github/workflows/ci.yml"
+    ],
+    "files.exclude": {
+        "**/.swc": true
     }
 }

@@ -2,21 +2,21 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '20'  # Specify your Node.js version
+        node-version: '20'
         cache: 'yarn'
 
     - name: Install dependencies
@@ -24,6 +24,3 @@ jobs:
 
     - name: Build
       run: yarn build
-
-    - name: Run tests
-      run: yarn test

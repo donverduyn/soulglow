@@ -104,16 +104,27 @@ module.exports = {
       env: { browser: true },
     },
     {
+      files: ['./tests/**/*.ts', './src/**/*.test.ts'],
+      extends: ['plugin:vitest/legacy-all'],
+      rules: {
+        'vitest/max-nested-describe': ['error', { max: 3 }]
+      },
+    },
+    {
       // all React files
       files: ['./src/**/*.tsx'],
       settings: { react: { version: 'detect' } },
-      plugins: ['react', 'react-hooks'],
+      plugins: ['react', 'react-hooks', 'react-refresh'],
       extends: [
         'plugin:react/jsx-runtime',
         'plugin:react/all',
         'plugin:react-hooks/recommended',
       ],
       rules: {
+        'react-refresh/only-export-components': [
+          'warn',
+          { allowConstantExport: true },
+        ],
         'no-restricted-imports': [
           'error',
           {
