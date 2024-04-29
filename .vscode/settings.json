@@ -2,13 +2,14 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
     },
-    "eslint.validate": [
-        "javascript",
-        "javascriptreact",
-        "typescript",
-        "typescriptreact"
-    ],
+    // we can't disable this, because we rely on errors not captured by eslint
+    // // rely on eslint for typed code checking
+    // "typescript.validate.enable": false,
+    // "javascript.validate.enable": false,
     "eslint.workingDirectories": [
         {"mode": "auto"}
     ],
+    "workbench.editorAssociations": {   
+        "*.md": "vscode.markdown.preview.editor",
+    }
 }

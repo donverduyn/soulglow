@@ -11,9 +11,33 @@ module.exports = {
   rules: {
     'prettier/prettier': 'warn',
     'unused-imports/no-unused-imports': 'warn',
-    '@typescript-eslint/no-unused-vars': 'warn',
     'import/no-named-as-default-member': 'off',
-    'import/order': ['warn', { alphabetize: { order: 'asc' } }],
+    'import/order': [
+      'warn',
+      {
+        groups: [
+          'builtin',
+          'external',
+          'internal',
+          'parent',
+          'sibling',
+          'index',
+        ],
+        pathGroups: [
+          {
+            pattern: 'react',
+            group: 'external',
+            position: 'before',
+          },
+        ],
+        pathGroupsExcludedImportTypes: ['react'],
+        'newlines-between': 'never',
+        alphabetize: {
+          order: 'asc',
+          caseInsensitive: true,
+        },
+      },
+    ],
   },
   overrides: [
     {
@@ -22,31 +46,50 @@ module.exports = {
       env: { node: true },
     },
     {
+      // all TypeScript files
       files: ['*.ts', '*.tsx'],
       parserOptions: {
-        ecmaVersion: 2021,
+        ecmaVersion: 'latest',
         sourceType: 'module',
-        project: ['./tsconfig.json'],
+        // tsconfig.node.json only applies for vite.config.ts
+        project: ['./tsconfig.json', './tsconfig.node.json'],
         tsconfigRootDir: __dirname,
       },
       plugins: ['@typescript-eslint'],
       extends: [
-        'plugin:@typescript-eslint/recommended',
+        'plugin:@typescript-eslint/strict-type-checked',
         'plugin:import/typescript',
       ],
       settings: {
         'import/resolver': {
           typescript: {
             alwaysTryTypes: true,
-            project: ['./tsconfig.json'],
+            project: ['./tsconfig.json', './tsconfig.node.json'],
           },
         },
       },
       rules: {
+        '@typescript-eslint/no-floating-promises': [
+          'warn',
+          { ignoreVoid: true },
+        ],
+        // use this references with mobx-react-lite
+        '@typescript-eslint/unbound-method': 'off',
+        '@typescript-eslint/no-confusing-void-expression': [
+          'warn',
+          { ignoreArrowShorthand: true },
+        ],
         '@typescript-eslint/no-unused-vars': [
           'warn',
-          { varsIgnorePattern: '^_$' },
+          {
+            varsIgnorePattern: '^_$',
+            argsIgnorePattern: '^_$',
+            vars: 'local',
+            args: 'after-used',
+            ignoreRestSiblings: true,
+          },
         ],
+
         '@typescript-eslint/no-empty-interface': [
           'error',
           {
@@ -56,14 +99,20 @@ module.exports = {
       },
     },
     {
+      // all TypeScript files in src
       files: ['./src/**/*.ts', './src/**/*.tsx'],
       env: { browser: true },
     },
     {
+      // all React files
       files: ['./src/**/*.tsx'],
       settings: { react: { version: 'detect' } },
       plugins: ['react', 'react-hooks'],
-      extends: ['plugin:react/all', 'plugin:react-hooks/recommended'],
+      extends: [
+        'plugin:react/jsx-runtime',
+        'plugin:react/all',
+        'plugin:react-hooks/recommended',
+      ],
       rules: {
         'no-restricted-imports': [
           'error',

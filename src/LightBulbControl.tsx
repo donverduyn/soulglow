@@ -1,8 +1,7 @@
-import * as Optic from '@fp-ts/optic';
+import * as React from 'react';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { observer, useLocalObservable } from 'mobx-react-lite';
-import React, { ChangeEvent, useCallback, useState } from 'react';
 import { useThrottleFn } from 'react-use';
 import * as R from 'remeda';
 import { ThumbComponent, ColoredSlider } from './Slider';
@@ -30,34 +29,34 @@ const defaultState: LightBulbState = {
   color: { r: 255, g: 25, b: 167 },
 };
 
-const createLensFromPath = <T,>() => ({
-  at: <Path extends string>(
-    path: Path | (NestedKeysAndIntersection<T, Path> & string)
-  ): Optic.Lens<T, PathType<T, Path>> => {
-    const parts = path.split('.');
+// const createLensFromPath = <T,>() => ({
+//   at: <Path extends string>(
+//     path: Path | (NestedKeysAndIntersection<T, Path> & string)
+//   ): Optic.Lens<T, PathType<T, Path>> => {
+//     const parts = path.split('.');
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return parts.reduce<Optic.Lens<T, any>>(
-      (acc, part) => acc.at(part),
-      Optic.id<T>()
-    ) as Optic.Lens<T, PathType<T, Path>>;
-  },
-});
+//     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//     return parts.reduce<Optic.Lens<T, any>>(
+//       (acc, part) => acc.at(part),
+//       Optic.id<T>()
+//     ) as Optic.Lens<T, PathType<T, Path>>;
+//   },
+// });
 
 // Example usage
-const colorGLens = createLensFromPath<LightBulbState>().at('color.g');
+// const colorGLens = createLensFromPath<LightBulbState>().at('color.g');
 
-const g = colorGLens.getOptic({
-  color: { g: 10, b: 5, r: 2 },
-  brightness: 10,
-  bulb_mode: 'color',
-  state: 'ON',
-});
+// const g = colorGLens.getOptic({
+//   color: { g: 10, b: 5, r: 2 },
+//   brightness: 10,
+//   bulb_mode: 'color',
+//   state: 'ON',
+// });
 
-const colorLens = Optic.id<LightBulbState>().at('color');
-const increaseRed = Optic.modify(colorLens.at('r'))((r) => r + 1);
+// const colorLens = Optic.id<LightBulbState>().at('color');
+// const increaseRed = Optic.modify(colorLens.at('r'))((r) => r + 1);
 
-increaseRed(defaultState);
+// increaseRed(defaultState);
 // const brightnessLens = lens<LightBulbState>().prop('brightness');
 
 // brightness
@@ -81,7 +80,7 @@ const handleChange = (
   // }
 };
 
-const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = (e: React.FormEvent) => {
   // e.preventDefault();
   // try {
   //   const response = await fetch('/api/gateways/desk-light', {
@@ -98,7 +97,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 };
 
 const LightBulbControl: React.FC = observer(() => {
-  const [lightBulb, setLightBulb] = useState<LightBulbState>(defaultState);
+  const [lightBulb, setLightBulb] = React.useState<LightBulbState>(defaultState);
 
   useThrottleFn(
     (lightBulb) => {
@@ -117,7 +116,7 @@ const LightBulbControl: React.FC = observer(() => {
 
   const { state, changeState } = useLocalObservable(() => ({
     state: 'ON',
-    changeState(e: ChangeEvent<HTMLSelectElement>) {
+    changeState(e: React.ChangeEvent<HTMLSelectElement>) {
       this.state = e.target.value;
     },
     // brightness: 79,
@@ -125,8 +124,8 @@ const LightBulbControl: React.FC = observer(() => {
     // state: 'ON',
   }));
 
-  const handleState = useCallback(
-    () => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleState = React.useCallback(
+    () => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       const { name, value } = e.target;
       console.log({ name, value });
 

@@ -16,59 +16,7 @@ const createFileName = (prefix: string) => {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    react({
-      babel: {
-        plugins: [
-          // [
-          //   'babel-plugin-import',
-          //   {
-          //     libraryName: '@mui/material',
-          //     libraryDirectory: '', // ensure this matches the MUI directory structure
-          //     camel2DashComponentName: false,
-          //   },
-          //   'core',
-          // ],
-          // [
-          //   'babel-plugin-import',
-          //   {
-          //     libraryName: '@mui/icons-material',
-          //     libraryDirectory: '', // same for icons
-          //     camel2DashComponentName: false,
-          //   },
-          //   'icons',
-          // ],
-          // [
-          //   'babel-plugin-import',
-          //   {
-          //     libraryName: 'remeda',
-          //     libraryDirectory: '',
-          //     camel2DashComponentName: false,
-          //   },
-          //   'remeda',
-          // ],
-        ],
-        // presets: [
-        //   [
-        //     '@babel/preset-env',
-        //     {
-        //       targets: 'defaults',
-        //     },
-        //   ],
-        //   '@babel/preset-react',
-        //   '@babel/preset-typescript',
-        // ],
-        // plugins: [
-        //   [
-        //     'babel-plugin-import',
-        //     {
-        //       libraryName: '@mui/material',
-        //       libraryDirectory: '',
-        //       camel2DashComponentName: false,
-        //     },
-        //   ],
-        // ],
-      },
-    }),
+    react(),
     checker({
       overlay: true,
       terminal: false,
@@ -87,14 +35,11 @@ export default defineConfig({
       gzipSize: true,
       brotliSize: true,
       // sourcemap: true,
-      // projectRoot: process.cwd(),
+      projectRoot: process.cwd(),
       title: 'Vite Visualizer',
       filename: `./.analyzer/${createFileName('analysis')}.html`, // will be saved in project's root
     }),
-    Inspect({
-      build: true,
-      outputDir: '.vite-inspect',
-    }),
+    Inspect(),
   ],
   server: {
     host: '0.0.0.0',

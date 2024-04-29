@@ -60,5 +60,5 @@ yarn-error.log*
 *.sublime-workspace
 *.sublime-project
 
-.vite-inspect
-.analyzer
+/.vite-inspect
+/.analyzer

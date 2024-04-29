@@ -1,12 +1,12 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react/no-multi-comp */
-import Slider, { SliderThumb } from '@mui/material/Slider';
-import { styled } from '@mui/material/styles';
 import * as React from 'react';
+import { styled } from '@mui/material';
+import Slider, { SliderThumb } from '@mui/material/Slider';
 import { ValidatedColor } from './types/color';
 
 interface Props<T extends string> {
-  readonly color: ValidatedColor<T>;
+  readonly color?: ValidatedColor<T>;
   readonly style?: React.CSSProperties;
 }
 
@@ -18,18 +18,19 @@ function MyComponent<T extends string>({ color, style }: Props<T>) {
   );
 }
 
+// type Test = PropsOf<typeof MyComponent<'#fff'>>['color'];
 // type TestContainsFormatError = ContainsFormatError<' format '>;
 
 // type Test3 = Parameters<typeof StyledMyComponent>[0]['color'];
 
-const StyledMyComponent = styled(MyComponent)(({ color }) => ({
+const StyledMyComponent = styled(MyComponent<'#fff'>)(({ color }) => ({
   color: color,
 }));
 
 const TestComponent0 = () => {
   return (
-    <MyComponent
-      color='#dd'
+    <StyledMyComponent
+      // color='#ff'
       style={{ '--length': 5 }}
     />
   );
