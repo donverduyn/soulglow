@@ -86,14 +86,15 @@ type ValidateHex<T extends string> = ParseHex<StripHash<T>>;
 
 type ValidateAll<T extends string> = ValidateHex<T> | ValidateRGB<T>;
 
-// returns T as literal type if valid, otherwise union of errors
-export type ValidatedColor<T extends string> = IfNever<
-  //Call<U.Extract<T, ValidateAll<T>>>,
-  //ValidateAll<T>,
-  ValidateAll<T>,
-  'Color',
-  T
->;
+declare global {
+  type ValidatedColor<T extends string> = IfNever<
+    //Call<U.Extract<T, ValidateAll<T>>>,
+    //ValidateAll<T>,
+    ValidateAll<T>,
+    'Color',
+    T
+  >;
+}
 
 type TestValidatedColor = ValidatedColor<'rgb(255, 255, 255)'>;
 

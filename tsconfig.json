@@ -19,7 +19,14 @@
     "jsxImportSource": "@emotion/react",
 
     /* Linting */
-    "strict": true
+    "strict": true,
+
+    /* Paths */
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "baseUrl": ".",
+    "paths": {
+      "*": ["src/*"]
+    }
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]

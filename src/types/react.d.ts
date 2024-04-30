@@ -6,3 +6,9 @@ declare module 'react' {
     '--length'?: number; // Custom CSS property as an example
   }
 }
+
+declare global {
+  interface DefaultProps {
+    className?: string;
+  }
+}

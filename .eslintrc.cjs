@@ -69,6 +69,7 @@ module.exports = {
         },
       },
       rules: {
+        '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-floating-promises': [
           'warn',
           { ignoreVoid: true },
@@ -85,7 +86,7 @@ module.exports = {
             varsIgnorePattern: '^_$',
             argsIgnorePattern: '^_$',
             vars: 'local',
-            args: 'after-used',
+            args: 'all',
             ignoreRestSiblings: true,
           },
         ],
@@ -104,10 +105,15 @@ module.exports = {
       env: { browser: true },
     },
     {
-      files: ['./tests/**/*.ts', './src/**/*.test.ts'],
+      files: [
+        './tests/**/*.ts',
+        './tests/**/*.tsx',
+        './src/**/*.test.ts',
+        './src/**/*.test.tsx',
+      ],
       extends: ['plugin:vitest/legacy-all'],
       rules: {
-        'vitest/max-nested-describe': ['error', { max: 3 }]
+        'vitest/max-nested-describe': ['error', { max: 3 }],
       },
     },
     {
@@ -131,6 +137,7 @@ module.exports = {
             patterns: ['@mui/*/*/*'],
           },
         ],
+        'react/prop-types': 'off',
         'react/jsx-no-useless-fragment': 'warn',
         'react/no-unused-prop-types': 'warn',
         'react/jsx-no-comment-textnodes': 'warn',

@@ -1,8 +1,9 @@
 import react from '@vitejs/plugin-react-swc';
 import { visualizer } from 'rollup-plugin-visualizer';
-import { defineConfig } from 'vite';
 import { checker } from 'vite-plugin-checker';
-import Inspect from 'vite-plugin-inspect';
+import inspect from 'vite-plugin-inspect';
+import tsconfigPaths from 'vite-tsconfig-paths';
+import { defineConfig } from 'vitest/config';
 
 const createFileName = (prefix: string) => {
   const now = new Date();
@@ -16,12 +17,17 @@ const createFileName = (prefix: string) => {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    tsconfigPaths(),
     react({
       jsxImportSource: '@emotion/react',
       plugins: [['@swc/plugin-emotion', {}]],
     }),
     checker({
-      overlay: true,
+      overlay: {
+        initialIsOpen: false,
+        panelStyle: 'height: 50vh;',
+        badgeStyle: 'background-color: transparent; font-size: 0.75em;',
+      },
       terminal: false,
       root: process.cwd(),
       typescript: {
@@ -42,8 +48,22 @@ export default defineConfig({
       title: 'Vite Visualizer',
       filename: `./.analyzer/${createFileName('analysis')}.html`, // will be saved in project's root
     }),
-    Inspect(),
+    inspect(),
   ],
+  test: {
+    // logHeapUsage: true,
+    open: true,
+    // resolveSnapshotPath: (testPath, snapshotExtension) =>
+    //   testPath.replace(/\.test\.(ts|tsx)$/, `.snap${snapshotExtension}`),
+    // typecheck: {
+    //   checker: 'tsc',
+    //   tsconfig: './tsconfig.json',
+    //   enabled: true,
+    // },
+    // reporters: ['html'],
+    globals: true,
+    environment: 'happy-dom',
+  },
   server: {
     host: '0.0.0.0',
     proxy: {

@@ -1,12 +1,13 @@
 import * as React from 'react';
 import Button from '@mui/material/Button';
+import { green } from '@mui/material/colors';
 import Typography from '@mui/material/Typography';
-import { observer, useLocalObservable } from 'mobx-react-lite';
-import { useThrottleFn } from 'react-use';
-import * as R from 'remeda';
-import { ThumbComponent, ColoredSlider } from './Slider';
+import { autorun, toJS } from 'mobx';
+import { observer } from 'mobx-react-lite';
+import { Slider } from 'common/components/Slider';
+import { useMobx } from 'common/hooks/useMobx';
+import { OnOffSwitch } from './components/OnOffSwitch';
 // import { throttle } from './utils/throttle';
-// import InputSlider from './InputSilder';
 
 interface Color {
   r: number;
@@ -14,56 +15,24 @@ interface Color {
   b: number;
 }
 
+enum LightMode {
+  COLOR,
+  WHITE,
+}
+
 interface LightBulbState {
-  state: string;
+  isOn: boolean;
   brightness: number;
-  bulb_mode: string;
+  bulb_mode: LightMode;
   color: Color;
-  // hello: { foo: { bar: { baz: string } } };
 }
 
 const defaultState: LightBulbState = {
-  state: 'ON',
+  isOn: true,
   brightness: 79,
-  bulb_mode: 'color',
+  bulb_mode: LightMode.COLOR,
   color: { r: 255, g: 25, b: 167 },
 };
-
-// const createLensFromPath = <T,>() => ({
-//   at: <Path extends string>(
-//     path: Path | (NestedKeysAndIntersection<T, Path> & string)
-//   ): Optic.Lens<T, PathType<T, Path>> => {
-//     const parts = path.split('.');
-
-//     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//     return parts.reduce<Optic.Lens<T, any>>(
-//       (acc, part) => acc.at(part),
-//       Optic.id<T>()
-//     ) as Optic.Lens<T, PathType<T, Path>>;
-//   },
-// });
-
-// Example usage
-// const colorGLens = createLensFromPath<LightBulbState>().at('color.g');
-
-// const g = colorGLens.getOptic({
-//   color: { g: 10, b: 5, r: 2 },
-//   brightness: 10,
-//   bulb_mode: 'color',
-//   state: 'ON',
-// });
-
-// const colorLens = Optic.id<LightBulbState>().at('color');
-// const increaseRed = Optic.modify(colorLens.at('r'))((r) => r + 1);
-
-// increaseRed(defaultState);
-// const brightnessLens = lens<LightBulbState>().prop('brightness');
-
-// brightness
-
-// color
-
-//
 
 const handleChange = (
   e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -96,39 +65,31 @@ const handleSubmit = (e: React.FormEvent) => {
   // }
 };
 
-const LightBulbControl: React.FC = observer(() => {
-  const [lightBulb, setLightBulb] = React.useState<LightBulbState>(defaultState);
-
-  useThrottleFn(
-    (lightBulb) => {
-      console.log('Throttled:', lightBulb);
+const useLightBulbState = (state: LightBulbState) =>
+  useMobx(() => ({
+    ...state,
+    togglePower() {
+      this.isOn = !this.isOn;
     },
-    1000,
-    [lightBulb]
-  );
-
-  const { call: handleChange } = R.debounce(
-    (e: Event, v: HTMLInputElement) => {
-      console.log('Debounced', v);
+    changeGreen(value: number) {
+      this.color.g = value;
     },
-    { waitMs: 100, maxWaitMs: 100 }
-  );
-
-  const { state, changeState } = useLocalObservable(() => ({
-    state: 'ON',
-    changeState(e: React.ChangeEvent<HTMLSelectElement>) {
-      this.state = e.target.value;
+    changeRed(value: number) {
+      this.color.r = value;
     },
-    // brightness: 79,
-    // bulb_mode: 'color',
-    // state: 'ON',
+    changeBlue(value: number) {
+      this.color.b = value;
+    },
   }));
+
+const LightBulbControl: React.FC = observer(() => {
+  const lightBulb = useLightBulbState(defaultState);
+  React.useEffect(() => autorun(() => console.log(toJS(lightBulb.color))));
 
   const handleState = React.useCallback(
     () => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       const { name, value } = e.target;
       console.log({ name, value });
-
       // setLightBulb({ ...lightBulb, [name]: value });
     },
     []
@@ -136,17 +97,10 @@ const LightBulbControl: React.FC = observer(() => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <label>
-        State:
-        <select
-          name='state'
-          value={state}
-          onChange={changeState}
-        >
-          <option value='ON'>On</option>
-          <option value='OFF'>Off</option>
-        </select>
-      </label>
+      <OnOffSwitch
+        getValue={() => lightBulb.isOn}
+        onChange={() => lightBulb.togglePower()}
+      />
       <br />
       <label>
         Brightness:
@@ -160,7 +114,7 @@ const LightBulbControl: React.FC = observer(() => {
         />
       </label>
       <br />
-      <label>
+      {/* <label>
         Mode:
         <select
           name='bulb_mode'
@@ -170,7 +124,11 @@ const LightBulbControl: React.FC = observer(() => {
           <option value='color'>Color</option>
           <option value='white'>White</option>
         </select>
-      </label>
+      </label> */}
+      {/* <ModeSelector
+        getValue={() => lightBulb.bulb_mode}
+        onChange={handleState}
+      /> */}
       <br />
       <label>
         Red:
@@ -193,15 +151,10 @@ const LightBulbControl: React.FC = observer(() => {
       </label>
       <br />
       <Typography gutterBottom>Green</Typography>
-      <ColoredSlider
+      <Slider
         aria-label='green slider'
-        // customColor='#ff4000'
-        defaultValue={20}
-        valueLabelDisplay='auto'
-        slots={{
-          thumb: ThumbComponent /*, valueLabel: StyledValueLabel */,
-        }}
-        onChange={(e, v) => console.log(e)}
+        color={green[500]}
+        onChange={(v) => lightBulb.changeGreen(v)}
       />
       {/* <Slider color='primary' value={lightBulb.color.b} valueLabelDisplay='on'>
       </Slider> */}

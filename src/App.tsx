@@ -2,7 +2,7 @@ import './App.css';
 
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import LightBulbControl from './LightBulbControl';
+import LightBulb from './modules/LightBulb/LightBulb';
 
 const darkTheme = createTheme({
   palette: { mode: 'dark' },
@@ -14,7 +14,7 @@ export default function App() {
       <CssBaseline />
       <div className='App'>
         <header className='App-header'>
-          <LightBulbControl />
+          <LightBulb />
         </header>
       </div>
     </ThemeProvider>
