@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { isFunction } from 'effect/Function';
-import { AnnotationsMap, observable } from 'mobx';
+import { AnnotationsMap, observable, autorun } from 'mobx';
 
 export const useMobx = <T extends Record<string, unknown>>(
   initialize: () => T,
@@ -15,7 +15,7 @@ export const useMobx = <T extends Record<string, unknown>>(
       if (isFunction(obs[key])) {
         const currentFn = obs[key] as <T>(a: T) => void;
         (obs[key] as <T>(a: T) => void) = <T>(a: T) => {
-          console.log('Calling:', key, a);
+          // console.log('Calling:', key, a);
           currentFn(a);
         };
       }
@@ -23,3 +23,15 @@ export const useMobx = <T extends Record<string, unknown>>(
 
     return obs;
   })[0];
+
+export const useAutorun = (fn: () => void) =>
+  React.useEffect(
+    () =>
+      autorun(() => {
+        fn();
+        if (process.env.NODE_ENV === 'development') {
+          // trace();
+        }
+      }),
+    []
+  );

@@ -10,6 +10,7 @@ module.exports = {
   plugins: ['import', 'unused-imports'],
   rules: {
     'prettier/prettier': 'warn',
+    'no-irregular-whitespace': 'off',
     'unused-imports/no-unused-imports': 'warn',
     'import/no-named-as-default-member': 'off',
     'import/order': [
@@ -69,12 +70,13 @@ module.exports = {
         },
       },
       rules: {
+        '@typescript-eslint/no-useless-template-literals': 'warn',
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-floating-promises': [
           'warn',
           { ignoreVoid: true },
         ],
-        // use this references with mobx-react-lite
+        // support this to use with mobx api
         '@typescript-eslint/unbound-method': 'off',
         '@typescript-eslint/no-confusing-void-expression': [
           'warn',
@@ -105,6 +107,7 @@ module.exports = {
       env: { browser: true },
     },
     {
+      // all test files
       files: [
         './tests/**/*.ts',
         './tests/**/*.tsx',
@@ -114,6 +117,7 @@ module.exports = {
       extends: ['plugin:vitest/legacy-all'],
       rules: {
         'vitest/max-nested-describe': ['error', { max: 3 }],
+        'vitest/no-hooks': 'off',
       },
     },
     {

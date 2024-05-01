@@ -1,33 +1,32 @@
 import { styled } from '@mui/material';
-import { flow } from 'effect';
-import { Select } from '../../../common/components/Select';
-import { LightMode } from '../LightBulb';
+import { Select } from 'common/components/Select';
+
+export enum LightMode {
+  COLOR = 0,
+  WHITE = 1,
+}
 
 const MODE_ITEMS = [
   { value: LightMode.COLOR, label: 'Color' },
   { value: LightMode.WHITE, label: 'White' },
 ];
 
-function getItemByMode(mode: LightMode) {
-  return MODE_ITEMS.find((item) => item.value === mode);
-}
-
 interface Props extends DefaultProps {
   getValue: () => LightMode;
-  onChange: <T>(value: T) => void;
+  onChange: (value: LightMode) => void;
 }
 
-const ModeSelectorBase: React.FC<Props> = ({ getValue, onChange }) => {
+const LightModeChangerBase: React.FC<Props> = ({ getValue, onChange }) => {
   return (
     <Select
-      getValue={flow(getValue, getItemByMode)}
+      getValue={getValue}
       items={MODE_ITEMS}
       onChange={onChange}
     />
   );
 };
 
-export const ModeSelector = styled(ModeSelectorBase)({
+export const LightModeChanger = styled(LightModeChangerBase)({
   //   width: '100%',
   //   height: 40,
   //   padding: '0 10px',

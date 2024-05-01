@@ -2,10 +2,6 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
     },
-    // we can't disable this, because we rely on errors not captured by eslint
-    // // rely on eslint for typed code checking
-    // "typescript.validate.enable": false,
-    // "javascript.validate.enable": false,
     "eslint.workingDirectories": [
         {"mode": "auto"}
     ],

@@ -15,7 +15,7 @@ const createFileName = (prefix: string) => {
 };
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     tsconfigPaths(),
     react({
@@ -25,7 +25,7 @@ export default defineConfig({
     checker({
       overlay: {
         initialIsOpen: false,
-        panelStyle: 'height: 50vh;',
+        panelStyle: 'height: 100%; background-color: #232125;',
         badgeStyle: 'background-color: transparent; font-size: 0.75em;',
       },
       terminal: false,
@@ -34,9 +34,13 @@ export default defineConfig({
         tsconfigPath: './tsconfig.json',
       },
       eslint: {
-        lintCommand: 'eslint ./src --ext .ts,.tsx',
+        lintCommand:
+          mode === 'test'
+            ? // exclude tsx files for eslint during test for now
+              "eslint 'test/**/*.ts' 'src/**/*.test.ts'"
+            : 'eslint ./src --ext .ts,.tsx',
         useFlatConfig: false,
-        dev: { logLevel: ['error'] },
+        dev: { logLevel: ['error', 'warning'] },
       },
     }),
     visualizer({
@@ -55,11 +59,13 @@ export default defineConfig({
     open: true,
     // resolveSnapshotPath: (testPath, snapshotExtension) =>
     //   testPath.replace(/\.test\.(ts|tsx)$/, `.snap${snapshotExtension}`),
-    // typecheck: {
-    //   checker: 'tsc',
-    //   tsconfig: './tsconfig.json',
-    //   enabled: true,
-    // },
+    // for testing types!
+    typecheck: {
+      checker: 'tsc',
+      tsconfig: './tsconfig.json',
+      enabled: true,
+    },
+
     // reporters: ['html'],
     globals: true,
     environment: 'happy-dom',
@@ -77,4 +83,4 @@ export default defineConfig({
       overlay: true,
     },
   },
-});
+}));

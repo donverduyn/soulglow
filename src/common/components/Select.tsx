@@ -1,78 +1,105 @@
-import React from 'react';
+import React, { ForwardedRef } from 'react';
 import {
+  FormControl,
+  InputLabel,
   Select as MUISelect,
   MenuItem,
   SelectChangeEvent,
+  Typography,
   styled,
 } from '@mui/material';
-import { untracked } from 'mobx';
 import { observer } from 'mobx-react-lite';
 
-type Item<T> = { label: string; value: T };
+type Item<TValue> = { label: string; value: TValue };
 
-interface SelectProps<T> extends DefaultProps {
-  readonly items: Item<T>[];
-  readonly getValue: () => T;
-  readonly onChange: (value: Item<T>) => void;
-  readonly renderItem?: (item: Item<T>) => React.ReactNode;
+interface SelectProps<TValue> extends DefaultProps {
+  readonly items: Item<TValue>[];
+  readonly getValue: () => TValue;
+  readonly onChange: (value: TValue) => void;
+  readonly renderItem?: (item: Item<TValue>) => React.ReactNode;
+  readonly id?: string;
+  readonly name?: string;
 }
-
-interface MenuItemProps extends DefaultProps {
-  getValue: () => string;
-  getLabel: () => string;
-}
-
-const MenuItemBase = observer(({ getValue, getLabel }: MenuItemProps) => {
-  return <MenuItem value={getValue()}>{getLabel()}</MenuItem>;
-});
-
-const renderItemDefault = <T,>(item: Item<T>) => (
-  <MenuItemBase
-    getLabel={() => item.label}
-    getValue={() => String(item.value)}
-  />
-);
 
 const SelectBase = observer(
-  <T,>({
+  <TValue,>({
     className,
     getValue,
     onChange,
     items,
-    renderItem = renderItemDefault,
-  }: SelectProps<T>) => {
+    // id = 'select',
+    // name = 'Select',
+    renderItem = renderMenuItem,
+  }: SelectProps<TValue>) => {
     //
     const handleChange = React.useCallback<
-      (event: SelectChangeEvent<Item<T>>) => void
-      // @ts-expect-error - The type of event.target.value is string
-    >((e) => onChange(e.target.value), [onChange]);
+      (event: SelectChangeEvent<TValue>) => void
+    >((e) => onChange(e.target.value as TValue), [onChange]);
 
     return (
-      <MUISelect
-        className={className!}
-        defaultValue={untracked(getValue) as unknown as Item<T>}
-        value={getValue()}
-        onChange={handleChange}
+      <FormControl
+        sx={{ m: 1, minWidth: 120 }}
+        variant='filled'
       >
-        {items.map(renderItem)}
-      </MUISelect>
+        <InputLabel id='demo-simple-select-helper-label'>Age</InputLabel>
+        <MUISelect
+          className={className!}
+          id='demo-simple-select-helper'
+          value={getValue()}
+          onChange={handleChange}
+        >
+          {items.map((item) => renderItem(item))}
+        </MUISelect>
+      </FormControl>
     );
   }
 );
 
 export const Select = styled(SelectBase)`
-  /* width: 100%;
-  height: 40;
-  padding: 0 10px;
-  border-radius: 4;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  color: #000;
-  &:focus {
-    outline: none;
-    border-color: #52af77;
+  text-align: left;
+` as typeof SelectBase;
+
+interface SelectItemProps<TValue> extends DefaultProps {
+  readonly getLabel: () => string;
+  readonly getValue: () => TValue;
+  readonly value: string;
+}
+
+const renderMenuItem = <T,>(item: Item<T>) => {
+  return (
+    <MenuItem
+      key={String(item.value)}
+      value={String(item.value)}
+    >
+      <Typography>{String(item.label)}</Typography>
+    </MenuItem>
+  );
+};
+
+const SelectItemBase = React.forwardRef(
+  <T,>(
+    { getLabel, getValue, value }: SelectItemProps<T>,
+    ref: ForwardedRef<null>
+  ) => {
+    return (
+      <MenuItem
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        key={String(getValue())}
+        ref={ref}
+        value={value}
+      >
+        {getLabel()}
+      </MenuItem>
+    );
   }
-  &:hover {
-    border-color: #52af77;
-  } */
-`;
+);
+
+SelectItemBase.displayName = 'MenuItemBase';
+
+const renderItemDefault = <T,>(item: Item<T>) => (
+  <SelectItemBase
+    getLabel={() => item.label}
+    getValue={() => item.value}
+    value={String(item.value)}
+  />
+);

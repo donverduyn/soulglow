@@ -25,9 +25,12 @@
     "typeRoots": ["./node_modules/@types", "./src/types"],
     "baseUrl": ".",
     "paths": {
-      "*": ["src/*"]
+      "*": ["src/*"],
+      "test/*": ["test/*"],
+
     }
   },
-  "include": ["src"],
+  "include": ["src", "test"],
+  // "exclude": ["src/server"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

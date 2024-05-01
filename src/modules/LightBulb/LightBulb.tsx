@@ -2,10 +2,11 @@ import * as React from 'react';
 import Button from '@mui/material/Button';
 import { green } from '@mui/material/colors';
 import Typography from '@mui/material/Typography';
-import { autorun, toJS } from 'mobx';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Slider } from 'common/components/Slider';
-import { useMobx } from 'common/hooks/useMobx';
+import { useAutorun, useMobx } from 'common/hooks/useMobx';
+import { LightMode, LightModeChanger } from './components/LightModeChanger';
 import { OnOffSwitch } from './components/OnOffSwitch';
 // import { throttle } from './utils/throttle';
 
@@ -13,11 +14,6 @@ interface Color {
   r: number;
   g: number;
   b: number;
-}
-
-enum LightMode {
-  COLOR,
-  WHITE,
 }
 
 interface LightBulbState {
@@ -34,22 +30,7 @@ const defaultState: LightBulbState = {
   color: { r: 255, g: 25, b: 167 },
 };
 
-const handleChange = (
-  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-) => {
-  const { name, value } = e.target;
-  console.log({ name, value });
-
-  // if (name === 'brightness') {
-  //   setLightBulb({ ...lightBulb, [name]: parseInt(value) });
-  // } else if (name === 'r' || name === 'g' || name === 'b') {
-  //   setLightBulb({ ...lightBulb, color: { ...lightBulb.color, [name]: parseInt(value) } });
-  // } else {
-  //   setLightBulb({ ...lightBulb, [name]: value });
-  // }
-};
-
-const handleSubmit = (e: React.FormEvent) => {
+const handleSubmit = (_: React.FormEvent) => {
   // e.preventDefault();
   // try {
   //   const response = await fetch('/api/gateways/desk-light', {
@@ -71,6 +52,9 @@ const useLightBulbState = (state: LightBulbState) =>
     togglePower() {
       this.isOn = !this.isOn;
     },
+    changeMode(value: LightMode) {
+      this.bulb_mode = value;
+    },
     changeGreen(value: number) {
       this.color.g = value;
     },
@@ -84,7 +68,15 @@ const useLightBulbState = (state: LightBulbState) =>
 
 const LightBulbControl: React.FC = observer(() => {
   const lightBulb = useLightBulbState(defaultState);
-  React.useEffect(() => autorun(() => console.log(toJS(lightBulb.color))));
+  useAutorun(() => console.log(toJS(lightBulb), Date.now()));
+  // React.useEffect(
+  //   () =>
+  //     autorun(() => {
+  //       console.log(toJS(lightBulb), Date.now());
+  //       trace();
+  //     }),
+  //   [lightBulb]
+  // );
 
   const handleState = React.useCallback(
     () => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -99,7 +91,7 @@ const LightBulbControl: React.FC = observer(() => {
     <form onSubmit={handleSubmit}>
       <OnOffSwitch
         getValue={() => lightBulb.isOn}
-        onChange={() => lightBulb.togglePower()}
+        onChange={lightBulb.togglePower}
       />
       <br />
       <label>
@@ -125,10 +117,10 @@ const LightBulbControl: React.FC = observer(() => {
           <option value='white'>White</option>
         </select>
       </label> */}
-      {/* <ModeSelector
+      <LightModeChanger
         getValue={() => lightBulb.bulb_mode}
-        onChange={handleState}
-      /> */}
+        onChange={lightBulb.changeMode}
+      />
       <br />
       <label>
         Red:
