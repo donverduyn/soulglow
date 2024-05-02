@@ -1,18 +1,10 @@
 import react from '@vitejs/plugin-react-swc';
+import dayjs from 'dayjs';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { checker } from 'vite-plugin-checker';
 import inspect from 'vite-plugin-inspect';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
-
-const createFileName = (prefix: string) => {
-  const now = new Date();
-  return `${prefix}_${now
-    .toISOString()
-    .replace(/-|:|\./g, '')
-    .replace('T', '')
-    .slice(0, 14)}`;
-};
 
 const noCacheHeaders = {
   'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -75,7 +67,7 @@ export default defineConfig(({ mode }) => ({
       // sourcemap: true,
       projectRoot: process.cwd(),
       title: 'Vite Visualizer',
-      filename: `./.analyzer/${createFileName('analysis')}.html`, // will be saved in project's root
+      filename: `./.analyzer/analysis_${dayjs().format('DDMMYYYY_HHmmss')}.html`, // will be saved in project's root
     }),
     inspect(),
   ],

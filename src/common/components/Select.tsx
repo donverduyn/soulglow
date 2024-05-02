@@ -82,12 +82,10 @@ interface SelectItemProps<TValue> extends DefaultProps {
   readonly children?: React.ReactNode;
 }
 
-// eslint-disable-next-line react/display-name
 const renderMenuItem = <T,>(item: Item<T>) => {
   return (
     <MenuItem
       key={item.id}
-      // eslint-disable-next-line react/jsx-props-no-spreading
       value={String(item.value)}
     >
       <Observer render={() => <span>{item.label}</span>} />
@@ -95,7 +93,6 @@ const renderMenuItem = <T,>(item: Item<T>) => {
   );
 };
 
-// eslint-disable-next-line react/display-name
 const RenderItem = observer(
   <T,>({ value, children, ...rest }: SelectItemProps<T>) => {
     return (

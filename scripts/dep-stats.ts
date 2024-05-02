@@ -1,31 +1,29 @@
 import fs from 'fs';
-import * as S from '@effect/schema/Schema';
 import axios from 'axios';
 import chalk from 'chalk';
 import dayjs from 'dayjs';
-import * as Effect from 'effect/Effect';
 import { merge } from 'remeda';
 
-const PersonId = S.Number;
+// const PersonId = S.Number;
 
-const Person = S.Struct({
-  id: PersonId,
-  name: S.String,
-  age: S.Number,
-});
+// const Person = S.Struct({
+//   id: PersonId,
+//   name: S.String,
+//   age: S.Number,
+// });
 
-const asyncSchema = S.transformOrFail(PersonId, Person, {
-  // Simulate an async transformation
-  decode: (id) =>
-    Effect.succeed({ id, name: 'name', age: 18 }).pipe(
-      Effect.delay('1000 millis')
-    ),
-  encode: (person) => Effect.succeed(person.id).pipe(Effect.delay('10 millis')),
-});
+// const asyncSchema = S.transformOrFail(PersonId, Person, {
+//   // Simulate an async transformation
+//   decode: (id) =>
+//     Effect.succeed({ id, name: 'name', age: 18 }).pipe(
+//       Effect.delay('1000 millis')
+//     ),
+//   encode: (person) => Effect.succeed(person.id).pipe(Effect.delay('10 millis')),
+// });
 
-const syncParsePersonId = S.decodeUnknownEither(asyncSchema);
+// const syncParsePersonId = S.decodeUnknownEither(asyncSchema);
 
-console.log(JSON.stringify(syncParsePersonId(1), null, 2));
+// console.log(JSON.stringify(syncParsePersonId(1), null, 2));
 /*
 Output:
 {
@@ -38,9 +36,9 @@ Output:
 }
 */
 
-const asyncParsePersonId = S.decodeUnknown(asyncSchema);
+// const asyncParsePersonId = S.decodeUnknown(asyncSchema);
 
-Effect.runPromise(asyncParsePersonId(1)).then(console.log);
+// Effect.runPromise(asyncParsePersonId(1)).then(console.log);
 /*
 Output:
 { id: 1, name: 'name', age: 18 }
@@ -224,7 +222,7 @@ const oneYearAndSevenDaysAgo = dayjs()
 const getDependencies = (path: string) => {
   const fileData: string = fs.readFileSync(path, 'utf8');
   const packageJson: PackageJson = JSON.parse(fileData) as PackageJson;
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
   return merge(packageJson.dependencies!, packageJson.devDependencies!);
 };
 
@@ -245,8 +243,8 @@ const fetchDownloads = async (packageName: string, period: string) => {
   }
 };
 
-const fetchByPeriod = (period: string) => (dep: string) =>
-  fetchDownloads(dep, period);
+// const fetchByPeriod = (period: string) => (dep: string) =>
+//   fetchDownloads(dep, period);
 
 // Example usage of fetching downloads
 async function showDownloads() {
@@ -270,10 +268,10 @@ async function showDownloads() {
       const relativeChangeColor = relativeChange > 0 ? 'green' : 'red';
 
       console.log(
-        `${chalk.blue(dep)}: ${chalk.yellow.bold(lastWeekData.downloads.toString())} downloads (last week), Relative change: ${chalk[relativeChangeColor](relativeChange.toFixed(2))}%`
+        `${chalk.blue(dep)}: ${chalk.yellow.bold(lastWeekData.downloads.toString())} downloads (last week), ${chalk[relativeChangeColor](relativeChange.toFixed(2))}%`
       );
     }
   }
 }
 
-// void showDownloads();
+void showDownloads();

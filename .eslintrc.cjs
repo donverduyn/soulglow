@@ -5,11 +5,13 @@ module.exports = {
     'prettier',
     'plugin:prettier/recommended',
     'plugin:import/recommended',
+    'plugin:eslint-comments/recommended',
   ],
   parser: '@typescript-eslint/parser',
   plugins: ['import', 'unused-imports'],
   rules: {
     'prettier/prettier': 'warn',
+    'eslint-comments/no-unused-disable': 'warn',
     'no-irregular-whitespace': 'off',
     'unused-imports/no-unused-imports': 'warn',
     'import/no-named-as-default-member': 'off',

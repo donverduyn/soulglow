@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { isFunction } from 'effect/Function';
-import { AnnotationsMap, observable, autorun, runInAction } from 'mobx';
+import { AnnotationsMap, observable, autorun } from 'mobx';
 
 export const useMobx = <T extends Record<string, unknown>>(
   initialize: () => T,
