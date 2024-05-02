@@ -1,14 +1,12 @@
 import * as React from 'react';
-import Button from '@mui/material/Button';
-import { green } from '@mui/material/colors';
-import Typography from '@mui/material/Typography';
-import { toJS } from 'mobx';
+import { blue, green, red } from '@mui/material/colors';
 import { observer } from 'mobx-react-lite';
+import { Input } from 'common/components/Input';
+import { TestComponent } from 'common/components/Select';
 import { Slider } from 'common/components/Slider';
-import { useAutorun, useMobx } from 'common/hooks/useMobx';
+import { useMobx } from 'common/hooks/useMobx';
 import { LightMode, LightModeChanger } from './components/LightModeChanger';
 import { OnOffSwitch } from './components/OnOffSwitch';
-// import { throttle } from './utils/throttle';
 
 interface Color {
   r: number;
@@ -30,7 +28,7 @@ const defaultState: LightBulbState = {
   color: { r: 255, g: 25, b: 167 },
 };
 
-const handleSubmit = (_: React.FormEvent) => {
+const handleSubmit = () => {
   // e.preventDefault();
   // try {
   //   const response = await fetch('/api/gateways/desk-light', {
@@ -68,21 +66,12 @@ const useLightBulbState = (state: LightBulbState) =>
 
 const LightBulbControl: React.FC = observer(() => {
   const lightBulb = useLightBulbState(defaultState);
-  useAutorun(() => console.log(toJS(lightBulb), Date.now()));
-  // React.useEffect(
-  //   () =>
-  //     autorun(() => {
-  //       console.log(toJS(lightBulb), Date.now());
-  //       trace();
-  //     }),
-  //   [lightBulb]
-  // );
+  // useAutorun(() => console.log(toJS(lightBulb), Date.now()));
 
   const handleState = React.useCallback(
-    () => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      const { name, value } = e.target;
-      console.log({ name, value });
-      // setLightBulb({ ...lightBulb, [name]: value });
+    () => (_: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      // const { name, value } = e.target
+      // console.log({ name, value });
     },
     []
   );
@@ -106,67 +95,49 @@ const LightBulbControl: React.FC = observer(() => {
         />
       </label>
       <br />
-      {/* <label>
-        Mode:
-        <select
-          name='bulb_mode'
-          value={lightBulb.bulb_mode}
-          onChange={handleState}
-        >
-          <option value='color'>Color</option>
-          <option value='white'>White</option>
-        </select>
-      </label> */}
       <LightModeChanger
         getValue={() => lightBulb.bulb_mode}
         onChange={lightBulb.changeMode}
       />
       <br />
-      <label>
-        Red:
-        <input
-          name='color.r'
-          type='number'
-          value={lightBulb.color.r}
-          onChange={handleState}
-        />
-      </label>
-      <br />
-      <label>
-        Green:
-        <input
-          name='color.g'
-          type='number'
-          value={lightBulb.color.g}
-          onChange={handleState}
-        />
-      </label>
-      <br />
-      <Typography gutterBottom>Green</Typography>
+      <TestComponent />
+      <Slider
+        aria-label='red slider'
+        color={red[500]}
+        getValue={() => lightBulb.color.r}
+        onChange={lightBulb.changeRed}
+      />
+      <Input
+        getValue={() => lightBulb.color.r}
+        onChange={lightBulb.changeRed}
+      />
       <Slider
         aria-label='green slider'
         color={green[500]}
-        onChange={(v) => lightBulb.changeGreen(v)}
+        getValue={() => lightBulb.color.g}
+        onChange={lightBulb.changeGreen}
       />
-      {/* <Slider color='primary' value={lightBulb.color.b} valueLabelDisplay='on'>
-      </Slider> */}
-      <label>
-        Blue:
-        <input
-          name='color.b'
-          type='number'
-          value={lightBulb.color.b}
-          onChange={handleState}
-        />
-      </label>
-      <br />
-      <Button
+      <Input
+        getValue={() => lightBulb.color.g}
+        onChange={lightBulb.changeGreen}
+      />
+      <Slider
+        aria-label='blue slider'
+        color={blue[500]}
+        getValue={() => lightBulb.color.b}
+        onChange={lightBulb.changeBlue}
+      />
+      <Input
+        getValue={() => lightBulb.color.b}
+        onChange={lightBulb.changeBlue}
+      />
+      {/* <Button
         color='primary'
         type='submit'
         variant='contained'
       >
         Submit
-      </Button>
+      </Button> */}
     </form>
   );
 });

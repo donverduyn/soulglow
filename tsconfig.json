@@ -27,7 +27,6 @@
     "paths": {
       "*": ["src/*"],
       "test/*": ["test/*"],
-
     }
   },
   "include": ["src", "test"],

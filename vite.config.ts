@@ -14,6 +14,12 @@ const createFileName = (prefix: string) => {
     .slice(0, 14)}`;
 };
 
+const noCacheHeaders = {
+  'Cache-Control': 'no-cache, no-store, must-revalidate',
+  Pragma: 'no-cache',
+  Expires: '0',
+};
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [
@@ -43,6 +49,25 @@ export default defineConfig(({ mode }) => ({
         dev: { logLevel: ['error', 'warning'] },
       },
     }),
+    // {
+    //   name: 'watch-external',
+    //   configureServer(server) {
+    //     // Use Vite's internal watcher to watch the .eslintrc file
+    //     server.watcher.add('.eslintrc.cjs');
+    //     server.watcher.on('change', (path) => {
+
+    //         console.log('.eslintrc changed, reloading server...');
+    //         // Restart the Vite server
+    //         server.hot.send({
+    //           type: 'full-reload',
+    //           triggeredBy: 'eslint',
+    //           // type: 'custom',
+    //           path: '*' // You can specify more granular paths if needed
+    //         });
+
+    //     });
+    //   }
+    // },
     visualizer({
       template: 'treemap', // or sunburst
       gzipSize: true,
@@ -54,21 +79,42 @@ export default defineConfig(({ mode }) => ({
     }),
     inspect(),
   ],
+  resolve: {
+    alias: {},
+  },
   test: {
     // logHeapUsage: true,
     open: true,
     // resolveSnapshotPath: (testPath, snapshotExtension) =>
     //   testPath.replace(/\.test\.(ts|tsx)$/, `.snap${snapshotExtension}`),
     // for testing types!
-    typecheck: {
-      checker: 'tsc',
-      tsconfig: './tsconfig.json',
-      enabled: true,
-    },
+    // typecheck: {
+    //   checker: 'tsc',
+    //   tsconfig: './tsconfig.json',
+    //   enabled: true,
+    // },
 
     // reporters: ['html'],
     globals: true,
     environment: 'happy-dom',
+  },
+  esbuild: {
+    drop: ['console', 'debugger'],
+  },
+  build: {
+    outDir: 'dist',
+    minify: 'esbuild',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          '@react': ['react', 'react-dom'],
+          '@emotion': ['@emotion/react', '@emotion/styled'],
+          '@mui': ['@mui/material', '@mui/icons-material'],
+          '@mobx': ['mobx', 'mobx-react-lite'],
+        },
+      },
+    },
   },
   server: {
     host: '0.0.0.0',
@@ -79,8 +125,21 @@ export default defineConfig(({ mode }) => ({
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
+    headers: noCacheHeaders,
     hmr: {
       overlay: true,
     },
+  },
+  preview: {
+    host: '0.0.0.0',
+    open: true,
+    proxy: {
+      '/api': {
+        target: 'http://192.168.0.153:80', // The base URL of your API
+        changeOrigin: true, // Needed for virtual hosted sites
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+    headers: noCacheHeaders,
   },
 }));

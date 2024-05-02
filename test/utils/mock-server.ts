@@ -1,13 +1,13 @@
+import { AnyRouter } from '@trpc/server';
 import { setupServer } from 'msw/node';
 import { createTRPCMsw } from 'msw-trpc';
-import { AppRouter } from 'server/server';
 
-export const createMockServer = (
+export const createMockServer = <T extends AnyRouter>(
   baseUrl: string,
   getHandlers: (
-    trpcMsw: ReturnType<typeof createTRPCMsw<AppRouter>>
+    trpcMsw: ReturnType<typeof createTRPCMsw<T>>
   ) => Parameters<typeof setupServer>
 ) => {
-  const trpcMsw = createTRPCMsw<AppRouter>({ baseUrl });
+  const trpcMsw = createTRPCMsw<T>({ baseUrl });
   return setupServer(...getHandlers(trpcMsw));
 };

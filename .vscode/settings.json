@@ -14,5 +14,10 @@
     ],
     "files.exclude": {
         "**/.swc": true
-    }
+    },
+    "window.autoDetectColorScheme": true,
+    "workbench.preferredDarkColorTheme": "Default Dark+",
+    "workbench.preferredLightColorTheme": "Default Light Modern",
+    "typescript.tsserver.experimental.useVsCodeWatcher": true,
+    // "terminal.integrated.shellIntegration.suggestEnabled": true
 }

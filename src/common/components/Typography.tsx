@@ -1,5 +1,6 @@
 import { PropsOf } from '@emotion/react';
-import { Typography as MUITypography, styled } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import MUITypography from '@mui/material/Typography';
 
 interface Props extends DefaultProps {
   readonly children: string;

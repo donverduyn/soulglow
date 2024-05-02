@@ -1,5 +1,7 @@
-import * as React from 'react';
+// import * as React from 'react';
+import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useMobx } from './useMobx';
@@ -21,7 +23,8 @@ describe('useMobx', () => {
       useMobx(() => ({
         count,
         increaseCount() {
-          setTimeout(() => this.count++, 100);
+          this.count++;
+          setTimeout(() => runInAction(() => this.count++), 100);
         },
       }));
 
@@ -34,13 +37,13 @@ describe('useMobx', () => {
       return <p>{counter.count}</p>;
     });
 
-    // Wait for the rerender
     render(<TestComponent />);
     const before = await screen.findByRole('paragraph');
-    expect(parseInt(before.innerHTML)).toBe(initialValue);
+    expect(parseInt(before.innerHTML)).toBe(initialValue + 1);
 
+    // wait for the second increase
     await React.act(() => vi.runAllTimers());
     const after = await screen.findByRole('paragraph');
-    expect(parseInt(after.innerHTML)).toBe(initialValue + 1);
+    expect(parseInt(after.innerHTML)).toBe(initialValue + 2);
   });
 });

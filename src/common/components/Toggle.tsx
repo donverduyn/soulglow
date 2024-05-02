@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Switch } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import Switch from '@mui/material/Switch';
 import { observer } from 'mobx-react-lite';
 
 interface Props {
@@ -7,7 +8,7 @@ interface Props {
   readonly onChange: (value: boolean) => void;
 }
 
-export const Toggle: React.FC<Props> = observer(({ getValue, onChange }) => {
+const ToggleBase: React.FC<Props> = ({ getValue, onChange }) => {
   //
   const handleChange = React.useCallback<
     (e: React.ChangeEvent<HTMLInputElement>, v: boolean) => void
@@ -20,4 +21,6 @@ export const Toggle: React.FC<Props> = observer(({ getValue, onChange }) => {
       onChange={handleChange}
     />
   );
-});
+};
+
+export const Toggle = styled(observer(ToggleBase))({});

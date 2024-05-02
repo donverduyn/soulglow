@@ -1,5 +1,6 @@
 import { renderHook } from '@testing-library/react';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { AppRouter } from 'server/server';
 import { createMockServer } from 'test/utils/mock-server';
 import { useTRPC } from './useTRPC';
 
@@ -8,7 +9,7 @@ describe('tRPC client', () => {
   const url = `http://localhost:${port.toString()}`;
   const user = { id: '42', name: 'Alice' };
 
-  const server = createMockServer(url, (trpcMsw) => [
+  const server = createMockServer<AppRouter>(url, (trpcMsw) => [
     trpcMsw.userById.query((req, res, ctx) => {
       const [id] = Object.values(req.getInput());
       return res(ctx.status(200), ctx.data(id === user.id ? user : undefined));

@@ -70,6 +70,7 @@ module.exports = {
         },
       },
       rules: {
+        '@typescript-eslint/no-unnecessary-condition': 'warn',
         '@typescript-eslint/no-useless-template-literals': 'warn',
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-floating-promises': [
@@ -141,6 +142,7 @@ module.exports = {
             patterns: ['@mui/*/*/*'],
           },
         ],
+        'react/jsx-curly-spacing': 'warn',
         'react/prop-types': 'off',
         'react/jsx-no-useless-fragment': 'warn',
         'react/no-unused-prop-types': 'warn',
