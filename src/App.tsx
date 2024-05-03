@@ -5,7 +5,11 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import LightBulb from './modules/LightBulb/LightBulb';
 
 const darkTheme = createTheme({
-  palette: { mode: 'dark' },
+  palette: {
+    mode: 'dark',
+    primary: { main: '#ffffff' },
+    secondary: { main: '#b3b3b3' },
+  },
 });
 
 export default function App() {

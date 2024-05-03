@@ -21,7 +21,7 @@ function isDeepFrozen<T extends Record<string, unknown> | unknown[]>(
 describe('freeze', () => {
   it('should freeze an object', () => {
     expect.hasAssertions();
-    const object = { prop: 'value', nested: { prop: 'value' } };
+    const object = { nested: { prop: 'value' }, prop: 'value' };
     freeze(object);
 
     expect(isDeepFrozen(object)).toBeTruthy();

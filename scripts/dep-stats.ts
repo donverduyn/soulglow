@@ -207,9 +207,9 @@ interface PackageJson {
 
 interface DownloadData {
   downloads: number;
-  start: string;
   end: string;
   package: string;
+  start: string;
 }
 
 const oneYearAgo = dayjs().subtract(1, 'year').format('YYYY-MM-DD');

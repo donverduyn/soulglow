@@ -1,24 +1,24 @@
 import * as React from 'react';
-import { default as MUISlider, SliderThumb } from '@mui/material/Slider';
+import { default as MuiSlider, SliderThumb } from '@mui/material/Slider';
 import { styled } from '@mui/material/styles';
 import { observer } from 'mobx-react-lite';
 
 interface Props<T> extends DefaultProps {
   readonly color?: string;
-  readonly style?: React.CSSProperties;
-  readonly value: () => T;
-  readonly onChange: (value: T) => void;
-  readonly min?: number;
+  readonly getValue: () => T;
   readonly max?: number;
+  readonly min?: number;
+  readonly onChange: (value: T) => void;
+  readonly style?: React.CSSProperties;
 }
 
 const SliderBase = observer(<T extends number>(props: Props<T>) => {
-  const { className, min, max, style, value, onChange } = props;
+  const { className, min, max, style, getValue: value, onChange } = props;
 
   // const handleChange = useThrottledFn(onChange, 100);
 
   return (
-    <MUISlider
+    <MuiSlider
       className={className!}
       max={max ?? 255}
       min={min ?? 0}
@@ -32,9 +32,9 @@ const SliderBase = observer(<T extends number>(props: Props<T>) => {
 });
 
 export const Slider = styled(SliderBase)`
-  margin: 0 0.5em;
-  height: 8px;
   color: ${(props) => props.color ?? '#52af77'};
+  height: 8px;
+  margin: 0 0.5em;
   & .MuiSlider-valueLabel {
     background-color: ${(props) => props.color ?? '#52af77'};
   }
@@ -42,8 +42,8 @@ export const Slider = styled(SliderBase)`
     border: none;
   }
   & .MuiSlider-thumb {
+    background-color: #fff;
     border: 2px solid currentColor;
-    transition: left 0;
     &:focus,
     &:hover,
     &.Mui-active,
@@ -54,17 +54,17 @@ export const Slider = styled(SliderBase)`
       display: none;
     }
     height: 20px;
+    transition: left 0;
     width: 20px;
-    background-color: #fff;
     &:hover {
       box-shadow: 0 0 0 8px rgba(58, 133, 137, 0.16);
     }
     & .bar {
-      height: 9px;
-      width: 1px;
       background-color: currentColor;
+      height: 9px;
       margin-left: 1px;
       margin-right: 1px;
+      width: 1px;
     }
   }
 `;

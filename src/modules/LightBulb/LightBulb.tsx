@@ -2,30 +2,31 @@ import * as React from 'react';
 import { styled } from '@mui/material';
 import { blue, green, grey, red } from '@mui/material/colors';
 import { observer } from 'mobx-react-lite';
-import { Input } from 'common/components/Input';
-import { Slider } from 'common/components/Slider';
 import { useMobx } from 'common/hooks/useMobx';
+import { InputSlider } from './components/InputSlider';
 import { LightMode, LightModeSelect } from './components/LightModeSelect';
 import { OnOffSwitch } from './components/OnOffSwitch';
 
 interface Color {
   r: number;
-  g: number;
-  b: number;
+  g: number; // eslint-disable-line typescript-sort-keys/interface
+  b: number; // eslint-disable-line typescript-sort-keys/interface
 }
 
 interface LightBulbState {
-  isOn: boolean;
   brightness: number;
   bulb_mode: LightMode;
   color: Color;
+  color_temp: number;
+  isOn: boolean;
 }
 
 const defaultState: LightBulbState = {
-  isOn: true,
   brightness: 79,
   bulb_mode: LightMode.COLOR,
-  color: { r: 255, g: 25, b: 167 },
+  color: { b: 167, g: 25, r: 255 },
+  color_temp: 100,
+  isOn: true,
 };
 
 const handleSubmit = () => {
@@ -76,32 +77,35 @@ const handleSubmit = () => {
 const useLightBulbState = (state: LightBulbState) =>
   useMobx(() => ({
     ...state,
-    togglePower() {
-      this.isOn = !this.isOn;
-    },
-    changeMode(value: LightMode) {
-      this.bulb_mode = value;
+    changeBlue(value: number) {
+      this.color.b = value;
     },
     changeBrightness(value: number) {
       this.brightness = value;
     },
+    changeColorTemp(value: number) {
+      this.color_temp = value;
+    },
     changeGreen(value: number) {
       this.color.g = value;
+    },
+    changeMode(value: LightMode) {
+      this.bulb_mode = value;
     },
     changeRed(value: number) {
       this.color.r = value;
     },
-    changeBlue(value: number) {
-      this.color.b = value;
+    togglePower() {
+      this.isOn = !this.isOn;
     },
   }));
 
 interface LightBulbProps extends DefaultProps {}
 
+// eslint-disable-next-line react-refresh/only-export-components
 const LightBulbBase: React.FC<LightBulbProps> = observer(({ className }) => {
   const lightBulb = useLightBulbState(defaultState);
-  // const throttledRed = useThrottledFn(lightBulb.changeRed, 1000);
-
+  // const lightBulb2 = useMobx(() => defaultState);
   return (
     <section className={className}>
       <form onSubmit={handleSubmit}>
@@ -113,83 +117,61 @@ const LightBulbBase: React.FC<LightBulbProps> = observer(({ className }) => {
           getValue={() => lightBulb.bulb_mode}
           onChange={lightBulb.changeMode}
         />
-        <InputSlider
-          color={grey[100]}
-          label='brightness'
-          onChange={lightBulb.changeBrightness}
-          value={() => lightBulb.brightness}
-        />
-        <InputSlider
-          color={red[500]}
-          label='red'
-          onChange={lightBulb.changeRed}
-          value={() => lightBulb.color.r}
-        />
-        <InputSlider
-          color={green[500]}
-          label='green'
-          onChange={lightBulb.changeGreen}
-          value={() => lightBulb.color.g}
-        />
-        <InputSlider
-          color={blue[500]}
-          label='blue'
-          onChange={lightBulb.changeBlue}
-          value={() => lightBulb.color.b}
-        />
+        {lightBulb.bulb_mode === LightMode.WHITE && (
+          <>
+            <InputSlider
+              color={grey[100]}
+              getValue={() => lightBulb.color_temp}
+              label='color temp'
+              onChange={lightBulb.changeColorTemp}
+            />
+            <InputSlider
+              color={grey[100]}
+              getValue={() => lightBulb.brightness}
+              label='brightness'
+              onChange={lightBulb.changeBrightness}
+            />
+          </>
+        )}
+        {lightBulb.bulb_mode === LightMode.COLOR && (
+          <>
+            <InputSlider
+              color={red[500]}
+              getValue={() => lightBulb.color.r}
+              label='red'
+              onChange={lightBulb.changeRed}
+            />
+            <InputSlider
+              color={green[500]}
+              getValue={() => lightBulb.color.g}
+              label='green'
+              onChange={lightBulb.changeGreen}
+            />
+            <InputSlider
+              color={blue[500]}
+              getValue={() => lightBulb.color.b}
+              label='blue'
+              onChange={lightBulb.changeBlue}
+            />
+          </>
+        )}
       </form>
     </section>
   );
 });
 
-interface InputSliderProps extends DefaultProps {
-  readonly value: () => number;
-  readonly onChange: (value: number) => void;
-  readonly color: string;
-  readonly label: string;
-}
-
-// eslint-disable-next-line react-refresh/only-export-components
-const InputSliderBase: React.FC<InputSliderProps> = observer(
-  ({ value, className, onChange, color, label }) => {
-    return (
-      <span className={className}>
-        <Slider
-          aria-label={label}
-          color={color}
-          max={255}
-          onChange={onChange}
-          value={value}
-        />
-        <Input
-          onChange={onChange}
-          value={value}
-        />
-      </span>
-    );
-  }
-);
-
-const InputSlider = styled(InputSliderBase)`
-  /* padding: 0.5em 0 1em 0.5em; */
-  display: flex;
-  flex-direction: row;
-  gap: 1.25em;
-  /* align-items: center; */
-`;
-
 export default styled(LightBulbBase)`
+  align-items: center;
   background: #212121;
   border-radius: 0.25em;
+  display: block;
   padding: 1.75em 1.5em;
   width: 15em;
-  display: block;
-  align-items: center;
   & form {
+    align-items: left;
     display: flex;
     flex-direction: column;
-    align-items: left;
-    gap: 1.25em;
+    gap: 1em;
     /* align-items: center; */
   }
 `;

@@ -1,11 +1,11 @@
 import { PropsOf } from '@emotion/react';
 import { styled } from '@mui/material/styles';
-import MUITypography from '@mui/material/Typography';
+import MuiTypography from '@mui/material/Typography';
 
 interface Props extends DefaultProps {
   readonly children: string;
-  readonly variant?: PropsOf<typeof MUITypography>['variant'];
-  readonly color?: PropsOf<typeof MUITypography>['color'];
+  readonly color?: PropsOf<typeof MuiTypography>['color'];
+  readonly variant?: PropsOf<typeof MuiTypography>['variant'];
 }
 
 const TypographyBase: React.FC<Props> = ({
@@ -15,13 +15,13 @@ const TypographyBase: React.FC<Props> = ({
   color,
 }) => {
   return (
-    <MUITypography
+    <MuiTypography
       className={className!}
       color={color ?? 'white'}
       variant={variant ?? 'body1'}
     >
       {children}
-    </MUITypography>
+    </MuiTypography>
   );
 };
 

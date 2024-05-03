@@ -1,22 +1,22 @@
-import MUIMenuItem from '@mui/material/MenuItem';
+import MuiMenuItem from '@mui/material/MenuItem';
 import { styled } from '@mui/material/styles';
 
 interface MenuItemProps<T> extends DefaultProps {
   readonly children: React.ReactElement;
-  readonly value: T;
   readonly key: React.Key;
+  readonly value: T;
 }
 
 const MenuItemBase = <T,>(props: MenuItemProps<T>) => {
   const { children, value, ...rest } = props;
   return (
-    <MUIMenuItem
+    <MuiMenuItem
       value={String(value)}
       // eslint-disable-next-line react/jsx-props-no-spreading
       {...rest}
     >
       {children}
-    </MUIMenuItem>
+    </MuiMenuItem>
   );
 };
 

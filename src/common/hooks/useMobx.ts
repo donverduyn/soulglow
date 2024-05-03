@@ -2,8 +2,29 @@ import React, { useState } from 'react';
 import { isFunction } from 'effect/Function';
 import { AnnotationsMap, observable, autorun } from 'mobx';
 
+// function mergeObservableObject<T extends Record<string, unknown>>(
+//   target: T,
+//   source: Partial<T>
+// ) {
+//   Object.keys(source).forEach((key) => {
+//     const sourceVal = source[key as keyof T];
+//     const targetVal = target[key as keyof T];
+
+//     if (isPlainObject(sourceVal) && isObservableObject(targetVal)) {
+//       mergeObservableObject(
+//         targetVal as T[keyof T] & Record<string, unknown>,
+//         sourceVal as T[keyof T] & Record<string, unknown>
+//       );
+//     } else {
+//       set(target, key, sourceVal);
+//     }
+//   });
+// }
+
+// type SetFunction<T> = (fn: (state: T) => Partial<T>) => void;
+
 export const useMobx = <T extends Record<string, unknown>>(
-  initialize: () => T,
+  initialize: () => T, //(set: SetFunction<T>) => T,
   annotations?: AnnotationsMap<T, never>
 ) =>
   useState(() => {
@@ -20,7 +41,6 @@ export const useMobx = <T extends Record<string, unknown>>(
         };
       }
     }
-
     return obs;
   })[0];
 

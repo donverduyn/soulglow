@@ -8,12 +8,30 @@ import { defineConfig } from 'vitest/config';
 
 const noCacheHeaders = {
   'Cache-Control': 'no-cache, no-store, must-revalidate',
-  Pragma: 'no-cache',
   Expires: '0',
+  Pragma: 'no-cache',
 };
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  build: {
+    minify: 'esbuild',
+    outDir: 'dist',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          '@emotion': ['@emotion/react', '@emotion/styled'],
+          '@mobx': ['mobx', 'mobx-react-lite'],
+          '@mui': ['@mui/material', '@mui/icons-material'],
+          '@react': ['react', 'react-dom'],
+        },
+      },
+    },
+    sourcemap: false,
+  },
+  esbuild: {
+    drop: ['console', 'debugger'],
+  },
   plugins: [
     tsconfigPaths(),
     react({
@@ -21,24 +39,24 @@ export default defineConfig(({ mode }) => ({
       plugins: [['@swc/plugin-emotion', {}]],
     }),
     checker({
-      overlay: {
-        initialIsOpen: false,
-        panelStyle: 'height: 100%; background-color: #232125;',
-        badgeStyle: 'background-color: transparent; font-size: 0.75em;',
-      },
-      terminal: false,
-      root: process.cwd(),
-      typescript: {
-        tsconfigPath: './tsconfig.json',
-      },
       eslint: {
+        dev: { logLevel: ['error', 'warning'] },
         lintCommand:
           mode === 'test'
             ? // exclude tsx files for eslint during test for now
               "eslint 'test/**/*.ts' 'src/**/*.test.ts'"
             : 'eslint ./src --ext .ts,.tsx',
         useFlatConfig: false,
-        dev: { logLevel: ['error', 'warning'] },
+      },
+      overlay: {
+        badgeStyle: 'background-color: transparent; font-size: 0.75em;',
+        initialIsOpen: false,
+        panelStyle: 'height: 100%; background-color: #232125;',
+      },
+      root: process.cwd(),
+      terminal: false,
+      typescript: {
+        tsconfigPath: './tsconfig.json',
       },
     }),
     // {
@@ -61,20 +79,53 @@ export default defineConfig(({ mode }) => ({
     //   }
     // },
     visualizer({
-      template: 'treemap', // or sunburst
-      gzipSize: true,
       brotliSize: true,
+
+      filename: `./.analyzer/analysis_${dayjs().format('DDMMYYYY_HHmmss')}.html`,
+      // or sunburst
+      gzipSize: true,
+
       // sourcemap: true,
       projectRoot: process.cwd(),
-      title: 'Vite Visualizer',
-      filename: `./.analyzer/analysis_${dayjs().format('DDMMYYYY_HHmmss')}.html`, // will be saved in project's root
+
+      template: 'treemap',
+      title: 'Vite Visualizer', // will be saved in project's root
     }),
     inspect(),
   ],
-  resolve: { alias: {} },
-  test: {
-    // logHeapUsage: true,
+  preview: {
+    headers: noCacheHeaders,
+    host: '0.0.0.0',
     open: true,
+    port: 4174,
+    proxy: {
+      '/api': {
+        // The base URL of your API
+        changeOrigin: true,
+        // Needed for virtual hosted sites
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        target: 'http://192.168.0.153:80',
+      },
+    },
+  },
+  resolve: { alias: {} },
+  server: {
+    headers: noCacheHeaders,
+    hmr: { overlay: true },
+    host: '0.0.0.0',
+    proxy: {
+      '/api': {
+        // The base URL of your API
+        changeOrigin: true,
+        // Needed for virtual hosted sites
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        target: 'http://192.168.0.153:80',
+      },
+    },
+  },
+  test: {
+    environment: 'happy-dom',
+
     // resolveSnapshotPath: (testPath, snapshotExtension) =>
     //   testPath.replace(/\.test\.(ts|tsx)$/, `.snap${snapshotExtension}`),
     // for testing types!
@@ -83,52 +134,9 @@ export default defineConfig(({ mode }) => ({
     //   tsconfig: './tsconfig.json',
     //   enabled: true,
     // },
-
     // reporters: ['html'],
     globals: true,
-    environment: 'happy-dom',
-  },
-  esbuild: {
-    drop: ['console', 'debugger'],
-  },
-  build: {
-    outDir: 'dist',
-    minify: 'esbuild',
-    sourcemap: false,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          '@react': ['react', 'react-dom'],
-          '@emotion': ['@emotion/react', '@emotion/styled'],
-          '@mui': ['@mui/material', '@mui/icons-material'],
-          '@mobx': ['mobx', 'mobx-react-lite'],
-        },
-      },
-    },
-  },
-  server: {
-    headers: noCacheHeaders,
-    host: '0.0.0.0',
-    hmr: { overlay: true },
-    proxy: {
-      '/api': {
-        target: 'http://192.168.0.153:80', // The base URL of your API
-        changeOrigin: true, // Needed for virtual hosted sites
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-    },
-  },
-  preview: {
-    headers: noCacheHeaders,
-    host: '0.0.0.0',
-    port: 4174,
+    // logHeapUsage: true,
     open: true,
-    proxy: {
-      '/api': {
-        target: 'http://192.168.0.153:80', // The base URL of your API
-        changeOrigin: true, // Needed for virtual hosted sites
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-    },
   },
 }));

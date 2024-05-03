@@ -1,5 +1,4 @@
 module.exports = {
-  root: true,
   extends: [
     'eslint:recommended',
     'prettier',
@@ -7,62 +6,60 @@ module.exports = {
     'plugin:import/recommended',
     'plugin:eslint-comments/recommended',
   ],
-  parser: '@typescript-eslint/parser',
-  plugins: ['import', 'unused-imports'],
-  rules: {
-    'prettier/prettier': 'warn',
-    'eslint-comments/no-unused-disable': 'warn',
-    'no-irregular-whitespace': 'off',
-    'unused-imports/no-unused-imports': 'warn',
-    'import/no-named-as-default-member': 'off',
-    'import/order': [
-      'warn',
-      {
-        groups: [
-          'builtin',
-          'external',
-          'internal',
-          'parent',
-          'sibling',
-          'index',
-        ],
-        pathGroups: [
-          {
-            pattern: 'react',
-            group: 'external',
-            position: 'before',
-          },
-        ],
-        pathGroupsExcludedImportTypes: ['react'],
-        'newlines-between': 'never',
-        alphabetize: {
-          order: 'asc',
-          caseInsensitive: true,
-        },
-      },
-    ],
-  },
   overrides: [
     {
+      env: { node: true },
       // config files are assumed to be running in node
       files: ['./**/*.js', './**/*.cjs', './**/*.mjs'],
-      env: { node: true },
     },
     {
-      // all TypeScript files
-      files: ['*.ts', '*.tsx'],
-      parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-        // tsconfig.node.json only applies for vite.config.ts
-        project: ['./tsconfig.json', './tsconfig.node.json'],
-        tsconfigRootDir: __dirname,
-      },
-      plugins: ['@typescript-eslint'],
       extends: [
         'plugin:@typescript-eslint/strict-type-checked',
         'plugin:import/typescript',
       ],
+      // all TypeScript files
+      files: ['*.ts', '*.tsx'],
+      parserOptions: {
+        ecmaVersion: 'latest',
+        // tsconfig.node.json only applies for vite.config.ts
+        project: ['./tsconfig.json', './tsconfig.node.json'],
+
+        sourceType: 'module',
+        tsconfigRootDir: __dirname,
+      },
+      plugins: ['@typescript-eslint', 'typescript-sort-keys'],
+      rules: {
+        '@typescript-eslint/no-confusing-void-expression': [
+          'warn',
+          { ignoreArrowShorthand: true },
+        ],
+        '@typescript-eslint/no-empty-interface': [
+          'error',
+          {
+            allowSingleExtends: true,
+          },
+        ],
+        '@typescript-eslint/no-floating-promises': [
+          'warn',
+          { ignoreVoid: true },
+        ],
+        '@typescript-eslint/no-non-null-assertion': 'off',
+        '@typescript-eslint/no-unnecessary-condition': 'warn',
+        '@typescript-eslint/no-unused-vars': [
+          'warn',
+          {
+            args: 'all',
+            argsIgnorePattern: '^_$',
+            ignoreRestSiblings: true,
+            vars: 'local',
+            varsIgnorePattern: '^_$',
+          },
+        ],
+        '@typescript-eslint/no-useless-template-literals': 'warn',
+        '@typescript-eslint/unbound-method': 'off',
+        'typescript-sort-keys/interface': 'warn',
+        'typescript-sort-keys/string-enum': 'warn',
+      },
       settings: {
         'import/resolver': {
           typescript: {
@@ -71,45 +68,14 @@ module.exports = {
           },
         },
       },
-      rules: {
-        '@typescript-eslint/no-unnecessary-condition': 'warn',
-        '@typescript-eslint/no-useless-template-literals': 'warn',
-        '@typescript-eslint/no-non-null-assertion': 'off',
-        '@typescript-eslint/no-floating-promises': [
-          'warn',
-          { ignoreVoid: true },
-        ],
-        // support this to use with mobx api
-        '@typescript-eslint/unbound-method': 'off',
-        '@typescript-eslint/no-confusing-void-expression': [
-          'warn',
-          { ignoreArrowShorthand: true },
-        ],
-        '@typescript-eslint/no-unused-vars': [
-          'warn',
-          {
-            varsIgnorePattern: '^_$',
-            argsIgnorePattern: '^_$',
-            vars: 'local',
-            args: 'all',
-            ignoreRestSiblings: true,
-          },
-        ],
-
-        '@typescript-eslint/no-empty-interface': [
-          'error',
-          {
-            allowSingleExtends: true,
-          },
-        ],
-      },
     },
     {
+      env: { browser: true },
       // all TypeScript files in src
       files: ['./src/**/*.ts', './src/**/*.tsx'],
-      env: { browser: true },
     },
     {
+      extends: ['plugin:vitest/legacy-all'],
       // all test files
       files: [
         './tests/**/*.ts',
@@ -117,57 +83,45 @@ module.exports = {
         './src/**/*.test.ts',
         './src/**/*.test.tsx',
       ],
-      extends: ['plugin:vitest/legacy-all'],
       rules: {
         'vitest/max-nested-describe': ['error', { max: 3 }],
         'vitest/no-hooks': 'off',
       },
     },
     {
-      // all React files
-      files: ['./src/**/*.tsx'],
-      settings: { react: { version: 'detect' } },
-      plugins: ['react', 'react-hooks', 'react-refresh'],
       extends: [
         'plugin:react/jsx-runtime',
         'plugin:react/all',
         'plugin:react-hooks/recommended',
       ],
+      // all React files
+      files: ['./src/**/*.tsx'],
+      plugins: [
+        'react',
+        'react-hooks',
+        'react-refresh',
+        'better-styled-components',
+      ],
       rules: {
-        'react-refresh/only-export-components': [
-          'warn',
-          { allowConstantExport: true },
-        ],
+        'better-styled-components/sort-declarations-alphabetically': 'warn',
         'no-restricted-imports': [
           'error',
           {
             patterns: ['@mui/*/*/*'],
           },
         ],
-        'react/jsx-curly-spacing': 'warn',
-        'react/prop-types': 'off',
-        'react/jsx-no-useless-fragment': 'warn',
-        'react/no-unused-prop-types': 'warn',
-        'react/jsx-no-comment-textnodes': 'warn',
-        'react/jsx-curly-brace-presence': 'warn',
-        'react/jsx-props-no-multi-spaces': 'warn',
-        'react/jsx-handler-names': 'off',
-        'react/react-in-jsx-scope': 'off',
-        'react/forbid-component-props': 'off',
-        'react/require-default-props': 'off',
-        'react/jsx-no-literals': 'off',
-        'react/jsx-no-bind': ['error', { allowArrowFunctions: true }],
-        'react/jsx-indent-props': ['warn', 2],
-        'react/jsx-indent': ['warn', 2],
-        'react/jsx-max-depth': ['warn', { max: 3 }],
-        'react/jsx-wrap-multilines': 'off',
-        'react/jsx-closing-bracket-location': ['warn', 'line-aligned'],
-        'react/jsx-child-element-spacing': 'off',
+        'react-hooks/exhaustive-deps': 'warn',
+        'react-hooks/rules-of-hooks': 'error',
+        'react-refresh/only-export-components': [
+          'warn',
+          { allowConstantExport: true },
+        ],
         'react/destructuring-assignment': [
           'warn',
           'always',
-          { ignoreClassFields: true, destructureInSignature: 'ignore' },
+          { destructureInSignature: 'ignore', ignoreClassFields: true },
         ],
+        'react/forbid-component-props': 'off',
         'react/function-component-definition': [
           'warn',
           {
@@ -175,36 +129,97 @@ module.exports = {
             unnamedComponents: ['arrow-function'],
           },
         ],
-        'react/jsx-max-props-per-line': [
-          'warn',
-          { maximum: { single: 3, multi: 1 } },
-        ],
-        'react/jsx-newline': [
-          'warn',
-          { prevent: true, allowMultilines: false },
-        ],
-        'react/jsx-sort-props': [
-          'warn',
-          {
-            callbacksLast: false,
-            shorthandFirst: true,
-            ignoreCase: true,
-            reservedFirst: true,
-            multiline: 'last',
-          },
-        ],
-        'react/jsx-one-expression-per-line': [
-          'warn',
-          { allow: 'single-child' },
-        ],
+        'react/jsx-boolean-value': 'warn',
+        'react/jsx-child-element-spacing': 'off',
+        'react/jsx-closing-bracket-location': ['warn', 'line-aligned'],
         'react/jsx-closing-tag-location': 'off',
+        'react/jsx-curly-brace-presence': 'warn',
+        'react/jsx-curly-spacing': 'warn',
         'react/jsx-filename-extension': [
           'error',
           { allow: 'as-needed', extensions: ['.tsx'] },
         ],
-        'react-hooks/rules-of-hooks': 'error',
-        'react-hooks/exhaustive-deps': 'warn',
+        'react/jsx-handler-names': 'off',
+        'react/jsx-indent': ['warn', 2],
+        'react/jsx-indent-props': ['warn', 2],
+        'react/jsx-max-depth': ['warn', { max: 3 }],
+        'react/jsx-max-props-per-line': [
+          'warn',
+          { maximum: { multi: 1, single: 3 } },
+        ],
+        'react/jsx-newline': [
+          'warn',
+          { allowMultilines: false, prevent: true },
+        ],
+        'react/jsx-no-bind': ['error', { allowArrowFunctions: true }],
+        'react/jsx-no-comment-textnodes': 'warn',
+        'react/jsx-no-literals': 'off',
+        'react/jsx-no-useless-fragment': 'warn',
+        'react/jsx-one-expression-per-line': [
+          'warn',
+          { allow: 'single-child' },
+        ],
+        'react/jsx-props-no-multi-spaces': 'warn',
+        'react/jsx-sort-props': [
+          'warn',
+          {
+            callbacksLast: false,
+            ignoreCase: true,
+            multiline: 'last',
+            reservedFirst: true,
+            shorthandFirst: true,
+          },
+        ],
+        'react/jsx-wrap-multilines': 'off',
+        'react/no-unknown-property': ['error', { ignore: ['css'] }],
+        'react/no-unused-prop-types': 'warn',
+        'react/prop-types': 'off',
+        'react/react-in-jsx-scope': 'off',
+        'react/require-default-props': 'off',
       },
+      settings: { react: { version: 'detect' } },
     },
   ],
+  parser: '@typescript-eslint/parser',
+  plugins: ['import', 'unused-imports', 'sort-keys-fix'],
+  root: true,
+  rules: {
+    'eslint-comments/no-unused-disable': 'warn',
+    'import/no-named-as-default-member': 'off',
+    'import/order': [
+      'warn',
+      {
+        alphabetize: {
+          caseInsensitive: true,
+          order: 'asc',
+        },
+        groups: [
+          'builtin',
+          'external',
+          'internal',
+          'parent',
+          'sibling',
+          'index',
+        ],
+        'newlines-between': 'never',
+        pathGroups: [
+          {
+            group: 'external',
+            pattern: 'react',
+            position: 'before',
+          },
+        ],
+        pathGroupsExcludedImportTypes: ['react'],
+      },
+    ],
+    'no-irregular-whitespace': 'off',
+    'prettier/prettier': 'warn',
+    'sort-keys': ['warn', 'asc', { allowLineSeparatedGroups: true }],
+    'sort-keys-fix/sort-keys-fix': [
+      'warn',
+      'asc',
+      { caseSensitive: true, natural: false },
+    ],
+    'unused-imports/no-unused-imports': 'warn',
+  },
 };
