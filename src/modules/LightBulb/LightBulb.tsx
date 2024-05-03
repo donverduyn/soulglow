@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { blue, green, red } from '@mui/material/colors';
+import { styled } from '@mui/material';
+import { blue, green, grey, red } from '@mui/material/colors';
 import { observer } from 'mobx-react-lite';
 import { Input } from 'common/components/Input';
-import { TestComponent } from 'common/components/Select';
 import { Slider } from 'common/components/Slider';
 import { useMobx } from 'common/hooks/useMobx';
-import { LightMode, LightModeChanger } from './components/LightModeChanger';
+import { LightMode, LightModeSelect } from './components/LightModeSelect';
 import { OnOffSwitch } from './components/OnOffSwitch';
 
 interface Color {
@@ -44,6 +44,35 @@ const handleSubmit = () => {
   // }
 };
 
+// const useThrottledFn = <T extends any[], U>(
+//   fn: (...args: T) => U,
+//   options: Partial<Parameters<typeof throttle>[1]>
+// ) => {
+//   const debounced = React.useRef(throttle(fn, options));
+//   return debounced.current;
+// };
+
+// // eslint-disable-next-line @typescript-eslint/no-explicit-any
+// const throttle = <T extends any[]>(fn: (...args: T) => void, delay: number) => {
+//   let timeoutId: NodeJS.Timeout | null = null;
+//   let lastArgs: T | null = null;
+
+//   const throttledFn = (...args: T) => {
+//     lastArgs = args;
+//     if (!timeoutId) {
+//       timeoutId = setTimeout(() => {
+//         if (lastArgs) {
+//           fn(...lastArgs);
+//           lastArgs = null;
+//         }
+//         timeoutId = null;
+//       }, delay);
+//     }
+//   };
+
+//   return throttledFn;
+// };
+
 const useLightBulbState = (state: LightBulbState) =>
   useMobx(() => ({
     ...state,
@@ -52,6 +81,9 @@ const useLightBulbState = (state: LightBulbState) =>
     },
     changeMode(value: LightMode) {
       this.bulb_mode = value;
+    },
+    changeBrightness(value: number) {
+      this.brightness = value;
     },
     changeGreen(value: number) {
       this.color.g = value;
@@ -64,82 +96,100 @@ const useLightBulbState = (state: LightBulbState) =>
     },
   }));
 
-const LightBulbControl: React.FC = observer(() => {
-  const lightBulb = useLightBulbState(defaultState);
-  // useAutorun(() => console.log(toJS(lightBulb), Date.now()));
+interface LightBulbProps extends DefaultProps {}
 
-  const handleState = React.useCallback(
-    () => (_: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      // const { name, value } = e.target
-      // console.log({ name, value });
-    },
-    []
-  );
+const LightBulbBase: React.FC<LightBulbProps> = observer(({ className }) => {
+  const lightBulb = useLightBulbState(defaultState);
+  // const throttledRed = useThrottledFn(lightBulb.changeRed, 1000);
 
   return (
-    <form onSubmit={handleSubmit}>
-      <OnOffSwitch
-        getValue={() => lightBulb.isOn}
-        onChange={lightBulb.togglePower}
-      />
-      <br />
-      <label>
-        Brightness:
-        <input
-          max='100'
-          min='0'
-          name='brightness'
-          type='range'
-          value={lightBulb.brightness}
-          onChange={handleState}
+    <section className={className}>
+      <form onSubmit={handleSubmit}>
+        <OnOffSwitch
+          getValue={() => lightBulb.isOn}
+          onChange={lightBulb.togglePower}
         />
-      </label>
-      <br />
-      <LightModeChanger
-        getValue={() => lightBulb.bulb_mode}
-        onChange={lightBulb.changeMode}
-      />
-      <br />
-      <TestComponent />
-      <Slider
-        aria-label='red slider'
-        color={red[500]}
-        getValue={() => lightBulb.color.r}
-        onChange={lightBulb.changeRed}
-      />
-      <Input
-        getValue={() => lightBulb.color.r}
-        onChange={lightBulb.changeRed}
-      />
-      <Slider
-        aria-label='green slider'
-        color={green[500]}
-        getValue={() => lightBulb.color.g}
-        onChange={lightBulb.changeGreen}
-      />
-      <Input
-        getValue={() => lightBulb.color.g}
-        onChange={lightBulb.changeGreen}
-      />
-      <Slider
-        aria-label='blue slider'
-        color={blue[500]}
-        getValue={() => lightBulb.color.b}
-        onChange={lightBulb.changeBlue}
-      />
-      <Input
-        getValue={() => lightBulb.color.b}
-        onChange={lightBulb.changeBlue}
-      />
-      {/* <Button
-        color='primary'
-        type='submit'
-        variant='contained'
-      >
-        Submit
-      </Button> */}
-    </form>
+        <LightModeSelect
+          getValue={() => lightBulb.bulb_mode}
+          onChange={lightBulb.changeMode}
+        />
+        <InputSlider
+          color={grey[100]}
+          label='brightness'
+          onChange={lightBulb.changeBrightness}
+          value={() => lightBulb.brightness}
+        />
+        <InputSlider
+          color={red[500]}
+          label='red'
+          onChange={lightBulb.changeRed}
+          value={() => lightBulb.color.r}
+        />
+        <InputSlider
+          color={green[500]}
+          label='green'
+          onChange={lightBulb.changeGreen}
+          value={() => lightBulb.color.g}
+        />
+        <InputSlider
+          color={blue[500]}
+          label='blue'
+          onChange={lightBulb.changeBlue}
+          value={() => lightBulb.color.b}
+        />
+      </form>
+    </section>
   );
 });
 
-export default LightBulbControl;
+interface InputSliderProps extends DefaultProps {
+  readonly value: () => number;
+  readonly onChange: (value: number) => void;
+  readonly color: string;
+  readonly label: string;
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+const InputSliderBase: React.FC<InputSliderProps> = observer(
+  ({ value, className, onChange, color, label }) => {
+    return (
+      <span className={className}>
+        <Slider
+          aria-label={label}
+          color={color}
+          max={255}
+          onChange={onChange}
+          value={value}
+        />
+        <Input
+          onChange={onChange}
+          value={value}
+        />
+      </span>
+    );
+  }
+);
+
+const InputSlider = styled(InputSliderBase)`
+  /* padding: 0.5em 0 1em 0.5em; */
+  display: flex;
+  flex-direction: row;
+  gap: 1.25em;
+  /* align-items: center; */
+`;
+
+export default styled(LightBulbBase)`
+  background: #212121;
+  border-radius: 0.25em;
+  padding: 1.75em 1.5em;
+  width: 15em;
+  display: block;
+  align-items: center;
+  & form {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    gap: 1.25em;
+    /* align-items: center; */
+  }
+`;

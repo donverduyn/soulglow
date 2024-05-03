@@ -71,9 +71,7 @@ export default defineConfig(({ mode }) => ({
     }),
     inspect(),
   ],
-  resolve: {
-    alias: {},
-  },
+  resolve: { alias: {} },
   test: {
     // logHeapUsage: true,
     open: true,
@@ -109,7 +107,9 @@ export default defineConfig(({ mode }) => ({
     },
   },
   server: {
+    headers: noCacheHeaders,
     host: '0.0.0.0',
+    hmr: { overlay: true },
     proxy: {
       '/api': {
         target: 'http://192.168.0.153:80', // The base URL of your API
@@ -117,13 +117,11 @@ export default defineConfig(({ mode }) => ({
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
-    headers: noCacheHeaders,
-    hmr: {
-      overlay: true,
-    },
   },
   preview: {
+    headers: noCacheHeaders,
     host: '0.0.0.0',
+    port: 4174,
     open: true,
     proxy: {
       '/api': {
@@ -132,6 +130,5 @@ export default defineConfig(({ mode }) => ({
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
-    headers: noCacheHeaders,
   },
 }));

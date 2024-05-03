@@ -166,7 +166,7 @@ module.exports = {
         'react/destructuring-assignment': [
           'warn',
           'always',
-          { ignoreClassFields: true, destructureInSignature: 'always' },
+          { ignoreClassFields: true, destructureInSignature: 'ignore' },
         ],
         'react/function-component-definition': [
           'warn',
@@ -186,7 +186,7 @@ module.exports = {
         'react/jsx-sort-props': [
           'warn',
           {
-            callbacksLast: true,
+            callbacksLast: false,
             shorthandFirst: true,
             ignoreCase: true,
             reservedFirst: true,

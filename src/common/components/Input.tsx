@@ -6,13 +6,13 @@ import { styled } from '@mui/material/styles';
 import { observer } from 'mobx-react-lite';
 
 interface InputProps<T> extends DefaultProps {
-  readonly getValue: () => T;
+  readonly value: () => T;
   readonly onChange: (value: T) => void;
   readonly onBlur?: () => void;
 }
 
 const InputBase = observer(
-  <T,>({ getValue, onBlur, onChange }: InputProps<T>) => {
+  <T,>({ className, value, onBlur, onChange }: InputProps<T>) => {
     //
     const handleBlur = React.useCallback(() => onBlur && onBlur(), [onBlur]);
     const handleInputChange = React.useCallback<
@@ -20,10 +20,15 @@ const InputBase = observer(
     >((e) => onChange(e.target.value as T), [onChange]);
 
     return (
-      <FormControl variant='outlined'>
+      <FormControl
+        className={className!}
+        variant='outlined'
+      >
         <MuiInput
+          onBlur={handleBlur}
+          onChange={handleInputChange}
           size='medium'
-          value={getValue()}
+          value={value()}
           inputProps={{
             step: 1,
             min: 0,
@@ -31,8 +36,6 @@ const InputBase = observer(
             type: 'number',
             'aria-labelledby': 'input-slider',
           }}
-          onBlur={handleBlur}
-          onChange={handleInputChange}
         />
       </FormControl>
     );

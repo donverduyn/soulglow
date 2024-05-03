@@ -13,9 +13,10 @@ export default function App() {
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
       <div className='App'>
-        <header className='App-header'>
-          <LightBulb />
-        </header>
+        {/* <header className='App-header'>
+         
+        </header> */}
+        <LightBulb />
       </div>
     </ThemeProvider>
   );

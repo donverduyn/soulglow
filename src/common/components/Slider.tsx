@@ -4,45 +4,46 @@ import { styled } from '@mui/material/styles';
 import { observer } from 'mobx-react-lite';
 
 interface Props<T> extends DefaultProps {
-  // eslint-disable-next-line react/no-unused-prop-types
   readonly color?: string;
   readonly style?: React.CSSProperties;
-  readonly getValue: () => T;
+  readonly value: () => T;
   readonly onChange: (value: T) => void;
+  readonly min?: number;
+  readonly max?: number;
 }
 
-const SliderBase = <T extends number>({
-  style,
-  className,
-  onChange,
-  getValue,
-}: Props<T>) => {
+const SliderBase = observer(<T extends number>(props: Props<T>) => {
+  const { className, min, max, style, value, onChange } = props;
+
+  // const handleChange = useThrottledFn(onChange, 100);
+
   return (
     <MUISlider
       className={className!}
-      // defaultValue={}
-      max={255}
-      min={0}
+      max={max ?? 255}
+      min={min ?? 0}
+      onChange={(_, value) => onChange(value as T)}
       slots={{ thumb: ThumbComponent }}
       style={style!}
-      value={getValue()}
-      valueLabelDisplay='auto'
-      onChange={(_, value) => onChange(value as T)}
+      value={value()}
+      valueLabelDisplay='off'
     />
   );
-};
+});
 
-export const Slider = styled(observer(SliderBase))`
+export const Slider = styled(SliderBase)`
+  margin: 0 0.5em;
+  height: 8px;
   color: ${(props) => props.color ?? '#52af77'};
   & .MuiSlider-valueLabel {
     background-color: ${(props) => props.color ?? '#52af77'};
   }
-  height: 8px;
   & .MuiSlider-track {
     border: none;
   }
   & .MuiSlider-thumb {
     border: 2px solid currentColor;
+    transition: left 0;
     &:focus,
     &:hover,
     &.Mui-active,
@@ -52,8 +53,8 @@ export const Slider = styled(observer(SliderBase))`
     &::before {
       display: none;
     }
-    height: 27px;
-    width: 27px;
+    height: 20px;
+    width: 20px;
     background-color: #fff;
     &:hover {
       box-shadow: 0 0 0 8px rgba(58, 133, 137, 0.16);
@@ -66,30 +67,10 @@ export const Slider = styled(observer(SliderBase))`
       margin-right: 1px;
     }
   }
-  & .MuiSlider-valueLabel {
-    line-height: 1.2em;
-    font-size: 12px;
-    padding: 0;
-    width: 32px;
-    height: 32px;
-    border-radius: 50% 50% 50% 0;
-    transform-origin: bottom left;
-    transform: translate(50%, -100%) rotate(-45deg) scale(0);
-    &::before {
-      display: none;
-    }
-    &.MuiSlider-valueLabelOpen {
-      transform: translate(50%, -100%) rotate(-45deg) scale(1);
-    }
-    & > * {
-      transform: rotate(45deg);
-    }
-  }
 `;
 
 interface ThumbComponentProps extends React.HTMLAttributes<EventTarget> {}
 
-// eslint-disable-next-line react/no-multi-comp
 const ThumbComponent: React.FC<ThumbComponentProps> = ({
   children,
   ...other

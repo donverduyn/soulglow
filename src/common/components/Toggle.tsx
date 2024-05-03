@@ -8,7 +8,7 @@ interface Props {
   readonly onChange: (value: boolean) => void;
 }
 
-const ToggleBase: React.FC<Props> = ({ getValue, onChange }) => {
+const ToggleBase: React.FC<Props> = observer(({ getValue, onChange }) => {
   //
   const handleChange = React.useCallback<
     (e: React.ChangeEvent<HTMLInputElement>, v: boolean) => void
@@ -21,6 +21,6 @@ const ToggleBase: React.FC<Props> = ({ getValue, onChange }) => {
       onChange={handleChange}
     />
   );
-};
+});
 
-export const Toggle = styled(observer(ToggleBase))({});
+export const Toggle = styled(ToggleBase)({});
