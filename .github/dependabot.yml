@@ -6,7 +6,13 @@
 
 version: 2
 updates:
- - package-ecosystem: "devcontainers"
+ - package-ecosystem: "npm"
    directory: "/"
    schedule:
      interval: weekly
+
+  # Configure pull request settings
+  open-pull-requests-limit: 1  # Maximum number of open pull requests Dependabot should have at any time
+  commit-message:
+    prefix: "chore"      # Prefix for the commit message and pull request title (e.g., chore, fix)
+    include: "scope"     # Include the scope of the dependency in the commit message

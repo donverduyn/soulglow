@@ -17,10 +17,24 @@
 		},
 		"ghcr.io/devcontainers-contrib/features/act:1": {
 			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+			"version": "latest",
+			"enableNonRootDocker": "true",
+			"moby": "true"
 		}
 	},
-	"postCreateCommand": "yarn install",
-	"initializeCommand": ["./.devcontainer/host.sh"],
+	"capAdd": [
+		"SYS_ADMIN"
+	],
+	"securityOpt": [
+		"seccomp=unconfined",
+		"apparmor=unconfined"
+	],
+	"postCreateCommand": "yarn install && puppeteer browsers install chrome",
+	"initializeCommand": [
+		"./.devcontainer/host.sh"
+	],
 	"containerEnv": {
 		"ESLINT_USE_FLAT_CONFIG": "false",
 		"EDITOR": "code"
