@@ -25,19 +25,39 @@
 		}
 	},
 	"capAdd": [
-		"SYS_ADMIN"
+		"SYS_ADMIN" // for sandboxing chromium
 	],
-	"securityOpt": [
-		"seccomp=unconfined",
-		"apparmor=unconfined"
+	"mounts": [
+		"source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached"
 	],
-	"postCreateCommand": "yarn install && puppeteer browsers install chrome",
+	"runArgs": ["--device=/dev/dri:/dev/dri", "--device=/dev/snd"],
+	"postCreateCommand": "yarn install",
+	"postStartCommand": {
+		"xvfb": "Xvfb :99 -screen 0 1024x768x16 -ac >/dev/null 2>&1 &",
+		"dbus": "sudo service dbus start >/dev/null 2>&1"
+	},
 	"initializeCommand": [
 		"./.devcontainer/host.sh"
 	],
+	"portsAttributes": {
+		"4173": {
+			"label": "Dev Server",
+			"onAutoForward": "silent"
+		}
+	},
+	"otherPortsAttributes": {
+		"onAutoForward": "ignore"
+	},
 	"containerEnv": {
 		"ESLINT_USE_FLAT_CONFIG": "false",
-		"EDITOR": "code"
+		"EDITOR": "code",
+		"DISPLAY": ":1",
+		"DBUS_SESSION_BUS_ADDRESS": "autolaunch:",
+		// two problems right now with XDG_RUNTIME_DIR set in the container
+		// vite does not do xdg-open (which works) with --open
+		// __open-in-editor links do not resolve when accessed from host
+		"XDG_RUNTIME_DIR": "/tmp/runtime-vscode"
+		// "PUPPETEER_CACHE_DIR": "./node_modules/.cache/puppeteer"
 	},
 	"customizations": {
 		"vscode": {

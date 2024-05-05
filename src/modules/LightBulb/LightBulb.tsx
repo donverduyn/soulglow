@@ -7,11 +7,13 @@ import { InputSlider } from './components/InputSlider';
 import { LightMode, LightModeSelect } from './components/LightModeSelect';
 import { OnOffSwitch } from './components/OnOffSwitch';
 
+/* eslint-disable typescript-sort-keys/interface */
 interface Color {
   r: number;
-  g: number; // eslint-disable-line typescript-sort-keys/interface
-  b: number; // eslint-disable-line typescript-sort-keys/interface
+  g: number;
+  b: number;
 }
+/* eslint-enable typescript-sort-keys/interface */
 
 interface LightBulbState {
   brightness: number;

@@ -12,6 +12,50 @@ module.exports = {
       // config files are assumed to be running in node
       files: ['./**/*.js', './**/*.cjs', './**/*.mjs'],
     },
+    // browser environment
+    {
+      excludedFiles: ['./**/*.test.ts?(x)'],
+      files: ['./src/**/*.ts', './**/*.tsx'],
+      parserOptions: {
+        ecmaVersion: 'latest',
+        // tsconfig.node.json only applies for vite.config.ts
+        project: ['./tsconfig.json'],
+        sourceType: 'module',
+        tsconfigRootDir: __dirname,
+      },
+      settings: {
+        'import/resolver': {
+          typescript: {
+            alwaysTryTypes: true,
+            project: ['./tsconfig.json'],
+          },
+        },
+      },
+    },
+    // node environment
+    {
+      files: [
+        'vite.config.ts',
+        './**/*.test.ts?(x)',
+        './test/**/*.ts',
+        './scripts/**/*.ts',
+      ],
+      parserOptions: {
+        ecmaVersion: 'latest',
+        // tsconfig.node.json only applies for vite.config.ts
+        project: ['./tsconfig.json', './tsconfig.node.json'],
+        sourceType: 'module',
+        tsconfigRootDir: __dirname,
+      },
+      settings: {
+        'import/resolver': {
+          typescript: {
+            alwaysTryTypes: true,
+            project: ['./tsconfig.json', './tsconfig.node.json'],
+          },
+        },
+      },
+    },
     {
       extends: [
         'plugin:@typescript-eslint/strict-type-checked',
@@ -19,14 +63,6 @@ module.exports = {
       ],
       // all TypeScript files
       files: ['*.ts', '*.tsx'],
-      parserOptions: {
-        ecmaVersion: 'latest',
-        // tsconfig.node.json only applies for vite.config.ts
-        project: ['./tsconfig.json', './tsconfig.node.json'],
-
-        sourceType: 'module',
-        tsconfigRootDir: __dirname,
-      },
       plugins: ['@typescript-eslint', 'typescript-sort-keys'],
       rules: {
         '@typescript-eslint/no-confusing-void-expression': [
@@ -59,14 +95,6 @@ module.exports = {
         '@typescript-eslint/unbound-method': 'off',
         'typescript-sort-keys/interface': 'warn',
         'typescript-sort-keys/string-enum': 'warn',
-      },
-      settings: {
-        'import/resolver': {
-          typescript: {
-            alwaysTryTypes: true,
-            project: ['./tsconfig.json', './tsconfig.node.json'],
-          },
-        },
       },
     },
     {

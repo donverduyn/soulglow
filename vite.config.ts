@@ -1,3 +1,4 @@
+import { execSync } from 'child_process';
 import react from '@vitejs/plugin-react-swc';
 import dayjs from 'dayjs';
 import { visualizer } from 'rollup-plugin-visualizer';
@@ -10,6 +11,13 @@ const noCacheHeaders = {
   'Cache-Control': 'no-cache, no-store, must-revalidate',
   Expires: '0',
   Pragma: 'no-cache',
+};
+
+export const getHostIp = () => {
+  const hostip = execSync("ip route show | awk '/default/ {print $3}'")
+    .toString()
+    .trim();
+  return hostip;
 };
 
 // https://vitejs.dev/config/
@@ -33,6 +41,18 @@ export default defineConfig(({ mode }) => ({
     drop: ['console', 'debugger'],
   },
   plugins: [
+    // {
+    //   configureServer: (() => {
+    //     const launcher = debounce(launch, { waitMs: 100 });
+    //     return (server) => {
+    //       server.watcher.on('ready', () => {
+    //         console.log('ready');
+    //         void launcher.call('http://localhost:4173');
+    //       });
+    //     };
+    //   })(),
+    //   name: 'custom-server-plugin',
+    // },
     tsconfigPaths(),
     react({
       jsxImportSource: '@emotion/react',
@@ -45,7 +65,7 @@ export default defineConfig(({ mode }) => ({
           mode === 'test'
             ? // exclude tsx files for eslint during test for now
               "eslint 'test/**/*.ts' 'src/**/*.test.ts'"
-            : 'eslint ./src --ext .ts,.tsx',
+            : 'eslint . --ext ts,tsx',
         useFlatConfig: false,
       },
       overlay: {
@@ -97,7 +117,7 @@ export default defineConfig(({ mode }) => ({
     headers: noCacheHeaders,
     host: '0.0.0.0',
     open: true,
-    port: 4174,
+    port: 4173,
     proxy: {
       '/api': {
         // The base URL of your API
@@ -113,7 +133,15 @@ export default defineConfig(({ mode }) => ({
     headers: noCacheHeaders,
     hmr: { overlay: true },
     host: '0.0.0.0',
+    open: true, // needs cli argument --open to work
     proxy: {
+      // '/__open-in-editor': {
+      //   changeOrigin: true,
+      //   pathRewrite: {
+      //     '^/__open-in-editor': '',
+      //   },
+      //   target: `http://${getHostIp()}`,
+      // },
       '/api': {
         // The base URL of your API
         changeOrigin: true,

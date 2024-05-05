@@ -29,4 +29,7 @@
             "command": "workbench.action.terminal.new",
         },
     ],
+    "terminal.integrated.env.linux": {
+        "GTK_PATH": null
+    },
 }
