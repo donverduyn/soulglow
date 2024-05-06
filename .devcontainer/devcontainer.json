@@ -56,8 +56,8 @@
 		// two problems right now with XDG_RUNTIME_DIR set in the container
 		// vite does not do xdg-open (which works) with --open
 		// __open-in-editor links do not resolve when accessed from host
-		"XDG_RUNTIME_DIR": "/tmp/runtime-vscode"
-		// "PUPPETEER_CACHE_DIR": "./node_modules/.cache/puppeteer"
+		"XDG_RUNTIME_DIR": "/tmp/runtime-vscode",
+		"PUPPETEER_CACHE_DIR": "${containerWorkspaceFolder}/node_modules/puppeteer/.local-chromium"
 	},
 	"customizations": {
 		"vscode": {

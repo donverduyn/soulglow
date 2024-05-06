@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    
     "chrome": "$(node -e \"console.log(require('puppeteer').executablePath())\") --alsa-output-device=\"$(bash ./.devcontainer/sound.sh)\" --disable-gpu --auto-open-devtools-for-tabs --disable-dev-shm-usage --no-first-run --bwsi",
     "dev": "vite --port 4173 --open",
     "build": "rm -rf dist && tsc && vite build",
