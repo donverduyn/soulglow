@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { isFunction } from 'effect/Function';
+import { Call, O, S } from 'hotscript';
 import { AnnotationsMap, observable, autorun } from 'mobx';
+import { memoize } from 'common/utils/memoize';
 
 // function mergeObservableObject<T extends Record<string, unknown>>(
 //   target: T,
@@ -32,6 +34,25 @@ export const useMobx = <T extends Record<string, unknown>>(
       autoBind: true,
     });
 
+    const get = memoize(
+      <U extends Call<O.AllPaths, T>>(path: U) =>
+        (): Call<O.Get<U>, T> => {
+          const keys = [
+            ...(path.split('.') as Call<S.Split<'.'>, U> & string[]),
+          ];
+          let value: unknown = obs;
+          for (const key of keys) {
+            if (!Object.prototype.hasOwnProperty.call(value, key))
+              return undefined as never;
+            else {
+              // @ts-expect-error unknown values
+              value = value[key];
+            }
+          }
+          return value as Call<O.Get<U>, T>;
+        }
+    );
+
     for (const key in obs) {
       if (isFunction(obs[key])) {
         const currentFn = obs[key] as <T>(a: T) => void;
@@ -41,7 +62,7 @@ export const useMobx = <T extends Record<string, unknown>>(
         };
       }
     }
-    return obs;
+    return Object.assign(obs, { get });
   })[0];
 
 export const useAutorun = (fn: () => void) =>

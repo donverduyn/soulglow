@@ -6,6 +6,7 @@ import { checker } from 'vite-plugin-checker';
 import inspect from 'vite-plugin-inspect';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
+import { createBrowser } from './test/launch';
 
 const noCacheHeaders = {
   'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -40,19 +41,36 @@ export default defineConfig(({ mode }) => ({
   esbuild: {
     drop: ['console', 'debugger'],
   },
+
   plugins: [
-    // {
-    //   configureServer: (() => {
-    //     const launcher = debounce(launch, { waitMs: 100 });
-    //     return (server) => {
-    //       server.watcher.on('ready', () => {
-    //         console.log('ready');
-    //         void launcher.call('http://localhost:4173');
-    //       });
-    //     };
-    //   })(),
-    //   name: 'custom-server-plugin',
-    // },
+    mode !== 'production' &&
+      (async () => {
+        const browser = await createBrowser();
+        let launched = false;
+        return {
+          configureServer(server) {
+            server.httpServer?.on('listening', () => {
+              const a = server.httpServer?.address();
+              const port = (typeof a === 'string' ? a : a?.port) ?? '4173';
+              const postfix = mode === 'test' ? '/__vitest__/#/' : '';
+              const goto = async () => {
+                if (!launched) {
+                  const [firstPage] = await browser.pages();
+                  await firstPage.goto(
+                    `http://localhost:${port.toString()}${postfix}`
+                  );
+                  launched = true;
+                }
+              };
+              void goto();
+            });
+            server.httpServer?.on('close', () => {
+              void browser.close();
+            });
+          },
+          name: 'custom-server-plugin',
+        };
+      })(),
     tsconfigPaths(),
     react({
       jsxImportSource: '@emotion/react',
@@ -100,14 +118,11 @@ export default defineConfig(({ mode }) => ({
     // },
     visualizer({
       brotliSize: true,
-
       filename: `./.analyzer/analysis_${dayjs().format('DDMMYYYY_HHmmss')}.html`,
       // or sunburst
       gzipSize: true,
-
       // sourcemap: true,
       projectRoot: process.cwd(),
-
       template: 'treemap',
       title: 'Vite Visualizer', // will be saved in project's root
     }),
@@ -116,7 +131,7 @@ export default defineConfig(({ mode }) => ({
   preview: {
     headers: noCacheHeaders,
     host: '0.0.0.0',
-    open: true,
+    open: false,
     port: 4173,
     proxy: {
       '/api': {
@@ -133,7 +148,7 @@ export default defineConfig(({ mode }) => ({
     headers: noCacheHeaders,
     hmr: { overlay: true },
     host: '0.0.0.0',
-    open: true, // needs cli argument --open to work
+    // open: true, // needs cli argument --open to work
     proxy: {
       // '/__open-in-editor': {
       //   changeOrigin: true,
@@ -165,6 +180,6 @@ export default defineConfig(({ mode }) => ({
     // reporters: ['html'],
     globals: true,
     // logHeapUsage: true,
-    open: true,
+    open: false,
   },
 }));

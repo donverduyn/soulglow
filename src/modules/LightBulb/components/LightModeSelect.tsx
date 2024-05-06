@@ -1,11 +1,10 @@
 import React from 'react';
 // import type { Faker } from '@faker-js/faker';
 import { styled } from '@mui/material/styles';
-import { observable } from 'mobx';
 import { Observer } from 'mobx-react-lite';
-import { v4 as uuid } from 'uuid';
 import { MenuItem } from 'common/components/MenuItem';
 import { Select } from 'common/components/Select';
+import { LightMode, MODE_ITEMS } from './constants';
 
 // let faker: Faker | null = null;
 // if (process.env.NODE_ENV === 'development') {
@@ -13,16 +12,6 @@ import { Select } from 'common/components/Select';
 //     faker = mod2.faker;
 //   });
 // }
-
-export enum LightMode {
-  COLOR = 'color',
-  WHITE = 'white',
-}
-
-const MODE_ITEMS = observable.array([
-  { id: uuid(), label: 'Color', value: LightMode.COLOR },
-  { id: uuid(), label: 'White', value: LightMode.WHITE },
-]);
 
 interface Props extends DefaultProps {
   readonly getValue: () => LightMode;

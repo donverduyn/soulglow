@@ -25,6 +25,7 @@ const preferences = puppeteerPrefs as (
   config: Record<string, unknown>
 ) => PuppeteerExtraPlugin;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Func<T> = (...args: any[]) => T;
 
 export function asyncMemoize<T>(func: Func<Promise<T>>): Func<Promise<T>> {
@@ -45,66 +46,64 @@ export function asyncMemoize<T>(func: Func<Promise<T>>): Func<Promise<T>> {
   };
 }
 
-puppeteer.use(
-  preferences({
-    userPrefs: {
-      browser: {
-        startup: {
-          // homepage: 'http://localhost:4173',
-          // startup_pages: 'http://localhost:4173',
-        },
-        // window_placement: {
-        // height: 1024,
-        // width: 1080,
-      },
-      devtools: {
-        preferences: {
-          currentDockState: '"bottom"',
-
-          logLevel: '"debug"',
-          // inspector: {
-          //   'drawer-split-view-state': JSON.stringify({
-          //     horizontal: { showMode: 'Both' },
-          //   }),
-          // },
-          'panel-selected-tab': '"console"',
-          'ui-theme': '"dark"',
-        },
-      },
-      profile: {
-        default_content_setting_values: {
-          fonts: 1,
-        },
-      },
-      settings: {
-        clock: { use_24hour_clock: true },
-        first_run_tutorial_shown: true,
-        timezone: 'timezoneid',
-      },
-      webkit: {
-        webprefs: {
-          default_fixed_font_size: 13,
-          default_font_size: 16,
-          default_monospace_font_size: 13,
-          fonts: {
-            // cursive: { Zyyy: "'Liberation Mono'" },
-            // fantasy: { Zyyy: "'Liberation Mono'" },
-            // fixed: { Zyyy: "'Liberation Mono'" },
-            // pictograph: { Zyyy: "'Liberation Mono'" },
-            // sansserif: { Zyyy: "'Liberation Mono'" },
-            // serif: { Zyyy: "'Liberation Mono'" },
-            standard: "'FreeMono'",
+export const createBrowser = asyncMemoize(() => {
+  puppeteer.use(
+    preferences({
+      userPrefs: {
+        browser: {
+          startup: {
+            // homepage: 'http://localhost:4173',
+            // startup_pages: 'http://localhost:4173',
           },
-          minimum_font_size: 12,
-          minimum_logical_font_size: 9,
+          // window_placement: {
+          // height: 1024,
+          // width: 1080,
+        },
+        devtools: {
+          preferences: {
+            currentDockState: '"bottom"',
+
+            logLevel: '"debug"',
+            // inspector: {
+            //   'drawer-split-view-state': JSON.stringify({
+            //     horizontal: { showMode: 'Both' },
+            //   }),
+            // },
+            'panel-selected-tab': '"console"',
+            'ui-theme': '"dark"',
+          },
+        },
+        profile: {
+          default_content_setting_values: {
+            fonts: 1,
+          },
+        },
+        settings: {
+          clock: { use_24hour_clock: true },
+          first_run_tutorial_shown: true,
+          timezone: 'timezoneid',
+        },
+        webkit: {
+          webprefs: {
+            default_fixed_font_size: 13,
+            default_font_size: 16,
+            default_monospace_font_size: 13,
+            fonts: {
+              // cursive: { Zyyy: "'Liberation Mono'" },
+              // fantasy: { Zyyy: "'Liberation Mono'" },
+              // fixed: { Zyyy: "'Liberation Mono'" },
+              // pictograph: { Zyyy: "'Liberation Mono'" },
+              // sansserif: { Zyyy: "'Liberation Mono'" },
+              // serif: { Zyyy: "'Liberation Mono'" },
+              standard: "'FreeMono'",
+            },
+            minimum_font_size: 12,
+            minimum_logical_font_size: 9,
+          },
         },
       },
-    },
-  })
-);
-
-const createBrowser = asyncMemoize((a: string) => {
-  console.log('createBrowser');
+    })
+  );
 
   // Launch the browser and open a new blank page
   const browser = puppeteer.launch({
@@ -122,8 +121,8 @@ const createBrowser = asyncMemoize((a: string) => {
     ],
     defaultViewport: { height: 0, width: 0 },
     devtools: true,
-    executablePath: puppeteer.executablePath(),
     // dumpio: true,
+    executablePath: puppeteer.executablePath(),
     headless: false,
   });
 
@@ -164,4 +163,4 @@ export const launch = async (url: string) => {
   // await browser.close();
 };
 
-void launch('http://localhost:4173')
+// void launch('http://localhost:4173');

@@ -93,6 +93,7 @@ module.exports = {
         ],
         '@typescript-eslint/no-useless-template-literals': 'warn',
         '@typescript-eslint/unbound-method': 'off',
+        'prefer-const': 'warn',
         'typescript-sort-keys/interface': 'warn',
         'typescript-sort-keys/string-enum': 'warn',
       },
@@ -242,7 +243,7 @@ module.exports = {
     ],
     'no-irregular-whitespace': 'off',
     'prettier/prettier': 'warn',
-    'sort-keys': ['warn', 'asc', { allowLineSeparatedGroups: true }],
+    'sort-keys': 'off',
     'sort-keys-fix/sort-keys-fix': [
       'warn',
       'asc',

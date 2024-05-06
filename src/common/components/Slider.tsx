@@ -13,9 +13,7 @@ interface Props<T> extends DefaultProps {
 }
 
 const SliderBase = observer(<T extends number>(props: Props<T>) => {
-  const { className, min, max, style, getValue: value, onChange } = props;
-
-  // const handleChange = useThrottledFn(onChange, 100);
+  const { className, min, max, style, getValue, onChange } = props;
 
   return (
     <MuiSlider
@@ -24,22 +22,28 @@ const SliderBase = observer(<T extends number>(props: Props<T>) => {
       min={min ?? 0}
       onChange={(_, value) => onChange(value as T)}
       slots={{ thumb: ThumbComponent }}
-      style={style!}
-      value={value()}
+      style={{ ['--test' as string]: 'red' }}
+      value={getValue()}
       valueLabelDisplay='off'
     />
   );
 });
 
 export const Slider = styled(SliderBase)`
-  color: ${(props) => props.color ?? '#52af77'};
+  /* color: ${(props) => props.color ?? '#52af77'}; */
+
   height: 8px;
   margin: 0 0.5em;
   & .MuiSlider-valueLabel {
-    background-color: ${(props) => props.color ?? '#52af77'};
+    /* background-color: ${(props) => props.color ?? '#52af77'}; */
   }
   & .MuiSlider-track {
+    background-image: linear-gradient(to right, #ffd27f, #ffffff 50%, #9abad9);
+    background-size: auto;
     border: none;
+  }
+  & .MuiSlider-rail {
+    background-image: linear-gradient(to right, #ffd27f, #ffffff 50%, #9abad9);
   }
   & .MuiSlider-thumb {
     background-color: #fff;

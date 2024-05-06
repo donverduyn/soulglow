@@ -3,8 +3,9 @@ import { styled } from '@mui/material';
 import { blue, green, grey, red } from '@mui/material/colors';
 import { observer } from 'mobx-react-lite';
 import { useMobx } from 'common/hooks/useMobx';
+import { LightMode } from './components/constants';
 import { InputSlider } from './components/InputSlider';
-import { LightMode, LightModeSelect } from './components/LightModeSelect';
+import { LightModeSelect } from './components/LightModeSelect';
 import { OnOffSwitch } from './components/OnOffSwitch';
 
 /* eslint-disable typescript-sort-keys/interface */
@@ -106,54 +107,53 @@ interface LightBulbProps extends DefaultProps {}
 
 // eslint-disable-next-line react-refresh/only-export-components
 const LightBulbBase: React.FC<LightBulbProps> = observer(({ className }) => {
-  const lightBulb = useLightBulbState(defaultState);
-  // const lightBulb2 = useMobx(() => defaultState);
+  const bulb = useLightBulbState(defaultState);
   return (
     <section className={className}>
       <form onSubmit={handleSubmit}>
         <OnOffSwitch
-          getValue={() => lightBulb.isOn}
-          onChange={lightBulb.togglePower}
+          getValue={bulb.get('isOn')}
+          onChange={bulb.togglePower}
         />
         <LightModeSelect
-          getValue={() => lightBulb.bulb_mode}
-          onChange={lightBulb.changeMode}
+          getValue={bulb.get('bulb_mode')}
+          onChange={bulb.changeMode}
         />
-        {lightBulb.bulb_mode === LightMode.WHITE && (
+        {bulb.bulb_mode === LightMode.WHITE && (
           <>
             <InputSlider
               color={grey[100]}
-              getValue={() => lightBulb.color_temp}
+              getValue={bulb.get('color_temp')}
               label='color temp'
-              onChange={lightBulb.changeColorTemp}
+              onChange={bulb.changeColorTemp}
             />
             <InputSlider
               color={grey[100]}
-              getValue={() => lightBulb.brightness}
+              getValue={bulb.get('brightness')}
               label='brightness'
-              onChange={lightBulb.changeBrightness}
+              onChange={bulb.changeBrightness}
             />
           </>
         )}
-        {lightBulb.bulb_mode === LightMode.COLOR && (
+        {bulb.bulb_mode === LightMode.COLOR && (
           <>
             <InputSlider
               color={red[500]}
-              getValue={() => lightBulb.color.r}
+              getValue={bulb.get('color.r')}
               label='red'
-              onChange={lightBulb.changeRed}
+              onChange={bulb.changeRed}
             />
             <InputSlider
               color={green[500]}
-              getValue={() => lightBulb.color.g}
+              getValue={bulb.get('color.g')}
               label='green'
-              onChange={lightBulb.changeGreen}
+              onChange={bulb.changeGreen}
             />
             <InputSlider
               color={blue[500]}
-              getValue={() => lightBulb.color.b}
+              getValue={bulb.get('color.b')}
               label='blue'
-              onChange={lightBulb.changeBlue}
+              onChange={bulb.changeBlue}
             />
           </>
         )}

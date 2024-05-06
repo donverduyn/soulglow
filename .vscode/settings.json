@@ -27,6 +27,7 @@
     "auto-run-command.rules": [
         {
             "command": "workbench.action.terminal.new",
+            "condition": ["isRunningInContainer"]
         },
     ],
     "terminal.integrated.env.linux": {
