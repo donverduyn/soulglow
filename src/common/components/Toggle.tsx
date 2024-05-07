@@ -17,6 +17,7 @@ const ToggleBase: React.FC<Props> = observer(({ getValue, onChange }) => {
   return (
     <Switch
       checked={getValue()}
+      color='warning'
       inputProps={{ 'aria-label': 'controlled' }}
       onChange={handleChange}
     />

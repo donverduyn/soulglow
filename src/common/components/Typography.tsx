@@ -8,16 +8,10 @@ interface Props extends DefaultProps {
   readonly variant?: PropsOf<typeof MuiTypography>['variant'];
 }
 
-const TypographyBase: React.FC<Props> = ({
-  children,
-  className,
-  variant,
-  color,
-}) => {
+const TypographyBase: React.FC<Props> = ({ children, className, variant }) => {
   return (
     <MuiTypography
       className={className!}
-      color={color ?? 'white'}
       variant={variant ?? 'body1'}
     >
       {children}
@@ -26,5 +20,5 @@ const TypographyBase: React.FC<Props> = ({
 };
 
 export const Typography = styled(TypographyBase)(() => ({
-  fontWeight: 'bold',
+  // fontWeight: 'bold',
 }));

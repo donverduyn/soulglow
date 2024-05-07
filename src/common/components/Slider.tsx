@@ -10,10 +10,11 @@ interface Props<T> extends DefaultProps {
   readonly min?: number;
   readonly onChange: (value: T) => void;
   readonly style?: React.CSSProperties;
+  readonly track?: false | 'normal';
 }
 
 const SliderBase = observer(<T extends number>(props: Props<T>) => {
-  const { className, min, max, style, getValue, onChange } = props;
+  const { className, min, max, track, getValue, onChange } = props;
 
   return (
     <MuiSlider
@@ -23,6 +24,7 @@ const SliderBase = observer(<T extends number>(props: Props<T>) => {
       onChange={(_, value) => onChange(value as T)}
       slots={{ thumb: ThumbComponent }}
       style={{ ['--test' as string]: 'red' }}
+      track={track ?? 'normal'}
       value={getValue()}
       valueLabelDisplay='off'
     />
@@ -30,42 +32,24 @@ const SliderBase = observer(<T extends number>(props: Props<T>) => {
 });
 
 export const Slider = styled(SliderBase)`
-  /* color: ${(props) => props.color ?? '#52af77'}; */
-  color: inherit;
+  --slider-color: var(--color, inherit);
+  color: var(--slider-color);
   height: 8px;
   margin: 0 0.5em;
-  & .MuiSlider-valueLabel {
-    /* background-color: ${(props) => props.color ?? '#52af77'}; */
-  }
   & .MuiSlider-track {
-    /* background-image: linear-gradient(to right, #ffd27f, #ffffff 50%, #9abad9); */
-    background-size: auto;
-    border: none;
-  }
-  & .MuiSlider-rail {
-    /* background-image: linear-gradient(to right, #ffd27f, #ffffff 50%, #9abad9); */
+    border: 0;
   }
   & .MuiSlider-thumb {
     background-color: #fff;
     border: 2px solid currentColor;
-    &:focus,
+    /* box-shadow: 0px 0px 0px 0px color-mix(in srgb, var(--slider-color) 16%, transparent); */
     &:hover,
-    &.Mui-active,
-    &.Mui-focusVisible {
-      box-shadow: inherit;
-    }
-    &::before {
-      display: none;
-    }
-    height: 20px;
-    transition: left 0;
-    width: 20px;
-    &:hover {
-      box-shadow: 0 0 0 8px rgba(58, 133, 137, 0.16);
+    &:focus {
+      /* box-shadow: 0px 0px 0px 8px color-mix(in srgb, var(--slider-color) 16%, transparent); */
     }
     & .bar {
       background-color: currentColor;
-      height: 9px;
+      height: 8px;
       margin-left: 1px;
       margin-right: 1px;
       width: 1px;

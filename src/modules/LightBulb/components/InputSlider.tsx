@@ -7,10 +7,11 @@ interface InputSliderProps extends DefaultProps {
   readonly getValue: () => number;
   readonly label: string;
   readonly onChange: (value: number) => void;
+  readonly track?: false | 'normal';
 }
 
 const InputSliderBase: React.FC<InputSliderProps> = observer(
-  ({ getValue, className, onChange, label }) => {
+  ({ getValue, className, track, onChange, label }) => {
     return (
       <span className={className}>
         <Slider
@@ -18,6 +19,7 @@ const InputSliderBase: React.FC<InputSliderProps> = observer(
           getValue={getValue}
           max={255}
           onChange={onChange}
+          track={track ?? 'normal'}
         />
         <TextField
           getValue={getValue}

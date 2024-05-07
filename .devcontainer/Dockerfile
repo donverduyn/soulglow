@@ -12,7 +12,7 @@ RUN apt-get update \
     
 # runtime dependencies    
 RUN apt-get update \
-    && apt-get install -y xdg-utils alsa-utils vulkan-tools mesa-vulkan-drivers upower xvfb fonts-recommended --no-install-recommends
+    && apt-get install -y xdg-utils alsa-utils vulkan-tools mesa-vulkan-drivers upower xvfb libglib2.0-bin fonts-recommended --no-install-recommends
 
 # configure tmp directory
 RUN mkdir -p /tmp/runtime-vscode \

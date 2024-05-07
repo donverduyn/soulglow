@@ -55,7 +55,7 @@ export const createBrowser = asyncMemoize(() => {
           preferences: {
             currentDockState: '"bottom"',
             'panel-selected-tab': '"console"',
-            'ui-theme': '"dark"',
+            // 'ui-theme': '"dark"',
           },
         },
         profile: {
@@ -99,7 +99,7 @@ export const createBrowser = asyncMemoize(() => {
       '--disable-first-run-ui',
       '--no-first-run',
       '--bwsi',
-      '--force-dark-mode',
+      // '--force-dark-mode',
       '--disable-extensions-except=/tmp/react-devtools-extensions/unpacked',
       '--load-extension=/tmp/react-devtools-extensions/unpacked',
     ],

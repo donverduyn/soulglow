@@ -41,6 +41,14 @@ const SelectBase = observer(<TValue,>(props: SelectProps<TValue>) => {
         // onClose={() => setOpen(false)}
         // onOpen={() => setOpen(true)}
         value={unwrap(getValue)}
+        MenuProps={{
+          slotProps: {
+            paper: {
+              elevation: 16,
+              sx: { borderTopLeftRadius: 0, borderTopRightRadius: 0 },
+            },
+          },
+        }}
       >
         {items.map(safeRender)}
       </MuiSelect>

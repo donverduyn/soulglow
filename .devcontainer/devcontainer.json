@@ -28,13 +28,14 @@
 		"SYS_ADMIN" // for sandboxing chromium
 	],
 	"mounts": [
-		"source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached"
+		"source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
+		"source=/run/user/1000/bus,target=/run/user/1000/bus,type=bind,consistency=cached"
 	],
 	"runArgs": ["--device=/dev/dri:/dev/dri", "--device=/dev/snd"],
 	"postCreateCommand": "yarn install",
 	"postStartCommand": {
 		"xvfb": "Xvfb :99 -screen 0 1024x768x16 -ac >/dev/null 2>&1 &",
-		"dbus": "sudo service dbus start >/dev/null 2>&1"
+		// "dbus": "dbus-daemon --session --address=unix:path=/run/user/1000/bus >/dev/null 2>&1 &"
 	},
 	"initializeCommand": [
 		"./.devcontainer/host.sh"
@@ -52,7 +53,7 @@
 		"ESLINT_USE_FLAT_CONFIG": "false",
 		"EDITOR": "code",
 		"DISPLAY": ":1",
-		"DBUS_SESSION_BUS_ADDRESS": "autolaunch:",
+		"DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
 		// two problems right now with XDG_RUNTIME_DIR set in the container
 		// vite does not do xdg-open (which works) with --open
 		// __open-in-editor links do not resolve when accessed from host
