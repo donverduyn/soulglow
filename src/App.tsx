@@ -12,15 +12,6 @@ const darkTheme = createTheme({
   },
 });
 
-// const cardCss = {
-//   self: css({
-//     backgroundColor: 'white',
-//     border: '1px solid #eee',
-//     borderRadius: '0.5rem',
-//     padding: '1rem'
-//   }),
-
-
 export default function App() {
   return (
     <ThemeProvider theme={darkTheme}>

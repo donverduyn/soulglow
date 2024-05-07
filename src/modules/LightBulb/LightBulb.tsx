@@ -1,12 +1,15 @@
 import * as React from 'react';
-import { styled } from '@mui/material';
 import { blue, green, grey, red } from '@mui/material/colors';
+import { css, styled } from '@mui/material/styles';
 import { observer } from 'mobx-react-lite';
 import { useMobx } from 'common/hooks/useMobx';
+import { memoize } from 'common/utils/memoize';
 import { LightMode } from './components/constants';
 import { InputSlider } from './components/InputSlider';
 import { LightModeSelect } from './components/LightModeSelect';
 import { OnOffSwitch } from './components/OnOffSwitch';
+
+const memoizedCss = memoize(css);
 
 /* eslint-disable typescript-sort-keys/interface */
 interface Color {
@@ -48,112 +51,58 @@ const handleSubmit = () => {
   // }
 };
 
-// const useThrottledFn = <T extends any[], U>(
-//   fn: (...args: T) => U,
-//   options: Partial<Parameters<typeof throttle>[1]>
-// ) => {
-//   const debounced = React.useRef(throttle(fn, options));
-//   return debounced.current;
-// };
-
-// // eslint-disable-next-line @typescript-eslint/no-explicit-any
-// const throttle = <T extends any[]>(fn: (...args: T) => void, delay: number) => {
-//   let timeoutId: NodeJS.Timeout | null = null;
-//   let lastArgs: T | null = null;
-
-//   const throttledFn = (...args: T) => {
-//     lastArgs = args;
-//     if (!timeoutId) {
-//       timeoutId = setTimeout(() => {
-//         if (lastArgs) {
-//           fn(...lastArgs);
-//           lastArgs = null;
-//         }
-//         timeoutId = null;
-//       }, delay);
-//     }
-//   };
-
-//   return throttledFn;
-// };
-
-const useLightBulbState = (state: LightBulbState) =>
-  useMobx(() => ({
-    ...state,
-    changeBlue(value: number) {
-      this.color.b = value;
-    },
-    changeBrightness(value: number) {
-      this.brightness = value;
-    },
-    changeColorTemp(value: number) {
-      this.color_temp = value;
-    },
-    changeGreen(value: number) {
-      this.color.g = value;
-    },
-    changeMode(value: LightMode) {
-      this.bulb_mode = value;
-    },
-    changeRed(value: number) {
-      this.color.r = value;
-    },
-    togglePower() {
-      this.isOn = !this.isOn;
-    },
-  }));
-
 interface LightBulbProps extends DefaultProps {}
 
 // eslint-disable-next-line react-refresh/only-export-components
 const LightBulbBase: React.FC<LightBulbProps> = observer(({ className }) => {
-  const bulb = useLightBulbState(defaultState);
+  const bulb = useMobx(() => ({ ...defaultState }));
+  console.log(memoizedCss({ color: grey[100] }));
   return (
     <section className={className}>
       <form onSubmit={handleSubmit}>
         <OnOffSwitch
-          getValue={bulb.get('isOn')}
-          onChange={bulb.togglePower}
+          getValue={bulb.lazyGet('isOn')}
+          onChange={bulb.set('isOn')}
         />
         <LightModeSelect
-          getValue={bulb.get('bulb_mode')}
-          onChange={bulb.changeMode}
+          getValue={bulb.lazyGet('bulb_mode')}
+          onChange={bulb.set('bulb_mode')}
         />
         {bulb.bulb_mode === LightMode.WHITE && (
           <>
             <InputSlider
-              color={grey[100]}
-              getValue={bulb.get('color_temp')}
+              css={memoizedCss({ color: grey[100] })}
+              getValue={bulb.lazyGet('color_temp')}
               label='color temp'
-              onChange={bulb.changeColorTemp}
+              onChange={bulb.set('color_temp')}
             />
             <InputSlider
-              color={grey[100]}
-              getValue={bulb.get('brightness')}
+              css={memoizedCss({ color: grey[100] })}
+              getValue={bulb.lazyGet('brightness')}
               label='brightness'
-              onChange={bulb.changeBrightness}
+              onChange={bulb.set('brightness')}
             />
           </>
         )}
         {bulb.bulb_mode === LightMode.COLOR && (
           <>
             <InputSlider
-              color={red[500]}
-              getValue={bulb.get('color.r')}
+              css={memoizedCss({ color: red[500] })}
+              getValue={bulb.lazyGet('color.r')}
               label='red'
-              onChange={bulb.changeRed}
+              onChange={bulb.set('color.r')}
             />
             <InputSlider
-              color={green[500]}
-              getValue={bulb.get('color.g')}
+              css={memoizedCss({ color: green[500] })}
+              getValue={bulb.lazyGet('color.g')}
               label='green'
-              onChange={bulb.changeGreen}
+              onChange={bulb.set('color.g')}
             />
             <InputSlider
-              color={blue[500]}
-              getValue={bulb.get('color.b')}
+              css={memoizedCss({ color: blue[500] })}
+              getValue={bulb.lazyGet('color.b')}
               label='blue'
-              onChange={bulb.changeBlue}
+              onChange={bulb.set('color.b')}
             />
           </>
         )}
@@ -174,6 +123,5 @@ export default styled(LightBulbBase)`
     display: flex;
     flex-direction: column;
     gap: 1em;
-    /* align-items: center; */
   }
 `;

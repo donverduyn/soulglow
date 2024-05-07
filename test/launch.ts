@@ -50,25 +50,10 @@ export const createBrowser = asyncMemoize(() => {
   puppeteer.use(
     preferences({
       userPrefs: {
-        browser: {
-          startup: {
-            // homepage: 'http://localhost:4173',
-            // startup_pages: 'http://localhost:4173',
-          },
-          // window_placement: {
-          // height: 1024,
-          // width: 1080,
-        },
+        browser: {},
         devtools: {
           preferences: {
             currentDockState: '"bottom"',
-
-            logLevel: '"debug"',
-            // inspector: {
-            //   'drawer-split-view-state': JSON.stringify({
-            //     horizontal: { showMode: 'Both' },
-            //   }),
-            // },
             'panel-selected-tab': '"console"',
             'ui-theme': '"dark"',
           },
@@ -114,10 +99,9 @@ export const createBrowser = asyncMemoize(() => {
       '--disable-first-run-ui',
       '--no-first-run',
       '--bwsi',
-      // '--disable-extensions-except=/path/to/extension/',
-      // '--load-extension=/path/to/extension/',
-      // '--homepage="http://localhost:4173"',
-      // '--incognito',
+      '--force-dark-mode',
+      '--disable-extensions-except=/tmp/react-devtools-extensions/unpacked',
+      '--load-extension=/tmp/react-devtools-extensions/unpacked',
     ],
     defaultViewport: { height: 0, width: 0 },
     devtools: true,
@@ -162,5 +146,3 @@ export const launch = async (url: string) => {
 
   // await browser.close();
 };
-
-// void launch('http://localhost:4173');

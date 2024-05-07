@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { isFunction } from 'effect/Function';
 import { Call, O, S } from 'hotscript';
-import { AnnotationsMap, observable, autorun } from 'mobx';
+import { AnnotationsMap, observable, autorun, runInAction } from 'mobx';
+import { identity, isFunction } from 'remeda';
 import { memoize } from 'common/utils/memoize';
 
 // function mergeObservableObject<T extends Record<string, unknown>>(
@@ -34,7 +34,7 @@ export const useMobx = <T extends Record<string, unknown>>(
       autoBind: true,
     });
 
-    const get = memoize(
+    const lazyGet = memoize(
       <U extends Call<O.AllPaths, T>>(path: U) =>
         (): Call<O.Get<U>, T> => {
           const keys = [
@@ -53,6 +53,29 @@ export const useMobx = <T extends Record<string, unknown>>(
         }
     );
 
+    const set = memoize(
+      <U extends Call<O.AllPaths, T>, G extends Call<O.Get<U>, T>>(
+        path: U,
+        map: (state: G, value: G) => G = identity
+      ) =>
+        (value: G) => {
+          const keys = [
+            ...(path.split('.') as Call<S.Split<'.'>, U> & string[]),
+          ];
+          let target = obs;
+          for (let i = 0; i < keys.length - 1; i++) {
+            if (!Object.prototype.hasOwnProperty.call(target, keys[i])) return; // Exit early if intermediate value is undefined
+            // @ts-expect-error unknown values
+            target = target[keys[i]];
+          }
+
+          const lastKey = keys[keys.length - 1];
+          runInAction(() => {
+            target[lastKey] = map(value, target[lastKey] as G);
+          });
+        }
+    );
+
     for (const key in obs) {
       if (isFunction(obs[key])) {
         const currentFn = obs[key] as <T>(a: T) => void;
@@ -62,7 +85,7 @@ export const useMobx = <T extends Record<string, unknown>>(
         };
       }
     }
-    return Object.assign(obs, { get });
+    return Object.assign(obs, { lazyGet, set });
   })[0];
 
 export const useAutorun = (fn: () => void) =>

@@ -4,19 +4,17 @@ import { Slider } from 'common/components/Slider';
 import { TextField } from 'common/components/TextField';
 
 interface InputSliderProps extends DefaultProps {
-  readonly color: string;
   readonly getValue: () => number;
   readonly label: string;
   readonly onChange: (value: number) => void;
 }
 
 const InputSliderBase: React.FC<InputSliderProps> = observer(
-  ({ getValue, className, onChange, color, label }) => {
+  ({ getValue, className, onChange, label }) => {
     return (
       <span className={className}>
         <Slider
           aria-label={label}
-          color={color}
           getValue={getValue}
           max={255}
           onChange={onChange}

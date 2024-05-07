@@ -31,19 +31,19 @@ const SliderBase = observer(<T extends number>(props: Props<T>) => {
 
 export const Slider = styled(SliderBase)`
   /* color: ${(props) => props.color ?? '#52af77'}; */
-
+  color: inherit;
   height: 8px;
   margin: 0 0.5em;
   & .MuiSlider-valueLabel {
     /* background-color: ${(props) => props.color ?? '#52af77'}; */
   }
   & .MuiSlider-track {
-    background-image: linear-gradient(to right, #ffd27f, #ffffff 50%, #9abad9);
+    /* background-image: linear-gradient(to right, #ffd27f, #ffffff 50%, #9abad9); */
     background-size: auto;
     border: none;
   }
   & .MuiSlider-rail {
-    background-image: linear-gradient(to right, #ffd27f, #ffffff 50%, #9abad9);
+    /* background-image: linear-gradient(to right, #ffd27f, #ffffff 50%, #9abad9); */
   }
   & .MuiSlider-thumb {
     background-color: #fff;

@@ -14,10 +14,35 @@ RUN apt-get update \
 RUN apt-get update \
     && apt-get install -y xdg-utils alsa-utils vulkan-tools mesa-vulkan-drivers upower xvfb fonts-recommended --no-install-recommends
 
+# configure tmp directory
 RUN mkdir -p /tmp/runtime-vscode \
     && chown vscode:vscode /tmp/runtime-vscode \
     && chmod 700 /tmp/runtime-vscode \
     && usermod -a -G audio,video vscode
+
+# Install curl and other necessary build tools
+RUN apt-get update && apt-get install -y curl gnupg build-essential
+
+# Install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -  # Replace '18.x' with the version you need
+RUN apt-get install -y nodejs
+
+# Install Yarn
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor -o /usr/share/keyrings/yarnkey.gpg
+RUN echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+RUN apt-get update && apt-get install -y yarn
+
+# Build React DevTools from source (fetches build artifacts from ci)
+RUN git clone https://github.com/facebook/react.git /tmp/react \
+    && cd /tmp/react \
+    && yarn install \
+    && cd ./scripts/release \
+    && yarn install \
+    && node ./download-experimental-build.js --commit $(git rev-parse main) \
+    && cd ./../../packages/react-devtools-extensions \
+    && yarn build:chrome \
+    && cp -r ./chrome/build/ /tmp/react-devtools-extensions \
+    && rm -rf /tmp/react
 
 # Add node binaries to PATH
 ENV PATH=./node_modules/.bin:$PATH
