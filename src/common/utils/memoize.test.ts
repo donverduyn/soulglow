@@ -15,4 +15,17 @@ describe('memoize', () => {
     // Assert
     expect(first).toStrictEqual(second);
   });
+  it('should memoize the result of a promise', async () => {
+    expect.hasAssertions();
+
+    const memoizedFn = memoize(async (obj: Record<string, unknown>) =>
+      Promise.resolve(obj)
+    );
+
+    const first = await memoizedFn({ foo: 'bar' });
+    const second = await memoizedFn({ foo: 'bar' });
+
+    // Assert
+    expect(first).toStrictEqual(second);
+  });
 });

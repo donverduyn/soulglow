@@ -76,7 +76,6 @@
     "http-server": "^14.1.1",
     "msw": "^1.3.3",
     "msw-trpc": "^1.3.4",
-    "open": "^10.1.0",
     "prettier": "^3.2.5",
     "puppeteer": "^22.7.1",
     "puppeteer-core": "^22.7.1",

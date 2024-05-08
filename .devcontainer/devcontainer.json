@@ -29,12 +29,17 @@
 	],
 	"mounts": [
 		"source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
-		"source=/run/user/1000/bus,target=/run/user/1000/bus,type=bind,consistency=cached"
+		"source=/run/user/1000/bus,target=/run/user/1000/bus,type=bind,consistency=cached",
+        "source=${env:HOME}/.local/share/fonts,target=/home/vscode/.local/share/fonts,type=bind,consistency=cached"
 	],
 	"runArgs": ["--device=/dev/dri:/dev/dri", "--device=/dev/snd"],
 	"postCreateCommand": "yarn install",
 	"postStartCommand": {
-		"xvfb": "Xvfb :99 -screen 0 1024x768x16 -ac >/dev/null 2>&1 &",
+		// If we consider cross-platform we should run dbus in the container
+		// and create mappings for windows and mac by investigating what is communicated
+		// over the bind mounted dbus right now.
+		// fonts should also be mounted differently for windows and mac
+		// In terms of x11 we should investigate how to support (xquartz, x410, vcxsrv, etc.)
 		// "dbus": "dbus-daemon --session --address=unix:path=/run/user/1000/bus >/dev/null 2>&1 &"
 	},
 	"initializeCommand": [
@@ -52,11 +57,8 @@
 	"containerEnv": {
 		"ESLINT_USE_FLAT_CONFIG": "false",
 		"EDITOR": "code",
-		"DISPLAY": ":1",
+		"DISPLAY": "${localEnv:DISPLAY}",
 		"DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
-		// two problems right now with XDG_RUNTIME_DIR set in the container
-		// vite does not do xdg-open (which works) with --open
-		// __open-in-editor links do not resolve when accessed from host
 		"XDG_RUNTIME_DIR": "/tmp/runtime-vscode",
 		"PUPPETEER_CACHE_DIR": "${containerWorkspaceFolder}/node_modules/puppeteer/.local-chromium"
 	},

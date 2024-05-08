@@ -1,20 +1,35 @@
-//
-export const memoize = <T>(func: T): T => {
-  const cache: Map<string, T> = new Map();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Func<T> = (...args: any[]) => T;
 
-  // @ts-expect-error not equal to T
+export const memoize = <T>(
+  func: Func<T | Promise<T>>
+): Func<T | Promise<T>> => {
+  const cache: Map<string, unknown> = new Map();
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (...args: any[]): T => {
+  const memoizedFunction = (...args: any[]) => {
     const key: string = JSON.stringify(args);
-
     if (cache.has(key)) {
-      return cache.get(key)!;
+      return cache.get(key);
     }
 
-    // @ts-expect-error not callable
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const result = func(...args) as T;
-    cache.set(key, result);
-    return result;
+    const result = func(...args);
+    if (result instanceof Promise) {
+      return result
+        .then((resolvedResult) => {
+          cache.set(key, resolvedResult);
+          return resolvedResult;
+        })
+        .catch((error: unknown) => {
+          cache.delete(key);
+          throw error;
+        });
+    } else {
+      cache.set(key, result);
+      return result;
+    }
   };
+
+  return memoizedFunction as Func<T | Promise<T>>;
 };

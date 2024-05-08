@@ -213,9 +213,9 @@ interface DownloadData {
 }
 
 const oneYearAgo = dayjs().subtract(1, 'year').format('YYYY-MM-DD');
-const oneYearAndSevenDaysAgo = dayjs()
+const oneYearAndOneMonthAgo = dayjs()
   .subtract(1, 'year')
-  .subtract(7, 'days')
+  .subtract(1, 'month')
   .format('YYYY-MM-DD');
 
 // Read and parse the package.json to get dependencies
@@ -226,8 +226,8 @@ const getDependencies = (path: string) => {
   return merge(packageJson.dependencies!, packageJson.devDependencies!);
 };
 
-const lastWeek = `last-week`;
-const oneYearAgoLastWeek = `${oneYearAndSevenDaysAgo}:${oneYearAgo}`;
+const lastMonth = `last-month`;
+const oneYearAgoLastWeek = `${oneYearAndOneMonthAgo}:${oneYearAgo}`;
 
 // Fetch download data from npm for a given package
 const fetchDownloads = async (packageName: string, period: string) => {
@@ -257,7 +257,7 @@ async function showDownloads() {
   // );
 
   for (const dep in dependencies) {
-    const lastWeekData = await fetchDownloads(dep, lastWeek);
+    const lastWeekData = await fetchDownloads(dep, lastMonth);
     const oneYearAgoData = await fetchDownloads(dep, oneYearAgoLastWeek);
 
     if (lastWeekData && oneYearAgoData) {

@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { AppRouter } from 'server/server';
+import type { AppRouter } from 'server/server';
 import { createMockServer } from 'test/utils/mock-server';
 import { useTRPC } from './useTRPC';
 

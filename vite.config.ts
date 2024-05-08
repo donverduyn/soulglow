@@ -2,11 +2,12 @@ import { execSync } from 'child_process';
 import react from '@vitejs/plugin-react-swc';
 import dayjs from 'dayjs';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { Plugin } from 'vite';
 import { checker } from 'vite-plugin-checker';
 import inspect from 'vite-plugin-inspect';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
-import { createBrowser } from './test/launch';
+import { createBrowser } from './scripts/browser';
 
 const noCacheHeaders = {
   'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -19,6 +20,39 @@ export const getHostIp = () => {
     .toString()
     .trim();
   return hostip;
+};
+
+const pluginPuppeteer = async (mode: string): Promise<Plugin> => {
+  const browser = await createBrowser({ devtools: mode === 'development' });
+  let launched = false;
+
+  return {
+    configureServer(server) {
+      const openPage = async () => {
+        const a = server.httpServer?.address();
+        const port = (typeof a === 'string' ? a : a?.port) ?? '4173';
+        const postfix = mode === 'test' ? '/__vitest__/#/' : '';
+        const url = `http://localhost:${port.toString()}${postfix}`;
+
+        if (!launched) {
+          const [firstPage] = await browser.pages();
+          await firstPage.goto(url);
+          launched = true;
+        }
+      };
+      server.httpServer?.on('listening', () => {
+        void openPage();
+      });
+      server.httpServer?.on('close', () => {
+        void browser.close();
+      });
+      browser.on('disconnected', () => {
+        void server.close();
+        process.exit(0);
+      });
+    },
+    name: 'puppeteer',
+  };
 };
 
 // https://vitejs.dev/config/
@@ -41,36 +75,8 @@ export default defineConfig(({ mode }) => ({
   esbuild: {
     drop: ['console', 'debugger'],
   },
-
   plugins: [
-    mode !== 'production' &&
-      (async () => {
-        const browser = await createBrowser();
-        let launched = false;
-        return {
-          configureServer(server) {
-            server.httpServer?.on('listening', () => {
-              const a = server.httpServer?.address();
-              const port = (typeof a === 'string' ? a : a?.port) ?? '4173';
-              const postfix = mode === 'test' ? '/__vitest__/#/' : '';
-              const goto = async () => {
-                if (!launched) {
-                  const [firstPage] = await browser.pages();
-                  await firstPage.goto(
-                    `http://localhost:${port.toString()}${postfix}`
-                  );
-                  launched = true;
-                }
-              };
-              void goto();
-            });
-            server.httpServer?.on('close', () => {
-              void browser.close();
-            });
-          },
-          name: 'custom-server-plugin',
-        };
-      })(),
+    mode !== 'production' && pluginPuppeteer(mode),
     tsconfigPaths(),
     react({
       jsxImportSource: '@emotion/react',

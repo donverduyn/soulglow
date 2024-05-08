@@ -10,13 +10,11 @@ export const useTRPC = memoize(({ url }: HTTPBatchLinkOptions) =>
   createTRPCProxyClient<AppRouter>({
     links: [
       httpBatchLink({
-        // You can pass any HTTP headers you wish here
         headers() {
           return {
             authorization: 'TOKEN', //getAuthCookie(),
           };
         },
-
         url: url as string,
       }),
     ],
