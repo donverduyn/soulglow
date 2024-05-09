@@ -8,17 +8,19 @@ module.exports = {
   ],
   overrides: [
     {
-      env: { node: true },
-      // config files are assumed to be running in node
       files: ['./**/*.js', './**/*.cjs', './**/*.mjs'],
+      // config files are assumed to be running in node
+      // eslint-disable-next-line sort-keys-fix/sort-keys-fix
+      env: { node: true },
     },
     // browser environment
     {
-      excludedFiles: ['./**/*.test.ts?(x)'],
-      files: ['./src/**/*.ts', './**/*.tsx'],
+      excludedFiles: ['*.test.ts', '*.test.tsx'],
+      files: ['./src/**/*.ts', './src/**/*.tsx'],
+      // eslint-disable-next-line sort-keys-fix/sort-keys-fix
+      env: { browser: true },
       parserOptions: {
         ecmaVersion: 'latest',
-        // tsconfig.node.json only applies for vite.config.ts
         project: ['./tsconfig.json'],
         sourceType: 'module',
         tsconfigRootDir: __dirname,
@@ -36,14 +38,17 @@ module.exports = {
     {
       files: [
         'vite.config.ts',
-        './**/*.test.ts?(x)',
+        './src/**/*.test.ts?(x)',
         './test/**/*.ts',
         './scripts/**/*.ts',
+        './server/**/*.ts',
       ],
+      // eslint-disable-next-line sort-keys-fix/sort-keys-fix
+      env: { node: true },
       parserOptions: {
         ecmaVersion: 'latest',
-        // tsconfig.node.json only applies for vite.config.ts
-        project: ['./tsconfig.json', './tsconfig.node.json'],
+        // include tsconfig.json for importing types from server
+        project: ['tsconfig.json', './tsconfig.node.json'],
         sourceType: 'module',
         tsconfigRootDir: __dirname,
       },
@@ -51,18 +56,19 @@ module.exports = {
         'import/resolver': {
           typescript: {
             alwaysTryTypes: true,
-            project: ['./tsconfig.json', './tsconfig.node.json'],
+            project: ['tsconfig.json', './tsconfig.node.json'],
           },
         },
       },
     },
     {
+      // all TypeScript files
+      files: ['*.ts', '*.tsx'],
+      // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       extends: [
         'plugin:@typescript-eslint/strict-type-checked',
         'plugin:import/typescript',
       ],
-      // all TypeScript files
-      files: ['*.ts', '*.tsx'],
       plugins: ['@typescript-eslint', 'typescript-sort-keys'],
       rules: {
         '@typescript-eslint/no-confusing-void-expression': [
@@ -94,37 +100,35 @@ module.exports = {
         '@typescript-eslint/no-useless-template-literals': 'warn',
         '@typescript-eslint/unbound-method': 'off',
         'prefer-const': 'warn',
+        'prefer-spread': 'off',
         'typescript-sort-keys/interface': 'warn',
         'typescript-sort-keys/string-enum': 'warn',
       },
     },
     {
-      env: { browser: true },
-      // all TypeScript files in src
-      files: ['./src/**/*.ts', './src/**/*.tsx'],
-    },
-    {
-      extends: ['plugin:vitest/legacy-all'],
       // all test files
       files: [
-        './tests/**/*.ts',
-        './tests/**/*.tsx',
+        './test/**/*.ts',
+        './test/**/*.tsx',
         './src/**/*.test.ts',
         './src/**/*.test.tsx',
       ],
+      // eslint-disable-next-line sort-keys-fix/sort-keys-fix
+      extends: ['plugin:vitest/legacy-all'],
       rules: {
         'vitest/max-nested-describe': ['error', { max: 3 }],
         'vitest/no-hooks': 'off',
       },
     },
     {
+      files: ['*.tsx'],
+      // all React files
+      // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       extends: [
         'plugin:react/jsx-runtime',
         'plugin:react/all',
         'plugin:react-hooks/recommended',
       ],
-      // all React files
-      files: ['./src/**/*.tsx'],
       plugins: [
         'react',
         'react-hooks',

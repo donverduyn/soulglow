@@ -26,8 +26,13 @@
     "baseUrl": ".",
     "paths": {
       "*": ["src/*"],
-      "test/*": ["test/*"]
+      // useTRPC.ts uses types from server alias
+      "server/*": ["server/*"],
+      // somehow needed for useTRPC.test.ts
+      // seems that it relies on tsconfig.json, not tsconfig.node.json
+      "test/*": ["test/*"],
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["*.test.ts", "*.test.tsx"],
 }

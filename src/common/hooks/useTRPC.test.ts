@@ -24,9 +24,11 @@ describe('tRPC client', () => {
     expect.hasAssertions();
 
     const { result } = renderHook(() => useTRPC({ url }));
-    const userByIdQuery = result.current.userById.query;
+    const client = result.current;
 
-    const response = await userByIdQuery(user.id);
+    const response = await client.userById.query(user.id);
     expect(response?.name).toBe(user.name);
   });
 });
+
+export const foo = 'bar';

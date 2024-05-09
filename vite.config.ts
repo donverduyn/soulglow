@@ -137,7 +137,7 @@ export default defineConfig(({ mode }) => ({
   preview: {
     headers: noCacheHeaders,
     host: '0.0.0.0',
-    open: false,
+    open: true,
     port: 4173,
     proxy: {
       '/api': {

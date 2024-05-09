@@ -1,4 +1,6 @@
 import { execSync } from 'child_process';
+import { createServer } from 'http-server';
+import { Browser, Page } from 'puppeteer';
 import puppeteer, { PuppeteerExtraPlugin } from 'puppeteer-extra';
 import puppeteerPrefs from 'puppeteer-extra-plugin-user-preferences';
 
@@ -18,7 +20,7 @@ const getAlsaOutputDevice = (): string => {
   return `hw:${result}`;
 };
 
-const launchOptions: Parameters<(typeof puppeteer)['launch']>[0] = {
+const options: Parameters<(typeof puppeteer)['launch']>[0] = {
   args: [
     `--alsa-output-device=${getAlsaOutputDevice()}`,
     '--disable-gpu',
@@ -53,5 +55,48 @@ export const createBrowser = (
   overrides: Parameters<(typeof puppeteer)['launch']>[0] = {}
 ) => {
   puppeteer.use(preferences({ userPrefs }));
-  return puppeteer.launch(Object.assign({}, launchOptions, overrides));
+  const browser = puppeteer.launch(Object.assign({}, options, overrides));
+  return browser;
+};
+
+export const createBrowser2 = async (
+  overrides: Parameters<(typeof puppeteer)['launch']>[0] = {},
+  operateFn: (page: Page, browser: Browser) => Promise<void>
+) => {
+  puppeteer.use(preferences({ userPrefs }));
+  const browser = await puppeteer.launch(Object.assign({}, options, overrides));
+  const [page] = await browser.pages();
+  await page.bringToFront();
+
+  await operateFn(page, browser);
+  await page.exposeFunction('closeBrowser', () => {
+    void browser.close();
+  });
+
+  await page.evaluateHandle(() => {
+    document.addEventListener('keydown', (event) => {
+      console.log(`Key pressed: ${event.key}`);
+      if (event.key === 'Escape') {
+        // @ts-expect-error closeBrowser is created above
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        void window.closeBrowser();
+      }
+    });
+  });
+
+  return browser;
+};
+
+export const viewStatic = (dir: string = './dist', port: number = 8080) => {
+  const server = createServer({ cache: -1, root: dir });
+
+  server.listen(port, 'localhost', () => {
+    void createBrowser2({ devtools: false }, async (page, browser) => {
+      await page.goto(`http://localhost:${port.toString()}`);
+      browser.on('disconnected', () => {
+        void server.close();
+        process.exit(0);
+      });
+    });
+  });
 };
