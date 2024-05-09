@@ -28,8 +28,6 @@ const SelectBase = observer(<TValue,>(props: SelectProps<TValue>) => {
     (event: SelectChangeEvent<TValue>) => void
   >((e) => onChange(e.target.value as TValue), [onChange]);
 
-  // const [open, setOpen] = React.useState(false);
-
   return (
     <FormControl
       className={className!}
@@ -45,7 +43,11 @@ const SelectBase = observer(<TValue,>(props: SelectProps<TValue>) => {
           slotProps: {
             paper: {
               elevation: 16,
-              sx: { borderTopLeftRadius: 0, borderTopRightRadius: 0 },
+              sx: {
+                borderTopLeftRadius: 0,
+                borderTopRightRadius: 0,
+                transform: 'translate(0, -0.5px) !important',
+              },
             },
           },
         }}

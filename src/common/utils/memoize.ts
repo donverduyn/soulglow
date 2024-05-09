@@ -24,5 +24,7 @@ export const memoize = <T extends (a: any) => R | Promise<R>, R>(fn: T) => {
       return result;
     }
   };
+  // Parameters<T> widens the parameter,
+  // therefore we need to cast to T
   return memoizedFunction as T;
 };

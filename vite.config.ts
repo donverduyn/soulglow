@@ -2,7 +2,7 @@ import { execSync } from 'child_process';
 import react from '@vitejs/plugin-react-swc';
 import dayjs from 'dayjs';
 import { visualizer } from 'rollup-plugin-visualizer';
-import { Plugin } from 'vite';
+import { Plugin, ViteDevServer } from 'vite';
 import { checker } from 'vite-plugin-checker';
 import inspect from 'vite-plugin-inspect';
 import tsconfigPaths from 'vite-tsconfig-paths';
@@ -22,33 +22,34 @@ export const getHostIp = () => {
   return hostip;
 };
 
-const pluginPuppeteer = async (mode: string): Promise<Plugin> => {
-  const browser = await createBrowser({ devtools: mode === 'development' });
+const pluginPuppeteer = (mode: string): Plugin => {
   let launched = false;
 
-  return {
-    configureServer(server) {
-      const openPage = async () => {
+  const openPage = (server: ViteDevServer) => {
+    void createBrowser(
+      { devtools: mode === 'development' },
+      async (page, browser) => {
         const a = server.httpServer?.address();
         const port = (typeof a === 'string' ? a : a?.port) ?? '4173';
         const postfix = mode === 'test' ? '/__vitest__/#/' : '';
         const url = `http://localhost:${port.toString()}${postfix}`;
 
-        if (!launched) {
-          const [firstPage] = await browser.pages();
-          await firstPage.goto(url);
-          launched = true;
-        }
-      };
+        await page.goto(url);
+        browser.on('disconnected', () => {
+          void server.close();
+        });
+        server.httpServer?.on('close', () => {
+          void browser.close();
+          process.exit(0);
+        });
+      }
+    );
+  };
+  return {
+    configureServer(server) {
       server.httpServer?.on('listening', () => {
-        void openPage();
-      });
-      server.httpServer?.on('close', () => {
-        void browser.close();
-      });
-      browser.on('disconnected', () => {
-        void server.close();
-        process.exit(0);
+        !launched && openPage(server);
+        launched = true;
       });
     },
     name: 'puppeteer',

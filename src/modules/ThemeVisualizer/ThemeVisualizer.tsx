@@ -1,4 +1,4 @@
-import { Theme, alpha, createTheme, styled } from '@mui/material/styles';
+import { Theme, createTheme, styled } from '@mui/material/styles';
 import { isNumber } from 'remeda';
 import { Typography } from 'common/components/Typography';
 
@@ -56,10 +56,7 @@ const ThemeVisualizerBase: React.FC<ThemeVisualizerProps> = ({
                     className='color'
                     style={{
                       backgroundColor: value as string,
-                      color: alpha(
-                        theme.palette.getContrastText(value as string),
-                        0.7
-                      ),
+                      color: theme.palette.getContrastText(value as string),
                     }}
                   >
                     <Typography variant='body2'>{key}</Typography>
