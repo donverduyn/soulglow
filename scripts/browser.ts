@@ -4,11 +4,19 @@ import { Browser, Page } from 'puppeteer';
 import puppeteer, { PuppeteerExtraPlugin } from 'puppeteer-extra';
 import puppeteerPrefs from 'puppeteer-extra-plugin-user-preferences';
 
+const safeExecSync = (command: string) => {
+  try {
+    return execSync(command);
+  } catch (error) {
+    return '';
+  }
+};
+
 // this only works on linux inside the dev container for now
 // because we bind mount /dev/snd and rely on alsa-utils
 const getAlsaOutputDevice = (): string => {
   const command = 'aplay -l';
-  const list = execSync(command);
+  const list = safeExecSync(command);
   const result = list
     .toString()
     .split('\n')
