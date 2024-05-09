@@ -68,10 +68,9 @@ export const lightTheme = extendTheme(commonTheme, {
       // hover: '#000000',
       hoverOpacity: 0.08,
       selected: '#000000',
-      selectedOpacity: 1,
+      selectedOpacity: 0.16,
     },
     background: { default: '#f5f5f5', paper: '#ffffff' },
-    common: { black: '#000', white: '#fff' },
     divider: '#333',
     error: commonTheme.palette.augmentColor({
       color: { main: '#ec5d10' },
