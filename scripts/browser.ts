@@ -8,7 +8,7 @@ const safeExecSync = (command: string) => {
   try {
     return execSync(command);
   } catch (error) {
-    return '';
+    return null;
   }
 };
 
@@ -18,13 +18,15 @@ const getAlsaOutputDevice = (): string => {
   const command = 'aplay -l';
   const list = safeExecSync(command);
   const result = list
-    .toString()
-    .split('\n')
-    .filter((line) => line.startsWith('card'))[0]
-    .split(',')
-    .map((line) => line.split(':')[0])
-    .map((line) => line.split(' ').reverse()[0])
-    .join(',');
+    ? list
+        .toString()
+        .split('\n')
+        .filter((line) => line.startsWith('card'))[0]
+        .split(',')
+        .map((line) => line.split(':')[0])
+        .map((line) => line.split(' ').reverse()[0])
+        .join(',')
+    : '0,0';
   return `hw:${result}`;
 };
 
