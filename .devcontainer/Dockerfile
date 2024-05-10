@@ -1,5 +1,20 @@
-# Stage 1: Build stage with Node.js
+# Step 1: Create a Java runtime
+FROM eclipse-temurin:21 as jre-build
+
+# java.base and java.logging are needed to build React
+RUN $JAVA_HOME/bin/jlink \
+         --add-modules java.base,java.logging \
+         --strip-debug \
+         --no-man-pages \
+         --no-header-files \
+         --compress=2 \
+         --output /javaruntime
+
+# Stage 2: Build React DevTools
 FROM node:20 as builder
+ENV JAVA_HOME=/opt/java/openjdk
+ENV PATH "${JAVA_HOME}/bin:${PATH}"
+COPY --from=jre-build /javaruntime $JAVA_HOME
 
 # Install Yarn
 RUN apt-get update && apt-get install -y curl gnupg \
@@ -7,17 +22,15 @@ RUN apt-get update && apt-get install -y curl gnupg \
     && echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
     && apt-get update && apt-get install -y yarn
 
-# Clone and build React DevTools
+# Clone and build
 RUN git clone https://github.com/facebook/react.git /tmp/react \
     && cd /tmp/react \
     && yarn install \
-    && cd ./scripts/release \
-    && yarn install \
-    && node ./download-experimental-build.js --commit $(git rev-parse main) \
-    && cd ./../../packages/react-devtools-extensions \
+    && yarn build-for-devtools \
+    && cd ./packages/react-devtools-extensions \
     && yarn build:chrome
 
-# Stage 2: Setup the final image
+# Stage 3: Setup the final image
 FROM mcr.microsoft.com/devcontainers/base:bullseye
 
 # Install general dependencies and Chrome
@@ -38,5 +51,5 @@ RUN mkdir -p /tmp/runtime-vscode \
 # Copy built React DevTools from the builder stage
 COPY --from=builder /tmp/react/packages/react-devtools-extensions/chrome/build /tmp/react-devtools-extensions
 
-# Configure PATH for potential remaining Node modules
+# Add Node binaries to PATH
 ENV PATH=./node_modules/.bin:$PATH

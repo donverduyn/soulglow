@@ -1,5 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const memoize = <T extends (a: any) => R | Promise<R>, R>(fn: T) => {
+export const memoize = <T extends (...args: any[]) => R | Promise<R>, R>(
+  targetFn: T
+) => {
   const cache: Map<string, R> = new Map();
 
   const memoizedFunction = (...args: Parameters<T>) => {
@@ -8,7 +10,7 @@ export const memoize = <T extends (a: any) => R | Promise<R>, R>(fn: T) => {
       return cache.get(key)!;
     }
 
-    const result = fn.apply(null, args);
+    const result = targetFn.apply(null, args);
     if (result instanceof Promise) {
       return result
         .then((resolvedResult) => {

@@ -10,7 +10,6 @@ const ThemeVisualizerBase: React.FC<ThemeVisualizerProps> = ({
   className,
   theme = createTheme({}),
 }) => {
-  console.log(theme);
   const items = [
     'action',
     'background',

@@ -41,18 +41,19 @@ const commonTheme = createTheme({
       const contrastD = getContrastRatio(bg, blend(bg, darkText, darkAlpha));
       return contrastD <= this.contrastThreshold! ? lightText : darkText;
     },
-    tonalOffset: { dark: 0.1, light: 0.5 },
+    tonalOffset: { dark: 0.3, light: 0.7 },
   },
   shape: { borderRadius: 5 },
   typography: {
     fontFamily: 'Proxima Nova, sans-serif',
-    fontSize: 16,
+    fontSize: 18,
     fontWeightBold: 800,
     fontWeightLight: 500,
     fontWeightMedium: 600,
     fontWeightRegular: 700,
   },
   unstable_strictMode: true,
+
 });
 
 export const lightTheme = extendTheme(commonTheme, {
@@ -82,7 +83,7 @@ export const lightTheme = extendTheme(commonTheme, {
     }),
     mode: 'light',
     primary: commonTheme.palette.augmentColor({
-      color: { main: '#55585b' },
+      color: { main: '#727679' },
       name: 'primary',
     }),
     secondary: commonTheme.palette.augmentColor({
@@ -116,52 +117,50 @@ export const darkTheme = extendTheme(commonTheme, {
     },
   },
   palette: {
-    // action: {
-    //   activatedOpacity: 0.12,
-    //   active: '#ffffff',
-    //   disabled: '#747474',
-    //   disabledBackground: '#747474',
-    //   disabledOpacity: 0.38,
-    //   focus: '#ff0000',
-    //   focusOpacity: 0.12,
-    //   hover: '#ffffff',
-    //   hoverOpacity: 0.08,
-    //   selected: '#ffffff',
-    //   selectedOpacity: 0.16,
-    // },
+    action: {
+      activatedOpacity: 0.12,
+      active: '#ffffff',
+      disabled: '#747474',
+      disabledBackground: '#747474',
+      disabledOpacity: 0.38,
+      focus: '#000000',
+      focusOpacity: 0.12,
+      // hover: '#ffffff',
+      hoverOpacity: 0.08,
+      selected: '#ffffff',
+      selectedOpacity: 0.16,
+    },
     background: { default: '#121212', paper: '#1e1e1e' },
-    common: { black: '#000', white: '#fff' },
+    divider: '#333',
     error: commonTheme.palette.augmentColor({
-      color: { main: '#d3533c' },
+      color: { main: '#ec5d10' },
       name: 'error',
     }),
-    // divider: '#333',
     info: commonTheme.palette.augmentColor({
-      color: { main: '#2594cf' },
+      color: { main: '#1692d5' },
       name: 'info',
     }),
-    // grey: grey,
     mode: 'dark',
     primary: commonTheme.palette.augmentColor({
-      color: { main: '#81878b' },
-      name: 'info',
+      color: { main: '#727679' },
+      name: 'primary',
     }),
     secondary: commonTheme.palette.augmentColor({
-      color: { main: '#cacaca' },
-      name: 'info',
+      color: { main: '#dbdbdb' },
+      name: 'secondary',
     }),
     success: commonTheme.palette.augmentColor({
-      color: { main: '#1bda37' },
-      name: 'info',
+      color: { main: '#00c846' },
+      name: 'success',
     }),
     text: {
       disabled: '#b3b3b3',
       primary: 'rgba(255,255,255,0.87)',
-      secondary: 'rgba(164, 173, 172, 0.87)',
+      secondary: 'rgba(164, 171, 173, 0.87)',
     },
     warning: commonTheme.palette.augmentColor({
-      color: { main: '#ff8400' },
-      name: 'info',
+      color: { main: '#ffd900' },
+      name: 'warning',
     }),
   },
 });

@@ -1,8 +1,7 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, styled } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import LightBulb from 'modules/LightBulb/LightBulb';
-import { ThemeVisualizer } from 'modules/ThemeVisualizer/ThemeVisualizer';
+import { LightBulb } from 'modules/LightBulb/LightBulb';
 import { darkTheme, lightTheme } from './theme';
 
 const AppBase = () => {
@@ -15,7 +14,7 @@ const AppBase = () => {
          
         </header> */}
         <LightBulb />
-        <ThemeVisualizer theme={prefersDarkMode ? darkTheme : lightTheme} />
+        {/* <ThemeVisualizer theme={prefersDarkMode ? darkTheme : lightTheme} /> */}
       </div>
     </ThemeProvider>
   );

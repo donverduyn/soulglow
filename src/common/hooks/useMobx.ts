@@ -1,29 +1,16 @@
 import React, { useState } from 'react';
 import { Call, O, S } from 'hotscript';
-import { AnnotationsMap, observable, autorun, runInAction } from 'mobx';
+import {
+  AnnotationsMap,
+  observable,
+  autorun,
+  runInAction,
+  reaction,
+  IReactionOptions,
+} from 'mobx';
 import { identity, isFunction } from 'remeda';
+import { Simplify } from 'type-fest';
 import { memoize } from 'common/utils/memoize';
-
-// function mergeObservableObject<T extends Record<string, unknown>>(
-//   target: T,
-//   source: Partial<T>
-// ) {
-//   Object.keys(source).forEach((key) => {
-//     const sourceVal = source[key as keyof T];
-//     const targetVal = target[key as keyof T];
-
-//     if (isPlainObject(sourceVal) && isObservableObject(targetVal)) {
-//       mergeObservableObject(
-//         targetVal as T[keyof T] & Record<string, unknown>,
-//         sourceVal as T[keyof T] & Record<string, unknown>
-//       );
-//     } else {
-//       set(target, key, sourceVal);
-//     }
-//   });
-// }
-
-// type SetFunction<T> = (fn: (state: T) => Partial<T>) => void;
 
 export const useMobx = <T extends Record<string, unknown>>(
   initialize: () => T, //(set: SetFunction<T>) => T,
@@ -35,32 +22,35 @@ export const useMobx = <T extends Record<string, unknown>>(
     });
 
     const lazyGet = memoize(
-      <U extends Call<O.AllPaths, T>>(path: U) =>
-        (): Call<O.Get<U>, T> => {
-          const keys = [
-            ...(path.split('.') as Call<S.Split<'.'>, U> & string[]),
-          ];
+      <P extends Call<O.AllPaths, T>, V extends Call<O.Get<P>, T>, R>(
+        path: P,
+        map: (value: V) => R = identity
+      ) => {
+        const keys = [...(path.split('.') as Call<S.Split<'.'>, P> & string[])];
+        return () => {
           let value: unknown = obs;
           for (const key of keys) {
             if (!Object.prototype.hasOwnProperty.call(value, key))
               return undefined as never;
             else {
+              // this doesn't change the observable
               // @ts-expect-error unknown values
               value = value[key];
             }
           }
-          return value as Call<O.Get<U>, T>;
-        }
+          return map(value as V);
+        };
+      }
     );
 
     const set = memoize(
-      <U extends Call<O.AllPaths, T>, G extends Call<O.Get<U>, T>>(
-        path: U,
-        map: (state: G, value: G) => G = identity
+      <P extends Call<O.AllPaths, T>, S extends Call<O.Get<P>, T>, V>(
+        path: P,
+        map: (value: V, state: S) => S = (value) => value as unknown as S
       ) =>
-        (value: G) => {
+        (value: V) => {
           const keys = [
-            ...(path.split('.') as Call<S.Split<'.'>, U> & string[]),
+            ...(path.split('.') as Call<S.Split<'.'>, P> & string[]),
           ];
           let target = obs;
           for (let i = 0; i < keys.length - 1; i++) {
@@ -71,7 +61,7 @@ export const useMobx = <T extends Record<string, unknown>>(
 
           const lastKey = keys[keys.length - 1];
           runInAction(() => {
-            target[lastKey] = map(value, target[lastKey] as G);
+            target[lastKey] = map(value, target[lastKey] as S);
           });
         }
     );
@@ -85,7 +75,10 @@ export const useMobx = <T extends Record<string, unknown>>(
         };
       }
     }
-    return Object.assign(obs, { lazyGet, set });
+    return Object.assign(obs, {
+      lazyGet,
+      set,
+    });
   })[0];
 
 export const useAutorun = (fn: () => void) =>
@@ -100,7 +93,10 @@ export const useAutorun = (fn: () => void) =>
     []
   );
 
-// export const useAction = (fn: () => void) =>
-//   React.useEffect(() => {
-//     runInAction(fn);
-//   }, []);
+export const useReaction = <T>(
+  fn: () => T,
+  effect: (value: T, prev: T) => void,
+  options: IReactionOptions<T, false> = { delay: 100 }
+) => {
+  React.useEffect(() => reaction(fn, effect, options), []);
+};
