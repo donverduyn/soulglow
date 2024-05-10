@@ -7,7 +7,7 @@ import { observer } from 'mobx-react-lite';
 import { Select } from 'common/components/Select';
 import { Slider } from 'common/components/Slider';
 import { TextField } from 'common/components/TextField';
-import { useAutorun, useMobx, useReaction } from 'common/hooks/useMobx';
+import { useAutorun, useMobx } from 'common/hooks/useMobx';
 import { LightMode, MODE_ITEMS } from './components/constants';
 import { OnOffSwitch } from './components/OnOffSwitch';
 
@@ -76,14 +76,7 @@ const colorInputs = [
 /* eslint-enable sort-keys-fix/sort-keys-fix */
 
 //
-const handleSubmit = async ({
-  brightness,
-  bulb_mode,
-  color,
-  color_temp,
-  saturation,
-  state,
-}: LightBulbState) => {
+const handleSubmit = async ({ state }: LightBulbState) => {
   try {
     const response = await fetch('/api/gateways/desk-light?blockOnQueue=true', {
       body: JSON.stringify({
@@ -117,13 +110,6 @@ const LightBulbBase: React.FC<LightBulbProps> = observer(({ className }) => {
     console.log('LightBulb:', toJS(bulb));
     void handleSubmit(bulb);
   });
-
-  useReaction(
-    () => bulb.bulb_mode,
-    (current, prev) => {
-      console.log('Reaction:', current, prev);
-    }
-  );
 
   return (
     <section className={className}>

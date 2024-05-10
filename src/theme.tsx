@@ -53,7 +53,6 @@ const commonTheme = createTheme({
     fontWeightRegular: 700,
   },
   unstable_strictMode: true,
-
 });
 
 export const lightTheme = extendTheme(commonTheme, {
