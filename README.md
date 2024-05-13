@@ -4,20 +4,26 @@ This Project provides a modern UI to interact with the Rest API provided by (htt
 
 # Getting started
 
-To install dependencies run:
-
-```
-yarn install
-```
+To get started, make sure you are on a linux machine/vm and have docker installed. Pull the repository and navigate to the root directory of the project. Open in dev container and grab a coffee.
 
 To start the development server run:
 
 ```
 yarn dev
 ```
+
+# Testing
+
+To run the test suite with vitest, run:
+
+```
+yarn test
+```
+An browser window will open and display the test results.
+
 # Editing files
 
-To edit files in VScode that are opened in preview mode, press `Ctrl + Shift + V` 
+To edit files in VScode that are opened in preview mode, press `Ctrl + Shift + V`. Don't click on the page before pressing the shortcut.
 
 # Patches
 
