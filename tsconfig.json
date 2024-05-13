@@ -20,7 +20,6 @@
 
     /* Linting */
     "strict": true,
-
     /* Paths */
     "typeRoots": ["./node_modules/@types", "./src/types"],
     "baseUrl": ".",
@@ -31,8 +30,16 @@
       // somehow needed for useTRPC.test.ts
       // seems that it relies on tsconfig.json, not tsconfig.node.json
       "test/*": ["test/*"],
-    }
+    },
+    "plugins": [
+      {
+        "name": "ts-plugin-sort-import-suggestions",
+        "moveUpPatterns": [],
+        "moveDownPatterns": ["@"],
+      }
+    ],
   },
-  "include": ["src"],
+  // vite.config.ts should not be included here
+  "include": ["src", "vite.config.ts"],
   "exclude": ["*.test.ts", "*.test.tsx"],
 }

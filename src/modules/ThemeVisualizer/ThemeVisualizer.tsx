@@ -14,11 +14,9 @@ const ThemeVisualizerBase: React.FC<ThemeVisualizerProps> = ({
     'action',
     'background',
     'common',
-    // 'divider',
     'error',
     'primary',
     'secondary',
-    // 'text',
     'info',
     'success',
     'warning',
@@ -76,25 +74,28 @@ export const ThemeVisualizer = styled(ThemeVisualizerBase, {
 })`
   background-color: ${({ theme }) => theme.palette.background.paper};
   padding: 2rem;
+
   & .title {
     margin-bottom: 1rem;
   }
+
   & .item {
     display: flex;
     flex-wrap: wrap;
-    // gap: 1rem;
+    /* gap: 1rem; */
     margin-bottom: 1rem;
 
     & .name {
-      flex-basis: 7em;
       align-self: center;
+      flex-basis: 7em;
       text-align: left;
     }
   }
+
   & .color {
     display: flex;
     flex: 1;
     flex-direction: column;
-    // gap: 0.5rem;
+    /* gap: 0.5rem; */
   }
 `;

@@ -2,6 +2,7 @@ import { execSync } from 'child_process';
 import { createServer } from 'http-server';
 import { Browser, Page } from 'puppeteer';
 import puppeteer, { PuppeteerExtraPlugin } from 'puppeteer-extra';
+// @ts-expect-error no @types package
 import puppeteerPrefs from 'puppeteer-extra-plugin-user-preferences';
 
 const safeExecSync = (command: string) => {

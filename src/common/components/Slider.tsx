@@ -4,51 +4,52 @@ import { styled } from '@mui/material/styles';
 import { observer } from 'mobx-react-lite';
 
 interface Props<T> extends DefaultProps {
-  readonly color?: string;
   readonly getValue: () => T;
   readonly max?: number;
   readonly min?: number;
   readonly onChange: (value: T) => void;
-  readonly style?: React.CSSProperties;
   readonly track?: false | 'normal';
 }
 
-const SliderBase = observer(<T extends number>(props: Props<T>) => {
+export const SliderBase = <T extends number>(props: Props<T>) => {
   const { className, min, max, track, getValue, onChange } = props;
+  const slots = React.useRef({ thumb: ThumbComponent });
+
+  const handleChange = React.useCallback<
+    (e: Event, v: number | number[]) => void
+  >((_, v) => onChange(v as T), [onChange]);
 
   return (
     <MuiSlider
       className={className!}
       max={max ?? 255}
       min={min ?? 0}
-      onChange={(_, value) => onChange(value as T)}
-      slots={{ thumb: ThumbComponent }}
-      style={{ ['--test' as string]: 'red' }}
+      onChange={handleChange}
+      slots={slots.current}
       track={track ?? 'normal'}
       value={getValue()}
       valueLabelDisplay='off'
     />
   );
-});
+};
 
-export const Slider = styled(SliderBase)`
+export const Slider = styled(observer(SliderBase))`
   --slider-color: var(--color, inherit);
+
   color: var(--slider-color);
   height: 8px;
   margin: 0 0.5em;
+
   & .MuiSlider-track {
     border: 0;
   }
+
   & .MuiSlider-thumb {
     background-color: #fff;
-    border: 2px solid currentColor;
-    /* box-shadow: 0px 0px 0px 0px color-mix(in srgb, var(--slider-color) 16%, transparent); */
-    &:hover,
-    &:focus {
-      /* box-shadow: 0px 0px 0px 8px color-mix(in srgb, var(--slider-color) 16%, transparent); */
-    }
+    border: 2px solid currentcolor;
+
     & .bar {
-      background-color: currentColor;
+      background-color: currentcolor;
       height: 8px;
       margin-left: 1px;
       margin-right: 1px;
@@ -59,6 +60,7 @@ export const Slider = styled(SliderBase)`
 
 interface ThumbComponentProps extends React.HTMLAttributes<EventTarget> {}
 
+// eslint-disable-next-line react/no-multi-comp
 const ThumbComponent: React.FC<ThumbComponentProps> = ({
   children,
   ...other

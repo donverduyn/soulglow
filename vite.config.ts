@@ -1,6 +1,10 @@
 import { execSync } from 'child_process';
 import react from '@vitejs/plugin-react-swc';
+import autoprefixer from 'autoprefixer';
 import dayjs from 'dayjs';
+import type { Parser } from 'postcss';
+// @ts-expect-error - no types
+import postcssStyledSyntax from 'postcss-styled-syntax';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { Plugin, ViteDevServer } from 'vite';
 import { checker } from 'vite-plugin-checker';
@@ -73,6 +77,14 @@ export default defineConfig(({ mode }) => ({
     },
     sourcemap: false,
   },
+  css: {
+    devSourcemap: true,
+    postcss: {
+      parser: postcssStyledSyntax as Parser,
+      // extends: ['stylelint-config-standard', 'stylelint-config-recommended'],
+      plugins: [autoprefixer()],
+    },
+  },
   esbuild: {
     drop: ['console', 'debugger'],
   },
@@ -99,6 +111,13 @@ export default defineConfig(({ mode }) => ({
         panelStyle: 'height: 100%; background-color: #232125;',
       },
       root: process.cwd(),
+      stylelint:
+        mode !== 'test'
+          ? {
+              dev: { logLevel: ['error', 'warning'] },
+              lintCommand: 'stylelint "src/**/*.css" "src/**/*.tsx"',
+            }
+          : false,
       terminal: false,
       typescript: {
         tsconfigPath: './tsconfig.json',

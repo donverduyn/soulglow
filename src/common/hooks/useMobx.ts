@@ -12,7 +12,8 @@ import {
 import { identity, isFunction } from 'remeda';
 import { memoize } from 'common/utils/memoize';
 
-export const useMobx = <T extends Record<string, unknown>>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useMobx = <T extends Record<string, any>>(
   initialize: () => T,
   annotations?: AnnotationsMap<T, never>
 ) =>
@@ -21,10 +22,14 @@ export const useMobx = <T extends Record<string, unknown>>(
       autoBind: true,
     });
 
+    // split a dot separated path into its constituents,
+    // and type it as a tuple of literals.
     const getKeys = <TPath extends string>(path: TPath) => [
       ...(path.split('.') as Call<S.Split<'.'>, typeof path> & string[]),
     ];
 
+    // given an observable object and array of path constituents,
+    // get the parent of the target.
     const getParent = <TParent>(
       observable: Record<string, unknown>,
       keys: string[]
@@ -37,6 +42,7 @@ export const useMobx = <T extends Record<string, unknown>>(
         // @ts-expect-error target changes so is unknown
         target = target[keys[i]];
       }
+
       // target contains the parent reference
       return target as TParent;
     };
@@ -51,9 +57,13 @@ export const useMobx = <T extends Record<string, unknown>>(
     ) => () => R;
 
     const lazyGet: LazyGetFn<T> = memoize((path, map = identity) => {
+      // by using map from the closure, V8 will only preparse it on re-renders
       const keys = getKeys(path);
       const parent = getParent<Parameters<typeof map>[0]>(obs, keys);
       const key = keys[keys.length - 1];
+      // Note how we keep the parent reference in the closure that is kept alive,
+      // until the component that calls useMobx unmounts.
+      // This is important, to avoid traversing every re-render
       return () => map(parent[key] as Call<O.Get<typeof path>, T>);
     });
 
@@ -84,7 +94,7 @@ export const useMobx = <T extends Record<string, unknown>>(
       }
     );
 
-    // This is the autobinding part we don't need anymore. Hurray!
+    // This is the autobinding part we don't need anymore.
     for (const key in obs) {
       if (isFunction(obs[key])) {
         const currentFn = obs[key] as <T>(a: T) => void;

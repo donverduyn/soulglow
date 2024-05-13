@@ -20,7 +20,7 @@ interface SelectProps<TValue> extends DefaultProps {
 
 // type Test = Parameters<typeof SelectBase>[0];
 
-const SelectBase = observer(<TValue,>(props: SelectProps<TValue>) => {
+const SelectBase = <TValue,>(props: SelectProps<TValue>) => {
   const { className, label, getValue, onChange, items, renderItem } = props;
   const safeRender = renderItem ?? renderDefaultSelectItem;
   //
@@ -60,7 +60,7 @@ const SelectBase = observer(<TValue,>(props: SelectProps<TValue>) => {
       /> */}
     </FormControl>
   );
-});
+};
 
 const renderDefaultSelectItem = <T,>(item: Item<T>) => {
   return (
@@ -73,7 +73,7 @@ const renderDefaultSelectItem = <T,>(item: Item<T>) => {
   );
 };
 
-export const Select = styled(SelectBase)`
-  margin: 0 0 1em 0;
+export const Select = styled(observer(SelectBase))`
+  margin: 0 0 1em;
   text-align: left;
 ` as typeof SelectBase;

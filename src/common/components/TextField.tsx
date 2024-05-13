@@ -63,8 +63,8 @@ export const TextField = styled(TextFieldBase)`
   font-size: 2em; */
   /* display: block; */
   /* flex-basis: content; */
-
   /* background: none; */
+
   & input:hover {
     /* cursor: pointer; // Changes the cursor to indicate scroll action */
     /* width: 3em; */

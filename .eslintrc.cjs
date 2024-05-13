@@ -6,6 +6,7 @@ module.exports = {
     'plugin:import/recommended',
     'plugin:eslint-comments/recommended',
   ],
+  ignorePatterns: ['node_modules', 'dist', '!**/.stylelintrc.cjs'],
   overrides: [
     {
       files: ['./**/*.js', './**/*.cjs', './**/*.mjs'],
@@ -54,6 +55,7 @@ module.exports = {
       },
       settings: {
         'import/resolver': {
+          node: true,
           typescript: {
             alwaysTryTypes: true,
             project: ['tsconfig.json', './tsconfig.node.json'],
@@ -129,14 +131,8 @@ module.exports = {
         'plugin:react/all',
         'plugin:react-hooks/recommended',
       ],
-      plugins: [
-        'react',
-        'react-hooks',
-        'react-refresh',
-        'better-styled-components',
-      ],
+      plugins: ['react', 'react-hooks', 'react-refresh'],
       rules: {
-        'better-styled-components/sort-declarations-alphabetically': 'warn',
         'no-restricted-imports': [
           'error',
           {
@@ -215,7 +211,7 @@ module.exports = {
   ],
   parser: '@typescript-eslint/parser',
   plugins: ['import', 'unused-imports', 'sort-keys-fix'],
-  root: true,
+  // root: true,
   rules: {
     'eslint-comments/no-unused-disable': 'warn',
     'import/no-named-as-default-member': 'off',

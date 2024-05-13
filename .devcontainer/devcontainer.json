@@ -70,7 +70,8 @@
 				"searKing.preview-vscode",
 				"github.vscode-github-actions",
 				"styled-components.vscode-styled-components",
-				"gabrielgrinberg.auto-run-command"
+				"gabrielgrinberg.auto-run-command",
+				"stylelint.vscode-stylelint"
 			]
 		}
 	}

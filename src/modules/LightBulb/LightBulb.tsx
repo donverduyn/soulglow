@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Stack } from '@mui/material';
 import { blue, green, grey, red } from '@mui/material/colors';
 import { css, styled } from '@mui/material/styles';
-import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Select } from 'common/components/Select';
 import { Slider } from 'common/components/Slider';
@@ -103,11 +102,11 @@ const formSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
 //
 
 const LightBulbBase: React.FC<LightBulbProps> = observer(({ className }) => {
-  const bulb = useMobx(() => ({ ...defaultState }));
+  const bulb = useMobx(() => defaultState);
   const inputs = bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
 
   useAutorun(() => {
-    console.log('LightBulb:', toJS(bulb));
+    // console.log('LightBulb:', toJS(bulb));
     void handleSubmit(bulb);
   });
 
