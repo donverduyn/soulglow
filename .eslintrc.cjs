@@ -6,7 +6,7 @@ module.exports = {
     'plugin:import/recommended',
     'plugin:eslint-comments/recommended',
   ],
-  ignorePatterns: ['node_modules', 'dist', '!**/.stylelintrc.cjs'],
+  ignorePatterns: ['node_modules', 'dist', '!**/.stylelintrc.mjs'],
   overrides: [
     {
       files: ['./**/*.js', './**/*.cjs', './**/*.mjs'],

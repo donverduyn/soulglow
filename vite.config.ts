@@ -1,10 +1,7 @@
 import { execSync } from 'child_process';
 import react from '@vitejs/plugin-react-swc';
-import autoprefixer from 'autoprefixer';
 import dayjs from 'dayjs';
-import type { Parser } from 'postcss';
-// @ts-expect-error - no types
-import postcssStyledSyntax from 'postcss-styled-syntax';
+import postcssPresetEnv from 'postcss-preset-env';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { Plugin, ViteDevServer } from 'vite';
 import { checker } from 'vite-plugin-checker';
@@ -80,9 +77,11 @@ export default defineConfig(({ mode }) => ({
   css: {
     devSourcemap: true,
     postcss: {
-      parser: postcssStyledSyntax as Parser,
-      // extends: ['stylelint-config-standard', 'stylelint-config-recommended'],
-      plugins: [autoprefixer()],
+      plugins: [
+        postcssPresetEnv({
+          features: {},
+        }),
+      ],
     },
   },
   esbuild: {
@@ -102,11 +101,12 @@ export default defineConfig(({ mode }) => ({
           mode === 'test'
             ? // exclude tsx files for eslint during test for now
               "eslint 'test/**/*.ts' 'src/**/*.test.ts'"
-            : 'eslint . --ext ts,tsx',
+            : 'eslint ./**/*.{js,cjs,ts,tsx}',
         useFlatConfig: false,
       },
       overlay: {
-        badgeStyle: 'background-color: transparent; font-size: 0.75em;',
+        badgeStyle:
+          'background-color: transparent; font-size: 0.75em; color: black;',
         initialIsOpen: false,
         panelStyle: 'height: 100%; background-color: #232125;',
       },
@@ -115,7 +115,7 @@ export default defineConfig(({ mode }) => ({
         mode !== 'test'
           ? {
               dev: { logLevel: ['error', 'warning'] },
-              lintCommand: 'stylelint "src/**/*.css" "src/**/*.tsx"',
+              lintCommand: 'stylelint "src/**/*.{css,tsx}"',
             }
           : false,
       terminal: false,
@@ -123,25 +123,6 @@ export default defineConfig(({ mode }) => ({
         tsconfigPath: './tsconfig.json',
       },
     }),
-    // {
-    //   name: 'watch-external',
-    //   configureServer(server) {
-    //     // Use Vite's internal watcher to watch the .eslintrc file
-    //     server.watcher.add('.eslintrc.cjs');
-    //     server.watcher.on('change', (path) => {
-
-    //         console.log('.eslintrc changed, reloading server...');
-    //         // Restart the Vite server
-    //         server.hot.send({
-    //           type: 'full-reload',
-    //           triggeredBy: 'eslint',
-    //           // type: 'custom',
-    //           path: '*' // You can specify more granular paths if needed
-    //         });
-
-    //     });
-    //   }
-    // },
     visualizer({
       brotliSize: true,
       filename: `./.analyzer/analysis_${dayjs().format('DDMMYYYY_HHmmss')}.html`,
@@ -174,15 +155,7 @@ export default defineConfig(({ mode }) => ({
     headers: noCacheHeaders,
     hmr: { overlay: true },
     host: '0.0.0.0',
-    // open: true, // needs cli argument --open to work
     proxy: {
-      // '/__open-in-editor': {
-      //   changeOrigin: true,
-      //   pathRewrite: {
-      //     '^/__open-in-editor': '',
-      //   },
-      //   target: `http://${getHostIp()}`,
-      // },
       '/api': {
         // The base URL of your API
         changeOrigin: true,

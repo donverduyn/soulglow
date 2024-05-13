@@ -18,3 +18,7 @@ yarn dev
 # Editing files
 
 To edit files in VScode that are opened in preview mode, press `Ctrl + Shift + V` 
+
+# Patches
+
+Currently, the project is using a patched version of vite-plugin-checker, because it is incompatible with the ESM version of meow.

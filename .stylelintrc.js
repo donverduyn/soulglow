@@ -1,8 +1,14 @@
 /** @type {import('stylelint').Config} */
-module.exports = {
-  customSyntax: 'postcss-styled-syntax',
+export default {
+  defaultSeverity: 'warning',
   extends: ['stylelint-config-standard', 'stylelint-config-recommended'],
   ignorePatterns: ['dist', 'node_modules', !'*.tsx', !'*.css'],
+  overrides: [
+    {
+      customSyntax: 'postcss-styled-syntax',
+      files: ['**/*.{js,ts,jsx,tsx}'],
+    },
+  ],
   plugins: ['stylelint-order'],
   rules: {
     'block-no-empty': true,
@@ -11,7 +17,6 @@ module.exports = {
       'never',
       {
         ignore: ['stylelint-commands', 'after-comment'],
-        severity: 'warning',
       },
     ],
     'no-descending-specificity': null,
@@ -31,7 +36,6 @@ module.exports = {
         message:
           'Selector should be written in lowercase with hyphens (except MUI classes)',
         resolveNestedSelectors: true,
-        severity: 'warning',
       },
     ],
     'selector-pseudo-element-no-unknown': [
@@ -46,8 +50,7 @@ module.exports = {
         ignoreTypes: ['from', '/^Mui/'], // Ignoring MUI-specific types
       },
     ],
-    'unit-no-unknown': true,
+    'unit-no-unknown': [true, { severity: 'error'}],
   },
-  severity: 'warning',
   syntax: 'scss',
 };
