@@ -1,7 +1,10 @@
 import { execSync } from 'child_process';
 import react from '@vitejs/plugin-react-swc';
 import dayjs from 'dayjs';
+import type { Syntax } from 'postcss';
 import postcssPresetEnv from 'postcss-preset-env';
+// @ts-expect-error no types file
+import postcssStyledSyntax from 'postcss-styled-syntax';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { Plugin, ViteDevServer } from 'vite';
 import { checker } from 'vite-plugin-checker';
@@ -82,6 +85,7 @@ export default defineConfig(({ mode }) => ({
           features: {},
         }),
       ],
+      syntax: postcssStyledSyntax as Syntax,
     },
   },
   esbuild: {

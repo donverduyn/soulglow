@@ -41,7 +41,6 @@ type Int8Clean<
       : never //Error<'Char'> // invalid char (negative sign etc.)
   : Acc;
 
-// provide reversed string to peano number parser
 type ParseInt<T extends string> =
   Int8Clean<T> extends ''
     ? never // empty values are not allowed

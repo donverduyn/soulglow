@@ -6,7 +6,10 @@ This Project provides a modern UI to interact with the Rest API provided by (htt
 
 To get started, make sure you are on a linux machine/vm and have docker installed. Pull the repository and navigate to the root directory of the project. Open in dev container and grab a coffee.
 
-To start the development server run:
+It is advised to use vscode with the remote SSH extension and configure the DISPLAY environment variable. For more information see:
+https://code.visualstudio.com/remote/advancedcontainers/develop-remote-host
+
+Note that Puppeteer is used to manage the browser for development. It automatically provides React Devtools and forwards the browser to the host machine over x11. To start the development server run:
 
 ```
 yarn dev
