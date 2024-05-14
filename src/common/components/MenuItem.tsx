@@ -20,6 +20,6 @@ const MenuItemBase = <T,>(props: MenuItemProps<T>) => {
   );
 };
 
-export const MenuItem = styled(MenuItemBase)({
-  textAlign: 'left',
-}) as typeof MenuItemBase;
+export const MenuItem = styled(MenuItemBase)`
+  text-align: left;
+` as typeof MenuItemBase;

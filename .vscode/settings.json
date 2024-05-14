@@ -37,4 +37,10 @@
     "typescript.tsc.autoDetect": "on",
     "css.validate": false,
     "stylelint.validate": ["css", "typescript", "typescriptreact"],
+    "search.exclude": {
+        "**/.git": true,
+        "**/node_modules": true,
+        "**/.analyzer": true,
+        "yarn.lock": true,
+    },
 }

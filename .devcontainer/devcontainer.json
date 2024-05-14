@@ -46,6 +46,10 @@
 		"./.devcontainer/host.sh"
 	],
 	"portsAttributes": {
+		"9222": {
+			"label": "Remote debugging",
+			"onAutoForward": "silent"
+		},
 		"4173": {
 			"label": "Dev Server",
 			"onAutoForward": "silent"

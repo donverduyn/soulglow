@@ -1,6 +1,6 @@
 import React from 'react';
-import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
+import { Stack } from 'common/components/Stack';
 import { Toggle } from 'common/components/Toggle';
 import { Typography } from 'common/components/Typography';
 

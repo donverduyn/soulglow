@@ -24,7 +24,7 @@ const TextFieldBase = observer(
       (event) => {
         if (!event.deltaY) return;
         event.preventDefault();
-        const adjustment = event.deltaY < 0 ? 1 : -1;
+        const adjustment = event.deltaY < 0 ? 0.1 : -0.1;
         onChange((Number(value()) + adjustment) as T);
       },
       [onChange, value]
@@ -57,10 +57,10 @@ const TextFieldBase = observer(
 );
 
 export const TextField = styled(TextFieldBase)`
-  /* width: 100%;
-  background: gray;
-  font-weight: bold;
-  font-size: 2em; */
+  /* width: 100%; */
+  /* background: color-mix(in srgb, #34c9eb 20%, white); */
+  /* font-weight: bold; */
+  /* font-size: 2em; */
   /* display: block; */
   /* flex-basis: content; */
   /* background: none; */

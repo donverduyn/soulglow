@@ -3,6 +3,7 @@ import 'react'; // Import React types, ensures that TypeScript treats this file 
 
 declare module 'react' {
   interface CSSProperties {
+    '--background'?: string;
     '--length'?: number; // Custom CSS property as an example
   }
 }

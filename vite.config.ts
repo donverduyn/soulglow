@@ -1,10 +1,7 @@
 import { execSync } from 'child_process';
 import react from '@vitejs/plugin-react-swc';
 import dayjs from 'dayjs';
-import type { Syntax } from 'postcss';
 import postcssPresetEnv from 'postcss-preset-env';
-// @ts-expect-error no types file
-import postcssStyledSyntax from 'postcss-styled-syntax';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { Plugin, ViteDevServer } from 'vite';
 import { checker } from 'vite-plugin-checker';
@@ -26,7 +23,7 @@ export const getHostIp = () => {
   return hostip;
 };
 
-const pluginPuppeteer = (mode: string): Plugin => {
+const pluginBrowserLaunch = (mode: string): Plugin => {
   let launched = false;
 
   const openPage = (server: ViteDevServer) => {
@@ -79,24 +76,37 @@ export default defineConfig(({ mode }) => ({
   },
   css: {
     devSourcemap: true,
-    postcss: {
-      plugins: [
-        postcssPresetEnv({
-          features: {},
-        }),
-      ],
-      syntax: postcssStyledSyntax as Syntax,
-    },
+    postcss: { plugins: [postcssPresetEnv({ features: {} })] },
   },
   esbuild: {
     drop: ['console', 'debugger'],
   },
   plugins: [
-    mode !== 'production' && pluginPuppeteer(mode),
+    mode !== 'production' && pluginBrowserLaunch(mode),
     tsconfigPaths(),
     react({
       jsxImportSource: '@emotion/react',
-      plugins: [['@swc/plugin-emotion', {}]],
+      plugins: [
+        [
+          '@swc/plugin-emotion',
+          {
+            importMap: {
+              '@mui/material': {
+                styled: {
+                  canonicalImport: ['@emotion/styled', 'default'],
+                  styledBaseImport: ['@mui/material', 'styled'],
+                },
+              },
+              '@mui/material/styles': {
+                styled: {
+                  canonicalImport: ['@emotion/styled', 'default'],
+                  styledBaseImport: ['@mui/material/styles', 'styled'],
+                },
+              },
+            },
+          },
+        ],
+      ],
     }),
     checker({
       eslint: {
@@ -130,12 +140,10 @@ export default defineConfig(({ mode }) => ({
     visualizer({
       brotliSize: true,
       filename: `./.analyzer/analysis_${dayjs().format('DDMMYYYY_HHmmss')}.html`,
-      // or sunburst
       gzipSize: true,
-      // sourcemap: true,
       projectRoot: process.cwd(),
       template: 'treemap',
-      title: 'Vite Visualizer', // will be saved in project's root
+      title: 'Vite Visualizer',
     }),
     inspect(),
   ],

@@ -11,8 +11,29 @@ interface Props<T> extends DefaultProps {
   readonly track?: false | 'normal';
 }
 
+// function inverseLogScale(
+//   x: number,
+//   xmin: number,
+//   xmax: number,
+//   ymin: number,
+//   ymax: number
+// ) {
+//   const c = Math.log(xmax - xmin + 1);
+//   return ((ymax - ymin) * (c - Math.log(x - xmin + 1))) / c + ymin;
+// }
+
+// // Example usage:
+// const x = 10; // Your input value
+// const xmin = 1;
+// const xmax = 100;
+// const ymin = 0;
+// const ymax = 1;
+
+// const scaledValue = inverseLogScale(x, xmin, xmax, ymin, ymax);
+// console.log(scaledValue); // Output will start very low and increase as x approaches xmax
+
 export const SliderBase = <T extends number>(props: Props<T>) => {
-  const { className, min, max, track, getValue, onChange } = props;
+  const { className, min, max, track, getValue, onChange, ...rest } = props;
   const slots = React.useRef({ thumb: ThumbComponent });
 
   const handleChange = React.useCallback<
@@ -29,6 +50,8 @@ export const SliderBase = <T extends number>(props: Props<T>) => {
       track={track ?? 'normal'}
       value={getValue()}
       valueLabelDisplay='off'
+      // eslint-disable-next-line react/jsx-props-no-spreading
+      {...rest}
     />
   );
 };

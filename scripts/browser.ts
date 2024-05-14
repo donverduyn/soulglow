@@ -38,6 +38,7 @@ const options: Parameters<(typeof puppeteer)['launch']>[0] = {
     '--disable-dev-shm-usage',
     '--disable-extensions-except=/tmp/react-devtools-extensions/unpacked',
     '--load-extension=/tmp/react-devtools-extensions/unpacked',
+    '--remote-debugging-port=9222',
     // '--auto-accept-camera-and-microphone-capture',
     // '--force-dark-mode',
   ],

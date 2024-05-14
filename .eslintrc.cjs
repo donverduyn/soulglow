@@ -131,8 +131,9 @@ module.exports = {
         'plugin:react/all',
         'plugin:react-hooks/recommended',
       ],
-      plugins: ['react', 'react-hooks', 'react-refresh'],
+      plugins: ['react', 'react-hooks', 'react-refresh', '@emotion'],
       rules: {
+        '@emotion/syntax-preference': ['warn', 'string'],
         'no-restricted-imports': [
           'error',
           {

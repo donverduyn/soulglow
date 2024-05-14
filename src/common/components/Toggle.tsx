@@ -24,4 +24,6 @@ const ToggleBase: React.FC<Props> = observer(({ getValue, onChange }) => {
   );
 });
 
-export const Toggle = styled(ToggleBase)({});
+export const Toggle = styled(ToggleBase)`
+  background: inherit;
+`;

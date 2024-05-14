@@ -47,6 +47,8 @@ export const useMobx = <T extends Record<string, any>>(
       return target as TParent;
     };
 
+    type LazyGetFnUnary<TType> = <R>(map: (value: TType) => R) => () => R;
+
     type LazyGetFn<TType> = <
       P extends Call<O.AllPaths, TType>,
       V extends Call<O.Get<P>, TType>,
@@ -55,6 +57,10 @@ export const useMobx = <T extends Record<string, any>>(
       path: P,
       map?: (value: V) => R
     ) => () => R;
+
+    const lazyGetUnary: LazyGetFnUnary<T> = memoize((map) => {
+      return () => map(obs);
+    });
 
     const lazyGet: LazyGetFn<T> = memoize((path, map = identity) => {
       // by using map from the closure, V8 will only preparse it on re-renders
@@ -105,6 +111,7 @@ export const useMobx = <T extends Record<string, any>>(
     }
     return Object.assign(obs, {
       lazyGet,
+      lazyGetUnary,
       set,
     });
   })[0];
