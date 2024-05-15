@@ -170,7 +170,7 @@ export const LightBulb = styled(observer(LightBulbBase))`
   border-radius: ${(props) => props.theme.shape.borderRadius.toString() + 'px'};
   display: block;
   padding: ${(props) => props.theme.spacing(3.5, 3)};
-  width: 15em;
+  width: 25em;
 
   & .input {
     align-items: center;
@@ -180,7 +180,6 @@ export const LightBulb = styled(observer(LightBulbBase))`
   }
 
   & form {
-    align-items: left;
     display: flex;
     flex-direction: column;
     gap: 1em;
