@@ -33,7 +33,7 @@ const pluginBrowserLaunch = (mode: string): Plugin => {
         const a = server.httpServer?.address();
         const port = (typeof a === 'string' ? a : a?.port) ?? '4173';
         const postfix = mode === 'test' ? '/__vitest__/#/' : '';
-        const url = `http://localhost:${port.toString()}${postfix}`;
+        const url = `http://127.0.0.1:${port.toString()}${postfix}`;
 
         await page.goto(url);
         browser.on('disconnected', () => {
@@ -104,6 +104,7 @@ export default defineConfig(({ mode }) => ({
                 },
               },
             },
+            labelFormat: '-[local]',
           },
         ],
       ],

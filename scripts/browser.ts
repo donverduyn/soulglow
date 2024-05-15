@@ -91,7 +91,7 @@ export const createBrowser = async (
 
 export const viewStatic = (
   dir: string = './dist',
-  address: string = 'localhost',
+  address: string = '127.0.0.1',
   port: number = 8080
 ) => {
   const server = createServer({ cache: -1, root: dir });

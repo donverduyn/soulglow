@@ -39,7 +39,8 @@
       }
     ],
   },
-  // vite.config.ts should not be included here
-  "include": ["src", "vite.config.ts"],
+  // vite.config.ts and scripts should not be included here
+  // seems to be a problem with vscode ts
+  "include": ["src", "vite.config.ts", "scripts"],
   "exclude": ["*.test.ts", "*.test.tsx"],
 }
