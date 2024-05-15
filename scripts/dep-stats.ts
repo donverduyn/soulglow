@@ -1,7 +1,10 @@
-import fs from 'fs';
+import * as fs from 'fs';
+import * as util from 'util';
 import axios from 'axios';
 import chalk from 'chalk';
+// @ts-expect-error isolatedModules disabled?
 import dayjs from 'dayjs';
+import { pipe, Effect as E, flow, Console } from 'effect';
 import { merge } from 'remeda';
 
 interface PackageJson {
@@ -16,58 +19,142 @@ interface DownloadData {
   start: string;
 }
 
-const oneYearAgo = dayjs().subtract(1, 'year').format('YYYY-MM-DD');
-const oneYearAndOneMonthAgo = dayjs()
-  .subtract(1, 'year')
-  .subtract(1, 'month')
-  .format('YYYY-MM-DD');
-const oneYearAgoLastMonth = `${oneYearAndOneMonthAgo}:${oneYearAgo}`;
+class NpmPackageAnalyzer {
+  private readonly PACKAGE_JSON_PATH: string = './package.json';
+  private readonly NPM_API_BASE_URL = 'https://api.npmjs.org/downloads/point';
 
-const today = dayjs().format('YYYY-MM-DD');
-const oneMonthAgo = dayjs().subtract(1, 'month').format('YYYY-MM-DD');
-const lastMonth = `${oneMonthAgo}:${today}`;
+  constructor(PACKAGE_JSON_PATH?: string) {
+    this.PACKAGE_JSON_PATH = PACKAGE_JSON_PATH;
+  }
 
-// Read and parse the package.json to get dependencies
-const getDependencies = (path: string) => {
-  const fileData: string = fs.readFileSync(path, 'utf8');
-  const packageJson: PackageJson = JSON.parse(fileData) as PackageJson;
-  return merge(packageJson.dependencies!, packageJson.devDependencies!);
-};
+  public analyze() {
+    const App = pipe(this.PACKAGE_JSON_PATH, this.logStats, E.runPromise);
+    // eslint-disable-next-line @typescript-eslint/use-unknown-in-catch-callback-variable
+    App.catch(Console.error);
+  }
 
-// Fetch download data from npm for a given package
-const fetchDownloads = async (packageName: string, period: string) => {
-  const url = `https://api.npmjs.org/downloads/point/${period}/${packageName}`;
-  try {
-    const response = await axios.get(url);
-    return response.data as DownloadData;
-  } catch (error) {
-    console.error(
-      `Failed to fetch downloads for ${packageName}: ${error as string}`
+  private readonly formatDateInterval = (from: dayjs.Dayjs, to: dayjs.Dayjs) =>
+    `${from.format('YYYY-MM-DD')}:${to.format('YYYY-MM-DD')}`;
+
+  private readonly dateRanges = {
+    lastMonth: () =>
+      this.formatDateInterval(
+        dayjs().subtract(1, 'month').subtract(1, 'day'),
+        dayjs().subtract(1, 'day')
+      ),
+    lastMonthPrevYear: () =>
+      this.formatDateInterval(
+        dayjs().subtract(1, 'year').subtract(1, 'month').subtract(1, 'day'),
+        dayjs().subtract(1, 'year').subtract(1, 'day')
+      ),
+    prevMonth: () =>
+      this.formatDateInterval(
+        dayjs().subtract(2, 'month').subtract(1, 'day'),
+        dayjs().subtract(1, 'month').subtract(1, 'day')
+      ),
+    prevMonthPrevYear: () =>
+      this.formatDateInterval(
+        dayjs().subtract(1, 'year').subtract(2, 'month').subtract(1, 'day'),
+        dayjs().subtract(1, 'year').subtract(1, 'month').subtract(1, 'day')
+      ),
+  };
+
+  private readonly readFile = (path: string) =>
+    E.tryPromise(() => util.promisify(fs.readFile)(path, 'utf-8'));
+
+  private readonly getDependencies = flow(
+    this.readFile,
+    E.mapError((err) => new Error(`Failed to read file: ${err.message}`)),
+    E.andThen((data) =>
+      E.try(() => {
+        const packageJson = JSON.parse(data) as PackageJson;
+        return merge(packageJson.devDependencies, packageJson.dependencies);
+      })
+    )
+  );
+
+  private readonly fetchData = (packageName: string, period: string) =>
+    E.tryPromise<{ data: DownloadData }>(() =>
+      axios.get(`${this.NPM_API_BASE_URL}/${period}/${packageName}`)
     );
-    return null;
-  }
-};
 
-// Example usage of fetching downloads
-async function showDownloads() {
-  const dependencies = getDependencies('./package.json');
+  private readonly rChange = (current: number, previous: number) => () =>
+    ((current - previous) / Math.max(previous, 1)) * 100;
 
-  for (const dep in dependencies) {
-    const lastWeekData = await fetchDownloads(dep, lastMonth);
-    const oneYearAgoData = await fetchDownloads(dep, oneYearAgoLastMonth);
+  private readonly calculateRoC = (current: number, prev: number) => {
+    const denominator =
+      (Math.abs(prev) + Math.abs(current)) / 2 + Number.EPSILON;
+    return ((current - prev) / denominator) * 100;
+  };
 
-    if (lastWeekData && oneYearAgoData) {
-      const relativeChange =
-        ((lastWeekData.downloads - oneYearAgoData.downloads) /
-          Math.max(oneYearAgoData.downloads, 1)) *
-        100;
-      const relativeChangeColor = relativeChange > 0 ? 'green' : 'red';
+  private readonly getPackageData = flow(
+    this.fetchData,
+    E.mapError(({ message }) => new Error(`Failed to fetch: ${message}`)),
+    E.map(({ data }) => data.downloads)
+  );
 
-      console.log(
-        `${chalk.blue(dep)}: ${chalk.yellow.bold(lastWeekData.downloads.toString())} downloads (last week), ${chalk[relativeChangeColor](relativeChange.toFixed(2))}%`
-      );
-    }
-  }
+  private readonly getResults = (dep: string) =>
+    pipe(
+      E.all(
+        [
+          this.getPackageData(dep, this.dateRanges.prevMonth()),
+          this.getPackageData(dep, this.dateRanges.prevMonthPrevYear()),
+          this.getPackageData(dep, this.dateRanges.lastMonth()),
+          this.getPackageData(dep, this.dateRanges.lastMonthPrevYear()),
+        ],
+        { concurrency: 4 }
+      ),
+      E.andThen(
+        ([prevMonth, prevMonthPrevYear, lastMonth, lastMonthPrevYear]) =>
+          E.Do.pipe(
+            E.let('lastMonth', () => lastMonth),
+            E.let('rChangeRecent', this.rChange(lastMonth, prevMonth)),
+            E.let('rChangePrev', this.rChange(prevMonth, prevMonthPrevYear)),
+            E.let('rChange', this.rChange(lastMonth, lastMonthPrevYear)),
+            E.let('rateOfChange', ({ rChange, rChangePrev }) =>
+              this.calculateRoC(rChange, rChangePrev)
+            )
+          )
+      )
+    );
+
+  private readonly getDepStats = flow(
+    this.getDependencies,
+    E.andThen((dependencies) =>
+      E.forEach(
+        Object.keys(dependencies),
+        (dep) =>
+          E.Do.pipe(
+            E.let('name', () => dep),
+            E.tap(() => Console.log(`Fetching stats for ${dep}`)),
+            E.bind('data', ({ name }) => this.getResults(name))
+          ),
+        { concurrency: 5 }
+      )
+    )
+  );
+
+  private readonly logStats = flow(
+    this.getDepStats,
+    E.andThen((data) =>
+      E.forEach(data, ({ data, name }) =>
+        E.Do.pipe(
+          E.let('rocColor', () => (data.rateOfChange > 0 ? 'green' : 'red')),
+          E.let('rColor', () => (data.rChangeRecent > 0 ? 'green' : 'red')),
+          E.tap(({ rocColor, rColor }) => {
+            console.log(
+              `${chalk.blue(name)}: ${chalk.yellow.bold(data.lastMonth.toString())} downloads (last month),
+              RoC: ${chalk[rocColor](data.rateOfChange.toFixed(2))}%,
+              prev: ${data.rChangePrev.toFixed(2)}%, current: ${data.rChange.toFixed(2)}%,
+              mo/mo ${chalk[rColor](data.rChangeRecent.toFixed(2))}%
+              `.replace(/\s+/g, ' ')
+            );
+          })
+        )
+      )
+    )
+  );
 }
 
-void showDownloads();
+const analyzer = new NpmPackageAnalyzer('./package.json');
+analyzer.analyze();
