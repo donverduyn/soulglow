@@ -1,12 +1,14 @@
-import { Theme, createTheme, styled } from '@mui/material/styles';
+import { Theme, createTheme, css } from '@mui/material/styles';
 import { isNumber } from 'remeda';
+import { Paper } from 'common/components/Paper';
+import { Stack } from 'common/components/Stack';
 import { Typography } from 'common/components/Typography';
 
 interface ThemeVisualizerProps extends DefaultProps {
   theme?: Theme;
 }
 
-const ThemeVisualizerBase: React.FC<ThemeVisualizerProps> = ({
+export const ThemeVisualizer: React.FC<ThemeVisualizerProps> = ({
   className,
   theme = createTheme({}),
 }) => {
@@ -24,78 +26,74 @@ const ThemeVisualizerBase: React.FC<ThemeVisualizerProps> = ({
   ] as const;
 
   return (
-    <div className={className}>
+    <Paper
+      className={className}
+      css={styles.root}
+    >
       <Typography
-        className='title'
+        css={styles.title}
         variant='h4'
       >
         Theme Visualizer
       </Typography>
-      {items.map((item) => {
-        return (
-          <div
-            key={item}
-            className='item'
+      {items.map((item) => (
+        <Stack
+          key={item}
+          css={styles.item}
+        >
+          <Typography
+            css={styles.name}
+            variant='h6'
           >
-            <Typography
-              className='name'
-              variant='h6'
-            >
-              {item}
-            </Typography>
-            {Object.entries(theme.palette[item as keyof Theme['palette']]).map(
-              ([key, value]) => {
-                const isColor = !isNumber(value);
-                if (!isColor) return null;
-                return (
-                  <div
-                    key={key}
-                    className='color'
-                    style={{
-                      backgroundColor: value as string,
-                      color: theme.palette.getContrastText(value as string),
-                    }}
-                  >
-                    <Typography variant='body2'>{key}</Typography>
-                    <Typography variant='body1'>{value}</Typography>
-                  </div>
-                );
-              }
-            )}
-          </div>
-        );
-      })}
-    </div>
+            {item}
+          </Typography>
+          {Object.entries(theme.palette[item as keyof Theme['palette']]).map(
+            ([key, value]) => {
+              const isColor = !isNumber(value);
+              if (!isColor) return null;
+              return (
+                <Paper
+                  key={key}
+                  css={styles.color}
+                  sx={{
+                    backgroundColor: value as string,
+                    color: theme.palette.getContrastText(value as string),
+                  }}
+                >
+                  <Typography variant='body2'>{key}</Typography>
+                  <Typography variant='body1'>{value}</Typography>
+                </Paper>
+              );
+            }
+          )}
+        </Stack>
+      ))}
+    </Paper>
   );
 };
 
-export const ThemeVisualizer = styled(ThemeVisualizerBase, {
-  shouldForwardProp: (prop) => prop === 'theme',
-})`
-  background-color: ${({ theme }) => theme.palette.background.paper};
-  padding: 2rem;
-
-  & .title {
-    margin-bottom: 1rem;
-  }
-
-  & .item {
-    display: flex;
-    flex-wrap: wrap;
-    /* gap: 1rem; */
-    margin-bottom: 1rem;
-
-    & .name {
-      align-self: center;
-      flex-basis: 7em;
-      text-align: left;
-    }
-  }
-
-  & .color {
+const styles = {
+  color: css`
+    border-radius: 0;
     display: flex;
     flex: 1;
     flex-direction: column;
-    /* gap: 0.5rem; */
-  }
-`;
+  `,
+  item: css`
+    display: flex;
+    flex-flow: row wrap;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  `,
+  name: css`
+    align-self: center;
+    flex-basis: 7em;
+    text-align: left;
+  `,
+  root: css`
+    padding: 2rem;
+  `,
+  title: css`
+    margin-bottom: 1rem;
+  `,
+};

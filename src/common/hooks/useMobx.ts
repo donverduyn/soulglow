@@ -99,6 +99,7 @@ export const useMobx = <T extends Record<string, any>>(
             );
             if (isPlainObject(result)) {
               for (const item of Object.entries(result)) {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-expect-error need to fix later
                 parent[key][item[0]] = item[1];
               }

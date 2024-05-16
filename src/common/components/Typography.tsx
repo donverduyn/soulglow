@@ -1,5 +1,4 @@
-import { PropsOf } from '@emotion/react';
-import { styled } from '@mui/material/styles';
+import { css, PropsOf } from '@emotion/react';
 import MuiTypography from '@mui/material/Typography';
 
 interface Props extends DefaultProps {
@@ -8,10 +7,15 @@ interface Props extends DefaultProps {
   readonly variant?: PropsOf<typeof MuiTypography>['variant'];
 }
 
-const TypographyBase: React.FC<Props> = ({ children, className, variant }) => {
+export const Typography: React.FC<Props> = ({
+  className,
+  children,
+  variant,
+}) => {
   return (
     <MuiTypography
       className={className!}
+      css={typographyStyles.root}
       variant={variant ?? 'body1'}
     >
       {children}
@@ -19,6 +23,8 @@ const TypographyBase: React.FC<Props> = ({ children, className, variant }) => {
   );
 };
 
-export const Typography = styled(TypographyBase)(() => ({
-  // fontWeight: 'bold',
-}));
+const typographyStyles = {
+  root: css`
+    color: inherit;
+  `,
+};

@@ -12,7 +12,7 @@ import {
   differenceEuclidean,
   formatHex,
   nearest,
-  type Lch,
+  type Okhsv,
 } from 'culori';
 import ColorThief from 'common/utils/extract';
 
@@ -51,7 +51,7 @@ const commonTheme = createTheme({
     },
     tonalOffset: { dark: 0.3, light: 0.7 },
   },
-  shape: { borderRadius: 5 },
+  shape: { borderRadius: 10 },
   typography: {
     fontFamily: 'Proxima Nova, sans-serif',
     fontSize: 18,
@@ -220,51 +220,51 @@ function adjustHue(val: number) {
   return val % 360;
 }
 
-function createScientificPalettes(baseColor: Lch) {
+function createScientificPalettes(baseColor: Okhsv, factor: number = 0.5) {
   const targetHueSteps = {
-    analogous: [0, 30, 60],
-    complementary: [0, 180],
-    splitComplementary: [0, 150, 210],
-    tetradic: [0, 90, 180, 270],
-    triadic: [0, 120, 240],
+    analogous: [30, 0, 60].map((step) => step * factor),
+    complementary: [0, 180].map((step) => step * factor),
+    splitComplementary: [150, 0, 210].map((step) => step * factor),
+    tetradic: [90, 270, 0, 180].map((step) => step * factor),
+    triadic: [120, 0, 240].map((step) => step * factor),
   };
 
   const monochromeSteps = [-50, -25, 0, 25, 50];
 
-  const palettes: Record<string, Array<Lch>> = {};
+  const palettes: Record<string, Array<Okhsv>> = {};
 
   for (const type of Object.keys(targetHueSteps)) {
     palettes[type] = targetHueSteps[type as keyof typeof targetHueSteps].map(
       (step) => ({
-        c: baseColor.c,
         h: adjustHue(baseColor.h! + step),
-        l: baseColor.l,
-        mode: 'lch',
+        mode: 'okhsv',
+        s: baseColor.s,
+        v: baseColor.v,
       })
     );
   }
 
   palettes.monochrome = monochromeSteps.map((step) => ({
-    c: baseColor.c,
     h: baseColor.h!,
-    l: baseColor.l + step,
-    mode: 'lch',
+    mode: 'okhsv',
+    s: baseColor.s,
+    v: Math.max(baseColor.v + step / 100, 0),
   }));
 
   return palettes;
 }
 
-export const createPalettes = (baseColor: Lch) =>
+export const createPalettes = (baseColor: Okhsv) =>
   createScientificPalettes(baseColor);
 
 export function generate() {
   // choose a random base color
   const base = {
-    c: 60 + Math.random() * 10,
     h: Math.random() * 360,
-    l: 50 + Math.random() * 10,
-    mode: 'lch',
-  } as Lch;
+    mode: 'okhsv',
+    s: 60 + Math.random() * 10,
+    v: 50 + Math.random() * 10,
+  } as Okhsv;
 
   // generate "classic" color palettes
   const palettes = createScientificPalettes(base);
@@ -278,25 +278,25 @@ export function generate() {
   // take the "base" color, and make a light, desaturated version of it. This will be perfect for background colors, etc.
   const lightest = formatHex({
     ...choice[0],
-    c: 10,
-    l: 98,
+    s: 10,
+    v: 98,
   });
 
   // take the "base" color, and make a dark, desaturated version of it. This will be perfect for text!
   const darkest = formatHex({
     ...choice[0],
-    c: 20,
-    l: 10,
+    s: 20,
+    v: 10,
   });
 
   return { darkest, lightest, palette: paletteHex };
 }
 
-function isColorEqual(c1: Lch, c2: Lch) {
-  return c1.h === c2.h && c1.l === c2.l && c1.c === c2.c;
+function isColorEqual(c1: Okhsv, c2: Okhsv) {
+  return c1.h === c2.h && c1.v === c2.v && c1.s === c2.s;
 }
 
-const toLCH = converter('lch');
+const toOkhsv = converter('okhsv');
 
 const baseColors = [
   '#FFB97A',
@@ -310,16 +310,16 @@ const baseColors = [
   '#33006B',
 ];
 
-const baseColorsLCH = baseColors.map((color) => toLCH(color)!);
+const baseColorsOkhsv = baseColors.map((color) => toOkhsv(color)!);
 
-export function discoverPalettes(colors: Lch[] = baseColorsLCH) {
-  const palettes: Record<string, { colors: Lch[]; variance: number }> = {};
+export function discoverPalettes(colors: Okhsv[] = baseColorsOkhsv) {
+  const palettes: Record<string, { colors: Okhsv[]; variance: number }> = {};
 
   for (const color of colors) {
     const targetPalettes = createScientificPalettes(color);
 
     for (const paletteType of Object.keys(targetPalettes)) {
-      const palette: Lch[] = [];
+      const palette: Okhsv[] = [];
       let variance = 0;
 
       for (const targetColor of targetPalettes[paletteType]) {
@@ -330,10 +330,10 @@ export function discoverPalettes(colors: Lch[] = baseColorsLCH) {
 
         const match = nearest(
           availableColors,
-          differenceEuclidean('lch')
+          differenceEuclidean('okhsv')
         )(targetColor)[0];
 
-        variance += differenceEuclidean('lch')(targetColor, match);
+        variance += differenceEuclidean('okhsv')(targetColor, match);
 
         palette.push(match);
       }
@@ -365,7 +365,7 @@ async function loadImg(url: string) {
 }
 
 export async function generatePalette() {
-  let colors: Lch[] = [];
+  let colors: Okhsv[] = [];
   let chosenImg;
 
   const queries = [
@@ -421,7 +421,7 @@ export async function generatePalette() {
     chosenImg = await loadImg(url);
 
     colors = colorThief.getPalette(chosenImg).map((color) =>
-      toLCH({
+      toOkhsv({
         b: color[2] / 255,
         g: color[1] / 255,
         mode: 'rgb',
@@ -445,7 +445,7 @@ function map(
 }
 
 export function createHueShiftPalette(opts: {
-  base: Lch;
+  base: Okhsv;
   hueStep: number;
   maxLightness: number;
   minLightness: number;
@@ -457,22 +457,22 @@ export function createHueShiftPalette(opts: {
   for (let i = 1; i < 5; i++) {
     const hueDark = adjustHue(base.h! - hueStep * i);
     const hueLight = adjustHue(base.h! + hueStep * i);
-    const lightnessDark = map(i, 0, 4, base.l, minLightness);
-    const lightnessLight = map(i, 0, 4, base.l, maxLightness);
-    const chroma = base.c;
+    const lightnessDark = map(i, 0, 4, base.v, minLightness);
+    const lightnessLight = map(i, 0, 4, base.v, maxLightness);
+    const chroma = base.s;
 
     palette.push({
-      c: chroma,
       h: hueDark,
-      l: lightnessDark,
-      mode: 'lch',
+      mode: 'okhsv',
+      s: chroma,
+      v: lightnessDark,
     });
 
     palette.unshift({
-      c: chroma,
       h: hueLight,
-      l: lightnessLight,
-      mode: 'lch',
+      mode: 'okhsv',
+      s: chroma,
+      v: lightnessLight,
     });
   }
 

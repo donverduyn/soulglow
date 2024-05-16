@@ -4,7 +4,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import MuiSelect from '@mui/material/Select';
 import type { SelectChangeEvent } from '@mui/material/Select';
-import { styled } from '@mui/material/styles';
+import { css } from '@mui/material/styles';
 import { Observer, observer } from 'mobx-react-lite';
 import { unwrap } from 'common/utils/unwrap';
 
@@ -18,9 +18,7 @@ interface SelectProps<TValue> extends DefaultProps {
   readonly renderItem?: (item: Item<TValue>) => React.ReactElement;
 }
 
-// type Test = Parameters<typeof SelectBase>[0];
-
-const SelectBase = <TValue,>(props: SelectProps<TValue>) => {
+export const Select = observer(<TValue,>(props: SelectProps<TValue>) => {
   const { className, label, getValue, onChange, items, renderItem } = props;
   const safeRender = renderItem ?? renderDefaultSelectItem;
   //
@@ -31,6 +29,7 @@ const SelectBase = <TValue,>(props: SelectProps<TValue>) => {
   return (
     <FormControl
       className={className!}
+      css={selectStyles.root}
       variant='filled'
     >
       <InputLabel>{label}</InputLabel>
@@ -54,12 +53,15 @@ const SelectBase = <TValue,>(props: SelectProps<TValue>) => {
       >
         {items.map(safeRender)}
       </MuiSelect>
-      {/* <Backdrop
-        onClick={() => console.log('Backdrop clicked')}
-        open={open}
-      /> */}
     </FormControl>
   );
+});
+
+const selectStyles = {
+  root: css`
+    margin: 0 0 1em;
+    text-align: left;
+  `,
 };
 
 const renderDefaultSelectItem = <T,>(item: Item<T>) => {
@@ -72,8 +74,3 @@ const renderDefaultSelectItem = <T,>(item: Item<T>) => {
     </MenuItem>
   );
 };
-
-export const Select = styled(observer(SelectBase))`
-  margin: 0 0 1em;
-  text-align: left;
-` as typeof SelectBase;
