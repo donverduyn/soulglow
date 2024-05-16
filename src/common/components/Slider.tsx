@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { default as MuiSlider, SliderThumb } from '@mui/material/Slider';
+import type { PropsOf } from '@emotion/react';
+import { default as MuiSlider } from '@mui/material/Slider';
 import { styled } from '@mui/material/styles';
 import { observer } from 'mobx-react-lite';
 
@@ -35,6 +36,9 @@ interface Props<T> extends DefaultProps {
 export const SliderBase = <T extends number>(props: Props<T>) => {
   const { className, min, max, track, getValue, onChange, ...rest } = props;
 
+  const slotProps = React.useRef<PropsOf<typeof MuiSlider>['slotProps']>({
+    track: { style: { border: 0 } },
+  });
   const handleChange = React.useCallback<
     (e: Event, v: number | number[]) => void
   >((_, v) => onChange(v as T), [onChange]);
@@ -45,6 +49,7 @@ export const SliderBase = <T extends number>(props: Props<T>) => {
       max={max ?? 255}
       min={min ?? 0}
       onChange={handleChange}
+      slotProps={slotProps.current!}
       track={track ?? 'normal'}
       value={getValue()}
       valueLabelDisplay='off'
@@ -60,12 +65,4 @@ export const Slider = styled(observer(SliderBase))`
   color: var(--slider-color);
   height: 8px;
   margin: 0 0.5em;
-
-  & .MuiSlider-track {
-    border: 0;
-  }
-
-  & .MuiSlider-thumb {
-    background-color: #fff;
-  }
 `;

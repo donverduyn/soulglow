@@ -7,6 +7,14 @@ import {
   getContrastRatio,
 } from '@mui/material/styles';
 import { blend } from '@mui/system/colorManipulator';
+import {
+  converter,
+  differenceEuclidean,
+  formatHex,
+  nearest,
+  type Lch,
+} from 'culori';
+import ColorThief from 'common/utils/extract';
 
 const extendTheme = createTheme as (
   theme: Theme,
@@ -141,7 +149,7 @@ export const darkTheme = extendTheme(commonTheme, {
     }),
     mode: 'dark',
     primary: commonTheme.palette.augmentColor({
-      color: { main: '#727679' },
+      color: { main: '#ffffff' },
       name: 'primary',
     }),
     secondary: commonTheme.palette.augmentColor({
@@ -154,8 +162,8 @@ export const darkTheme = extendTheme(commonTheme, {
     }),
     text: {
       disabled: '#b3b3b3',
-      primary: 'rgba(255,255,255,0.87)',
-      secondary: 'rgba(164, 171, 173, 0.87)',
+      primary: 'rgba(255,255,255,1)',
+      secondary: 'rgba(255,255,255, 0.6)',
     },
     warning: commonTheme.palette.augmentColor({
       color: { main: '#ffd900' },
@@ -205,3 +213,268 @@ export const darkTheme = extendTheme(commonTheme, {
 //     },
 //   },
 // });
+
+function adjustHue(val: number) {
+  if (val < 0) val += Math.ceil(-val / 360) * 360;
+
+  return val % 360;
+}
+
+function createScientificPalettes(baseColor: Lch) {
+  const targetHueSteps = {
+    analogous: [0, 30, 60],
+    complementary: [0, 180],
+    splitComplementary: [0, 150, 210],
+    tetradic: [0, 90, 180, 270],
+    triadic: [0, 120, 240],
+  };
+
+  const monochromeSteps = [-50, -25, 0, 25, 50];
+
+  const palettes: Record<string, Array<Lch>> = {};
+
+  for (const type of Object.keys(targetHueSteps)) {
+    palettes[type] = targetHueSteps[type as keyof typeof targetHueSteps].map(
+      (step) => ({
+        c: baseColor.c,
+        h: adjustHue(baseColor.h! + step),
+        l: baseColor.l,
+        mode: 'lch',
+      })
+    );
+  }
+
+  palettes.monochrome = monochromeSteps.map((step) => ({
+    c: baseColor.c,
+    h: baseColor.h!,
+    l: baseColor.l + step,
+    mode: 'lch',
+  }));
+
+  return palettes;
+}
+
+export const createPalettes = (baseColor: Lch) =>
+  createScientificPalettes(baseColor);
+
+export function generate() {
+  // choose a random base color
+  const base = {
+    c: 60 + Math.random() * 10,
+    h: Math.random() * 360,
+    l: 50 + Math.random() * 10,
+    mode: 'lch',
+  } as Lch;
+
+  // generate "classic" color palettes
+  const palettes = createScientificPalettes(base);
+
+  // choose a random palette
+  const choice = Object.entries(palettes)[Math.floor(Math.random() * 6)][1];
+
+  // convert palette to HEX
+  const paletteHex = choice.map((color) => formatHex(color));
+
+  // take the "base" color, and make a light, desaturated version of it. This will be perfect for background colors, etc.
+  const lightest = formatHex({
+    ...choice[0],
+    c: 10,
+    l: 98,
+  });
+
+  // take the "base" color, and make a dark, desaturated version of it. This will be perfect for text!
+  const darkest = formatHex({
+    ...choice[0],
+    c: 20,
+    l: 10,
+  });
+
+  return { darkest, lightest, palette: paletteHex };
+}
+
+function isColorEqual(c1: Lch, c2: Lch) {
+  return c1.h === c2.h && c1.l === c2.l && c1.c === c2.c;
+}
+
+const toLCH = converter('lch');
+
+const baseColors = [
+  '#FFB97A',
+  '#FF957C',
+  '#FF727F',
+  '#FF5083',
+  '#F02F87',
+  '#C70084',
+  '#9A007F',
+  '#6A0076',
+  '#33006B',
+];
+
+const baseColorsLCH = baseColors.map((color) => toLCH(color)!);
+
+export function discoverPalettes(colors: Lch[] = baseColorsLCH) {
+  const palettes: Record<string, { colors: Lch[]; variance: number }> = {};
+
+  for (const color of colors) {
+    const targetPalettes = createScientificPalettes(color);
+
+    for (const paletteType of Object.keys(targetPalettes)) {
+      const palette: Lch[] = [];
+      let variance = 0;
+
+      for (const targetColor of targetPalettes[paletteType]) {
+        // filter out colors already in the palette
+        const availableColors = colors.filter(
+          (color1) => !palette.some((color2) => isColorEqual(color1, color2))
+        );
+
+        const match = nearest(
+          availableColors,
+          differenceEuclidean('lch')
+        )(targetColor)[0];
+
+        variance += differenceEuclidean('lch')(targetColor, match);
+
+        palette.push(match);
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (!palettes[paletteType] || variance < palettes[paletteType].variance) {
+        palettes[paletteType] = {
+          colors: palette,
+          variance,
+        };
+      }
+    }
+  }
+
+  return palettes;
+}
+
+const colorThief = new ColorThief();
+
+async function loadImg(url: string) {
+  const img = document.createElement('img');
+
+  img.src = url;
+  img.crossOrigin = `anonymous`;
+
+  await img.decode();
+
+  return img;
+}
+
+export async function generatePalette() {
+  let colors: Lch[] = [];
+  let chosenImg;
+
+  const queries = [
+    'red',
+    'green',
+    'blue',
+    'yellow',
+    'orange',
+    'magenta',
+    'pink',
+    'purple',
+    'turqoise',
+    'grey',
+    'black',
+    'white',
+    'indigo',
+    'violet',
+    'emerald',
+    'flower',
+    'vibrant',
+    'gold',
+    'silver',
+    'jewels',
+    'rainbow',
+    'forest',
+    'ocean',
+    'coral',
+    'galaxy',
+    'tree',
+    'leaf',
+    'fish',
+    'frog',
+    'animal',
+    'wildlife',
+    'color',
+    'paint',
+    'paint',
+    'abstract',
+    'colorful',
+    'nature',
+    'volcano',
+    'sun',
+    'ruby',
+    'saphire',
+    'emerald',
+    '',
+  ];
+
+  while (colors.length < 4) {
+    const url = `https://source.unsplash.com/random?${
+      queries[Math.floor(Math.random() * queries.length - 1)]
+    }`;
+    chosenImg = await loadImg(url);
+
+    colors = colorThief.getPalette(chosenImg).map((color) =>
+      toLCH({
+        b: color[2] / 255,
+        g: color[1] / 255,
+        mode: 'rgb',
+        r: color[0] / 255,
+      })
+    );
+  }
+
+  const palettes = discoverPalettes(colors);
+  return palettes;
+}
+
+function map(
+  n: number,
+  start1: number,
+  end1: number,
+  start2: number,
+  end2: number
+) {
+  return ((n - start1) / (end1 - start1)) * (end2 - start2) + start2;
+}
+
+export function createHueShiftPalette(opts: {
+  base: Lch;
+  hueStep: number;
+  maxLightness: number;
+  minLightness: number;
+}) {
+  const { base, minLightness, maxLightness, hueStep } = opts;
+
+  const palette = [base];
+
+  for (let i = 1; i < 5; i++) {
+    const hueDark = adjustHue(base.h! - hueStep * i);
+    const hueLight = adjustHue(base.h! + hueStep * i);
+    const lightnessDark = map(i, 0, 4, base.l, minLightness);
+    const lightnessLight = map(i, 0, 4, base.l, maxLightness);
+    const chroma = base.c;
+
+    palette.push({
+      c: chroma,
+      h: hueDark,
+      l: lightnessDark,
+      mode: 'lch',
+    });
+
+    palette.unshift({
+      c: chroma,
+      h: hueLight,
+      l: lightnessLight,
+      mode: 'lch',
+    });
+  }
+
+  return palette;
+}

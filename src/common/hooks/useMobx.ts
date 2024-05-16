@@ -9,7 +9,7 @@ import {
   IReactionOptions,
   IAutorunOptions,
 } from 'mobx';
-import { identity, isFunction } from 'remeda';
+import { identity, isFunction, isPlainObject } from 'remeda';
 import { memoize } from 'common/utils/memoize';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,6 +39,7 @@ export const useMobx = <T extends Record<string, any>>(
         if (!Object.prototype.hasOwnProperty.call(target, keys[i])) {
           throw new Error('Invalid path');
         }
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error target changes so is unknown
         target = target[keys[i]];
       }
@@ -92,10 +93,18 @@ export const useMobx = <T extends Record<string, any>>(
 
         return (value) =>
           runInAction(() => {
-            parent[key] = map(
+            const result = map(
               value,
               parent[key] as Call<O.Get<typeof path>, T>
             );
+            if (isPlainObject(result)) {
+              for (const item of Object.entries(result)) {
+                // @ts-expect-error need to fix later
+                parent[key][item[0]] = item[1];
+              }
+            } else {
+              parent[key] = result;
+            }
           });
       }
     );

@@ -120,8 +120,7 @@ export default defineConfig(({ mode }) => ({
         useFlatConfig: false,
       },
       overlay: {
-        badgeStyle:
-          'background-color: transparent; font-size: 0.75em; color: black;',
+        badgeStyle: 'background-color: white; font-size: 0.75em; color: black;',
         initialIsOpen: false,
         panelStyle: 'height: 100%; background-color: #232125;',
       },

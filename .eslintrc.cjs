@@ -73,6 +73,15 @@ module.exports = {
       ],
       plugins: ['@typescript-eslint', 'typescript-sort-keys'],
       rules: {
+        '@typescript-eslint/ban-ts-comment': [
+          'warn',
+          {
+            'ts-check': false,
+            'ts-expect-error': true,
+            'ts-ignore': false,
+            'ts-nocheck': false,
+          },
+        ],
         '@typescript-eslint/no-confusing-void-expression': [
           'warn',
           { ignoreArrowShorthand: true },

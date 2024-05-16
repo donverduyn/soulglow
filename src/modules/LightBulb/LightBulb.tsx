@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { grey } from '@mui/material/colors';
 import { css, styled } from '@mui/material/styles';
+import type { Lch } from 'culori';
 import { observer } from 'mobx-react-lite';
 import { Select } from 'common/components/Select';
 import { Slider } from 'common/components/Slider';
@@ -9,8 +10,12 @@ import { TextField } from 'common/components/TextField';
 import { useAutorun, useMobx } from 'common/hooks/useMobx';
 import { LightMode, MODE_ITEMS } from './components/constants';
 import { OnOffSwitch } from './components/OnOffSwitch';
+import { toJS } from 'mobx';
 
-interface LightBulbProps extends DefaultProps {}
+interface LightBulbProps extends DefaultProps {
+  readonly getColor?: () => Lch;
+  readonly onChange: (value: LightBulbState) => void;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface LightBulbDto {
@@ -104,12 +109,13 @@ const formSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
 };
 //
 
-const LightBulbBase: React.FC<LightBulbProps> = ({ className }) => {
+const LightBulbBase: React.FC<LightBulbProps> = ({ className, onChange }) => {
   const bulb = useMobx(() => defaultState);
   const inputs = bulb.mode === LightMode.WHITE ? whiteInputs : colorInputs;
 
   useAutorun(() => {
     // console.log('LightBulb:', toJS(bulb));
+    onChange(toJS(bulb));
     void handleSubmit(bulb);
   });
 
@@ -149,6 +155,7 @@ const LightBulbBase: React.FC<LightBulbProps> = ({ className }) => {
               getValue={bulb.lazyGet(input.key)}
               max={255}
               onChange={bulb.set(input.key)}
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-expect-error props does not exist
               // eslint-disable-next-line react/jsx-props-no-spreading
               {...(input.props ?? {})}
@@ -170,7 +177,7 @@ export const LightBulb = styled(observer(LightBulbBase))`
   border-radius: ${(props) => props.theme.shape.borderRadius.toString() + 'px'};
   display: block;
   padding: ${(props) => props.theme.spacing(3.5, 3)};
-  width: 25em;
+  /* width: 25em; */
 
   & .input {
     align-items: center;
