@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { css, type Theme } from '@mui/material/styles';
-import { formatHex, type Okhsv } from 'culori';
+import { formatHex, formatRgb, type Okhsv } from 'culori';
 import { observer } from 'mobx-react-lite';
 import { Paper } from 'common/components/Paper';
 import { Stack } from 'common/components/Stack';
@@ -9,13 +9,13 @@ interface Props {
   readonly getPalettes: () => Record<string, Okhsv[]>;
 }
 
-export const PaletteViewer: React.FC<Props> = observer((props) => {
+const PaletteViewerComponent: React.FC<Props> = (props) => {
   const palettes = Object.entries(props.getPalettes());
 
   return (
     <Paper
       css={styles.root}
-      sx={styles.rootSx}
+      getStyle={styles.rootSx}
     >
       {palettes.map(([key, palette]) => (
         <Stack
@@ -26,7 +26,7 @@ export const PaletteViewer: React.FC<Props> = observer((props) => {
             <Stack
               key={key.concat(id.toString())}
               css={styles.swatch}
-              style={{ backgroundColor: formatHex(color) }}
+              style={{ backgroundColor: formatRgb(color) }}
             >
               {formatHex(color)}
             </Stack>
@@ -35,8 +35,9 @@ export const PaletteViewer: React.FC<Props> = observer((props) => {
       ))}
     </Paper>
   );
-});
+};
 
+export const PaletteViewer = observer(PaletteViewerComponent);
 const styles = {
   palette: css`
     background: none;

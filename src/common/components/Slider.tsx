@@ -30,6 +30,7 @@ export const Slider = observer(<T extends number>(props: Props<T>) => {
       min={min ?? 0}
       onChange={handleChange}
       slotProps={slotProps.current!}
+      step={0.1}
       track={track ?? 'normal'}
       value={getValue()}
       valueLabelDisplay='off'

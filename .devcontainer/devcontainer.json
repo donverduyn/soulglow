@@ -46,6 +46,10 @@
 		"./.devcontainer/host.sh"
 	],
 	"portsAttributes": {
+		"8080": {
+			"label": "Preview",
+			"onAutoForward": "silent"
+		},
 		"9222": {
 			"label": "Remote debugging",
 			"onAutoForward": "silent"

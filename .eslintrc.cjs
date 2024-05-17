@@ -155,11 +155,7 @@ module.exports = {
           'warn',
           { allowConstantExport: true },
         ],
-        'react/destructuring-assignment': [
-          'warn',
-          'always',
-          { destructureInSignature: 'ignore', ignoreClassFields: true },
-        ],
+        'react/destructuring-assignment': 'off',
         'react/forbid-component-props': 'off',
         'react/function-component-definition': [
           'warn',

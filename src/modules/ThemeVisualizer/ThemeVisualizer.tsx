@@ -29,6 +29,7 @@ export const ThemeVisualizer: React.FC<ThemeVisualizerProps> = ({
     <Paper
       className={className}
       css={styles.root}
+      getStyle={styles.rootSx}
     >
       <Typography
         css={styles.title}
@@ -52,17 +53,17 @@ export const ThemeVisualizer: React.FC<ThemeVisualizerProps> = ({
               const isColor = !isNumber(value);
               if (!isColor) return null;
               return (
-                <Paper
+                <Stack
                   key={key}
                   css={styles.color}
-                  sx={{
+                  getStyle={() => ({
                     backgroundColor: value as string,
                     color: theme.palette.getContrastText(value as string),
-                  }}
+                  })}
                 >
                   <Typography variant='body2'>{key}</Typography>
                   <Typography variant='body1'>{value}</Typography>
-                </Paper>
+                </Stack>
               );
             }
           )}
@@ -93,6 +94,10 @@ const styles = {
   root: css`
     padding: 2rem;
   `,
+  rootSx: (theme: Theme) => ({
+    background: theme.palette.background.paper,
+    borderRadius: theme.shape.borderRadius.toString() + 'px',
+  }),
   title: css`
     margin-bottom: 1rem;
   `,

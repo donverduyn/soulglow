@@ -98,6 +98,10 @@ export default defineConfig(({ mode }) => ({
                 },
               },
               '@mui/material/styles': {
+                // css: {
+                //   canonicalImport: ['@emotion/react', 'css'],
+                //   styledBaseImport: ['@mui/material/styles', 'css'],
+                // },
                 styled: {
                   canonicalImport: ['@emotion/styled', 'default'],
                   styledBaseImport: ['@mui/material/styles', 'styled'],

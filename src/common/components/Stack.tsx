@@ -11,16 +11,15 @@ interface Props extends DefaultProps {
 }
 
 export const Stack: React.FC<Props> = observer(
-  ({ children, className, sx, style = {}, getStyle }) => {
+  ({ children, className, style = {}, getStyle }) => {
     const styles = getStyle ? Object.assign(style, getStyle()) : style;
     return (
-      <MuiStack
-        className={className!}
+      <div
+        className={className}
         style={styles}
-        sx={sx!}
       >
         {children}
-      </MuiStack>
+      </div>
     );
   }
 );

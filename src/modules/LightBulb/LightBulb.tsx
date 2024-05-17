@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { grey } from '@mui/material/colors';
 import { css } from '@mui/material/styles';
+import type { Okhsv } from 'culori';
 import { observer } from 'mobx-react-lite';
 import { Select } from 'common/components/Select';
 import { Slider } from 'common/components/Slider';
@@ -12,11 +13,7 @@ import { OnOffSwitch } from './components/OnOffSwitch';
 
 interface LightBulbProps extends DefaultProps {
   readonly getStyle: () => React.CSSProperties;
-  readonly onChange: (value: {
-    hue: number;
-    level: number;
-    saturation: number;
-  }) => void;
+  readonly onChange: (value: Okhsv) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -118,9 +115,10 @@ export const LightBulb: React.FC<LightBulbProps> = observer(
     });
     useAutorun(() => {
       onChange({
-        hue: bulb.hue,
-        level: bulb.level,
-        saturation: bulb.saturation,
+        h: bulb.hue,
+        mode: 'okhsv',
+        s: bulb.saturation / 100,
+        v: bulb.level / 100,
       });
     });
 
