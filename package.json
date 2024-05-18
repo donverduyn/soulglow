@@ -17,7 +17,7 @@
     "clean": "rm -rf dist .vite-inspect .analyzer .swc yarn-error.log",
     "reset": "yarn clean && rm -rf node_modules /home/vscode/.cache ./src/__generated",
     "ci:local": "act -P ubuntu-latest=-self-hosted -j build --cache-server-addr 0.0.0.0",
-    "dep:stats": "npx --yes tsx ./scripts/dep-stats.ts"
+    "dep:stats": "npx --yes tsx -e \"import { view } from './scripts/dep-stats'; view('./package.json');\""
   },
   "dependencies": {
     "@effect/schema": "^0.66.10",
