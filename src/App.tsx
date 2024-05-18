@@ -11,10 +11,10 @@ import { ThemeVisualizer } from 'modules/ThemeVisualizer/ThemeVisualizer';
 import { createPalettes, darkTheme, lightTheme } from './theme';
 
 const baseColor: Okhsv = {
-  h: 140,
+  h: 0,
   mode: 'okhsv',
-  s: 0.3,
-  v: 0.8,
+  s: 0,
+  v: 0,
 };
 
 export const App2: React.FC<DefaultProps> = ({ className }) => {

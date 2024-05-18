@@ -82,7 +82,9 @@ export default defineConfig(({ mode }) => ({
     drop: ['console', 'debugger'],
   },
   plugins: [
-    mode !== 'production' && pluginBrowserLaunch(mode),
+    mode !== 'production' &&
+      process.env.CI !== 'true' &&
+      pluginBrowserLaunch(mode),
     tsconfigPaths(),
     react({
       jsxImportSource: '@emotion/react',

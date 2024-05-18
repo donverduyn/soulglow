@@ -9,8 +9,22 @@ import {
   IReactionOptions,
   IAutorunOptions,
 } from 'mobx';
+import { deepObserve } from 'mobx-utils';
 import { identity, isFunction, isPlainObject } from 'remeda';
 import { memoize } from 'common/utils/memoize';
+
+// const ref = observable.object(
+//   { h: 0, mode: 'okhsv', s: 0, v: 0 } as Okhsv,
+//   {
+//     h: observable.ref,
+//     mode: observable.ref,
+//     s: observable.ref,
+//     v: observable.ref,
+//   },
+//   { deep: false }
+// );
+
+// console.log(isObservable(ref), isObservableProp(ref, 'target'));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const useMobx = <T extends Record<string, any>>(
@@ -129,6 +143,15 @@ export const useMobx = <T extends Record<string, any>>(
 export const useAutorun = (fn: () => void, options: IAutorunOptions = {}) =>
   // because the aesthetics of useEffect are suboptimal
   React.useEffect(() => autorun(fn, options), []);
+
+type IChange<T> = Parameters<Parameters<typeof deepObserve>[1]>[0] & {
+  name: string;
+  newValue: T;
+  oldValue: T;
+};
+
+export const useDeepObserve = <T, U>(t: T, fn: (c: IChange<U>) => void) =>
+  React.useEffect(() => deepObserve(t, (c) => fn(c as IChange<U>)), []);
 
 export const useReaction = <T>(
   fn: () => T,

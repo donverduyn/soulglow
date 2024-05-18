@@ -1,13 +1,20 @@
 import * as React from 'react';
-import { grey } from '@mui/material/colors';
+// import { grey } from '@mui/material/colors';
 import { css } from '@mui/material/styles';
 import type { Okhsv } from 'culori';
 import { observer } from 'mobx-react-lite';
+import {
+  DeviceControlService,
+  RemoteType,
+  State,
+  type GroupState,
+  type GroupStateCommands,
+} from '__generated/api';
 import { Select } from 'common/components/Select';
 import { Slider } from 'common/components/Slider';
 import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
-import { useAutorun, useMobx } from 'common/hooks/useMobx';
+import { useAutorun, useMobx, useDeepObserve } from 'common/hooks/useMobx';
 import { LightMode, MODE_ITEMS } from './components/constants';
 import { OnOffSwitch } from './components/OnOffSwitch';
 
@@ -23,29 +30,24 @@ interface LightBulbDto {
   color: Color;
   color_temp: number;
   saturation: number;
-  state: PowerState;
+  state: State;
 }
 
 interface LightBulbState {
+  bulb_mode: LightMode;
   hue: number;
   level: number;
-  mode: LightMode;
   saturation: number;
-  status: PowerState;
+  status: State;
   temperature: number;
 }
 
-enum PowerState {
-  OFF = 'OFF',
-  ON = 'ON',
-}
-
 const defaultState: LightBulbState = {
-  hue: 250,
-  level: 60,
-  mode: LightMode.COLOR,
-  saturation: 20,
-  status: PowerState.OFF,
+  bulb_mode: LightMode.COLOR,
+  hue: 270,
+  level: 87,
+  saturation: 70,
+  status: State.OFF,
   temperature: 100,
 };
 
@@ -57,69 +59,78 @@ interface Color {
 }
 /* eslint-enable typescript-sort-keys/interface */
 
-const inputCSS = {
-  colorTemp: css`
-    color: ${grey[800]};
+// const inputCSS = {
+//   colorTemp: css`
+//     color: ${grey[800]};
 
-    & .MuiSlider-rail {
-      background-image: linear-gradient(to right, #ffd27f, #fff 50%, #9abad9);
-      opacity: 1;
-    }
-  `,
-};
+//     & .MuiSlider-rail {
+//       background-image: linear-gradient(to right, #ffd27f, #fff 50%, #9abad9);
+//       opacity: 1;
+//     }
+//   `,
+// };
 
 const whiteInputs = [
-  {
-    key: 'temperature',
-    label: 'temperature',
-    props: { css: inputCSS.colorTemp, track: false },
-  },
+  { key: 'temperature', label: 'temp', props: { max: 100, track: false } },
   { key: 'level', label: 'level' },
 ] as const;
 
 const colorInputs = [
-  {
-    key: 'level',
-    label: 'level',
-    props: { max: 100 },
-  },
+  { key: 'level', label: 'level', props: { max: 100 } },
   { key: 'saturation', label: 'saturation', props: { max: 100 } },
   { key: 'hue', label: 'hue', props: { max: 360 } },
 ] as const;
 
 //
-const handleSubmit = async (status: LightBulbState['status']) => {
+const handleSubmit = async (state: GroupState & GroupStateCommands) => {
   try {
-    const response = await fetch('/api/gateways/desk-light?blockOnQueue=true', {
-      body: JSON.stringify({ status }),
-      headers: { 'Content-Type': 'application/json' },
-      method: 'POST',
-    });
-    console.log('Response:', await response.json());
+    const deviceId = 5;
+    const groupId = 5;
+    const response =
+      await DeviceControlService.putGatewaysByDeviceIdByRemoteTypeByGroupId({
+        blockOnQueue: true,
+        deviceId,
+        groupId,
+        remoteType: RemoteType.FUT089,
+        requestBody: state,
+      });
+
+    console.log('Response:', response);
+    // console.log('Response:', response);
   } catch (error) {
     console.error('Error:', error);
   }
 };
 
 const formSubmit: React.FormEventHandler<HTMLFormElement> = () => {
-  // we can't really support formSubmit, unless we find a way to apply all settings at once. it seems that this is not supported by the api but who knows
+  // we can't really support formSubmit, unless we find a way to apply all settings at once.
+  // it seems that this is not supported by the api but who knows
 };
 
 export const LightBulb: React.FC<LightBulbProps> = observer(
   ({ getStyle: getStyles, onChange }) => {
     const bulb = useMobx(() => defaultState);
-    const inputs = bulb.mode === LightMode.WHITE ? whiteInputs : colorInputs;
+    const inputs =
+      bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
 
     useAutorun(() => {
-      void handleSubmit(bulb.status);
-    });
-    useAutorun(() => {
       onChange({
-        h: bulb.hue,
+        h:
+          (360 +
+            bulb.hue +
+            20 +
+            20 * Math.sin((bulb.hue / 360) * 2 * Math.PI)) %
+          360,
         mode: 'okhsv',
-        s: bulb.saturation / 100,
-        v: bulb.level / 100,
+        s: 0.4 + (bulb.saturation / 100) * (1 - 0.4),
+        v: 0.6 + (bulb.level / 100) * (1 - 0.6),
       });
+    });
+
+    useDeepObserve(bulb, (change) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      void handleSubmit({ [change.name]: change.newValue });
+      console.log('path:', change.name);
     });
 
     return (
@@ -133,17 +144,17 @@ export const LightBulb: React.FC<LightBulbProps> = observer(
         >
           <OnOffSwitch
             getValue={bulb.lazyGet('status', (value) =>
-              value === PowerState.ON ? true : false
+              value === State.ON ? true : false
             )}
             onChange={bulb.set('status', (value) =>
-              value ? PowerState.ON : PowerState.OFF
+              value ? State.ON : State.OFF
             )}
           />
           <Select
-            getValue={bulb.lazyGet('mode')}
+            getValue={bulb.lazyGet('bulb_mode')}
             items={MODE_ITEMS}
             label='Mode'
-            onChange={bulb.set('mode')}
+            onChange={bulb.set('bulb_mode')}
           />
           {inputs.map((input) => (
             <Stack
