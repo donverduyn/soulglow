@@ -139,9 +139,8 @@ export default defineConfig(({ mode }) => ({
             }
           : false,
       terminal: false,
-      typescript: {
-        tsconfigPath: './tsconfig.json',
-      },
+      typescript:
+        process.env.CI === 'true' ? false : { tsconfigPath: './tsconfig.json' },
     }),
     visualizer({
       brotliSize: true,
