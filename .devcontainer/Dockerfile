@@ -1,35 +1,57 @@
-# Step 1: Create a Java runtime
-FROM eclipse-temurin:21 as jre-build
+# ENV CPPFLAGS="-DPNG_ARM_NEON_OPT=0"
+# ENV CFLAGS="-march=armv7-a -mfloat-abi=hard -mfpu=neon -mthumb"
 
-# java.base and java.logging are needed to build React
-RUN $JAVA_HOME/bin/jlink \
-         --add-modules java.base,java.logging \  
-         # for openapi-generator ,java.xml,java.naming,jdk.unsupported,java.desktop \
-         --strip-debug \
-         --no-man-pages \
-         --no-header-files \
-         --compress=2 \
-         --output /javaruntime
+# Install necessary packages
+# RUN apt-get update && apt-get install -y \
+#     # chromium-browser \
+#     chromium \
+#     libgles2-mesa \
+#     libegl1-mesa \
+#     mesa-utils \
+#     alsa-utils \
+#     xdg-utils \
+#     libgl1-mesa-dri \
+#     mesa-vdpau-drivers \
+#     libvulkan1 \
+#     libgbm1 \
+#     libxshmfence1 \
+#     curl \
+#     x11-apps \
+#     && rm -rf /var/lib/apt/lists/*
 
-# Stage 2: Build React DevTools
-FROM node:20 as builder
-ENV JAVA_HOME=/opt/java/openjdk
-ENV PATH "${JAVA_HOME}/bin:${PATH}"
-COPY --from=jre-build /javaruntime $JAVA_HOME
 
-# Install Yarn
-RUN apt-get update && apt-get install -y curl gnupg \
-    && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor -o /usr/share/keyrings/yarnkey.gpg \
-    && echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
-    && apt-get update && apt-get install -y yarn
+# # Step 1: Create a Java runtime
+# FROM eclipse-temurin:21 as jre-build
 
-# Clone and build
-RUN git clone https://github.com/facebook/react.git /tmp/react \
-    && cd /tmp/react \
-    && yarn install \
-    && yarn build-for-devtools \
-    && cd ./packages/react-devtools-extensions \
-    && yarn build:chrome
+# # java.base and java.logging are needed to build React
+# RUN $JAVA_HOME/bin/jlink \
+#          --add-modules java.base,java.logging \  
+#          # for openapi-generator ,java.xml,java.naming,jdk.unsupported,java.desktop \
+#          --strip-debug \
+#          --no-man-pages \
+#          --no-header-files \
+#          --compress=2 \
+#          --output /javaruntime
+
+# # Stage 2: Build React DevTools
+# FROM node:20 as builder
+# ENV JAVA_HOME=/opt/java/openjdk
+# ENV PATH "${JAVA_HOME}/bin:${PATH}"
+# COPY --from=jre-build /javaruntime $JAVA_HOME
+
+# # Install Yarn
+# RUN apt-get update && apt-get install -y curl gnupg \
+#     && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor -o /usr/share/keyrings/yarnkey.gpg \
+#     && echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
+#     && apt-get update && apt-get install -y yarn
+
+# # Clone and build
+# RUN git clone https://github.com/facebook/react.git /tmp/react \
+#     && cd /tmp/react \
+#     && yarn install \
+#     && yarn build-for-devtools \
+#     && cd ./packages/react-devtools-extensions \
+#     && yarn build:chrome
 
 # Stage 3: Setup the final image
 FROM mcr.microsoft.com/devcontainers/base:bullseye
@@ -50,7 +72,7 @@ RUN mkdir -p /tmp/runtime-vscode \
     && usermod -a -G audio,video vscode
 
 # Copy built React DevTools from the builder stage
-COPY --from=builder /tmp/react/packages/react-devtools-extensions/chrome/build /tmp/react-devtools-extensions
+# COPY --from=builder /tmp/react/packages/react-devtools-extensions/chrome/build /tmp/react-devtools-extensions
 
 # Add Node binaries to PATH
 ENV PATH=./node_modules/.bin:$PATH

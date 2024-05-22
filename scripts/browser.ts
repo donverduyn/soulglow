@@ -35,19 +35,21 @@ const getAlsaOutputDevice = (): string => {
 const options: Parameters<(typeof puppeteer)['launch']>[0] = {
   args: [
     `--alsa-output-device=${getAlsaOutputDevice()}`,
-    '--disable-gpu',
-    '--disable-dev-shm-usage',
-    '--disable-extensions-except=/tmp/react-devtools-extensions/unpacked',
-    '--load-extension=/tmp/react-devtools-extensions/unpacked',
+    // '--disable-gpu',
+    // '--disable-dev-shm-usage',
+    // '--disable-extensions-except=/tmp/react-devtools-extensions/unpacked',
+    // '--load-extension=/tmp/react-devtools-extensions/unpacked',
     '--remote-debugging-port=9222',
     // '--auto-accept-camera-and-microphone-capture',
-    // '--force-dark-mode',
+    '--dbus-stub',
+    '--force-dark-mode',
+    '--use-gl=egl',
   ],
   defaultViewport: { height: 0, width: 0 },
   devtools: true,
-  executablePath: puppeteer.executablePath(),
+  // executablePath: puppeteer.executablePath(),
   headless: false,
-  // dumpio: true,
+  dumpio: true,
 };
 
 const userPrefs = {

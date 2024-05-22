@@ -33,11 +33,12 @@
 		"SYS_ADMIN" // for sandboxing chromium
 	],
 	"mounts": [
+		"source=/dev/shm,target=/dev/shm,type=bind,consistency=cached",
 		"source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
 		"source=/run/user/1000/bus,target=/run/user/1000/bus,type=bind,consistency=cached",
         "source=${env:HOME}/.local/share/fonts,target=/home/vscode/.local/share/fonts,type=bind,consistency=cached"
 	],
-	"runArgs": ["--device=/dev/dri:/dev/dri", "--device=/dev/snd"],
+	"runArgs": ["--device=/dev/dri:/dev/dri", "--device=/dev/snd", "--security-opt=apparmor=unconfined"],
 	"postCreateCommand": "yarn install",
 	"postStartCommand": {
 		// If we consider cross-platform we should run dbus in the container
@@ -47,9 +48,9 @@
 		// In terms of x11 we should investigate how to support (xquartz, x410, vcxsrv, etc.)
 		// "dbus": "dbus-daemon --session --address=unix:path=/run/user/1000/bus >/dev/null 2>&1 &"
 	},
-	"initializeCommand": [
-		"./.devcontainer/host.sh"
-	],
+	// "initializeCommand": [
+	// 	"./.devcontainer/host.sh"
+	// ],
 	"portsAttributes": {
 		"8080": {
 			"label": "Preview",
@@ -73,7 +74,12 @@
 		"DISPLAY": "${localEnv:DISPLAY}",
 		"DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
 		"XDG_RUNTIME_DIR": "/tmp/runtime-vscode",
-		"PUPPETEER_CACHE_DIR": "${containerWorkspaceFolder}/node_modules/puppeteer/.local-chromium"
+		// "PUPPETEER_CACHE_DIR": "${containerWorkspaceFolder}/node_modules/puppeteer/.local-chromium",
+		"PUPPETEER_SKIP_CHROMIUM_DOWNLOAD": "true",
+		// "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium",
+		// "LIBGL_ALWAYS_SOFTWARE": "0",
+		// "LIBGL_ALWAYS_INDIRECT": "1",
+		// "LIBGL_DRIVERS_PATH": "/usr/lib/aarch64-linux-gnu/dri"
 	},
 	"customizations": {
 		"vscode": {
