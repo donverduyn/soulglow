@@ -36,9 +36,9 @@
 		"source=/dev/shm,target=/dev/shm,type=bind,consistency=cached",
 		"source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
 		"source=/run/user/1000/bus,target=/run/user/1000/bus,type=bind,consistency=cached",
-        "source=${env:HOME}/.local/share/fonts,target=/home/vscode/.local/share/fonts,type=bind,consistency=cached"
+        // "source=${env:HOME}/.local/share/fonts,target=/home/vscode/.local/share/fonts,type=bind,consistency=cached"
 	],
-	"runArgs": ["--device=/dev/dri:/dev/dri", "--device=/dev/snd", "--security-opt=apparmor=unconfined"],
+	"runArgs": ["--device=/dev/dri:/dev/dri", "--device=/dev/snd","--security-opt=apparmor=unconfined"],
 	"postCreateCommand": "yarn install",
 	"postStartCommand": {
 		// If we consider cross-platform we should run dbus in the container
@@ -74,12 +74,8 @@
 		"DISPLAY": "${localEnv:DISPLAY}",
 		"DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
 		"XDG_RUNTIME_DIR": "/tmp/runtime-vscode",
-		// "PUPPETEER_CACHE_DIR": "${containerWorkspaceFolder}/node_modules/puppeteer/.local-chromium",
 		"PUPPETEER_SKIP_CHROMIUM_DOWNLOAD": "true",
-		// "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium",
-		// "LIBGL_ALWAYS_SOFTWARE": "0",
-		// "LIBGL_ALWAYS_INDIRECT": "1",
-		// "LIBGL_DRIVERS_PATH": "/usr/lib/aarch64-linux-gnu/dri"
+		"PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium"
 	},
 	"customizations": {
 		"vscode": {

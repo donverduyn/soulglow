@@ -1,25 +1,3 @@
-# ENV CPPFLAGS="-DPNG_ARM_NEON_OPT=0"
-# ENV CFLAGS="-march=armv7-a -mfloat-abi=hard -mfpu=neon -mthumb"
-
-# Install necessary packages
-# RUN apt-get update && apt-get install -y \
-#     # chromium-browser \
-#     chromium \
-#     libgles2-mesa \
-#     libegl1-mesa \
-#     mesa-utils \
-#     alsa-utils \
-#     xdg-utils \
-#     libgl1-mesa-dri \
-#     mesa-vdpau-drivers \
-#     libvulkan1 \
-#     libgbm1 \
-#     libxshmfence1 \
-#     curl \
-#     x11-apps \
-#     && rm -rf /var/lib/apt/lists/*
-
-
 # # Step 1: Create a Java runtime
 # FROM eclipse-temurin:21 as jre-build
 
@@ -56,14 +34,22 @@
 # Stage 3: Setup the final image
 FROM mcr.microsoft.com/devcontainers/base:bullseye
 
-# Install general dependencies and Chrome
-RUN apt-get update \
-    && apt-get install -y wget gnupg \
-    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/googlechrome-linux-keyring.gpg \
-    && sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/googlechrome-linux-keyring.gpg] https://dl-ssl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
-    && apt-get update \
-    && apt-get install -y libnss3 libgbm1 fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-khmeros fonts-kacst fonts-freefont-ttf libxss1 dbus dbus-x11 libappindicator3-1 libasound2 libatk-bridge2.0-0 libatk1.0-0 libcups2 libdbus-1-3 libgdk-pixbuf2.0-0 libnspr4 libnss3 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 xdg-utils alsa-utils vulkan-tools mesa-vulkan-drivers upower libglib2.0-bin fonts-recommended --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/* /var/tmp/*
+# Install necessary packages
+RUN apt-get update && apt-get install -y \
+    chromium \
+    alsa-utils \
+    xdg-utils \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# # Install general dependencies and Chrome
+# RUN apt-get update \
+#     && apt-get install -y wget gnupg \
+#     && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/googlechrome-linux-keyring.gpg \
+#     && sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/googlechrome-linux-keyring.gpg] https://dl-ssl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+#     && apt-get update \
+#     && apt-get install -y libnss3 libgbm1 fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-khmeros fonts-kacst fonts-freefont-ttf libxss1 dbus dbus-x11 libappindicator3-1 libasound2 libatk-bridge2.0-0 libatk1.0-0 libcups2 libdbus-1-3 libgdk-pixbuf2.0-0 libnspr4 libnss3 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 xdg-utils alsa-utils vulkan-tools mesa-vulkan-drivers upower libglib2.0-bin fonts-recommended --no-install-recommends \
+#     && rm -rf /var/lib/apt/lists/* /var/tmp/*
 
 # Additional container configuration
 RUN mkdir -p /tmp/runtime-vscode \
