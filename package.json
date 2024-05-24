@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "postinstall": "patch-package && yarn api:generate",
+    "postinstall": "patch-package && yarn api:generate && npx playwright install --with-deps chromium",
     "api:generate": "rm -rf ./src/__generated && tsx -e \"import { generate } from './scripts/api-gen'; generate('./openapi.yml', './src/__generated/api');\"",
     "dev": "vite --port 4173",
     "build": "rm -rf dist && vite build",
@@ -14,8 +14,8 @@
     "test": "vitest --ui",
     "test:e2e": "npx --yes tsx --watch ./.devcontainer/launch.ts",
     "analyze": "yarn build && NODE_NO_WARNINGS=1 tsx -e \"import { viewStatic } from './scripts/browser'; viewStatic('./.analyzer');\"",
-    "clean": "rm -rf dist .vite-inspect .analyzer .swc yarn-error.log",
-    "reset": "yarn clean && rm -rf node_modules /home/vscode/.cache ./src/__generated",
+    "clean": "rm -rf dist .vite-inspect .analyzer .swc yarn-error.log ./src/__generated",
+    "reset": "yarn clean && rm -rf node_modules /home/vscode/.cache",
     "ci:local": "act -P ubuntu-latest=-self-hosted -j build --cache-server-addr 0.0.0.0",
     "dep:stats": "npx --yes tsx -e \"import { view } from './scripts/dep-stats'; view('./package.json');\""
   },
@@ -46,7 +46,7 @@
   "devDependencies": {
     "@emotion/eslint-plugin": "^11.11.0",
     "@faker-js/faker": "^8.4.1",
-    "@hey-api/openapi-ts": "^0.45.1",
+    "@hey-api/openapi-ts": "0.45.1",
     "@puppeteer/browsers": "^2.2.3",
     "@swc/plugin-emotion": "^3.0.0",
     "@testing-library/react": "^15.0.5",
@@ -84,6 +84,7 @@
     "msw": "^1.3.3",
     "msw-trpc": "^1.3.4",
     "patch-package": "^8.0.0",
+    "playwright": "^1.44.1",
     "postcss": "^8.4.38",
     "postcss-preset-env": "^9.5.12",
     "postcss-styled-syntax": "^0.6.4",

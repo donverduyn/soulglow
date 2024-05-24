@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# to configure xquartz
+# defaults write org.xquartz.X11 enable_iglx -bool YES
+
 # Check if the /tmp/monaspace directory does not exist
 if [ ! -d "/tmp/monaspace" ]; then
     # Clone the repository into /tmp/monaspace

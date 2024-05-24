@@ -172,7 +172,7 @@ export default defineConfig(({ mode }) => ({
     headers: noCacheHeaders,
     hmr: { overlay: true },
     host: '0.0.0.0',
-    open: true,
+    // open: true,
     proxy: {
       '/api': {
         // The base URL of your API

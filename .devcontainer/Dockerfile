@@ -38,6 +38,32 @@ FROM mcr.microsoft.com/devcontainers/base:bullseye
 RUN apt-get update && apt-get install -y \
     chromium \
     alsa-utils \
+    # libgconf-2-4 \
+    # libnss3 \
+    # libxss1 \
+    # libasound2 \
+    # libatk1.0-0 \
+    # libatk-bridge2.0-0 \
+    # libcups2 \
+    # libdbus-1-3 \
+    # libdrm2 \
+    # libgbm1 \
+    # libgtk-3-0 \
+    # libnspr4 \
+    # libxcomposite1 \
+    # libxrandr2 \
+    # libxdamage1 \
+    # libxkbcommon0 \
+    # libxshmfence1 \
+    # libx11-xcb1 \
+    # libxcursor1 \
+    # libxi6 \
+    # libxtst6 \
+    # libnss3-dev \
+    # libgles2-mesa \
+    # libegl1-mesa \
+    # libgl1-mesa-glx \
+    # mesa-utils \
     xdg-utils \
     curl \
     && rm -rf /var/lib/apt/lists/*
