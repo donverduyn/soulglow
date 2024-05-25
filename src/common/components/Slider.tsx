@@ -43,7 +43,6 @@ export const Slider = observer(<T extends number>(props: Props<T>) => {
 const sliderStyles = {
   root: css`
     --slider-color: var(--color, inherit);
-
     color: var(--slider-color);
     height: 8px;
     margin: 0 0.5em;

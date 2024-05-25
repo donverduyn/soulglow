@@ -13,11 +13,9 @@ export const generate = async (
 
     // Generate TypeScript client
     await createClient({
-      client: 'fetch',
+      client: '@hey-api/client-fetch',
       // debug: true,
-      input: Object.assign(jsonSpec, {
-        servers: [{ url: '/api' }],
-      }),
+      input: jsonSpec,
       output: {
         format: 'prettier',
         lint: 'eslint',
@@ -28,6 +26,7 @@ export const generate = async (
         type: 'json',
       },
       services: {
+        asClass: true,
         export: true,
         name: '{{name}}Service',
       },

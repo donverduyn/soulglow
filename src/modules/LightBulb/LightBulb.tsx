@@ -1,7 +1,8 @@
 import * as React from 'react';
-// import { grey } from '@mui/material/colors';
 import { css } from '@mui/material/styles';
 import type { Okhsv } from 'culori';
+import { Effect, flow } from 'effect';
+import { runPromise } from 'effect/Effect';
 import { observer } from 'mobx-react-lite';
 import {
   DeviceControlService,
@@ -17,21 +18,6 @@ import { TextField } from 'common/components/TextField';
 import { useAutorun, useMobx, useDeepObserve } from 'common/hooks/useMobx';
 import { LightMode, MODE_ITEMS } from './components/constants';
 import { OnOffSwitch } from './components/OnOffSwitch';
-
-interface LightBulbProps extends DefaultProps {
-  readonly getStyle: () => React.CSSProperties;
-  readonly onChange: (value: Okhsv) => void;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface LightBulbDto {
-  brightness: number;
-  bulb_mode: LightMode;
-  color: Color;
-  color_temp: number;
-  saturation: number;
-  state: State;
-}
 
 interface LightBulbState {
   bulb_mode: LightMode;
@@ -51,24 +37,38 @@ const defaultState: LightBulbState = {
   temperature: 100,
 };
 
-/* eslint-disable typescript-sort-keys/interface */
-interface Color {
-  r: number;
-  g: number;
-  b: number;
+const handle = (
+  state: GroupState & GroupStateCommands,
+  options: { deviceId: number; groupId: number; remoteType: RemoteType }
+) =>
+  Effect.tryPromise(() =>
+    DeviceControlService.putGatewaysByDeviceIdByRemoteTypeByGroupId({
+      body: state,
+      path: {
+        'device-id': options.deviceId,
+        'group-id': options.groupId,
+        'remote-type': options.remoteType,
+      },
+      query: { blockOnQueue: true },
+    })
+  );
+
+const handleSubmit2 = flow(
+  handle,
+  Effect.andThen((response) => {
+    console.log('Response:', response);
+  })
+);
+
+const formSubmit: React.FormEventHandler<HTMLFormElement> = () => {
+  // we can't really support formSubmit, unless we find a way to apply all settings at once.
+  // it seems that this is not supported by the api but who knows
+};
+
+interface Props extends DefaultProps {
+  readonly getStyle: () => React.CSSProperties;
+  readonly onChange: (value: Okhsv) => void;
 }
-/* eslint-enable typescript-sort-keys/interface */
-
-// const inputCSS = {
-//   colorTemp: css`
-//     color: ${grey[800]};
-
-//     & .MuiSlider-rail {
-//       background-image: linear-gradient(to right, #ffd27f, #fff 50%, #9abad9);
-//       opacity: 1;
-//     }
-//   `,
-// };
 
 const whiteInputs = [
   { key: 'temperature', label: 'temp', props: { max: 100, track: false } },
@@ -82,33 +82,8 @@ const colorInputs = [
 ] as const;
 
 //
-const handleSubmit = async (state: GroupState & GroupStateCommands) => {
-  try {
-    const deviceId = 5;
-    const groupId = 5;
-    const response =
-      await DeviceControlService.putGatewaysByDeviceIdByRemoteTypeByGroupId({
-        blockOnQueue: true,
-        deviceId,
-        groupId,
-        remoteType: RemoteType.FUT089,
-        requestBody: state,
-      });
-
-    console.log('Response:', response);
-    // console.log('Response:', response);
-  } catch (error) {
-    console.error('Error:', error);
-  }
-};
-
-const formSubmit: React.FormEventHandler<HTMLFormElement> = () => {
-  // we can't really support formSubmit, unless we find a way to apply all settings at once.
-  // it seems that this is not supported by the api but who knows
-};
-
-export const LightBulb: React.FC<LightBulbProps> = observer(
-  ({ getStyle: getStyles, onChange }) => {
+export const LightBulb: React.FC<Props> = observer(
+  ({ className, getStyle, onChange }) => {
     const bulb = useMobx(() => defaultState);
     const inputs =
       bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
@@ -129,14 +104,21 @@ export const LightBulb: React.FC<LightBulbProps> = observer(
 
     useDeepObserve(bulb, (change) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      // void handleSubmit({ [change.name]: change.newValue });
-      // console.log('path:', change.name);
+      const body = { [change.name]: change.newValue };
+      void runPromise(
+        handleSubmit2(body, {
+          deviceId: 5,
+          groupId: 5,
+          remoteType: RemoteType.FUT089,
+        })
+      );
     });
 
     return (
       <Stack
+        className={className}
         css={styles.root}
-        getStyle={getStyles}
+        getStyle={getStyle}
       >
         <form
           css={styles.form}
@@ -185,17 +167,20 @@ export const LightBulb: React.FC<LightBulbProps> = observer(
 
 const styles = {
   form: css`
+    --label: Form;
     display: flex;
     flex-direction: column;
     gap: 1em;
   `,
   input: css`
+    --label: SliderInput;
     align-items: center;
     display: flex;
     flex-direction: row;
     gap: 1em;
   `,
   root: css`
+    --label: LightBulb;
     align-items: center;
     background: var(--background, #fff);
     border-radius: 12px;

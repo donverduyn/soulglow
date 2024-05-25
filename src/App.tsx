@@ -1,6 +1,6 @@
 import * as React from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
-import { ThemeProvider, css, styled } from '@mui/material/styles';
+import { ThemeProvider, css } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { formatRgb, type Okhsv } from 'culori';
 import { observable } from 'mobx';
@@ -18,7 +18,7 @@ const baseColor: Okhsv = {
   v: 0,
 };
 
-export const App2: React.FC<DefaultProps> = ({ className }) => {
+export const App: React.FC = () => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const state = useMobx(() => ({ color: baseColor }), {
     color: observable.ref,
@@ -27,10 +27,7 @@ export const App2: React.FC<DefaultProps> = ({ className }) => {
   return (
     <ThemeProvider theme={prefersDarkMode ? darkTheme : lightTheme}>
       <CssBaseline />
-      <Stack
-        className={className}
-        css={appStyles.root}
-      >
+      <Stack css={appStyles.root}>
         <LightBulb
           onChange={state.set('color')}
           getStyle={state.lazyGet('color', (value) => ({
@@ -43,13 +40,6 @@ export const App2: React.FC<DefaultProps> = ({ className }) => {
     </ThemeProvider>
   );
 };
-
-//! using styled is the only way to get the labels from @swc/plugin-emotion
-//! otherwise they seem to come from @mui/material/styles css which picks the label from the component
-//! where css is applied inside.
-export const App = styled(App2)`
-  background: inherit;
-`;
 
 const appStyles = {
   root: css`

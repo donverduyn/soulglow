@@ -1,4 +1,3 @@
-import { execSync } from 'child_process';
 import react from '@vitejs/plugin-react-swc';
 import dayjs from 'dayjs';
 import postcssPresetEnv from 'postcss-preset-env';
@@ -16,14 +15,7 @@ const noCacheHeaders = {
   Pragma: 'no-cache',
 };
 
-export const getHostIp = () => {
-  const hostip = execSync("ip route show | awk '/default/ {print $3}'")
-    .toString()
-    .trim();
-  return hostip;
-};
-
-const pluginBrowserLaunch = (mode: string): Plugin => {
+const browser = (mode: string): Plugin => {
   let launched = false;
 
   const openPage = (server: ViteDevServer) => {
@@ -82,39 +74,9 @@ export default defineConfig(({ mode }) => ({
     drop: ['console', 'debugger'],
   },
   plugins: [
-    mode !== 'production' &&
-      process.env.CI !== 'true' &&
-      pluginBrowserLaunch(mode),
+    mode !== 'production' && process.env.CI !== 'true' && browser(mode),
     tsconfigPaths(),
-    react({
-      jsxImportSource: '@emotion/react',
-      plugins: [
-        [
-          '@swc/plugin-emotion',
-          {
-            importMap: {
-              '@mui/material': {
-                styled: {
-                  canonicalImport: ['@emotion/styled', 'default'],
-                  styledBaseImport: ['@mui/material', 'styled'],
-                },
-              },
-              '@mui/material/styles': {
-                // css: {
-                //   canonicalImport: ['@emotion/react', 'css'],
-                //   styledBaseImport: ['@mui/material/styles', 'css'],
-                // },
-                styled: {
-                  canonicalImport: ['@emotion/styled', 'default'],
-                  styledBaseImport: ['@mui/material/styles', 'styled'],
-                },
-              },
-            },
-            labelFormat: '-[local]',
-          },
-        ],
-      ],
-    }),
+    react({ jsxImportSource: '@emotion/react' }),
     checker({
       eslint: {
         dev: { logLevel: ['error', 'warning'] },
@@ -184,7 +146,6 @@ export default defineConfig(({ mode }) => ({
   },
   test: {
     environment: 'happy-dom',
-
     // resolveSnapshotPath: (testPath, snapshotExtension) =>
     //   testPath.replace(/\.test\.(ts|tsx)$/, `.snap${snapshotExtension}`),
     // for testing types!

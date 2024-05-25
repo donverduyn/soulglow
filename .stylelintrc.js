@@ -21,6 +21,7 @@ export default {
     ],
     'no-descending-specificity': null,
     'no-duplicate-selectors': true,
+    "declaration-empty-line-before": ["never"],
     'order/order': ['custom-properties', 'declarations', 'rules', 'at-rules'],
     'order/properties-alphabetical-order': true,
     'rule-empty-line-before': [
@@ -42,6 +43,12 @@ export default {
       true,
       {
         ignorePseudoElements: ['global'],
+      },
+    ],
+    'value-keyword-case': [
+      'lower',
+      {
+        ignoreProperties: ['font-family', '--label'],
       },
     ],
     'selector-type-no-unknown': [

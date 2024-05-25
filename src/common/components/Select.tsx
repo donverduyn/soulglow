@@ -59,6 +59,7 @@ export const Select = observer(<TValue,>(props: SelectProps<TValue>) => {
 
 const selectStyles = {
   root: css`
+    --label: Select;
     margin: 0 0 1em;
     text-align: left;
   `,

@@ -36,6 +36,13 @@
         "name": "ts-plugin-sort-import-suggestions",
         "moveUpPatterns": [],
         "moveDownPatterns": ["@"],
+      },
+      {
+        "name": "@styled/typescript-styled-plugin",
+        "tags": ["styled", "css", "global"],
+        "lint": {
+          "validProperties": ["label"]
+        }
       }
     ],
   },
