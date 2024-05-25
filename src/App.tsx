@@ -3,12 +3,13 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, css, styled } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { formatRgb, type Okhsv } from 'culori';
+import { observable } from 'mobx';
 import { Stack } from 'common/components/Stack';
 import { useMobx } from 'common/hooks/useMobx';
 import { LightBulb } from 'modules/LightBulb/LightBulb';
 import { PaletteViewer } from 'modules/PaletteViewer/PaletteViewer';
-import { ThemeVisualizer } from 'modules/ThemeVisualizer/ThemeVisualizer';
-import { createPalettes, darkTheme, lightTheme } from './theme';
+// import { ThemeVisualizer } from 'modules/ThemeVisualizer/ThemeVisualizer';
+import { darkTheme, lightTheme } from './theme';
 
 const baseColor: Okhsv = {
   h: 0,
@@ -19,7 +20,9 @@ const baseColor: Okhsv = {
 
 export const App2: React.FC<DefaultProps> = ({ className }) => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const state = useMobx(() => ({ color: baseColor }));
+  const state = useMobx(() => ({ color: baseColor }), {
+    color: observable.ref,
+  });
 
   return (
     <ThemeProvider theme={prefersDarkMode ? darkTheme : lightTheme}>
@@ -34,8 +37,8 @@ export const App2: React.FC<DefaultProps> = ({ className }) => {
             background: formatRgb(value),
           }))}
         />
-        <PaletteViewer getPalettes={state.lazyGet('color', createPalettes)} />
-        <ThemeVisualizer theme={prefersDarkMode ? darkTheme : lightTheme} />
+        <PaletteViewer getColor={state.lazyGet('color')} />
+        {/* <ThemeVisualizer theme={prefersDarkMode ? darkTheme : lightTheme} /> */}
       </Stack>
     </ThemeProvider>
   );

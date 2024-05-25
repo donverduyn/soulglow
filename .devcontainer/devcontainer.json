@@ -34,10 +34,11 @@
 	],
 	"mounts": [
 		"source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
-		"source=/run/user/1000/bus,target=/run/user/1000/bus,type=bind,consistency=cached",
-        "source=${env:HOME}/.local/share/fonts,target=/home/vscode/.local/share/fonts,type=bind,consistency=cached"
+		"source=/run/user/1000/bus,target=/run/user/1000/bus,type=bind,consistency=cached"
 	],
-	"runArgs": ["--device=/dev/dri:/dev/dri", "--device=/dev/snd"],
+	// we statically bind the dev server so external machines on the network can view it.
+	// if the firewall allows, that is.
+	"runArgs": ["--device=/dev/dri:/dev/dri", "--device=/dev/snd", "-p=0.0.0.0:4173:4173"],
 	"postCreateCommand": "yarn install",
 	"postStartCommand": {
 		// If we consider cross-platform we should run dbus in the container
@@ -54,13 +55,10 @@
 		"8080": {
 			"label": "Preview",
 			"onAutoForward": "silent"
-		},
+		},	
+		// remote extension runs outside of the container
 		"9222": {
 			"label": "Remote debugging",
-			"onAutoForward": "silent"
-		},
-		"4173": {
-			"label": "Dev Server",
 			"onAutoForward": "silent"
 		}
 	},

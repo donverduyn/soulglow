@@ -10,7 +10,7 @@ import {
   IAutorunOptions,
 } from 'mobx';
 import { deepObserve } from 'mobx-utils';
-import { identity, isFunction, isPlainObject } from 'remeda';
+import { identity, isFunction } from 'remeda';
 import { memoize } from 'common/utils/memoize';
 
 // const ref = observable.object(
@@ -34,6 +34,7 @@ export const useMobx = <T extends Record<string, any>>(
   useState(() => {
     const obs = observable(initialize(), annotations, {
       autoBind: true,
+      proxy: false,
     });
 
     // split a dot separated path into its constituents,
@@ -111,15 +112,17 @@ export const useMobx = <T extends Record<string, any>>(
               value,
               parent[key] as Call<O.Get<typeof path>, T>
             );
-            if (isPlainObject(result)) {
-              for (const item of Object.entries(result)) {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-expect-error need to fix later
-                parent[key][item[0]] = item[1];
-              }
-            } else {
-              parent[key] = result;
-            }
+            //! we should avoid setting each property when obs is observable.ref
+            //! therefore this is disabled for now
+            // if (isPlainObject(result)) {
+            //   for (const item of Object.entries(result)) {
+            //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            //     // @ts-expect-error need to fix later
+            //     parent[key][item[0]] = item[1];
+            //   }
+            // } else {
+            parent[key] = result;
+            // }
           });
       }
     );

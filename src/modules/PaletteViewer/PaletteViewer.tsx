@@ -1,36 +1,40 @@
 import * as React from 'react';
 import { css, type Theme } from '@mui/material/styles';
-import { formatHex, formatRgb, type Okhsv } from 'culori';
+import { formatHex, type Okhsv } from 'culori';
+import { computed, untracked } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Paper } from 'common/components/Paper';
 import { Stack } from 'common/components/Stack';
+import { createPalettes } from 'theme';
 
 interface Props {
-  readonly getPalettes: () => Record<string, Okhsv[]>;
+  readonly getColor: () => Okhsv;
 }
 
-const PaletteViewerComponent: React.FC<Props> = (props) => {
-  const palettes = Object.entries(props.getPalettes());
-
+const PaletteViewerComponent: React.FC<Props> = ({ getColor }) => {
+  const palettes = computed(() => createPalettes(getColor()));
+  const entries = Object.entries(untracked(() => palettes.get()));
   return (
     <Paper
       css={styles.root}
       getStyle={styles.rootSx}
     >
-      {palettes.map(([key, palette]) => (
+      {entries.map(([key, palette]) => (
         <Stack
           key={key}
           css={styles.palette}
         >
-          {palette.map((color, id) => (
-            <Stack
-              key={key.concat(id.toString())}
-              css={styles.swatch}
-              style={{ backgroundColor: formatRgb(color) }}
-            >
-              {formatHex(color)}
-            </Stack>
-          ))}
+          {palette.map((_, i) => {
+            const color = computed(() => formatHex(palettes.get()[key][i]));
+            return (
+              <Stack
+                key={key.concat(i.toString())}
+                css={styles.swatch}
+                getStyle={() => ({ background: color.get() })}
+                render={() => color.get()}
+              />
+            );
+          })}
         </Stack>
       ))}
     </Paper>

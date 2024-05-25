@@ -129,8 +129,8 @@ export const LightBulb: React.FC<LightBulbProps> = observer(
 
     useDeepObserve(bulb, (change) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      void handleSubmit({ [change.name]: change.newValue });
-      console.log('path:', change.name);
+      // void handleSubmit({ [change.name]: change.newValue });
+      // console.log('path:', change.name);
     });
 
     return (
