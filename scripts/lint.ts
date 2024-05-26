@@ -1,9 +1,10 @@
 import { spawn } from 'node:child_process';
-import { Console, Context, Effect, flow, pipe } from 'effect';
-import ora, { type Ora } from 'ora';
+import { Context, Effect, pipe } from 'effect';
+import { default as ora, Ora } from 'ora';
 
-// we should ideally narrow down the type of the spinner
-class Spinner extends Context.Tag('Spinner')<Spinner, Ora>() {}
+// eslint-disable-next-line prettier/prettier
+interface Spinnable { create: (options?: Parameters<typeof ora>[0]) => Ora }
+class Spinner extends Context.Tag('Spinner')<Spinner, Spinnable>() {}
 
 const run = (command: string) =>
   pipe(
@@ -20,39 +21,49 @@ const run = (command: string) =>
               child.on('error', reject);
             })
         ),
-        Effect.mapBoth({
-          onFailure: Effect.fail,
-          onSuccess: (code) =>
+        Effect.orElse(() => Effect.fail('Unexpected Error')),
+        Effect.tapError(() => Effect.sync(() => child.kill('SIGTERM'))),
+        Effect.andThen((code) =>
+          Effect.suspend(() =>
             code !== 0
-              ? Effect.fail('Lint Error')
-              : Effect.succeed('Lint Passed'),
-        })
+              ? Effect.fail(`'${command}' Exited with code ${String(code)}`)
+              : Effect.succeed('Lint Passed')
+          )
+        )
       )
     )
   );
 
-const runLintTasks = (commands: string[]) =>
+const runLintTasks = (cmds: string[]) =>
   Effect.gen(function* () {
-    const spinner = yield* Spinner;
-    spinner.start();
+    const { create } = yield* Spinner;
+    const spinner = create();
 
     yield* pipe(
-      Effect.all(
-        commands.map((command) => run(command)),
-        { concurrency: 'unbounded', mode: 'validate' }
+      Effect.sync(() => spinner.start()),
+      Effect.andThen(() =>
+        Effect.all(cmds.map(run), {
+          concurrency: 'unbounded',
+          mode: 'validate',
+        })
       ),
-      //   Effect.forEach(commands, run, { concurrency: 'unbounded' }),
-      Effect.tap(Console.log),
+      Effect.tapError(() => Effect.sync(() => spinner.stop())),
       Effect.tap(() => spinner.stop())
     );
   });
 
-export const lint = flow(
-  runLintTasks,
-  Effect.provide(Context.make(Spinner, ora({ color: 'gray' }))),
-  Effect.runPromise
-);
+export const lint = (tasks: string[]) =>
+  pipe(
+    runLintTasks(tasks),
+    Effect.provide(
+      Context.make(Spinner, {
+        create: (options) => ora(Object.assign({ color: 'green' }, options)),
+      })
+    ),
+    Effect.catchAll(() => Effect.sync(() => process.exit(1))),
+    Effect.runPromise
+  );
 
 // to test this script
 // const i: number = 'foo';
-// void lint(['tsc']);
+// void lint(['tsc --foobar']);
