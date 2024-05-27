@@ -37,7 +37,7 @@ const run = (command: string) =>
 const runLintTasks = (cmds: string[]) =>
   Effect.gen(function* () {
     const { create } = yield* Spinner;
-    const spinner = create();
+    const spinner = create({ spinner: 'monkey' });
 
     yield* pipe(
       Effect.sync(() => spinner.start()),
@@ -66,4 +66,4 @@ export const lint = (tasks: string[]) =>
 
 // to test this script
 // const i: number = 'foo';
-// void lint(['tsc --foobar']);
+// void lint(['tsc']);

@@ -1,12 +1,9 @@
 import * as React from 'react';
 import { css } from '@mui/material/styles';
 import type { Okhsv } from 'culori';
-import { Effect, flow } from 'effect';
-import { runPromise } from 'effect/Effect';
+import { Effect, Queue, pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
 import {
-  DeviceControlService,
-  RemoteType,
   State,
   type GroupState,
   type GroupStateCommands,
@@ -15,6 +12,7 @@ import { Select } from 'common/components/Select';
 import { Slider } from 'common/components/Slider';
 import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
+import { useEffectQueue } from 'common/hooks/useEffectQueue';
 import { useAutorun, useMobx, useDeepObserve } from 'common/hooks/useMobx';
 import { LightMode, MODE_ITEMS } from './components/constants';
 import { OnOffSwitch } from './components/OnOffSwitch';
@@ -36,29 +34,6 @@ const defaultState: LightBulbState = {
   status: State.OFF,
   temperature: 100,
 };
-
-const handle = (
-  state: GroupState & GroupStateCommands,
-  options: { deviceId: number; groupId: number; remoteType: RemoteType }
-) =>
-  Effect.tryPromise(() =>
-    DeviceControlService.putGatewaysByDeviceIdByRemoteTypeByGroupId({
-      body: state,
-      path: {
-        'device-id': options.deviceId,
-        'group-id': options.groupId,
-        'remote-type': options.remoteType,
-      },
-      query: { blockOnQueue: true },
-    })
-  );
-
-const handleSubmit2 = flow(
-  handle,
-  Effect.andThen((response) => {
-    console.log('Response:', response);
-  })
-);
 
 const formSubmit: React.FormEventHandler<HTMLFormElement> = () => {
   // we can't really support formSubmit, unless we find a way to apply all settings at once.
@@ -84,6 +59,7 @@ const colorInputs = [
 //
 export const LightBulb: React.FC<Props> = observer(
   ({ className, getStyle, onChange }) => {
+    const queueRef = useEffectQueue<GroupState & GroupStateCommands>();
     const bulb = useMobx(() => defaultState);
     const inputs =
       bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
@@ -105,13 +81,23 @@ export const LightBulb: React.FC<Props> = observer(
     useDeepObserve(bulb, (change) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const body = { [change.name]: change.newValue };
-      void runPromise(
-        handleSubmit2(body, {
-          deviceId: 5,
-          groupId: 5,
-          remoteType: RemoteType.FUT089,
-        })
-      );
+      console.log(body);
+      // DeviceControlService.putGatewaysByDeviceIdByRemoteTypeByGroupId({
+      //   body: state,
+      //   path: {
+      //     'device-id': options.deviceId,
+      //     'group-id': options.groupId,
+      //     'remote-type': options.remoteType,
+      //   },
+      //   query: { blockOnQueue: true },
+      // })
+      queueRef.current &&
+        void Effect.runPromise(
+          pipe(
+            Effect.sync(() => queueRef.current!),
+            Effect.andThen(Queue.offer(body))
+          )
+        );
     });
 
     return (

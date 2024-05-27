@@ -21,6 +21,9 @@
       ],
     },
   },
+  "exclude": [
+    "node_modules/**"
+  ],
   "include": [
     "vite.config.ts",
     "./scripts",
