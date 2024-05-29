@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { css } from '@mui/material/styles';
 import type { Okhsv } from 'culori';
-import { Effect, Queue, pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
 import {
   State,
@@ -59,7 +58,12 @@ const colorInputs = [
 //
 export const LightBulb: React.FC<Props> = observer(
   ({ className, getStyle, onChange }) => {
-    const queueRef = useEffectQueue<GroupState & GroupStateCommands>();
+    const enqueue = useEffectQueue<GroupState & GroupStateCommands>({
+      capacity: 1,
+      delay: 100,
+      type: 'sliding',
+    });
+
     const bulb = useMobx(() => defaultState);
     const inputs =
       bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
@@ -81,7 +85,7 @@ export const LightBulb: React.FC<Props> = observer(
     useDeepObserve(bulb, (change) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const body = { [change.name]: change.newValue };
-      console.log(body);
+      // console.log(body);
       // DeviceControlService.putGatewaysByDeviceIdByRemoteTypeByGroupId({
       //   body: state,
       //   path: {
@@ -91,13 +95,8 @@ export const LightBulb: React.FC<Props> = observer(
       //   },
       //   query: { blockOnQueue: true },
       // })
-      queueRef.current &&
-        void Effect.runPromise(
-          pipe(
-            Effect.sync(() => queueRef.current!),
-            Effect.andThen(Queue.offer(body))
-          )
-        );
+
+      enqueue(body);
     });
 
     return (
