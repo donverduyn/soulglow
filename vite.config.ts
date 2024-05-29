@@ -57,10 +57,13 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: {
+          '@culori': ['culori'],
+          '@effect': ['effect'],
           '@emotion': ['@emotion/react', '@emotion/styled'],
-          '@mobx': ['mobx', 'mobx-react-lite'],
+          '@mobx': ['mobx', 'mobx-react-lite', 'mobx-utils'],
           '@mui': ['@mui/material', '@mui/icons-material'],
           '@react': ['react', 'react-dom'],
+          '@utils': ['moize', 'uuid', '@hey-api/client-fetch'],
         },
       },
     },
