@@ -34,9 +34,9 @@ const createRuntime = async <T>(layer: Layer.Layer<T>) => {
     pipe(layer, Layer.toRuntime, Scope.extend(scope))
   );
 
-  const runPromise = Runtime.runPromise(runtime);
+  const runSync = Runtime.runSync(runtime);
   const dispose = () => Effect.runFork(Scope.close(scope, Exit.void));
-  return { dispose, runPromise };
+  return { dispose, runSync };
 };
 
 type Options = {
@@ -73,15 +73,12 @@ const layer = <T>(options: Options) =>
       pipe(take<T>(options.delay), Effect.forever, Effect.forkScoped)
     ),
     Layer.provideMerge(
-      Layer.scoped(
-        Throttler<T>(),
-        pipe(Queue[options.type]<T>(options.capacity))
-      )
+      Layer.scoped(Throttler<T>(), Queue[options.type]<T>(options.capacity))
     )
   );
 
 export const useEffectQueue = <T>(options: Partial<Options> = defaults) => {
-  const config = Object.assign(defaults, options);
+  const config = Object.assign({}, defaults, options);
   const runtime = React.useMemo(() => createRuntime(layer<T>(config)), []);
   const runtimeRef = React.useRef<Awaited<typeof runtime> | null>(null);
 
@@ -95,11 +92,13 @@ export const useEffectQueue = <T>(options: Partial<Options> = defaults) => {
   }, []);
 
   const enqueue = React.useCallback((value: T) => {
-    void runtimeRef.current?.runPromise(
-      Effect.gen(function* () {
-        const queue = yield* Throttler<T>();
-        yield* queue.offer(value);
-      })
+    void runtimeRef.current?.runSync(
+      pipe(
+        Effect.gen(function* () {
+          return yield* Throttler<T>();
+        }),
+        Effect.andThen(Queue.offer(value))
+      )
     );
   }, []);
 
