@@ -53,7 +53,7 @@ const options: Parameters<(typeof puppeteer)['launch']>[0] = {
 const userPrefs = {
   devtools: {
     preferences: {
-      currentDockState: '"bottom"',
+      currentDockState: '"right"',
       'panel-selected-tab': '"console"',
       // 'ui-theme': '"dark"',
     },
