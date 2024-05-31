@@ -1,8 +1,10 @@
 import * as React from 'react';
+import { DevTools } from '@effect/experimental';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, css } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { formatRgb, type Okhsv } from 'culori';
+import { Layer, LogLevel, Logger, pipe } from 'effect';
 import { observable } from 'mobx';
 import { Stack } from 'common/components/Stack';
 import { useMobx } from 'common/hooks/useMobx';
@@ -17,6 +19,11 @@ const baseColor: Okhsv = {
   s: 0,
   v: 0,
 };
+
+const rootLayer = pipe(
+  DevTools.layer(),
+  Layer.merge(Logger.minimumLogLevel(LogLevel.Debug))
+);
 
 export const App: React.FC = () => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');

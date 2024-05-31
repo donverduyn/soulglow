@@ -82,7 +82,8 @@
 				"github.vscode-github-actions",
 				"styled-components.vscode-styled-components",
 				"gabrielgrinberg.auto-run-command",
-				"stylelint.vscode-stylelint"
+				"stylelint.vscode-stylelint",
+				"effectful-tech.effect-vscode"
 			]
 		}
 	}
