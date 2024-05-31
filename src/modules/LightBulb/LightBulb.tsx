@@ -1,20 +1,24 @@
 import * as React from 'react';
 import { css } from '@mui/material/styles';
 import type { Okhsv } from 'culori';
+import { Effect, Layer, Queue, pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
-import {
-  State,
-  type GroupState,
-  type GroupStateCommands,
-} from '__generated/api';
+import { State } from '__generated/api';
 import { Select } from 'common/components/Select';
 import { Slider } from 'common/components/Slider';
 import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
-import { useEffectQueue } from 'common/hooks/useEffectQueue';
+import { createRuntimeProvider, runtime } from 'common/hoc/runtime';
 import { useAutorun, useMobx, useDeepObserve } from 'common/hooks/useMobx';
-import { LightMode, MODE_ITEMS } from './components/constants';
 import { OnOffSwitch } from './components/OnOffSwitch';
+import {
+  LightMode,
+  MODE_ITEMS,
+  Throttler,
+  DeviceRepo,
+  type LightbulbDto,
+} from './constants';
+import { deviceRepoLayer } from './repos/DeviceRepo';
 
 interface LightBulbState {
   bulb_mode: LightMode;
@@ -34,11 +38,6 @@ const defaultState: LightBulbState = {
   temperature: 100,
 };
 
-const formSubmit: React.FormEventHandler<HTMLFormElement> = () => {
-  // we can't really support formSubmit, unless we find a way to apply all settings at once.
-  // it seems that this is not supported by the api but who knows
-};
-
 interface Props extends DefaultProps {
   readonly getStyle: () => React.CSSProperties;
   readonly onChange: (value: Okhsv) => void;
@@ -55,48 +54,66 @@ const colorInputs = [
   { key: 'hue', label: 'hue', props: { max: 360 } },
 ] as const;
 
-//
-export const LightBulb: React.FC<Props> = observer(
-  ({ className, getStyle, onChange }) => {
-    const enqueue = useEffectQueue<GroupState & GroupStateCommands>({
-      capacity: 1,
-      delay: 100,
-      type: 'sliding',
-    });
+const take = pipe(
+  Effect.gen(function* () {
+    const queue = yield* Throttler<LightbulbDto>();
+    const item = yield* queue.take;
+    console.log(item);
+    const repo = yield* DeviceRepo;
+    yield* repo.update(item);
+    yield* Effect.logDebug('Queue take', item);
+  })
+);
 
+const queue = Effect.gen(function* () {
+  const queue = yield* Queue.sliding<LightbulbDto>(1);
+  yield* Effect.addFinalizer(() =>
+    Effect.gen(function* () {
+      yield* Queue.shutdown(queue);
+      yield* Effect.logDebug('Queue shutdown');
+    })
+  );
+  return queue;
+});
+
+const LightBulbRuntime = createRuntimeProvider(
+  pipe(
+    Layer.scopedDiscard(pipe(take, Effect.forever, Effect.forkScoped)),
+    Layer.provideMerge(Layer.scoped(Throttler<LightbulbDto>(), queue)),
+    Layer.provideMerge(deviceRepoLayer)
+  )
+);
+
+export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
+  observer(({ className, getStyle, onChange }) => {
+    //
+    const runtimeRef = React.useContext(LightBulbRuntime);
     const bulb = useMobx(() => defaultState);
     const inputs =
       bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
 
     useAutorun(() => {
+      const hue = 360 + bulb.hue + 30;
+      const hueShift = (20 * Math.sin((bulb.hue / 360) * 2 * Math.PI)) % 360;
+      const saturation = 0.4 + (bulb.saturation / 100) * (1 - 0.4);
+      const value = 0.6 + (bulb.level / 100) * (1 - 0.6);
       onChange({
-        h:
-          (360 +
-            bulb.hue +
-            20 +
-            20 * Math.sin((bulb.hue / 360) * 2 * Math.PI)) %
-          360,
+        h: hue + hueShift,
         mode: 'okhsv',
-        s: 0.4 + (bulb.saturation / 100) * (1 - 0.4),
-        v: 0.6 + (bulb.level / 100) * (1 - 0.6),
+        s: saturation,
+        v: value,
       });
     });
 
     useDeepObserve(bulb, (change) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const body = { [change.name]: change.newValue };
-      // console.log(body);
-      // DeviceControlService.putGatewaysByDeviceIdByRemoteTypeByGroupId({
-      //   body: state,
-      //   path: {
-      //     'device-id': options.deviceId,
-      //     'group-id': options.groupId,
-      //     'remote-type': options.remoteType,
-      //   },
-      //   query: { blockOnQueue: true },
-      // })
-
-      enqueue(body);
+      const body = { [change.name]: change.newValue } as Partial<LightbulbDto>;
+      runtimeRef.current?.runSync(
+        Effect.gen(function* () {
+          const queue = yield* Throttler<LightbulbDto>();
+          yield* queue.offer(body);
+        })
+      );
     });
 
     return (
@@ -105,10 +122,7 @@ export const LightBulb: React.FC<Props> = observer(
         css={styles.root}
         getStyle={getStyle}
       >
-        <form
-          css={styles.form}
-          onSubmit={formSubmit}
-        >
+        <form css={styles.form}>
           <OnOffSwitch
             getValue={bulb.lazyGet('status', (value) =>
               value === State.ON ? true : false
@@ -147,7 +161,7 @@ export const LightBulb: React.FC<Props> = observer(
         </form>
       </Stack>
     );
-  }
+  })
 );
 
 const styles = {
