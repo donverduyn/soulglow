@@ -12,5 +12,22 @@
             "url": "http://127.0.0.1:4173",
             "webRoot": "${workspaceFolder}/src"
         },
+        {
+            "name": "Launch Node",
+            "type": "node",
+            "request": "launch",
+            "program": "${file}",
+            "runtimeExecutable": "tsx",
+            "runtimeArgs": [
+                "--inspect-brk"
+            ],
+            "skipFiles": [
+                // Node.js internal core modules
+                "<node_internals>/**",
+        
+                // Ignore all dependencies (optional)
+                "${workspaceFolder}/node_modules/**",
+            ],
+        }
     ]
 }

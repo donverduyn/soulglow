@@ -1,0 +1,29 @@
+# Dependency directories
+node_modules/
+dist/
+
+# Development tool configurations and directories
+.analyzer/
+.devcontainer/
+.github/
+.vscode/
+**/.git/
+**/.swc/
+tmp/
+
+# Configuration files
+*.cjs
+*.js
+*.yml
+
+# Documentation and miscellaneous
+README.md
+TODO.md
+*.md
+
+# Logs and temporary files
+**/*.log
+
+# Docker-specific files
+docker-compose.yml
+Dockerfile

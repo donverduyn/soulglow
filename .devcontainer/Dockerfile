@@ -3,7 +3,8 @@ FROM eclipse-temurin:21 as jre-build
 
 # java.base and java.logging are needed to build React
 RUN $JAVA_HOME/bin/jlink \
-         --add-modules java.base,java.logging \
+         --add-modules java.base,java.logging \  
+         # for openapi-generator ,java.xml,java.naming,jdk.unsupported,java.desktop \
          --strip-debug \
          --no-man-pages \
          --no-header-files \
@@ -53,3 +54,8 @@ COPY --from=builder /tmp/react/packages/react-devtools-extensions/chrome/build /
 
 # Add Node binaries to PATH
 ENV PATH=./node_modules/.bin:$PATH
+
+# If you want to use Java runtime
+# ENV JAVA_HOME=/opt/java/openjdk
+# ENV PATH "${JAVA_HOME}/bin:${PATH}"
+# COPY --from=jre-build /javaruntime $JAVA_HOME

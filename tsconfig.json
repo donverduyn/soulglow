@@ -36,11 +36,18 @@
         "name": "ts-plugin-sort-import-suggestions",
         "moveUpPatterns": [],
         "moveDownPatterns": ["@"],
+      },
+      {
+        "name": "@styled/typescript-styled-plugin",
+        "tags": ["styled", "css", "global"],
+        "lint": {
+          "validProperties": ["label"]
+        }
       }
     ],
   },
   // vite.config.ts and scripts should not be included here
   // seems to be a problem with vscode ts
   "include": ["src", "vite.config.ts", "scripts"],
-  "exclude": ["*.test.ts", "*.test.tsx"],
+  "exclude": ["*.test.ts", "*.test.tsx", "node_modules/**"],
 }

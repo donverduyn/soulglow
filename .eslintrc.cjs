@@ -73,6 +73,15 @@ module.exports = {
       ],
       plugins: ['@typescript-eslint', 'typescript-sort-keys'],
       rules: {
+        '@typescript-eslint/ban-ts-comment': [
+          'warn',
+          {
+            'ts-check': false,
+            'ts-expect-error': true,
+            'ts-ignore': false,
+            'ts-nocheck': false,
+          },
+        ],
         '@typescript-eslint/no-confusing-void-expression': [
           'warn',
           { ignoreArrowShorthand: true },
@@ -123,6 +132,26 @@ module.exports = {
       },
     },
     {
+      // generated TS files
+      files: ['./src/__generated/**'],
+      rules: {
+        '@typescript-eslint/ban-ts-comment': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-extraneous-class': 'off',
+        '@typescript-eslint/no-misused-promises': 'off',
+        '@typescript-eslint/no-unnecessary-condition': 'off',
+        '@typescript-eslint/no-unsafe-argument': 'off',
+        '@typescript-eslint/no-unsafe-assignment': 'off',
+        '@typescript-eslint/no-unsafe-return': 'off',
+        '@typescript-eslint/restrict-template-expressions': 'off',
+        'import/order': 'off',
+        'no-prototype-builtins': 'off',
+        'sort-keys-fix/sort-keys-fix': 'off',
+        'typescript-sort-keys/interface': 'off',
+        'typescript-sort-keys/string-enum': 'off',
+      },
+    },
+    {
       files: ['*.tsx'],
       // all React files
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
@@ -146,11 +175,7 @@ module.exports = {
           'warn',
           { allowConstantExport: true },
         ],
-        'react/destructuring-assignment': [
-          'warn',
-          'always',
-          { destructureInSignature: 'ignore', ignoreClassFields: true },
-        ],
+        'react/destructuring-assignment': 'off',
         'react/forbid-component-props': 'off',
         'react/function-component-definition': [
           'warn',

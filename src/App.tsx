@@ -1,26 +1,62 @@
 import * as React from 'react';
+import { DevTools } from '@effect/experimental';
 import CssBaseline from '@mui/material/CssBaseline';
-import { ThemeProvider, styled } from '@mui/material/styles';
+import { ThemeProvider, css } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { formatRgb, type Okhsv } from 'culori';
+import { Layer, LogLevel, Logger, pipe } from 'effect';
+import { observable } from 'mobx';
+import { Stack } from 'common/components/Stack';
+import { useMobx } from 'common/hooks/useMobx';
 import { LightBulb } from 'modules/LightBulb/LightBulb';
+import { PaletteViewer } from 'modules/PaletteViewer/PaletteViewer';
+// import { ThemeVisualizer } from 'modules/ThemeVisualizer/ThemeVisualizer';
 import { darkTheme, lightTheme } from './theme';
 
-const AppBase: React.FC<DefaultProps> = ({ className }) => {
+const baseColor: Okhsv = {
+  h: 0,
+  mode: 'okhsv',
+  s: 0,
+  v: 0,
+};
+
+const rootLayer = pipe(
+  DevTools.layer(),
+  Layer.merge(Logger.minimumLogLevel(LogLevel.Debug))
+);
+
+export const App: React.FC = () => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const state = useMobx(() => ({ color: baseColor }), {
+    color: observable.ref,
+  });
+
   return (
     <ThemeProvider theme={prefersDarkMode ? darkTheme : lightTheme}>
       <CssBaseline />
-      <div className={className}>
-        {/* <header className='App-header'>
-         
-        </header> */}
-        <LightBulb />
+      <Stack css={appStyles.root}>
+        <LightBulb
+          onChange={state.set('color')}
+          getStyle={state.lazyGet('color', (value) => ({
+            background: formatRgb(value),
+          }))}
+        />
+        <PaletteViewer getColor={state.lazyGet('color')} />
         {/* <ThemeVisualizer theme={prefersDarkMode ? darkTheme : lightTheme} /> */}
-      </div>
+      </Stack>
     </ThemeProvider>
   );
 };
 
-export const App = styled(AppBase)`
-  background: inherit;
-`;
+const appStyles = {
+  root: css`
+    background: inherit;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 1em;
+    margin: 0 auto;
+    padding: 1em;
+    width: 40em;
+  `,
+};

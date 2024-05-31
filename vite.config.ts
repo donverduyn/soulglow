@@ -1,4 +1,3 @@
-import { execSync } from 'child_process';
 import react from '@vitejs/plugin-react-swc';
 import dayjs from 'dayjs';
 import postcssPresetEnv from 'postcss-preset-env';
@@ -16,14 +15,7 @@ const noCacheHeaders = {
   Pragma: 'no-cache',
 };
 
-export const getHostIp = () => {
-  const hostip = execSync("ip route show | awk '/default/ {print $3}'")
-    .toString()
-    .trim();
-  return hostip;
-};
-
-const pluginBrowserLaunch = (mode: string): Plugin => {
+const browser = (mode: string): Plugin => {
   let launched = false;
 
   const openPage = (server: ViteDevServer) => {
@@ -65,10 +57,13 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: {
+          '@culori': ['culori'],
+          '@effect': ['effect'],
           '@emotion': ['@emotion/react', '@emotion/styled'],
-          '@mobx': ['mobx', 'mobx-react-lite'],
+          '@mobx': ['mobx', 'mobx-react-lite', 'mobx-utils'],
           '@mui': ['@mui/material', '@mui/icons-material'],
           '@react': ['react', 'react-dom'],
+          '@utils': ['moize', 'uuid', '@hey-api/client-fetch'],
         },
       },
     },
@@ -82,33 +77,9 @@ export default defineConfig(({ mode }) => ({
     drop: ['console', 'debugger'],
   },
   plugins: [
-    mode !== 'production' && pluginBrowserLaunch(mode),
+    mode !== 'production' && process.env.CI !== 'true' && browser(mode),
     tsconfigPaths(),
-    react({
-      jsxImportSource: '@emotion/react',
-      plugins: [
-        [
-          '@swc/plugin-emotion',
-          {
-            importMap: {
-              '@mui/material': {
-                styled: {
-                  canonicalImport: ['@emotion/styled', 'default'],
-                  styledBaseImport: ['@mui/material', 'styled'],
-                },
-              },
-              '@mui/material/styles': {
-                styled: {
-                  canonicalImport: ['@emotion/styled', 'default'],
-                  styledBaseImport: ['@mui/material/styles', 'styled'],
-                },
-              },
-            },
-            labelFormat: '-[local]',
-          },
-        ],
-      ],
-    }),
+    react({ jsxImportSource: '@emotion/react' }),
     checker({
       eslint: {
         dev: { logLevel: ['error', 'warning'] },
@@ -120,8 +91,7 @@ export default defineConfig(({ mode }) => ({
         useFlatConfig: false,
       },
       overlay: {
-        badgeStyle:
-          'background-color: transparent; font-size: 0.75em; color: black;',
+        badgeStyle: 'background-color: white; font-size: 0.75em; color: black;',
         initialIsOpen: false,
         panelStyle: 'height: 100%; background-color: #232125;',
       },
@@ -134,9 +104,8 @@ export default defineConfig(({ mode }) => ({
             }
           : false,
       terminal: false,
-      typescript: {
-        tsconfigPath: './tsconfig.json',
-      },
+      typescript:
+        process.env.CI === 'true' ? false : { tsconfigPath: './tsconfig.json' },
     }),
     visualizer({
       brotliSize: true,
@@ -180,7 +149,6 @@ export default defineConfig(({ mode }) => ({
   },
   test: {
     environment: 'happy-dom',
-
     // resolveSnapshotPath: (testPath, snapshotExtension) =>
     //   testPath.replace(/\.test\.(ts|tsx)$/, `.snap${snapshotExtension}`),
     // for testing types!

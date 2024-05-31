@@ -1,5 +1,5 @@
 import MuiMenuItem from '@mui/material/MenuItem';
-import { styled } from '@mui/material/styles';
+import { css } from '@mui/material/styles';
 
 interface MenuItemProps<T> extends DefaultProps {
   readonly children: React.ReactElement;
@@ -7,10 +7,12 @@ interface MenuItemProps<T> extends DefaultProps {
   readonly value: T;
 }
 
-const MenuItemBase = <T,>(props: MenuItemProps<T>) => {
-  const { children, value, ...rest } = props;
+export const MenuItem = <T,>(props: MenuItemProps<T>) => {
+  const { className, children, value, ...rest } = props;
   return (
     <MuiMenuItem
+      className={className!}
+      css={menuItemStyles.root}
       value={String(value)}
       // eslint-disable-next-line react/jsx-props-no-spreading
       {...rest}
@@ -20,6 +22,8 @@ const MenuItemBase = <T,>(props: MenuItemProps<T>) => {
   );
 };
 
-export const MenuItem = styled(MenuItemBase)`
-  text-align: left;
-` as typeof MenuItemBase;
+const menuItemStyles = {
+  root: css`
+    text-align: left;
+  `,
+};

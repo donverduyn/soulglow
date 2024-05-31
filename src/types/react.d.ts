@@ -10,6 +10,6 @@ declare module 'react' {
 
 declare global {
   interface DefaultProps {
-    className?: string;
+    className?: string | undefined;
   }
 }

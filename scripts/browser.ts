@@ -2,6 +2,7 @@ import { execSync } from 'child_process';
 import { createServer } from 'http-server';
 import { Browser, Page } from 'puppeteer';
 import puppeteer, { PuppeteerExtraPlugin } from 'puppeteer-extra';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error no @types package
 import puppeteerPrefs from 'puppeteer-extra-plugin-user-preferences';
 
@@ -52,7 +53,7 @@ const options: Parameters<(typeof puppeteer)['launch']>[0] = {
 const userPrefs = {
   devtools: {
     preferences: {
-      currentDockState: '"bottom"',
+      currentDockState: '"right"',
       'panel-selected-tab': '"console"',
       // 'ui-theme': '"dark"',
     },
@@ -80,6 +81,7 @@ export const createBrowser = async (
   await page.evaluateHandle(() => {
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error closeBrowser is created above
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         void window.closeBrowser();

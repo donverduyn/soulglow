@@ -1,5 +1,5 @@
 import React from 'react';
-import { styled } from '@mui/material/styles';
+import { css } from '@mui/material/styles';
 import { Stack } from 'common/components/Stack';
 import { Toggle } from 'common/components/Toggle';
 import { Typography } from 'common/components/Typography';
@@ -9,9 +9,16 @@ interface Props extends DefaultProps {
   readonly onChange: (value: boolean) => void;
 }
 
-const OnOffBase: React.FC<Props> = ({ className, getValue, onChange }) => {
+export const OnOffSwitch: React.FC<Props> = ({
+  className,
+  getValue,
+  onChange,
+}) => {
   return (
-    <Stack className={className!}>
+    <Stack
+      className={className}
+      css={styles.root}
+    >
       <Typography>Off</Typography>
       <Toggle
         getValue={getValue}
@@ -22,9 +29,11 @@ const OnOffBase: React.FC<Props> = ({ className, getValue, onChange }) => {
   );
 };
 
-export const OnOffSwitch = styled(OnOffBase)(() => ({
-  alignItems: 'center',
-  display: 'flex',
-  flexDirection: 'row',
-  justifyContent: 'center',
-}));
+const styles = {
+  root: css`
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  `,
+};

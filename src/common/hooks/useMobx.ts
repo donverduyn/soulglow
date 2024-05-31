@@ -9,8 +9,22 @@ import {
   IReactionOptions,
   IAutorunOptions,
 } from 'mobx';
+import { deepObserve } from 'mobx-utils';
 import { identity, isFunction } from 'remeda';
 import { memoize } from 'common/utils/memoize';
+
+// const ref = observable.object(
+//   { h: 0, mode: 'okhsv', s: 0, v: 0 } as Okhsv,
+//   {
+//     h: observable.ref,
+//     mode: observable.ref,
+//     s: observable.ref,
+//     v: observable.ref,
+//   },
+//   { deep: false }
+// );
+
+// console.log(isObservable(ref), isObservableProp(ref, 'target'));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const useMobx = <T extends Record<string, any>>(
@@ -20,6 +34,7 @@ export const useMobx = <T extends Record<string, any>>(
   useState(() => {
     const obs = observable(initialize(), annotations, {
       autoBind: true,
+      proxy: false,
     });
 
     // split a dot separated path into its constituents,
@@ -39,6 +54,7 @@ export const useMobx = <T extends Record<string, any>>(
         if (!Object.prototype.hasOwnProperty.call(target, keys[i])) {
           throw new Error('Invalid path');
         }
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error target changes so is unknown
         target = target[keys[i]];
       }
@@ -46,8 +62,6 @@ export const useMobx = <T extends Record<string, any>>(
       // target contains the parent reference
       return target as TParent;
     };
-
-    type LazyGetFnUnary<TType> = <R>(map: (value: TType) => R) => () => R;
 
     type LazyGetFn<TType> = <
       P extends Call<O.AllPaths, TType>,
@@ -57,10 +71,6 @@ export const useMobx = <T extends Record<string, any>>(
       path: P,
       map?: (value: V) => R
     ) => () => R;
-
-    const lazyGetUnary: LazyGetFnUnary<T> = memoize((map) => {
-      return () => map(obs);
-    });
 
     const lazyGet: LazyGetFn<T> = memoize((path, map = identity) => {
       // by using map from the closure, V8 will only preparse it on re-renders
@@ -92,10 +102,21 @@ export const useMobx = <T extends Record<string, any>>(
 
         return (value) =>
           runInAction(() => {
-            parent[key] = map(
+            const result = map(
               value,
               parent[key] as Call<O.Get<typeof path>, T>
             );
+            //! we should avoid setting each property when obs is observable.ref
+            //! therefore this is disabled for now
+            // if (isPlainObject(result)) {
+            //   for (const item of Object.entries(result)) {
+            //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            //     // @ts-expect-error need to fix later
+            //     parent[key][item[0]] = item[1];
+            //   }
+            // } else {
+            parent[key] = result;
+            // }
           });
       }
     );
@@ -111,7 +132,6 @@ export const useMobx = <T extends Record<string, any>>(
     }
     return Object.assign(obs, {
       lazyGet,
-      lazyGetUnary,
       set,
     });
   })[0];
@@ -119,6 +139,15 @@ export const useMobx = <T extends Record<string, any>>(
 export const useAutorun = (fn: () => void, options: IAutorunOptions = {}) =>
   // because the aesthetics of useEffect are suboptimal
   React.useEffect(() => autorun(fn, options), []);
+
+type IChange<T> = Parameters<Parameters<typeof deepObserve>[1]>[0] & {
+  name: string;
+  newValue: T;
+  oldValue: T;
+};
+
+export const useDeepObserve = <T, U>(t: T, fn: (c: IChange<U>) => void) =>
+  React.useEffect(() => deepObserve(t, (c) => fn(c as IChange<U>)), []);
 
 export const useReaction = <T>(
   fn: () => T,

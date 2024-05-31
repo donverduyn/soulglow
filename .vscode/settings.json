@@ -35,6 +35,9 @@
     "javascript.preferGoToSourceDefinition": true,
     "typescript.tsdk": "node_modules/typescript/lib",
     "typescript.tsc.autoDetect": "on",
+    "files.watcherExclude": {
+        "./src/__generated": true,
+    },
     "css.validate": false,
     "stylelint.validate": ["css", "typescript", "typescriptreact"],
     "search.exclude": {

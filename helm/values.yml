@@ -1,0 +1,19 @@
+replicaCount: 1
+
+image:
+  repository: nginx
+  pullPolicy: IfNotPresent
+  tag: "latest"  # Use a specific version as needed
+
+service:
+  type: LoadBalancer  # Use NodePort if LoadBalancer is not supported
+  port: 80
+  targetPort: 80
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
