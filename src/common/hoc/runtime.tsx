@@ -12,15 +12,6 @@ const createRuntime = async <T,>(layer: Layer.Layer<T>) => {
   return { dispose, runSync };
 };
 
-export const createRuntimeProvider = <T,>(layer: Layer.Layer<T>) => {
-  const factory = () => createRuntime(layer);
-  return React.createContext<
-    React.MutableRefObject<Awaited<ReturnType<typeof factory>> | null>
-    // we abuse context here to pass through the layer
-    // and infer the type of the runtime
-  >(layer as unknown as React.MutableRefObject<null>);
-};
-
 const useEffectRuntime = <T,>(layer: Layer.Layer<T>) => {
   const create = React.useCallback(() => createRuntime(layer), [layer]);
   const ref = React.useRef<Awaited<ReturnType<typeof create>> | null>(null);
@@ -41,8 +32,16 @@ const useEffectRuntime = <T,>(layer: Layer.Layer<T>) => {
     // only on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   return ref;
+};
+
+export const createRuntimeProvider = <T,>(layer: Layer.Layer<T>) => {
+  const factory = () => createRuntime(layer);
+  return React.createContext<
+    React.MutableRefObject<Awaited<ReturnType<typeof factory>> | null>
+    // we abuse context here to pass through the layer
+    // while casting context to the inferred type of the runtime
+  >(layer as unknown as React.MutableRefObject<null>);
 };
 
 export const runtime = <T,>(Context: React.Context<T>) => {

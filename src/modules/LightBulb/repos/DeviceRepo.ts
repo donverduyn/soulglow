@@ -1,11 +1,6 @@
 import { Effect, Layer, pipe } from 'effect';
-import {
-  type GroupState,
-  type GroupStateCommands,
-  RemoteType,
-  DeviceControlService,
-} from '__generated/api';
-import { DeviceRepo } from '../constants';
+import { RemoteType, DeviceControlService } from '__generated/api';
+import { DeviceRepo, type LightbulbDto } from '../constants';
 
 interface Crudable<T> {
   // create: (value: T) => Effect.Effect<T>;
@@ -14,11 +9,9 @@ interface Crudable<T> {
   update: (value: T) => Effect.Effect<T>;
 }
 
-export const createDeviceRepo = <
-  TBody extends GroupState & GroupStateCommands,
->() => {
+export const createDeviceRepo = () => {
   const options = { deviceId: 5, groupId: 5, remoteType: RemoteType.FUT089 };
-  const createOptions = (body: TBody) => ({
+  const createOptions = (body: LightbulbDto) => ({
     body,
     path: {
       'device-id': options.deviceId,
@@ -44,20 +37,20 @@ export const createDeviceRepo = <
     );
 
   const handlers = {
-    create: (dto: TBody) => handlers.update(dto),
-    delete: (dto: TBody) =>
+    create: (dto: LightbulbDto) => handlers.update(dto),
+    delete: (dto: LightbulbDto) =>
       handle(() =>
         DeviceControlService.deleteGatewaysByDeviceIdByRemoteTypeByGroupId(
           createOptions(dto)
         )
       ),
-    read: (dto: TBody) =>
+    read: (dto: LightbulbDto) =>
       handle(() =>
         DeviceControlService.getGatewaysByDeviceIdByRemoteTypeByGroupId(
           createOptions(dto)
         )
       ),
-    update: (dto: TBody) =>
+    update: (dto: LightbulbDto) =>
       handle(() =>
         DeviceControlService.putGatewaysByDeviceIdByRemoteTypeByGroupId(
           createOptions(dto)

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DevTools } from '@effect/experimental';
+// import { DevTools } from '@effect/experimental';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, css } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -21,7 +21,7 @@ const baseColor: Okhsv = {
 };
 
 const rootLayer = pipe(
-  DevTools.layer(),
+  // DevTools.layer(),
   Layer.merge(Logger.minimumLogLevel(LogLevel.Debug))
 );
 
