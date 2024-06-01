@@ -8,7 +8,6 @@
     "moduleResolution": "bundler",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "downlevelIteration": true,
     "strict": true,
     "paths": {
       "test/*": [
@@ -23,7 +22,7 @@
     },
   },
   "exclude": [
-    "node_modules/**"
+    "node_modules", "**/node_modules/*"
   ],
   "include": [
     "vite.config.ts",

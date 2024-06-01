@@ -25,6 +25,7 @@
     "workbench.preferredDarkColorTheme": "Default Dark+",
     "workbench.preferredLightColorTheme": "Default Light Modern",
     "typescript.tsserver.experimental.useVsCodeWatcher": true,
+    "typescript.tsserver.experimental.enableProjectDiagnostics": false,
     // "terminal.integrated.shellIntegration.suggestEnabled": true,
     "auto-run-command.rules": [
         {
@@ -34,7 +35,7 @@
     ],
     "javascript.preferGoToSourceDefinition": true,
     "typescript.tsdk": "node_modules/typescript/lib",
-    "typescript.tsc.autoDetect": "on",
+    "typescript.tsc.autoDetect": "off",
     "files.watcherExclude": {
         "./src/__generated": true,
     },

@@ -12,9 +12,6 @@
     "allowSyntheticDefaultImports": true,
     "exactOptionalPropertyTypes": true,
     "esModuleInterop": true,
-    // currently needed to circumvent errors from node_modules/effect
-    // not ideal, so we should investigate how to fix this
-    "downlevelIteration": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
@@ -52,5 +49,5 @@
   // vite.config.ts and scripts should not be included here
   // seems to be a problem with vscode ts
   "include": ["src", "vite.config.ts", "scripts"],
-  "exclude": ["*.test.ts", "*.test.tsx", "node_modules/**"],
+  "exclude": ["node_modules", "**/node_modules/*"],
 }
