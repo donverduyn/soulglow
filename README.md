@@ -18,9 +18,17 @@ Also make sure you have XQuartz installed. Don't forget to enable remote connect
 ## Starting the development server
 Note that Puppeteer is used to manage the browser for development. It automatically provides React Devtools and forwards the browser to the host machine over x11. To start the development server run:
 
+
 ```
 yarn dev
 ```
+
+### Visiting the dev server outside of the container
+The dev server is running on port 4173 and is statically forwarded to the host machine. To visit the dev server, open a browser and navigate to http://localhost:4173. If you want to make the dev server available to other devices on the network, configure your fireall to allow incoming connections on port 4173. Remote debugging is not supported outside of the container.
+
+### Debugging
+To debug the server, make sure it is running and run "Attach to Chrome" in the debug tab of vscode. The debugger will attach to the browser and you can set breakpoints in the code.
+
 ### Inspect dependency tree
 To inspect the dependency tree run the dev server and visit the /__inspect link provided in the terminal.
 
@@ -32,6 +40,16 @@ To run the test suite with vitest, run:
 yarn test
 ```
 A browser window will open and display the test results.
+
+# Linting
+The project runs tsc, eslint and stylelint in a concurrently to ensure code quality. To run the linter, run:
+
+```
+yarn lint
+```
+
+## Navigating to the error
+Note that the any warnings and errors are also displayed in the left corner of the browser window when running the dev server. You can click on the warning to navigate to the file and line where the error occured.
 
 # Contributing
 If you like to contribute to this project, please reach out to me. I am happy to help you get started.
