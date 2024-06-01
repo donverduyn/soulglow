@@ -25,7 +25,7 @@ const browser = (mode: string): Plugin => {
         const a = server.httpServer?.address();
         const port = (typeof a === 'string' ? a : a?.port) ?? '4173';
         const postfix = mode === 'test' ? '/__vitest__/#/' : '';
-        const url = `http://127.0.0.1:${port.toString()}${postfix}`;
+        const url = `http://localhost:${port.toString()}${postfix}`;
 
         await page.goto(url);
         browser.on('disconnected', () => {
@@ -119,7 +119,7 @@ export default defineConfig(({ mode }) => ({
   ],
   preview: {
     headers: noCacheHeaders,
-    host: '0.0.0.0',
+    host: true,
     open: true,
     port: 4173,
     proxy: {
@@ -136,7 +136,8 @@ export default defineConfig(({ mode }) => ({
   server: {
     headers: noCacheHeaders,
     hmr: { overlay: true },
-    host: '0.0.0.0',
+    host: true,
+    port: 4173,
     proxy: {
       '/api': {
         // The base URL of your API

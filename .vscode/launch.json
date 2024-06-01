@@ -9,7 +9,7 @@
             "port": 9222,
             "request": "attach",
             "type": "chrome",
-            "url": "http://127.0.0.1:4173",
+            "url": "http://localhost:4173",
             "webRoot": "${workspaceFolder}/src"
         },
         {
