@@ -12,6 +12,9 @@
     "allowSyntheticDefaultImports": true,
     "exactOptionalPropertyTypes": true,
     "esModuleInterop": true,
+    // currently needed to circumvent errors from node_modules/effect
+    // not ideal, so we should investigate how to fix this
+    "downlevelIteration": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
