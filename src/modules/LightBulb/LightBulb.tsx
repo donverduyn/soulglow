@@ -8,7 +8,7 @@ import { Select } from 'common/components/Select';
 import { Slider } from 'common/components/Slider';
 import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
-import { createRuntimeProvider, runtime } from 'common/hoc/runtime';
+import { createRuntimeContext, runtime } from 'common/hoc/runtime';
 import { useAutorun, useMobx, useDeepObserve } from 'common/hooks/useMobx';
 import { OnOffSwitch } from './components/OnOffSwitch';
 import {
@@ -18,7 +18,7 @@ import {
   DeviceRepo,
   type LightbulbDto,
 } from './constants';
-import { deviceRepoLayer } from './repos/DeviceRepo';
+import { createDeviceRepo } from './repos/DeviceRepo';
 
 interface LightBulbState {
   bulb_mode: LightMode;
@@ -62,7 +62,9 @@ const take = pipe(
     const repo = yield* DeviceRepo;
     yield* repo.update(item);
     yield* Effect.logDebug('Queue take', item);
-  })
+  }),
+  Effect.forever,
+  Effect.forkScoped
 );
 
 const queue = Effect.gen(function* () {
@@ -76,11 +78,11 @@ const queue = Effect.gen(function* () {
   return queue;
 });
 
-const LightBulbRuntime = createRuntimeProvider(
+export const LightBulbRuntime = createRuntimeContext(
   pipe(
-    Layer.scopedDiscard(pipe(take, Effect.forever, Effect.forkScoped)),
+    Layer.scopedDiscard(take),
     Layer.provideMerge(Layer.scoped(Throttler<LightbulbDto>(), queue)),
-    Layer.provideMerge(deviceRepoLayer)
+    Layer.provideMerge(Layer.effect(DeviceRepo, Effect.sync(createDeviceRepo)))
   )
 );
 

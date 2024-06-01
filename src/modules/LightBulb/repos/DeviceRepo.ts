@@ -64,7 +64,3 @@ export const createDeviceRepo = () => {
 class FetchError {
   readonly _tag = 'FetchError';
 }
-
-export const deviceRepoLayer = pipe(
-  Layer.effect(DeviceRepo, Effect.sync(createDeviceRepo))
-);

@@ -35,7 +35,7 @@ const useEffectRuntime = <T,>(layer: Layer.Layer<T>) => {
   return ref;
 };
 
-export const createRuntimeProvider = <T,>(layer: Layer.Layer<T>) => {
+export const createRuntimeContext = <T,>(layer: Layer.Layer<T>) => {
   const factory = () => createRuntime(layer);
   return React.createContext<
     React.MutableRefObject<Awaited<ReturnType<typeof factory>> | null>
