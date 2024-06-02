@@ -14,6 +14,7 @@ interface Props extends DefaultProps {
 export const PaletteViewer: React.FC<Props> = observer(
   ({ getColor, className }) => {
     const palettes = computed(() => createPalettes(getColor()));
+    // prevent reconciliation on every render
     const entries = Object.entries(untracked(() => palettes.get()));
 
     return (
@@ -28,11 +29,13 @@ export const PaletteViewer: React.FC<Props> = observer(
             css={styles.palette}
           >
             {palette.map((_, i) => {
+              // cache the color computation
               const color = computed(() => formatHex(palettes.get()[key][i]));
               return (
                 <Stack
                   key={key.concat(i.toString())}
                   css={styles.swatch}
+                  // late dereference the color
                   getStyle={() => ({ background: color.get() })}
                   render={() => color.get()}
                 />
@@ -77,5 +80,6 @@ const styles = {
     flex-direction: row;
     justify-content: center;
     padding: 0.25em;
+    transition: background-color 0.17s ease;
   `,
 };
