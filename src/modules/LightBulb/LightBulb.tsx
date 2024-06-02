@@ -1,24 +1,24 @@
 import * as React from 'react';
 import { css } from '@mui/material/styles';
 import type { Okhsv } from 'culori';
-import { Effect, Layer, Queue, pipe } from 'effect';
+import { Cause, Effect, Option, pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { State } from '__generated/api';
 import { Select } from 'common/components/Select';
 import { Slider } from 'common/components/Slider';
 import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
-import { createRuntimeContext, runtime } from 'common/hoc/runtime';
-import { useAutorun, useMobx, useDeepObserve } from 'common/hooks/useMobx';
+import { runtime } from 'common/hoc/runtime';
+import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
 import { OnOffSwitch } from './components/OnOffSwitch';
 import {
   LightMode,
   MODE_ITEMS,
-  Throttler,
-  DeviceRepo,
+  ApiThrottler,
+  TweenTarget,
   type LightbulbDto,
+  LightBulbRuntime,
 } from './constants';
-import { createDeviceRepo } from './repos/DeviceRepo';
 
 interface LightBulbState {
   bulb_mode: LightMode;
@@ -54,38 +54,6 @@ const colorInputs = [
   { key: 'hue', label: 'hue', props: { max: 360 } },
 ] as const;
 
-const take = pipe(
-  Effect.gen(function* () {
-    const queue = yield* Throttler<LightbulbDto>();
-    const item = yield* queue.take;
-    console.log(item);
-    const repo = yield* DeviceRepo;
-    yield* repo.update(item);
-    yield* Effect.logDebug('Queue take', item);
-  }),
-  Effect.forever,
-  Effect.forkScoped
-);
-
-const queue = Effect.gen(function* () {
-  const queue = yield* Queue.sliding<LightbulbDto>(1);
-  yield* Effect.addFinalizer(() =>
-    Effect.gen(function* () {
-      yield* Queue.shutdown(queue);
-      yield* Effect.logDebug('Queue shutdown');
-    })
-  );
-  return queue;
-});
-
-export const LightBulbRuntime = createRuntimeContext(
-  pipe(
-    Layer.scopedDiscard(take),
-    Layer.provideMerge(Layer.scoped(Throttler<LightbulbDto>(), queue)),
-    Layer.provideMerge(Layer.effect(DeviceRepo, Effect.sync(createDeviceRepo)))
-  )
-);
-
 export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
   observer(({ className, getStyle, onChange }) => {
     //
@@ -93,6 +61,45 @@ export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
     const bulb = useMobx(() => defaultState);
     const inputs =
       bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
+
+    // const createColor = React.useCallback(() => {
+    //   const hue = 360 + bulb.hue + 30;
+    //   const hueShift = (20 * Math.sin((bulb.hue / 360) * 2 * Math.PI)) % 360;
+    //   const saturation = 0.4 + (bulb.saturation / 100) * (1 - 0.4);
+    //   const value = 0.6 + (bulb.level / 100) * (1 - 0.6);
+    //   return {
+    //     h: hue + hueShift,
+    //     mode: 'okhsv',
+    //     s: saturation,
+    //     v: value,
+    //   } as Okhsv;
+    // }, []);
+
+    // React.useEffect(() => {
+    //   // catch fiber interrupts from runtime disposal
+    //   void runtimeRef.current?.runPromise(
+    //     pipe(
+    //       Effect.gen(function* () {
+    //         const queue = yield* TweenTarget;
+    //         const item = yield* queue.take;
+
+    //         console.log(item, 'from tweenTarget');
+    //         const value = Object.values(item)[0];
+    //         if (typeof value !== 'number') return;
+    //         onChange(createColor());
+
+    //         yield* Effect.logDebug('TweenTarget take', item);
+    //       }),
+    //       Effect.forever,
+    //       Effect.catchSomeCause((cause) =>
+    //         // allow the fiber to be interrupted on component unmounts
+    //         Cause.isInterruptedOnly(cause)
+    //           ? Option.some(Effect.void)
+    //           : Option.none()
+    //       )
+    //     )
+    //   );
+    // }, [runtimeRef]);
 
     useAutorun(() => {
       const hue = 360 + bulb.hue + 30;
@@ -112,7 +119,7 @@ export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
       const body = { [change.name]: change.newValue } as Partial<LightbulbDto>;
       runtimeRef.current?.runSync(
         Effect.gen(function* () {
-          const queue = yield* Throttler<LightbulbDto>();
+          const queue = yield* ApiThrottler;
           yield* queue.offer(body);
         })
       );
@@ -187,5 +194,6 @@ const styles = {
     border-radius: 12px;
     display: block;
     padding: 24px;
+    transition: background-color 0.17s ease;
   `,
 };

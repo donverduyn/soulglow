@@ -1,6 +1,6 @@
-import { Effect, Layer, pipe } from 'effect';
+import { Effect, pipe } from 'effect';
 import { RemoteType, DeviceControlService } from '__generated/api';
-import { DeviceRepo, type LightbulbDto } from '../constants';
+import { type LightbulbDto } from '../constants';
 
 interface Crudable<T> {
   // create: (value: T) => Effect.Effect<T>;
