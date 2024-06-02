@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { css } from '@mui/material/styles';
 import type { Okhsv } from 'culori';
-import { Cause, Effect, Option, pipe } from 'effect';
+import { Effect } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { State } from '__generated/api';
 import { Select } from 'common/components/Select';
@@ -15,7 +15,6 @@ import {
   LightMode,
   MODE_ITEMS,
   ApiThrottler,
-  TweenTarget,
   type LightbulbDto,
   LightBulbRuntime,
 } from './constants';
