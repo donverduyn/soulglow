@@ -23,9 +23,8 @@ export const TextField = observer(
     >(
       (event) => {
         if (!event.deltaY) return;
-        event.preventDefault();
         const adjustment = event.deltaY < 0 ? 0.1 : -0.1;
-        onChange((Number(value()) + adjustment) as T);
+        onChange(Number((Number(value()) + adjustment).toFixed(1)) as T);
       },
       [onChange, value]
     );
