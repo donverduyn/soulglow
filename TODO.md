@@ -3,6 +3,9 @@
 - [ ] Use color pattern scaling factor
 - [ ] Use color pattern base color blend + blending factor
 - [ ] Use color pattern individual tweaks (hue, saturation, lightness)
+- [ ] Make minikube available in the dev container
+- [ ] Make it possible to deploy the app in minikube with helm charts
+- [ ] Configure github actions to run e2e tests with minikube
 
 # Ideas
 - Use white UI elements against colored background to simulate brightness
