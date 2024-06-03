@@ -21,7 +21,7 @@ import { EndpointPanel } from 'modules/EndpointPanel/EndpointPanel';
 import { LightBulb } from 'modules/LightBulb/LightBulb';
 import { PaletteViewer } from 'modules/PaletteViewer/PaletteViewer';
 // import { ThemeVisualizer } from 'modules/ThemeVisualizer/ThemeVisualizer';
-import { darkTheme, lightTheme } from './theme';
+import { darkTheme } from './theme';
 
 const baseColor: Okhsv = {
   h: 0,
