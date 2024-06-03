@@ -11,7 +11,7 @@ import { Typography } from 'common/components/Typography';
 import { createRuntimeContext, runtime } from 'common/hoc/runtime';
 import { useMobx } from 'common/hooks/useMobx';
 import { useRuntime } from 'common/hooks/useRuntime';
-import type { Endpoint } from './constants';
+import type { Endpoint } from './context';
 
 interface Props extends DefaultProps {
   readonly onChange: (endpoints: Endpoint) => void;

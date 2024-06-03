@@ -1,6 +1,6 @@
 import { Effect, pipe } from 'effect';
 import { RemoteType, DeviceControlService } from '__generated/api';
-import { FetchError, type LightbulbDto } from '../constants';
+import { FetchError, type LightbulbDto } from '../context';
 
 export const createDeviceRepo = () => {
   const options = { deviceId: 5, groupId: 5, remoteType: RemoteType.FUT089 };

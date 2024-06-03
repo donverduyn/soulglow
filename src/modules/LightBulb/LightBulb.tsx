@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { css } from '@mui/material/styles';
 import type { Okhsv } from 'culori';
-import { Effect } from 'effect';
+import { Effect, Ref } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { State } from '__generated/api';
 import { Select } from 'common/components/Select';
@@ -11,6 +11,7 @@ import { TextField } from 'common/components/TextField';
 import { runtime } from 'common/hoc/runtime';
 import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
 import { useRuntime } from 'common/hooks/useRuntime';
+import { GlobalRuntime, Hello } from 'context';
 import { OnOffSwitch } from './components/OnOffSwitch';
 import {
   LightMode,
@@ -18,8 +19,7 @@ import {
   ApiThrottler,
   type LightbulbDto,
   LightBulbRuntime,
-  DeviceRepo,
-} from './constants';
+} from './context';
 
 interface LightBulbState {
   bulb_mode: LightMode;
@@ -64,14 +64,24 @@ export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
       bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
 
     useRuntime(
-      LightBulbRuntime,
+      GlobalRuntime,
       Effect.gen(function* () {
-        const repo = yield* DeviceRepo;
-        const result = yield* repo.read();
-        console.log(result?.color);
-        return 0;
+        const hello = yield* Hello;
+        yield* Ref.update(hello, (value) => value + 1);
+        const hello2 = yield* Ref.get(hello);
+        console.log(hello2);
       })
     );
+
+    // useRuntime(
+    //   LightBulbRuntime,
+    //   Effect.gen(function* () {
+    //     const repo = yield* DeviceRepo;
+    //     const result = yield* repo.read();
+    //     console.log(result?.color);
+    //     return 0;
+    //   })
+    // );
 
     useAutorun(() => {
       const hue = 360 + bulb.hue + 30;

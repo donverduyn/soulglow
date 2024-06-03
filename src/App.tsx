@@ -4,21 +4,13 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, css } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { formatRgb, type Okhsv } from 'culori';
-import {
-  Console,
-  Context,
-  Layer,
-  LogLevel,
-  Logger,
-  Ref,
-  SynchronizedRef,
-  pipe,
-} from 'effect';
+import { Effect, Ref } from 'effect';
 import { observable } from 'mobx';
 import { Stack } from 'common/components/Stack';
-import { createRuntimeContext, runtime } from 'common/hoc/runtime';
+import { runtime } from 'common/hoc/runtime';
 import { useMobx } from 'common/hooks/useMobx';
 import { useRuntime } from 'common/hooks/useRuntime';
+import { GlobalRuntime, Hello } from 'context';
 import { EndpointPanel } from 'modules/EndpointPanel/EndpointPanel';
 import { LightBulb } from 'modules/LightBulb/LightBulb';
 import { PaletteViewer } from 'modules/PaletteViewer/PaletteViewer';
@@ -32,24 +24,21 @@ const baseColor: Okhsv = {
   v: 0,
 };
 
-const rootLayer = pipe(
-  // DevTools.layer(),
-  Layer.merge(Logger.minimumLogLevel(LogLevel.Debug))
-);
-
-export class Hello extends Context.Tag('Hello')<Hello, Ref.Ref<number>>() {}
-
-export const GlobalRuntime = createRuntimeContext(
-  Layer.effect(Hello, SynchronizedRef.make(0))
-);
-
 export const App: React.FC = runtime(GlobalRuntime)(() => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const state = useMobx(() => ({ color: baseColor }), {
     color: observable.ref,
   });
 
-  useRuntime(GlobalRuntime, Console.log('Hello, World!'));
+  useRuntime(
+    GlobalRuntime,
+    Effect.gen(function* () {
+      const hello = yield* Hello;
+      yield* Ref.update(hello, (value) => value + 1);
+      const hello2 = yield* Ref.get(hello);
+      console.log(hello2);
+    })
+  );
 
   return (
     <ThemeProvider theme={prefersDarkMode ? darkTheme : darkTheme}>
