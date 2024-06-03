@@ -5,6 +5,7 @@ import { ThemeProvider, css } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { formatRgb, type Okhsv } from 'culori';
 import {
+  Console,
   Context,
   Layer,
   LogLevel,
@@ -17,6 +18,7 @@ import { observable } from 'mobx';
 import { Stack } from 'common/components/Stack';
 import { createRuntimeContext, runtime } from 'common/hoc/runtime';
 import { useMobx } from 'common/hooks/useMobx';
+import { useRuntime } from 'common/hooks/useRuntime';
 import { EndpointPanel } from 'modules/EndpointPanel/EndpointPanel';
 import { LightBulb } from 'modules/LightBulb/LightBulb';
 import { PaletteViewer } from 'modules/PaletteViewer/PaletteViewer';
@@ -35,7 +37,7 @@ const rootLayer = pipe(
   Layer.merge(Logger.minimumLogLevel(LogLevel.Debug))
 );
 
-class Hello extends Context.Tag('Hello')<Hello, Ref.Ref<number>>() {}
+export class Hello extends Context.Tag('Hello')<Hello, Ref.Ref<number>>() {}
 
 export const GlobalRuntime = createRuntimeContext(
   Layer.effect(Hello, SynchronizedRef.make(0))
@@ -46,6 +48,8 @@ export const App: React.FC = runtime(GlobalRuntime)(() => {
   const state = useMobx(() => ({ color: baseColor }), {
     color: observable.ref,
   });
+
+  useRuntime(GlobalRuntime, Console.log('Hello, World!'));
 
   return (
     <ThemeProvider theme={prefersDarkMode ? darkTheme : darkTheme}>

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { css } from '@mui/material/styles';
 import type { Okhsv } from 'culori';
-import { Effect, pipe } from 'effect';
+import { Effect } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { State } from '__generated/api';
 import { Select } from 'common/components/Select';
@@ -10,6 +10,7 @@ import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
 import { runtime } from 'common/hoc/runtime';
 import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
+import { useRuntime } from 'common/hooks/useRuntime';
 import { OnOffSwitch } from './components/OnOffSwitch';
 import {
   LightMode,
@@ -62,34 +63,15 @@ export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
     const inputs =
       bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
 
-    React.useEffect(() => {
-      // catch fiber interrupts from runtime disposal
-      void runtimeRef.current?.runPromise(
-        pipe(
-          Effect.gen(function* () {
-            console.log('from tweenTarget');
-            yield* Effect.sleep(1000);
-          }),
-          Effect.forever
-          // Effect.catchSomeCause((cause) =>
-          //   // allow the fiber to be interrupted on component unmounts
-          //   Cause.isInterruptedOnly(cause)
-          //     ? Option.some(Effect.void)
-          //     : Option.none()
-          // ) 
-        )
-      );
-    }, []);
-
-    // React.useEffect(() => {
-    //   void runtimeRef.current?.runPromise(
-    //     Effect.gen(function* () {
-    //       const repo = yield* DeviceRepo;
-    //       const result = yield* repo.read();
-    //       console.log(result?.color);
-    //     })
-    //   );
-    // }, []);
+    useRuntime(
+      LightBulbRuntime,
+      Effect.gen(function* () {
+        const repo = yield* DeviceRepo;
+        const result = yield* repo.read();
+        console.log(result?.color);
+        return 0;
+      })
+    );
 
     useAutorun(() => {
       const hue = 360 + bulb.hue + 30;

@@ -6,16 +6,21 @@ const useEffectRuntime = <T,>(layer: Layer.Layer<T>) => {
     null
   );
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     const id = Math.round(Math.random() * 1000);
-    console.log(`[useEffectRuntime] create runtime ${String(id)}`);
+    // console.log(`[useEffectRuntime] create runtime ${String(id)}`);
 
     const runtime = ManagedRuntime.make(layer);
     ref.current = runtime;
 
     return () => {
       void runtime.dispose();
-      console.log(`[useEffectRuntime] dispose runtime ${String(id)}`);
+      // console.log(`[useEffectRuntime] dispose runtime ${String(id)}`);
+      ref.current = null;
+      // we need to wait for the next tick to clear the ref
+      // setTimeout(() => {
+        // ref.current = null;
+      // }, 0);
     };
     // layer never changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
