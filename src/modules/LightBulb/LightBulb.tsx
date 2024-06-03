@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { css } from '@mui/material/styles';
 import type { Okhsv } from 'culori';
-import { Effect } from 'effect';
+import { Effect, pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { State } from '__generated/api';
 import { Select } from 'common/components/Select';
@@ -17,6 +17,7 @@ import {
   ApiThrottler,
   type LightbulbDto,
   LightBulbRuntime,
+  DeviceRepo,
 } from './constants';
 
 interface LightBulbState {
@@ -61,44 +62,34 @@ export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
     const inputs =
       bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
 
-    // const createColor = React.useCallback(() => {
-    //   const hue = 360 + bulb.hue + 30;
-    //   const hueShift = (20 * Math.sin((bulb.hue / 360) * 2 * Math.PI)) % 360;
-    //   const saturation = 0.4 + (bulb.saturation / 100) * (1 - 0.4);
-    //   const value = 0.6 + (bulb.level / 100) * (1 - 0.6);
-    //   return {
-    //     h: hue + hueShift,
-    //     mode: 'okhsv',
-    //     s: saturation,
-    //     v: value,
-    //   } as Okhsv;
-    // }, []);
+    React.useEffect(() => {
+      // catch fiber interrupts from runtime disposal
+      void runtimeRef.current?.runPromise(
+        pipe(
+          Effect.gen(function* () {
+            console.log('from tweenTarget');
+            yield* Effect.sleep(1000);
+          }),
+          Effect.forever
+          // Effect.catchSomeCause((cause) =>
+          //   // allow the fiber to be interrupted on component unmounts
+          //   Cause.isInterruptedOnly(cause)
+          //     ? Option.some(Effect.void)
+          //     : Option.none()
+          // ) 
+        )
+      );
+    }, []);
 
     // React.useEffect(() => {
-    //   // catch fiber interrupts from runtime disposal
     //   void runtimeRef.current?.runPromise(
-    //     pipe(
-    //       Effect.gen(function* () {
-    //         const queue = yield* TweenTarget;
-    //         const item = yield* queue.take;
-
-    //         console.log(item, 'from tweenTarget');
-    //         const value = Object.values(item)[0];
-    //         if (typeof value !== 'number') return;
-    //         onChange(createColor());
-
-    //         yield* Effect.logDebug('TweenTarget take', item);
-    //       }),
-    //       Effect.forever,
-    //       Effect.catchSomeCause((cause) =>
-    //         // allow the fiber to be interrupted on component unmounts
-    //         Cause.isInterruptedOnly(cause)
-    //           ? Option.some(Effect.void)
-    //           : Option.none()
-    //       )
-    //     )
+    //     Effect.gen(function* () {
+    //       const repo = yield* DeviceRepo;
+    //       const result = yield* repo.read();
+    //       console.log(result?.color);
+    //     })
     //   );
-    // }, [runtimeRef]);
+    // }, []);
 
     useAutorun(() => {
       const hue = 360 + bulb.hue + 30;
@@ -116,6 +107,7 @@ export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
     useDeepObserve(bulb, (change) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const body = { [change.name]: change.newValue } as Partial<LightbulbDto>;
+      // const rgb = formatRgb({mode: ''})
       runtimeRef.current?.runSync(
         Effect.gen(function* () {
           const queue = yield* ApiThrottler;

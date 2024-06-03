@@ -1,18 +1,15 @@
 import { Effect, pipe } from 'effect';
 import { RemoteType, DeviceControlService } from '__generated/api';
-import { type LightbulbDto } from '../constants';
-
-interface Crudable<T> {
-  // create: (value: T) => Effect.Effect<T>;
-  // delete: () => Effect.Effect<boolean>;
-  // read: (id: string) => Effect.Effect<T>;
-  update: (value: T) => Effect.Effect<T>;
-}
+import { FetchError, type LightbulbDto } from '../constants';
 
 export const createDeviceRepo = () => {
   const options = { deviceId: 5, groupId: 5, remoteType: RemoteType.FUT089 };
-  const createOptions = (body: LightbulbDto) => ({
-    body,
+  const createOptions = (body?: LightbulbDto) => ({
+    ...(body && { body }),
+    headers: {
+      // TODO: this should be injected from the global runtime
+      endpoint: 'http://192.168.0.153',
+    },
     path: {
       'device-id': options.deviceId,
       'group-id': options.groupId,
@@ -28,7 +25,11 @@ export const createDeviceRepo = () => {
     }>
   ) =>
     pipe(
-      Effect.tryPromise(call),
+      // Effect.gen(function* () {
+      //   yield* Effect.logDebug('Fetching data');
+      // }),
+      // if we can inject from the global runtime, we can access the url
+      Effect.tryPromise(() => call()),
       Effect.andThen(({ error, data }) =>
         error ? Effect.fail(new FetchError()) : Effect.succeed(data)
       ),
@@ -38,16 +39,16 @@ export const createDeviceRepo = () => {
 
   const handlers = {
     create: (dto: LightbulbDto) => handlers.update(dto),
-    delete: (dto: LightbulbDto) =>
+    delete: () =>
       handle(() =>
         DeviceControlService.deleteGatewaysByDeviceIdByRemoteTypeByGroupId(
-          createOptions(dto)
+          createOptions()
         )
       ),
-    read: (dto: LightbulbDto) =>
+    read: () =>
       handle(() =>
         DeviceControlService.getGatewaysByDeviceIdByRemoteTypeByGroupId(
-          createOptions(dto)
+          createOptions()
         )
       ),
     update: (dto: LightbulbDto) =>
@@ -60,7 +61,3 @@ export const createDeviceRepo = () => {
 
   return handlers;
 };
-
-class FetchError {
-  readonly _tag = 'FetchError';
-}

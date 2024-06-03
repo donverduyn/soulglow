@@ -5,7 +5,7 @@ import { computed, untracked } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Paper } from 'common/components/Paper';
 import { Stack } from 'common/components/Stack';
-import { createPalettes } from 'theme';
+import { createPalettes } from 'common/utils/color';
 
 interface Props extends DefaultProps {
   readonly getColor: () => Okhsv;
@@ -13,6 +13,7 @@ interface Props extends DefaultProps {
 
 export const PaletteViewer: React.FC<Props> = observer(
   ({ getColor, className }) => {
+    // we don't need useMemo here because props are stable
     const palettes = computed(() => createPalettes(getColor()));
     // prevent reconciliation on every render
     const entries = Object.entries(untracked(() => palettes.get()));

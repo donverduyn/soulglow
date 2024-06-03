@@ -6,7 +6,7 @@ const useEffectRuntime = <T,>(layer: Layer.Layer<T>) => {
     null
   );
 
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     const id = Math.round(Math.random() * 1000);
     console.log(`[useEffectRuntime] create runtime ${String(id)}`);
 
@@ -17,10 +17,14 @@ const useEffectRuntime = <T,>(layer: Layer.Layer<T>) => {
       void runtime.dispose();
       console.log(`[useEffectRuntime] dispose runtime ${String(id)}`);
     };
-  }, [layer]);
+    // layer never changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return ref;
 };
 
+// TODO: breaks fast refresh. Should be in a separate file
 export const createRuntimeContext = <T,>(layer: Layer.Layer<T>) => {
   const factory = () => ManagedRuntime.make(layer);
 
@@ -32,7 +36,9 @@ export const createRuntimeContext = <T,>(layer: Layer.Layer<T>) => {
 };
 
 export const runtime = <T,>(Context: React.Context<T>) => {
-  return <P extends object>(Component: React.FC<P>): React.FC<P> => {
+  return <P extends object>(
+    Component: React.FC<P>
+  ): React.FC<React.PropsWithRef<P>> => {
     const Wrapped = (props: P) => {
       const runtimeRef = useEffectRuntime(
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -47,6 +53,6 @@ export const runtime = <T,>(Context: React.Context<T>) => {
         </Context.Provider>
       );
     };
-    return Wrapped;
+    return React.memo(Wrapped);
   };
 };

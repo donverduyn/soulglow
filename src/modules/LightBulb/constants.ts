@@ -1,10 +1,15 @@
 import { Context, Effect, Layer, Queue, pipe } from 'effect';
 import { observable } from 'mobx';
 import { v4 as uuid } from 'uuid';
-import type { GroupState, GroupStateCommands } from '__generated/api';
+import type {
+  BooleanResponse,
+  GroupState,
+  GroupStateCommands,
+} from '__generated/api';
 import { createRuntimeContext } from 'common/hoc/runtime';
 import { createDeviceRepo } from './repos/DeviceRepo';
 
+// we really shouldn't couple our dto with the api types
 export type LightbulbDto = GroupState & GroupStateCommands;
 
 export enum LightMode {
@@ -19,19 +24,25 @@ export const MODE_ITEMS = observable.array([
   { id: uuid(), label: 'White', value: LightMode.WHITE },
 ]);
 
+interface Crudable<T, E> {
+  create: (dto: T) => Effect.Effect<T | BooleanResponse | undefined, E>;
+  delete: () => Effect.Effect<BooleanResponse | undefined, E>;
+  read: () => Effect.Effect<T | undefined, E>;
+  update: (dto: T) => Effect.Effect<T | BooleanResponse | undefined, E>;
+}
+
+export class FetchError {
+  readonly _tag = 'FetchError';
+}
+
 export class ApiThrottler extends Context.Tag('@Lightbulb/Throttler')<
   ApiThrottler,
-  Queue.Queue<Partial<GroupState>>
->() {}
-
-export class TweenTarget extends Context.Tag('@Lightbulb/TweenTarget')<
-  TweenTarget,
-  Queue.Queue<Partial<GroupState>>
+  Queue.Queue<Partial<LightbulbDto>>
 >() {}
 
 export class DeviceRepo extends Context.Tag('@Lightbulb/DeviceRepo')<
   DeviceRepo,
-  ReturnType<typeof createDeviceRepo>
+  Crudable<LightbulbDto, FetchError>
 >() {}
 
 const take = pipe(
@@ -39,9 +50,6 @@ const take = pipe(
     const queue = yield* ApiThrottler;
     const item = yield* queue.take;
     console.log(item);
-
-    const target = yield* TweenTarget;
-    yield* target.offer(item);
 
     const repo = yield* DeviceRepo;
     yield* repo.update(item);
@@ -68,7 +76,6 @@ export const LightBulbRuntime = createRuntimeContext(
   pipe(
     Layer.scopedDiscard(take),
     Layer.provideMerge(Layer.scoped(ApiThrottler, singleItemQueue)),
-    Layer.provideMerge(Layer.scoped(TweenTarget, singleItemQueue)),
     Layer.provideMerge(Layer.effect(DeviceRepo, Effect.sync(createDeviceRepo)))
   )
 );

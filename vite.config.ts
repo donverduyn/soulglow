@@ -1,5 +1,7 @@
 import react from '@vitejs/plugin-react-swc';
 import dayjs from 'dayjs';
+import { createProxyMiddleware } from 'http-proxy-middleware';
+import moize from 'moize';
 import postcssPresetEnv from 'postcss-preset-env';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { Plugin, ViteDevServer } from 'vite';
@@ -13,6 +15,31 @@ const noCacheHeaders = {
   'Cache-Control': 'no-cache, no-store, must-revalidate',
   Expires: '0',
   Pragma: 'no-cache',
+};
+
+const dynamicProxyPlugin = (): Plugin => {
+  const getProxy = moize((endpoint: string) =>
+    createProxyMiddleware({
+      changeOrigin: true,
+      pathRewrite: { [`^/api`]: endpoint },
+      target: endpoint,
+    })
+  );
+
+  return {
+    configureServer(server) {
+      server.middlewares.use('/api', (req, res, next) => {
+        const endpoint = req.headers.endpoint as string;
+        if (!endpoint) {
+          return res.writeHead(400).end('Endpoint is required in headers');
+        }
+
+        const proxy = getProxy(endpoint);
+        void proxy(req, res, next);
+      });
+    },
+    name: 'dynamic-proxy',
+  };
 };
 
 const browser = (mode: string): Plugin => {
@@ -78,6 +105,7 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     mode !== 'production' && process.env.CI !== 'true' && browser(mode),
+    dynamicProxyPlugin(),
     tsconfigPaths(),
     react({ jsxImportSource: '@emotion/react' }),
     checker({
@@ -138,15 +166,15 @@ export default defineConfig(({ mode }) => ({
     hmr: { overlay: true },
     host: true,
     port: 4173,
-    proxy: {
-      '/api': {
-        // The base URL of your API
-        changeOrigin: true,
-        // Needed for virtual hosted sites
-        rewrite: (path) => path.replace(/^\/api/, ''),
-        target: 'http://192.168.0.153:80',
-      },
-    },
+    // proxy: {
+    //   '/api': {
+    //     // The base URL of your API
+    //     changeOrigin: true,
+    //     // Needed for virtual hosted sites
+    //     rewrite: (path) => path.replace(/^\/api/, ''),
+    //     target: 'http://192.168.0.153:80',
+    //   },
+    // },
   },
   test: {
     environment: 'happy-dom',
