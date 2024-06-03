@@ -4,13 +4,15 @@ import { css } from '@mui/material/styles';
 
 interface Props extends DefaultProps {
   readonly children: React.ReactNode;
+  readonly onClick?: () => void;
 }
 
-export const Button: React.FC<Props> = ({ className, children }) => {
+export const Button: React.FC<Props> = ({ className, children, onClick }) => {
   return (
     <MuiButton
       className={className!}
       css={buttonStyles.root}
+      onClick={onClick}
       variant='contained'
     >
       {children}
@@ -20,6 +22,6 @@ export const Button: React.FC<Props> = ({ className, children }) => {
 
 const buttonStyles = {
   root: css`
-    background: red;
+    /* background: red; */
   `,
 };
