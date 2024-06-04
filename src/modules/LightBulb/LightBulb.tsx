@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { css } from '@mui/material/styles';
 import type { Okhsv } from 'culori';
-import { Effect, Ref } from 'effect';
+import { Console, Effect, Ref } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { State } from '__generated/api';
 import { Select } from 'common/components/Select';
@@ -55,8 +55,9 @@ const colorInputs = [
   { key: 'hue', label: 'hue', props: { max: 360 } },
 ] as const;
 
+//TODO: think about default props and how to set them
 export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
-  observer(({ className, getStyle, onChange }) => {
+  observer(({ className, getStyle, onChange = () => {} }) => {
     //
     const runtimeRef = React.useContext(LightBulbRuntime);
     const bulb = useMobx(() => defaultState);
@@ -67,9 +68,9 @@ export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
       GlobalRuntime,
       Effect.gen(function* () {
         const hello = yield* Hello;
-        yield* Ref.update(hello, (value) => value + 1);
+        yield* Ref.update(hello, (value) => value + 2);
         const hello2 = yield* Ref.get(hello);
-        console.log(hello2);
+        yield* Console.log(hello2);
       })
     );
 
@@ -79,7 +80,6 @@ export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
     //     const repo = yield* DeviceRepo;
     //     const result = yield* repo.read();
     //     console.log(result?.color);
-    //     return 0;
     //   })
     // );
 

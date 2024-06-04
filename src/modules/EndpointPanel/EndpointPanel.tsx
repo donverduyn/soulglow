@@ -10,7 +10,6 @@ import { TextField } from 'common/components/TextField';
 import { Typography } from 'common/components/Typography';
 import { createRuntimeContext, runtime } from 'common/hoc/runtime';
 import { useMobx } from 'common/hooks/useMobx';
-import { useRuntime } from 'common/hooks/useRuntime';
 import type { Endpoint } from './context';
 
 interface Props extends DefaultProps {
@@ -30,19 +29,17 @@ const defaults = {
 
 const EndpointRuntime = createRuntimeContext(Layer.empty);
 
+const logClick = pipe(
+  Stream.fromEventListener(window, 'click'),
+  Stream.tap((e) => Console.log(e)),
+  Stream.runCollect
+);
+
 export const EndpointPanel: React.FC<Props> = runtime(EndpointRuntime)(({
   onChange,
 }) => {
   const endpoints = useMobx(() => defaults);
-
-  useRuntime(
-    EndpointRuntime,
-    pipe(
-      Stream.fromEventListener(window, 'click'),
-      Stream.tap((e) => Console.log(e)),
-      Stream.runCollect
-    )
-  );
+  // useRuntime(EndpointRuntime, logClick);
 
   return (
     <Paper css={styles.root}>
