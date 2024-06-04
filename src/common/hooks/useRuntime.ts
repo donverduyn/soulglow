@@ -10,6 +10,8 @@ export const useRuntime = <R, A, E>(
   const runtimeRef = React.useContext(context);
   React.useEffect(() => {
     const scope = Effect.runSync(Scope.make());
+
+    // TODO: explore ways to prevent recomposing the effect
     void runtimeRef.current?.runPromise(
       Effect.scoped(
         pipe(

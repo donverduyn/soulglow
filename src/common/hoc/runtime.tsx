@@ -1,30 +1,20 @@
 import * as React from 'react';
 import { Layer, ManagedRuntime } from 'effect';
 
-const useEffectRuntime = <T,>(layer: Layer.Layer<T>) => {
+const useRuntimeFactory = <T,>(layer: Layer.Layer<T>) => {
   const ref = React.useRef<ManagedRuntime.ManagedRuntime<T, never> | null>(
     null
   );
 
   React.useLayoutEffect(() => {
-    const id = Math.round(Math.random() * 1000);
-    // console.log(`[useEffectRuntime] create runtime ${String(id)}`);
-
     const runtime = ManagedRuntime.make(layer);
     ref.current = runtime;
 
     return () => {
       void runtime.dispose();
-      // console.log(`[useEffectRuntime] dispose runtime ${String(id)}`);
       ref.current = null;
-      // we need to wait for the next tick to clear the ref
-      // setTimeout(() => {
-        // ref.current = null;
-      // }, 0);
     };
-    // layer never changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [layer]);
 
   return ref;
 };
@@ -34,7 +24,7 @@ export const createRuntimeContext = <T,>(layer: Layer.Layer<T>) => {
   const factory = () => ManagedRuntime.make(layer);
 
   return React.createContext<
-    React.MutableRefObject<Awaited<ReturnType<typeof factory>> | null>
+    React.MutableRefObject<ReturnType<typeof factory> | null>
     // we abuse context here to pass through the layer
     // while casting context to the inferred type of the runtime
   >(layer as unknown as React.MutableRefObject<null>);
@@ -45,7 +35,7 @@ export const runtime = <T,>(Context: React.Context<T>) => {
     Component: React.FC<P>
   ): React.FC<React.PropsWithRef<P>> => {
     const Wrapped = (props: P) => {
-      const runtimeRef = useEffectRuntime(
+      const runtimeRef = useRuntimeFactory(
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error _currentValue does not exist
         Context._currentValue as unknown as Layer.Layer<unknown>
