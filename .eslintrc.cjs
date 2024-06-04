@@ -184,6 +184,7 @@ module.exports = {
             unnamedComponents: ['arrow-function'],
           },
         ],
+        'react/hook-use-state': 'off',
         'react/jsx-boolean-value': 'warn',
         'react/jsx-child-element-spacing': 'off',
         'react/jsx-closing-bracket-location': ['warn', 'line-aligned'],
