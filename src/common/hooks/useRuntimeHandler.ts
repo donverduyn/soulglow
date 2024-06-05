@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { type ManagedRuntime, type Effect, pipe, Stream } from 'effect';
+import { type ManagedRuntime, Effect, pipe, Stream } from 'effect';
 import { useRuntime } from './useRuntime';
 
 class EventEmitter<T> {
@@ -37,18 +37,18 @@ export const useRuntimeHandler = <T, A, E, R>(
   context: React.Context<
     React.MutableRefObject<ManagedRuntime.ManagedRuntime<R, never> | null>
   >,
-  effect: (value: T) => Effect.Effect<A, E, R>
+  handler: (value: T) => Effect.Effect<A, E, NoInfer<R>>
 ) => {
-  const [emitter] = React.useState(
-    () => new EventEmitter<Parameters<typeof effect>[0]>()
+  const [emitter] = React.useState(() => new EventEmitter<T>());
+  const stream = React.useMemo(
+    () =>
+      pipe(
+        Stream.fromAsyncIterable(createAsyncIterator(emitter), console.log),
+        Stream.mapEffect(handler),
+        Stream.runDrain
+      ),
+    [handler, emitter]
   );
-  useRuntime(
-    context,
-    pipe(
-      Stream.fromAsyncIterable(createAsyncIterator(emitter), console.log),
-      Stream.mapEffect(effect),
-      Stream.runDrain
-    )
-  );
+  useRuntime(context, stream);
   return emitter.emit.bind(emitter);
 };

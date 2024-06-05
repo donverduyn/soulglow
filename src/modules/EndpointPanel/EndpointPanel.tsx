@@ -2,7 +2,7 @@ import * as React from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { IconButton } from '@mui/material';
 import { css } from '@mui/material/styles';
-import { Console, Layer, Stream, pipe } from 'effect';
+import { Layer } from 'effect';
 import { Button } from 'common/components/Button';
 import { Paper } from 'common/components/Paper';
 import { Stack } from 'common/components/Stack';
@@ -28,12 +28,6 @@ const defaults = {
 };
 
 const EndpointRuntime = createRuntimeContext(Layer.empty);
-
-const logClick = pipe(
-  Stream.fromEventListener(window, 'click'),
-  Stream.tap((e) => Console.log(e)),
-  Stream.runCollect
-);
 
 export const EndpointPanel: React.FC<Props> = runtime(EndpointRuntime)(({
   onChange,

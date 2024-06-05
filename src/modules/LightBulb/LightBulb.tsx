@@ -11,6 +11,7 @@ import { TextField } from 'common/components/TextField';
 import { runtime } from 'common/hoc/runtime';
 import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
 import { useRuntime } from 'common/hooks/useRuntime';
+import { useRuntimeHandler } from 'common/hooks/useRuntimeHandler';
 import { GlobalRuntime, Hello } from 'context';
 import { OnOffSwitch } from './components/OnOffSwitch';
 import {
@@ -74,6 +75,15 @@ export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
       })
     );
 
+    const handle = useRuntimeHandler(
+      LightBulbRuntime,
+      (body: Partial<LightbulbDto>) =>
+        Effect.gen(function* () {
+          const queue = yield* ApiThrottler;
+          yield* queue.offer(body);
+        })
+    );
+
     // useRuntime(
     //   LightBulbRuntime,
     //   Effect.gen(function* () {
@@ -100,12 +110,7 @@ export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const body = { [change.name]: change.newValue } as Partial<LightbulbDto>;
       // const rgb = formatRgb({mode: ''})
-      runtimeRef.current?.runSync(
-        Effect.gen(function* () {
-          const queue = yield* ApiThrottler;
-          yield* queue.offer(body);
-        })
-      );
+      handle(body);
     });
 
     return (
