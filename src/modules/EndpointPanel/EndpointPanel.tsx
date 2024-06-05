@@ -29,9 +29,7 @@ const defaults = {
 
 const EndpointRuntime = createRuntimeContext(Layer.empty);
 
-export const EndpointPanel: React.FC<Props> = runtime(EndpointRuntime)(({
-  onChange,
-}) => {
+export const EndpointPanel: React.FC<Props> = runtime(EndpointRuntime)(() => {
   const endpoints = useMobx(() => defaults);
   // useRuntime(EndpointRuntime, logClick);
 

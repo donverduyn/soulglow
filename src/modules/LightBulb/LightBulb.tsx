@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { css } from '@mui/material/styles';
 import type { Okhsv } from 'culori';
-import { Console, Effect, Ref } from 'effect';
+import { Effect } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { State } from '__generated/api';
 import { Select } from 'common/components/Select';
@@ -10,9 +10,7 @@ import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
 import { runtime } from 'common/hoc/runtime';
 import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
-import { useRuntime } from 'common/hooks/useRuntime';
 import { useRuntimeHandler } from 'common/hooks/useRuntimeHandler';
-import { GlobalRuntime, Hello } from 'context';
 import { OnOffSwitch } from './components/OnOffSwitch';
 import {
   LightMode,
@@ -60,20 +58,20 @@ const colorInputs = [
 export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
   observer(({ className, getStyle, onChange = () => {} }) => {
     //
-    const runtimeRef = React.useContext(LightBulbRuntime);
+    // const runtimeRef = React.useContext(LightBulbRuntime);
     const bulb = useMobx(() => defaultState);
     const inputs =
       bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
 
-    useRuntime(
-      GlobalRuntime,
-      Effect.gen(function* () {
-        const hello = yield* Hello;
-        yield* Ref.update(hello, (value) => value + 2);
-        const hello2 = yield* Ref.get(hello);
-        yield* Console.log(hello2);
-      })
-    );
+    // useRuntime(
+    //   GlobalRuntime,
+    //   Effect.gen(function* () {
+    //     const hello = yield* Hello;
+    //     yield* Ref.update(hello, (value) => value + 2);
+    //     const hello2 = yield* Ref.get(hello);
+    //     yield* Console.log(hello2);
+    //   })
+    // );
 
     const handle = useRuntimeHandler(
       LightBulbRuntime,
@@ -110,7 +108,7 @@ export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const body = { [change.name]: change.newValue } as Partial<LightbulbDto>;
       // const rgb = formatRgb({mode: ''})
-      handle(body);
+      void handle(body);
     });
 
     return (
