@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Layer, ManagedRuntime } from 'effect';
+import { Layer, ManagedRuntime, type Effect } from 'effect';
+import { useRuntimeHandler } from 'common/hooks/useRuntimeHandler';
 
 const useRuntimeFactory = <T,>(layer: Layer.Layer<T>) => {
   const ref = React.useRef<ManagedRuntime.ManagedRuntime<T, never> | null>(
@@ -9,13 +10,11 @@ const useRuntimeFactory = <T,>(layer: Layer.Layer<T>) => {
   React.useLayoutEffect(() => {
     const runtime = ManagedRuntime.make(layer);
     ref.current = runtime;
-
     return () => {
       void runtime.dispose();
       ref.current = null;
     };
   }, [layer]);
-
   return ref;
 };
 
@@ -30,21 +29,31 @@ export const createRuntimeContext = <T,>(layer: Layer.Layer<T>) => {
   >(layer as unknown as React.MutableRefObject<null>);
 };
 
-export const runtime = <T,>(Context: React.Context<T>) => {
+export const runtime = <T,>(
+  Context: React.Context<
+    React.MutableRefObject<ManagedRuntime.ManagedRuntime<T, never> | null>
+  >
+) => {
+  const useHandler = <T1, A, E, R>(
+    effectFn: (a: T1) => Effect.Effect<A, E, NoInfer<T>>
+  ) => useRuntimeHandler(Context, effectFn);
   return <P extends object>(
-    Component: React.FC<P>
-  ): React.FC<React.PropsWithRef<P>> => {
+    Component: React.FC<P & { useHandler: typeof useHandler }>
+  ) => {
     const Wrapped = (props: P) => {
       const runtimeRef = useRuntimeFactory(
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error _currentValue does not exist
-        Context._currentValue as unknown as Layer.Layer<unknown>
-      ) as T;
+        Context._currentValue as unknown as Layer.Layer<T>
+      );
 
       return (
         <Context.Provider value={runtimeRef}>
-          {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-          <Component {...props} />
+          <Component
+            // eslint-disable-next-line react/jsx-props-no-spreading
+            {...props}
+            useHandler={useHandler}
+          />
         </Context.Provider>
       );
     };

@@ -11,7 +11,7 @@ import { GlobalRuntime } from 'context';
 import { EndpointPanel } from 'modules/EndpointPanel/EndpointPanel';
 import { LightBulb } from 'modules/LightBulb/LightBulb';
 import { PaletteViewer } from 'modules/PaletteViewer/PaletteViewer';
-// import { MyComponent } from 'Test';
+// import { TestButton } from 'modules/TestButton/TestButton';
 import { darkTheme } from './theme';
 
 const baseColor: Okhsv = {
@@ -41,7 +41,7 @@ export const App: React.FC = runtime(GlobalRuntime)(() => {
     <ThemeProvider theme={prefersDarkMode ? darkTheme : darkTheme}>
       <CssBaseline />
       <Stack css={appStyles.root}>
-        {/* <MyComponent /> */}
+        {/* <TestButton foo='bar' /> */}
         <EndpointPanel onChange={() => {}} />
         <LightBulb
           onChange={state.set('color')}
