@@ -15,7 +15,7 @@ export const PaletteViewer: React.FC<Props> = observer(
   ({ getColor, className }) => {
     // we don't need useMemo here because props are stable
     const palettes = computed(() => createPalettes(getColor()));
-    // prevent reconciliation on every render
+    // prevent reconciliation on every update
     const entries = Object.entries(untracked(() => palettes.get()));
 
     return (
