@@ -1,3 +1,4 @@
+import type { Okhsv } from 'culori';
 import { Effect, pipe } from 'effect';
 
 // this service should be responsible for updating the colors of lightbulbs,
@@ -13,7 +14,13 @@ export const ColorService = () => {
     return pipe(Effect.sync(() => color));
   };
 
+  const applyPattern = (pattern: Okhsv[]) => {
+    // this is a placeholder for the actual implementation
+    return pipe(Effect.sync(() => pattern));
+  };
+
   return {
+    applyPattern,
     updateColor,
   };
 };

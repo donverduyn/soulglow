@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Layer, ManagedRuntime, type Effect } from 'effect';
 import { useRuntimeHandler } from 'common/hooks/useRuntimeHandler';
-
+import type { RuntimeContext } from 'context';
 const useRuntimeFactory = <T,>(layer: Layer.Layer<T>) => {
   const ref = React.useRef<ManagedRuntime.ManagedRuntime<T, never> | null>(
     null
@@ -29,14 +29,14 @@ export const createRuntimeContext = <T,>(layer: Layer.Layer<T>) => {
   >(layer as unknown as React.MutableRefObject<null>);
 };
 
-export const runtime = <T,>(
-  Context: React.Context<
-    React.MutableRefObject<ManagedRuntime.ManagedRuntime<T, never> | null>
-  >
-) => {
-  const useHandler = <T1, A, E, R>(
-    effectFn: (a: T1) => Effect.Effect<A, E, NoInfer<T>>
-  ) => useRuntimeHandler(Context, effectFn);
+type useHandlerFn<R> = <T, A, E>(
+  effectFn: (a: T) => Effect.Effect<A, E, NoInfer<R>>
+) => (data: T) => Promise<A>;
+
+export const runtime = <T,>(Context: RuntimeContext<T>) => {
+  const useHandler: useHandlerFn<T> = (effectFn) => {
+    return useRuntimeHandler(Context, effectFn);
+  };
   return <P extends object>(
     Component: React.FC<P & { useHandler: typeof useHandler }>
   ) => {

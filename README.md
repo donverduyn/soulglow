@@ -16,15 +16,19 @@ https://code.visualstudio.com/remote/advancedcontainers/develop-remote-host.
 Also make sure you have XQuartz installed. Don't forget to enable remote connections in the settings and X11 forwarding should work automatically.
 
 ## Starting the development server
-Note that Puppeteer is used to manage the browser for development. It automatically provides React Devtools and forwards the browser to the host machine over x11. To start the development server run:
+Note that Puppeteer manages the browser for development purposes. It automatically provides React Devtools. Chromium is automatically forwarded over X11 to the host machine. To start the development server run:
 
 
 ```
 yarn dev
 ```
 
+#### Tips
+- On Linux, chromium will steal focus and you can close the window with `Esc`.
+- On MacOS, chromium will not steal focus and you can close the window with `Cmd + C`, ending the terminal process, which closes the window too.
+
 ### Visiting the dev server outside of the container
-The dev server is running on port 4173 and is statically forwarded to the host machine. To visit the dev server, open a browser and navigate to http://localhost:4173. If you want to make the dev server available to other devices on the network, configure your fireall to allow incoming connections on port 4173. Remote debugging is not supported outside of the container.
+The dev server is running on port 4173 and is statically forwarded to the host machine. To visit the dev server on the host, launch the dev server, minimize puppeteer chromium, open a browser and navigate to http://localhost:4173. If you want to make the dev server available to other devices on the network, configure your firewall to allow incoming connections on port 4173. Remote debugging is not supported outside of the container.
 
 ### Debugging
 To debug the server, make sure it is running and run "Attach to Chrome" in the debug tab of vscode. The debugger will attach to the browser and you can set breakpoints in the code.

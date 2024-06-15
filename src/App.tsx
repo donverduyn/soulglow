@@ -7,11 +7,12 @@ import { observable } from 'mobx';
 import { Stack } from 'common/components/Stack';
 import { runtime } from 'common/hoc/runtime';
 import { useMobx } from 'common/hooks/useMobx';
-import { GlobalRuntime } from 'context';
+import { AppRuntime } from 'context';
 import { EndpointPanel } from 'modules/EndpointPanel/EndpointPanel';
 import { LightBulb } from 'modules/LightBulb/LightBulb';
 import { PaletteViewer } from 'modules/PaletteViewer/PaletteViewer';
 // import { TestButton } from 'modules/TestButton/TestButton';
+import TestButton from 'modules/TestButton/TestButton';
 import { darkTheme } from './theme';
 
 const baseColor: Okhsv = {
@@ -21,28 +22,31 @@ const baseColor: Okhsv = {
   v: 0,
 };
 
-export const App: React.FC = runtime(GlobalRuntime)(() => {
+export const App: React.FC = runtime(AppRuntime)(() => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const state = useMobx(() => ({ color: baseColor }), {
     color: observable.ref,
   });
 
   // useRuntime(
-  //   GlobalRuntime,
-  //   Effect.gen(function* () {
-  //     const hello = yield* Hello;
-  //     yield* Ref.update(hello, (value) => value + 1);
-  //     const hello2 = yield* Ref.get(hello);
-  //     yield* Console.log(hello2);
-  //   })
+  //   AppRuntime,
+  //   Effect.scoped(
+  //     Effect.gen(function* () {
+  //       const hello = yield* MessageBus;
+  //       yield* hello.publish(42);
+  //       yield* Effect.sleep(1000);
+  //     }).pipe(Effect.forever)
+  //   )
   // );
 
   return (
     <ThemeProvider theme={prefersDarkMode ? darkTheme : darkTheme}>
       <CssBaseline />
       <Stack css={appStyles.root}>
-        {/* <TestButton foo='bar' /> */}
-        <EndpointPanel onChange={() => {}} />
+        <TestButton />
+        <React.Suspense fallback='loading... 🙉'>
+          <EndpointPanel onChange={() => {}} />
+        </React.Suspense>
         <LightBulb
           onChange={state.set('color')}
           getStyle={state.lazyGet('color', (value) => ({

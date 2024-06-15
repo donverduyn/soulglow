@@ -1,38 +1,75 @@
+// eslint-disable-next-line eslint-comments/disable-enable-pair
+/* eslint-disable react/no-multi-comp */
 import * as React from 'react';
-import { Effect, Ref, flow } from 'effect';
-import { runtime as $ } from 'common/hoc/runtime';
-import { Count, TestButtonRuntime } from './context';
+import {
+  Rx,
+  useRxSuspenseSuccess,
+  useRxValue,
+  useRxSet,
+} from '@effect-rx/rx-react';
+import { Context, Effect, Layer } from 'effect';
 
-interface Props {
-  foo: string;
+interface Counter {
+  readonly _: unique symbol;
 }
 
-const countEffect = flow(
-  (value: string) => Effect.sync(() => value),
-  Effect.andThen((value) =>
-    Effect.gen(function* () {
-      const count = yield* Count;
-      const n = yield* Ref.updateAndGet(count, (value) => value + 1);
-      return { count: n, value };
-    })
+const Counter = Context.GenericTag<Counter, Rx.Writable<number, number>>(
+  'Counter'
+);
+
+const create = Rx.context();
+const runtime = create(
+  Layer.effect(
+    Counter,
+    Effect.sync(() => Rx.make(0))
   )
 );
 
-export const TestButton = $(TestButtonRuntime)<Props>(({ useHandler }) => {
-  const count = useHandler(countEffect);
-  const logCount = React.useCallback(() => {
-    void count('hello').then((value) => {
-      console.log(value, 'from Effect');
-    });
-  }, []);
+const counter = runtime.rx(() =>
+  Effect.gen(function* () {
+    return yield* Counter;
+  })
+);
 
-  //   useInterval(logCount, 1000);
+const CounterDisplay = () => {
+  const ref = useRxSuspenseSuccess(counter);
+  return (
+    <>
+      <span>Count</span>
+      <Display writable={ref.value} />
+    </>
+  );
+};
+
+interface Props {
+  readonly writable: Rx.Writable<number, number>;
+}
+
+const Display: React.FC<Props> = ({ writable }) => {
+  const countV = useRxValue(writable);
+  return <h1>{String(countV)}</h1>;
+};
+
+const Button: React.FC<Props> = ({ writable }) => {
+  const set = useRxSet(writable);
   return (
     <button
-      onClick={logCount}
       type='button'
+      onClick={() => {
+        set((n) => n + 1);
+      }}
     >
-      Emit Event
+      Add
     </button>
   );
-});
+};
+
+export default function Component() {
+  const ref = useRxSuspenseSuccess(counter);
+  return (
+    <React.Suspense fallback='Loading'>
+      <CounterDisplay />
+      <Button writable={ref.value} />
+    </React.Suspense>
+  );
+}

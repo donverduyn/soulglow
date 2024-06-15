@@ -1,60 +1,72 @@
 import * as React from 'react';
-import { type ManagedRuntime, Effect, pipe, Stream } from 'effect';
+import { Effect, pipe, Stream } from 'effect';
 import { v4 as uuidv4 } from 'uuid';
+import type { RuntimeContext } from 'context';
 import { useRuntime } from './useRuntime';
 
-class EventEmitter<T, R> {
-  private listener: (data: T, eventId: string) => void = () => {};
-  private resolvers: Map<string, (value: R) => void> = new Map();
+class EventEmitter<T, A> {
+  private listeners: Array<(data: T, eventId: string) => void> = [];
+  private resolvers: Map<string, (result: A) => void> = new Map();
+  private eventQueue: Array<{ data: T; eventId: string }> = [];
 
-  emit(data: T): Promise<R> {
+  emit(data: T): Promise<A> {
     const eventId = uuidv4();
-    const promise = new Promise<R>((resolve) => {
-      this.resolvers.set(eventId, resolve);
-      this.listener(data, eventId);
+    let resolver: (result: A) => void;
+    const promise = new Promise<A>((resolve) => {
+      resolver = resolve;
     });
+    this.eventQueue.push({ data, eventId });
+    this.notifyListeners();
+    this.resolvers.set(eventId, resolver!);
     return promise;
   }
 
   subscribe(listener: (data: T, eventId: string) => void): void {
-    this.listener = listener;
+    this.listeners.push(listener);
+    this.notifyListeners();
   }
 
-  resolve(eventId: string, result: R): void {
+  private notifyListeners(): void {
+    while (this.eventQueue.length > 0 && this.listeners.length > 0) {
+      const event = this.eventQueue.shift()!;
+      this.listeners.forEach((listener) => listener(event.data, event.eventId));
+    }
+  }
+
+  resolve(eventId: string, result: A): void {
     const resolver = this.resolvers.get(eventId);
     if (resolver) {
-      resolver(result);
+      resolver(result); // Pass the result to the resolver function
       this.resolvers.delete(eventId);
     }
   }
-}
 
-async function* createAsyncIterator<T, R>(
-  emitter: EventEmitter<T, R>
-): AsyncGenerator<{ data: T; eventId: string }> {
-  let resolve: (value: IteratorResult<{ data: T; eventId: string }>) => void;
-  let promise: Promise<IteratorResult<{ data: T; eventId: string }>> =
-    new Promise((res) => (resolve = res));
+  async waitForEvent(): Promise<{ data: T; eventId: string }> {
+    if (this.eventQueue.length > 0) {
+      return Promise.resolve(this.eventQueue.shift()!);
+    }
 
-  function handler(data: T, eventId: string) {
-    resolve({ done: false, value: { data, eventId } });
-    promise = new Promise((res) => (resolve = res));
+    return new Promise((resolve) => {
+      const oneTimeListener = (data: T, eventId: string) => {
+        resolve({ data, eventId });
+        this.listeners = this.listeners.filter((l) => l !== oneTimeListener);
+      };
+      this.subscribe(oneTimeListener);
+    });
   }
-
-  emitter.subscribe(handler);
+}
+async function* createAsyncIterator<T, A>(
+  emitter: EventEmitter<T, A>
+): AsyncGenerator<{ data: T; eventId: string }> {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   while (true) {
-    const result = await promise;
-    yield result.value;
+    const event = await emitter.waitForEvent();
+    yield event;
   }
 }
 
-// TODO: think about interrupting the fiber after inactivity, to avoid hogging
-// TODO: lazily create the stream again after inactivity? or maybe configure the stream to be lazy
 export const useRuntimeHandler = <T, A, E, R>(
-  context: React.Context<
-    React.MutableRefObject<ManagedRuntime.ManagedRuntime<R, never> | null>
-  >,
+  context: RuntimeContext<R>,
   handler: (value: T) => Effect.Effect<A, E, NoInfer<R>>
 ) => {
   const emitter = React.useMemo(() => new EventEmitter<T, A>(), []);
