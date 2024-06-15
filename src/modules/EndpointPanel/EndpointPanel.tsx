@@ -2,8 +2,7 @@ import * as React from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { IconButton, Radio } from '@mui/material';
 import { css } from '@mui/material/styles';
-import { Effect, Queue, type PubSub } from 'effect';
-import { action, computed, observable } from 'mobx';
+import { Effect, Queue } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { v4 as uuid } from 'uuid';
 import { Button } from 'common/components/Button';
@@ -44,11 +43,11 @@ type Store = WithSelected<Endpoint> & EntityStore<Endpoint>;
 
 // we also have to think about how we want to update states in the store, i think it makes most sense if we access the store through its api from the effects
 
-const viewModel = <T,>(bus: PubSub.PubSub<T>, store: Store) => {};
+// const viewModel = <T,>(bus: PubSub.PubSub<T>, store: Store) => {};
 
 // find a name that accurately describes with it does behind the scenes
 // as in, runs effects on mount etc
-const useViewModel = () => {};
+// const useViewModel = () => {};
 
 export const EndpointPanel: React.FC<Props> = $(EndpointRuntime)(
   observer(() => {
@@ -64,7 +63,7 @@ export const EndpointPanel: React.FC<Props> = $(EndpointRuntime)(
           const bus = yield* MessageBus;
           const dequeue = yield* bus.subscribe;
           const message = yield* Queue.take(dequeue);
-          // console.log('take', message);
+          console.log('take', message);
         }).pipe(Effect.forever)
       )
     );
@@ -83,7 +82,7 @@ export const EndpointPanel: React.FC<Props> = $(EndpointRuntime)(
     const publish = useRuntimeHandler(AppRuntime, (value: string) => {
       return Effect.gen(function* () {
         const bus = yield* MessageBus;
-        yield* bus.publish(value);
+        yield* bus.publish({ message: 'foo', payload: value });
       });
     });
 

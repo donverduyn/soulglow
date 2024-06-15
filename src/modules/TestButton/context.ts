@@ -11,24 +11,20 @@ export const TestButtonRuntime = createRuntimeContext(
   Layer.effect(Count, Ref.make(0))
 );
 
-class TestButtonStore {
+export class TestButtonStore {
   store = {
-    lightBulb: createEntityStore<LightBulb>(),
-  }
+    lightBulb: createEntityStore(),
+  };
   // inject pubsub
   // inject services
   // listen for messages, update stores
   // provide methods, publish messages, call services, update stores
 }
 
-class ModuleStore {
+export class ModuleStore {
   // set provides a function that sets the value of a specific property based on the dot separated path that is provided as the first argument.
   // for example set(')
-  set() {
+  set() {}
 
-  }
-
-  lazyGet() {
-
-  }
+  lazyGet() {}
 }

@@ -1,17 +1,18 @@
 import * as React from 'react';
-import useSuspense from 'common/hooks/useSuspense';
 
 export const withAsync =
   <P extends object>(
     resolve: (a: P) => Promise<P>,
     optimistic: (a: P) => NoInfer<P>
   ) =>
-  (Component: React.ComponentType) => { 
+  (Component: React.ComponentType) => {
     const Wrapper = (props: P) => {
-      const fulfilled = useSuspense<P>(() => resolve(props));
+      const resolved = resolve(props);
+      console.log(resolved);
+      // const fulfilled = useSuspense<P>(() => resolve(props));
       return (
         // eslint-disable-next-line react/jsx-props-no-spreading
-        <Component {...fulfilled} />
+        <Component {...props} />
       );
     };
 
