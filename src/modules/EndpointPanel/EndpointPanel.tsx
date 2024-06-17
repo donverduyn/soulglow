@@ -2,7 +2,7 @@ import * as React from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { IconButton, Radio } from '@mui/material';
 import { css } from '@mui/material/styles';
-import { Effect, Queue } from 'effect';
+import { Effect, Queue, pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { v4 as uuid } from 'uuid';
 import { Button } from 'common/components/Button';
@@ -10,13 +10,18 @@ import { Paper } from 'common/components/Paper';
 import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
 import { Typography } from 'common/components/Typography';
-import { runtime as $ } from 'common/hoc/runtime';
+import { runtime as withRuntime } from 'common/hoc/runtime';
+import { useAsyncProxy } from 'common/hooks/useAsyncProxy';
 import { useAutorun } from 'common/hooks/useMobx';
 import { useRuntime } from 'common/hooks/useRuntime';
-import { useRuntimeHandler } from 'common/hooks/useRuntimeHandler';
-import { type EntityStore, type WithSelected } from 'common/utils/entity';
+import { useRuntimeFn } from 'common/hooks/useRuntimeHandler';
 import { AppRuntime, MessageBus } from 'context';
-import { EndpointRuntime, EndpointStore, type Endpoint } from './context';
+import {
+  EndpointRuntime,
+  EndpointStore,
+  createEndpointStore,
+  type Endpoint,
+} from './context';
 
 interface Props extends DefaultProps {
   readonly onChange: (endpoints: Endpoint) => void;
@@ -30,8 +35,6 @@ const createEndpoint = (id?: string): Endpoint => {
     url: 'http://192.168.0.153',
   };
 };
-
-type Store = WithSelected<Endpoint> & EntityStore<Endpoint>;
 
 // the idea is that you inject the pubsub and store into the effects
 // then use a special hook that instantiates the effects
@@ -49,14 +52,44 @@ type Store = WithSelected<Endpoint> & EntityStore<Endpoint>;
 // as in, runs effects on mount etc
 // const useViewModel = () => {};
 
-export const EndpointPanel: React.FC<Props> = $(EndpointRuntime)(
-  observer(() => {
-    const [store, setStore] = React.useState<Store | null>(null);
-    useAutorun(() => {
-      console.log('autorun', store?.count.get());
-    });
+// const context = Context.empty().pipe(
+//   Context.add(EndpointStore, createEndpointStore())
+// );
 
-    useRuntime(
+export const EndpointPanel: React.FC<Props> = withRuntime(EndpointRuntime)(
+  observer(() => {
+    const id = React.useMemo(() => uuid(), []);
+    const getStore = useRuntimeFn(EndpointRuntime, EndpointStore);
+    const { data: store, loading } = useAsyncProxy(
+      getStore,
+      createEndpointStore,
+      (old, current) => {
+        if (current.count.get() === 0) {
+          current.merge(old);
+        }
+        return current;
+      }
+    );
+
+    console.log({ id, loading, store });
+    useAutorun(
+      () => {
+        console.log('autorun', store.count.get());
+      },
+      {},
+      [store]
+    );
+
+    // still uses the stale store
+    React.useEffect(() => {
+      if (store.count.get() === 0) {
+        const endpoint = createEndpoint();
+        store.add(endpoint);
+        store.select(endpoint.id);
+      }
+    }, [store]);
+
+    void useRuntime(
       AppRuntime,
       Effect.scoped(
         Effect.gen(function* () {
@@ -68,44 +101,31 @@ export const EndpointPanel: React.FC<Props> = $(EndpointRuntime)(
       )
     );
 
-    useRuntime(
-      EndpointRuntime,
-      Effect.gen(function* () {
-        const store = yield* EndpointStore;
-        const endpoint = createEndpoint();
-        store.add(endpoint);
-        store.select(endpoint.id);
-        setStore(store);
-      })
+    const publish = useRuntimeFn(
+      AppRuntime,
+      pipe(
+        MessageBus,
+        Effect.andThen((bus) => bus.publish({ message: 'foo', payload: 'bar' }))
+      )
     );
-
-    const publish = useRuntimeHandler(AppRuntime, (value: string) => {
-      return Effect.gen(function* () {
-        const bus = yield* MessageBus;
-        yield* bus.publish({ message: 'foo', payload: value });
-      });
-    });
-
-    // think about using the value from suspend to render a component that depends on it, as in, if a component needs a store, it should suspend on a separate component and then pass it on to the child component, to avoid conditional hooks from early throws
-    // Basically what we do in withAsync, but with effect-rx, while avoiding frameworky abstractions
 
     return (
       <Paper css={styles.root}>
         <Typography>Endpoints</Typography>
-        {[...(store?.list.get() ?? [])].map((endpoint) => (
+        {[...(store.list.get() ?? [])].map((endpoint) => (
           <Stack
             key={endpoint.id}
             css={styles.endpoint}
           >
             <Radio
-              checked={store?.selectedId.get() === endpoint.id}
-              onChange={() => store?.select(endpoint.id)}
+              checked={store.selectedId.get() === endpoint.id}
+              onChange={() => store.select(endpoint.id)}
             />
             <TextField
               css={styles.textField}
               getValue={() => endpoint.url}
               onChange={(value) => {
-                store?.update(endpoint.id, {
+                store.update(endpoint.id, {
                   ...endpoint,
                   url: value,
                 });
@@ -114,7 +134,7 @@ export const EndpointPanel: React.FC<Props> = $(EndpointRuntime)(
             {/* TODO: wrap IconButton in common/components */}
             <IconButton
               aria-label='delete'
-              onClick={() => store?.remove(endpoint.id)}
+              onClick={() => store.remove(endpoint.id)}
             >
               <DeleteIcon />
             </IconButton>
@@ -123,7 +143,7 @@ export const EndpointPanel: React.FC<Props> = $(EndpointRuntime)(
         <Button
           css={styles.addButton}
           onClick={() => {
-            store?.add(createEndpoint(String(store.count.get() + 1)));
+            store.add(createEndpoint());
             void publish(
               `http://192.168.0.${String(Math.round(Math.random() * 100))}`
             );

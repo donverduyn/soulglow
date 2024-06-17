@@ -136,9 +136,13 @@ export const useMobx = <T extends Record<string, any>>(
     });
   })[0];
 
-export const useAutorun = (fn: () => void, options: IAutorunOptions = {}) =>
+export const useAutorun = (
+  fn: () => void,
+  options: IAutorunOptions = {},
+  deps: unknown[] = []
+) =>
   // because the aesthetics of useEffect are suboptimal
-  React.useEffect(() => autorun(fn, options), []);
+  React.useEffect(() => autorun(fn, options), [...deps]);
 
 type IChange<T> = Parameters<Parameters<typeof deepObserve>[1]>[0] & {
   name: string;
@@ -152,7 +156,8 @@ export const useDeepObserve = <T, U>(t: T, fn: (c: IChange<U>) => void) =>
 export const useReaction = <T>(
   fn: () => T,
   effect: (value: T, prev: T) => void,
-  options: IReactionOptions<T, false> = { delay: 100 }
+  options: IReactionOptions<T, false> = { delay: 100 },
+  deps: unknown[] = []
 ) => {
-  React.useEffect(() => reaction(fn, effect, options), []);
+  React.useEffect(() => reaction(fn, effect, options), [...deps]);
 };

@@ -1,10 +1,9 @@
-import { Context, Effect, Layer } from 'effect';
+import { Context, Effect, Layer, pipe } from 'effect';
 import { createRuntimeContext } from 'common/hoc/runtime';
 import {
   createEntityStore,
+  withFiltered,
   withSelected,
-  type EntityStore,
-  type WithSelected,
 } from 'common/utils/entity';
 
 export type Endpoint = {
@@ -15,16 +14,16 @@ export type Endpoint = {
 
 export class EndpointStore extends Context.Tag('EndpointStore')<
   EndpointStore,
-  WithSelected<Endpoint> & EntityStore<Endpoint>
+  ReturnType<typeof createEndpointStore>
 >() {}
 
+export const createEndpointStore = pipe(
+  createEntityStore<Endpoint>,
+  withSelected,
+  withFiltered,
+
+);
+
 export const EndpointRuntime = createRuntimeContext(
-  Layer.effect(
-    EndpointStore,
-    Effect.gen(function* () {
-      return yield* Effect.sync(() =>
-        withSelected(createEntityStore<Endpoint>)
-      );
-    })
-  )
+  Layer.effect(EndpointStore, Effect.sync(createEndpointStore))
 );

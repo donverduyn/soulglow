@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Layer, ManagedRuntime, type Effect } from 'effect';
-import { useRuntimeHandler } from 'common/hooks/useRuntimeHandler';
+import { useRuntimeFn } from 'common/hooks/useRuntimeHandler';
 import type { RuntimeContext } from 'context';
 const useRuntimeFactory = <T,>(layer: Layer.Layer<T>) => {
   const ref = React.useRef<ManagedRuntime.ManagedRuntime<T, never> | null>(
@@ -35,7 +35,7 @@ type useHandlerFn<R> = <T, A, E>(
 
 export const runtime = <T,>(Context: RuntimeContext<T>) => {
   const useHandler: useHandlerFn<T> = (effectFn) => {
-    return useRuntimeHandler(Context, effectFn);
+    return useRuntimeFn(Context, effectFn);
   };
   return <P extends object>(
     Component: React.FC<P & { useHandler: typeof useHandler }>

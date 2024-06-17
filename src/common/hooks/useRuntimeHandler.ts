@@ -4,18 +4,20 @@ import { v4 as uuidv4 } from 'uuid';
 import type { RuntimeContext } from 'context';
 import { useRuntime } from './useRuntime';
 
+// this is converting push based events to a pull based stream, where the consumer has control through the provided effect. Every call to the handler returns a promise when the associated effect has succeeded.
+
 class EventEmitter<T, A> {
   private listeners: Array<(data: T, eventId: string) => void> = [];
   private resolvers: Map<string, (result: A) => void> = new Map();
   private eventQueue: Array<{ data: T; eventId: string }> = [];
 
-  emit(data: T): Promise<A> {
+  emit(data: T | null = null): Promise<A> {
     const eventId = uuidv4();
     let resolver: (result: A) => void;
     const promise = new Promise<A>((resolve) => {
       resolver = resolve;
     });
-    this.eventQueue.push({ data, eventId });
+    this.eventQueue.push({ data: data as T, eventId });
     this.notifyListeners();
     this.resolvers.set(eventId, resolver!);
     return promise;
@@ -33,12 +35,14 @@ class EventEmitter<T, A> {
     }
   }
 
-  resolve(eventId: string, result: A): void {
-    const resolver = this.resolvers.get(eventId);
-    if (resolver) {
-      resolver(result); // Pass the result to the resolver function
-      this.resolvers.delete(eventId);
-    }
+  resolve(eventId: string) {
+    return (result: A) => {
+      const resolver = this.resolvers.get(eventId);
+      if (resolver) {
+        resolver(result);
+        this.resolvers.delete(eventId);
+      }
+    };
   }
 
   async waitForEvent(): Promise<{ data: T; eventId: string }> {
@@ -55,6 +59,7 @@ class EventEmitter<T, A> {
     });
   }
 }
+
 async function* createAsyncIterator<T, A>(
   emitter: EventEmitter<T, A>
 ): AsyncGenerator<{ data: T; eventId: string }> {
@@ -65,9 +70,11 @@ async function* createAsyncIterator<T, A>(
   }
 }
 
-export const useRuntimeHandler = <T, A, E, R>(
+export const useRuntimeFn = <T, A, E, R>(
   context: RuntimeContext<R>,
-  handler: (value: T) => Effect.Effect<A, E, NoInfer<R>>
+  handler:
+    | ((value: T) => Effect.Effect<A, E, NoInfer<R>>)
+    | Effect.Effect<A, E, NoInfer<R>>
 ) => {
   const emitter = React.useMemo(() => new EventEmitter<T, A>(), []);
   const stream = React.useMemo(
@@ -75,10 +82,12 @@ export const useRuntimeHandler = <T, A, E, R>(
       pipe(
         Stream.fromAsyncIterable(createAsyncIterator(emitter), console.log),
         Stream.mapEffect(({ data, eventId }) =>
-          Effect.gen(function* () {
-            const result = yield* handler(data);
-            emitter.resolve(eventId, result);
-          })
+          pipe(
+            Effect.sync(() =>
+              Effect.isEffect(handler) ? handler : handler(data)
+            ),
+            Effect.andThen(Effect.tap(emitter.resolve(eventId)))
+          )
         ),
         Stream.runDrain
       ),

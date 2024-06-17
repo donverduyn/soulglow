@@ -18,6 +18,7 @@ const Counter = Context.GenericTag<Counter, Rx.Writable<number, number>>(
 );
 
 const create = Rx.context();
+
 const runtime = create(
   Layer.effect(
     Counter,
@@ -64,7 +65,11 @@ const Button: React.FC<Props> = ({ writable }) => {
   );
 };
 
-export default function Component() {
+const getCounter = Effect.gen(function* () {
+  return yield* Counter;
+});
+
+const Component = () => {
   const ref = useRxSuspenseSuccess(counter);
   return (
     <React.Suspense fallback='Loading'>
@@ -72,4 +77,6 @@ export default function Component() {
       <Button writable={ref.value} />
     </React.Suspense>
   );
-}
+};
+
+export default Component;

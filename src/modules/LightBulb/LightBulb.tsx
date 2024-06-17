@@ -10,7 +10,7 @@ import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
 import { runtime } from 'common/hoc/runtime';
 import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
-import { useRuntimeHandler } from 'common/hooks/useRuntimeHandler';
+import { useRuntimeFn } from 'common/hooks/useRuntimeHandler';
 import { OnOffSwitch } from './components/OnOffSwitch';
 import {
   LightMode,
@@ -73,7 +73,7 @@ export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
     //   })
     // );
 
-    const handle = useRuntimeHandler(
+    const handle = useRuntimeFn(
       LightBulbRuntime,
       (body: Partial<LightbulbDto>) =>
         Effect.gen(function* () {
