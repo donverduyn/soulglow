@@ -12,7 +12,6 @@ const useRuntimeFactory = <T,>(layer: Layer.Layer<T>) => {
     ref.current = runtime;
 
     return () => {
-      console.log('disposing runtime');
       void runtime.dispose();
       ref.current = null;
     };
@@ -31,7 +30,7 @@ export const createRuntimeContext = <T,>(layer: Layer.Layer<T>) => {
   >(layer as unknown as React.MutableRefObject<null>);
 };
 
-export const runtime = <T,>(Context: RuntimeContext<T>) => {
+export const withRuntime = <T,>(Context: RuntimeContext<T>) => {
   return <P extends object>(Component: React.FC<P>) => {
     const Wrapped = (props: P) => {
       const runtimeRef = useRuntimeFactory(
@@ -49,6 +48,6 @@ export const runtime = <T,>(Context: RuntimeContext<T>) => {
         </Context.Provider>
       );
     };
-    return React.memo(Wrapped);
+    return Wrapped;
   };
 };

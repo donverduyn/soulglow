@@ -1,5 +1,5 @@
 import { Context, Effect, Layer, pipe } from 'effect';
-import { createRuntimeContext } from 'common/hoc/runtime';
+import { createRuntimeContext } from 'common/hoc/withRuntime';
 import {
   createEntityStore,
   withFiltered,
@@ -26,9 +26,7 @@ export const createEndpointStore = pipe(
 export const EndpointRuntime = createRuntimeContext(
   Layer.effect(
     EndpointStore,
-    Effect.sync(() => {
-      console.log('creating endpoint store');
-      return createEndpointStore();
-    })
+    // here we can provide any dependencies that the store needs
+    Effect.sync(() => createEndpointStore())
   )
 );

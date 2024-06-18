@@ -5,7 +5,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { formatRgb, type Okhsv } from 'culori';
 import { observable } from 'mobx';
 import { Stack } from 'common/components/Stack';
-import { runtime } from 'common/hoc/runtime';
+import { withRuntime } from 'common/hoc/withRuntime';
 import { useMobx } from 'common/hooks/useMobx';
 import { AppRuntime } from 'context';
 import { EndpointPanel } from 'modules/EndpointPanel/EndpointPanel';
@@ -22,7 +22,7 @@ const baseColor: Okhsv = {
   v: 0,
 };
 
-export const App: React.FC = runtime(AppRuntime)(() => {
+export const App: React.FC = withRuntime(AppRuntime)(() => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const state = useMobx(() => ({ color: baseColor }), {
     color: observable.ref,
@@ -44,9 +44,7 @@ export const App: React.FC = runtime(AppRuntime)(() => {
       <CssBaseline />
       <Stack css={appStyles.root}>
         <TestButton />
-        <React.Suspense fallback='loading... 🙉'>
-          <EndpointPanel onChange={() => {}} />
-        </React.Suspense>
+        <EndpointPanel />
         <LightBulb
           onChange={state.set('color')}
           getStyle={state.lazyGet('color', (value) => ({

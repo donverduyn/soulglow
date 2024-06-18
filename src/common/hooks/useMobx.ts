@@ -150,8 +150,11 @@ type IChange<T> = Parameters<Parameters<typeof deepObserve>[1]>[0] & {
   oldValue: T;
 };
 
-export const useDeepObserve = <T, U>(t: T, fn: (c: IChange<U>) => void) =>
-  React.useEffect(() => deepObserve(t, (c) => fn(c as IChange<U>)), []);
+export const useDeepObserve = <T, U>(
+  t: T,
+  fn: (c: IChange<U>) => void,
+  deps: unknown[] = []
+) => React.useEffect(() => deepObserve(t, (c) => fn(c as IChange<U>)), deps);
 
 export const useReaction = <T>(
   fn: () => T,

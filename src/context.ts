@@ -7,7 +7,7 @@ import {
   type ManagedRuntime,
   PubSub,
 } from 'effect';
-import { createRuntimeContext } from 'common/hoc/runtime';
+import { createRuntimeContext } from 'common/hoc/withRuntime';
 // import { DevTools } from '@effect/experimental';
 
 // const rootLayer = pipe(

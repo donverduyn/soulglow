@@ -1,17 +1,17 @@
 import * as React from 'react';
 
-const defaultUpdate = <T>(
+const defaultMerge = <T>(
   current: { merge?: (a: T) => void },
   optimistic: T
 ) => {
-  console.log('defaultUpdate', current, optimistic);
+  // we should prevent merging incompatible objects, maybe structural compare
   current.merge?.(optimistic);
 };
 
 export const useAsync = <T extends object>(
   getAsync: () => Promise<T>,
   optimistic: () => T = () => ({}) as T,
-  updateData: (result: T, data: T) => void = defaultUpdate
+  merge: (result: T, data: T) => void = defaultMerge
 ) => {
   const [error, setError] = React.useState<Error | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -23,7 +23,7 @@ export const useAsync = <T extends object>(
     void getAsync().then(
       (result) => {
         if (mounted) {
-          updateData(result, data);
+          merge(result, data);
           setData(result);
           setLoading(false);
         }
@@ -40,6 +40,5 @@ export const useAsync = <T extends object>(
     };
   }, []);
 
-  // console.log({ data, error, loading })
   return { data, error, loading };
 };

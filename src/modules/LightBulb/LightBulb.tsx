@@ -7,7 +7,7 @@ import { Select } from 'common/components/Select';
 import { Slider } from 'common/components/Slider';
 import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
-import { runtime as withRuntime } from 'common/hoc/runtime';
+import { withRuntime as withRuntime } from 'common/hoc/withRuntime';
 import { useAsync } from 'common/hooks/useAsync';
 import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
 import { useRuntimeFn } from 'common/hooks/useRuntimeHandler';
@@ -58,7 +58,6 @@ const colorInputs = [
 export const LightBulb: React.FC<Props> = withRuntime(LightBulbRuntime)(
   observer(({ className, getStyle, onChange = () => {} }) => {
     //
-    // const runtimeRef = React.useContext(LightBulbRuntime);
     const bulb = useMobx(() => defaultState);
     const inputs =
       bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
@@ -98,12 +97,18 @@ export const LightBulb: React.FC<Props> = withRuntime(LightBulbRuntime)(
       });
     });
 
-    useDeepObserve(bulb, (change) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const body = { [change.name]: change.newValue } as Partial<LightbulbDto>;
-      // const rgb = formatRgb({mode: ''})
-      void throttler.offer(body);
-    });
+    useDeepObserve(
+      bulb,
+      (change) => {
+        const body = {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          [change.name]: change.newValue,
+        } as Partial<LightbulbDto>;
+        // const rgb = formatRgb({mode: ''})
+        void throttler.offer(body);
+      },
+      [throttler]
+    );
 
     return (
       <Stack

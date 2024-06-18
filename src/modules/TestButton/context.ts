@@ -1,5 +1,5 @@
 import { Context, Ref, Layer } from 'effect';
-import { createRuntimeContext } from 'common/hoc/runtime';
+import { createRuntimeContext } from 'common/hoc/withRuntime';
 import { createEntityStore } from 'common/utils/entity';
 
 export class Count extends Context.Tag('@MyComponent/Count')<
