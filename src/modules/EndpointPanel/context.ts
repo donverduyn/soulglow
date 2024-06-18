@@ -20,10 +20,15 @@ export class EndpointStore extends Context.Tag('EndpointStore')<
 export const createEndpointStore = pipe(
   createEntityStore<Endpoint>,
   withSelected,
-  withFiltered,
-
+  withFiltered
 );
 
 export const EndpointRuntime = createRuntimeContext(
-  Layer.effect(EndpointStore, Effect.sync(createEndpointStore))
+  Layer.effect(
+    EndpointStore,
+    Effect.sync(() => {
+      console.log('creating endpoint store');
+      return createEndpointStore();
+    })
+  )
 );

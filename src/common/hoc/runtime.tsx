@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { Layer, ManagedRuntime, type Effect } from 'effect';
-import { useRuntimeFn } from 'common/hooks/useRuntimeHandler';
+import { Layer, ManagedRuntime } from 'effect';
 import type { RuntimeContext } from 'context';
+
 const useRuntimeFactory = <T,>(layer: Layer.Layer<T>) => {
   const ref = React.useRef<ManagedRuntime.ManagedRuntime<T, never> | null>(
     null
@@ -10,7 +10,9 @@ const useRuntimeFactory = <T,>(layer: Layer.Layer<T>) => {
   React.useLayoutEffect(() => {
     const runtime = ManagedRuntime.make(layer);
     ref.current = runtime;
+
     return () => {
+      console.log('disposing runtime');
       void runtime.dispose();
       ref.current = null;
     };
@@ -29,17 +31,8 @@ export const createRuntimeContext = <T,>(layer: Layer.Layer<T>) => {
   >(layer as unknown as React.MutableRefObject<null>);
 };
 
-type useHandlerFn<R> = <T, A, E>(
-  effectFn: (a: T) => Effect.Effect<A, E, NoInfer<R>>
-) => (data: T) => Promise<A>;
-
 export const runtime = <T,>(Context: RuntimeContext<T>) => {
-  const useHandler: useHandlerFn<T> = (effectFn) => {
-    return useRuntimeFn(Context, effectFn);
-  };
-  return <P extends object>(
-    Component: React.FC<P & { useHandler: typeof useHandler }>
-  ) => {
+  return <P extends object>(Component: React.FC<P>) => {
     const Wrapped = (props: P) => {
       const runtimeRef = useRuntimeFactory(
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -52,7 +45,6 @@ export const runtime = <T,>(Context: RuntimeContext<T>) => {
           <Component
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...props}
-            useHandler={useHandler}
           />
         </Context.Provider>
       );

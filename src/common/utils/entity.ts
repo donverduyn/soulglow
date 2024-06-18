@@ -1,4 +1,3 @@
-import { pipe } from 'effect';
 import { action, computed, observable, type IComputedValue } from 'mobx';
 
 interface Identifiable {
@@ -14,17 +13,21 @@ interface EntityStore<T extends Identifiable> {
   update: (id: string, newEntity: T) => void;
 }
 
-type WithMerge<T> = T & { merge: (other: T) => void };
+// The key here, is that we infer the previous type as U through the parameter of merge. By intersecting with the inferred generic, we can compose any additional added properties.
+
+type WithPrevious<T> = T & {
+  merge: (other: T) => void;
+};
 
 export const withSelected = <T extends Identifiable, U>(
-  createStore: () => EntityStore<T> & WithMerge<U>
+  createStore: () => EntityStore<T> & WithPrevious<U>
 ) => {
   return () => {
     const { merge, ...store } = createStore();
     const selectedId = observable.box<string | null>(null);
 
     const api = {
-      ...store,
+      ...(store as EntityStore<T> & U),
       select: action((id: string) => selectedId.set(id)),
       selectedId: computed(() => selectedId.get()),
       selectedItem: computed(() => store.get(selectedId.get() ?? '')),
@@ -32,7 +35,7 @@ export const withSelected = <T extends Identifiable, U>(
 
     return Object.assign(api, {
       merge: (other: typeof api) => {
-        merge(other as U);
+        merge(other);
         selectedId.set(other.selectedId.get());
       },
     });
@@ -40,14 +43,14 @@ export const withSelected = <T extends Identifiable, U>(
 };
 
 export const withFiltered = <T extends Identifiable, U>(
-  createStore: () => EntityStore<T> & WithMerge<U>
+  createStore: () => EntityStore<T> & WithPrevious<U>
 ) => {
   return () => {
     const { merge, ...store } = createStore();
     const filter = observable.box<string | null>(null);
 
     const api = {
-      ...store,
+      ...(store as EntityStore<T> & U),
       filter: computed(() => filter.get()),
       filteredItems: computed(() => {
         const value = filter.get();
@@ -60,7 +63,7 @@ export const withFiltered = <T extends Identifiable, U>(
 
     return Object.assign(api, {
       merge: (other: typeof api) => {
-        merge(other as U);
+        merge(other);
         filter.set(other.filter.get());
       },
     });
@@ -81,16 +84,7 @@ export const createEntityStore = <T extends Identifiable>() => {
 
   return Object.assign(api, {
     merge: (other: typeof api) => {
-      other.list.get().forEach((entity) => store.set(entity.id, entity));
+      other.list.get().forEach((item) => api.add(item));
     },
-  })
+  });
 };
-
-const test = pipe(
-  createEntityStore<{ id: string, value: boolean }>,
-  withSelected,
-  withFiltered
-)()
-
-
-// think about merging set and lazyGet into entity store?

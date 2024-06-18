@@ -1,14 +1,21 @@
 import * as React from 'react';
 
-export const useAsyncProxy = <T extends Record<string, unknown>>(
+const defaultUpdate = <T>(
+  current: { merge?: (a: T) => void },
+  optimistic: T
+) => {
+  console.log('defaultUpdate', current, optimistic);
+  current.merge?.(optimistic);
+};
+
+export const useAsync = <T extends object>(
   getAsync: () => Promise<T>,
-  optimistic: () => T,
-  updateData: (data: T, result: T) => T
+  optimistic: () => T = () => ({}) as T,
+  updateData: (result: T, data: T) => void = defaultUpdate
 ) => {
   const [error, setError] = React.useState<Error | null>(null);
   const [loading, setLoading] = React.useState(true);
   const optimisticMemo = React.useMemo(optimistic, [optimistic]);
-  // this allows us to use proxied mobx objects
   const [data, setData] = React.useState<T>(optimisticMemo);
 
   React.useEffect(() => {
@@ -16,8 +23,8 @@ export const useAsyncProxy = <T extends Record<string, unknown>>(
     void getAsync().then(
       (result) => {
         if (mounted) {
-          console.log('result', result);
-          setData(updateData(data, result));
+          updateData(result, data);
+          setData(result);
           setLoading(false);
         }
       },
@@ -28,7 +35,6 @@ export const useAsyncProxy = <T extends Record<string, unknown>>(
         }
       }
     );
-
     return () => {
       mounted = false;
     };

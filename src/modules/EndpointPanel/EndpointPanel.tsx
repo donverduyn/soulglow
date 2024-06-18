@@ -2,7 +2,6 @@ import * as React from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { IconButton, Radio } from '@mui/material';
 import { css } from '@mui/material/styles';
-import { Effect, Queue, pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { v4 as uuid } from 'uuid';
 import { Button } from 'common/components/Button';
@@ -11,11 +10,9 @@ import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
 import { Typography } from 'common/components/Typography';
 import { runtime as withRuntime } from 'common/hoc/runtime';
-import { useAsyncProxy } from 'common/hooks/useAsyncProxy';
+import { useAsync } from 'common/hooks/useAsync';
 import { useAutorun } from 'common/hooks/useMobx';
-import { useRuntime } from 'common/hooks/useRuntime';
 import { useRuntimeFn } from 'common/hooks/useRuntimeHandler';
-import { AppRuntime, MessageBus } from 'context';
 import {
   EndpointRuntime,
   EndpointStore,
@@ -36,16 +33,6 @@ const createEndpoint = (id?: string): Endpoint => {
   };
 };
 
-// the idea is that you inject the pubsub and store into the effects
-// then use a special hook that instantiates the effects
-// the effects would be be available to the component functioning as a view model
-// because every module would need to grab the pubsub and store, we might want to abstract this away in the hook, if it doesn't obscure the code too much
-
-// we might want to steal useRxSuspendSuccess from effect-rx, or at least the idea of it
-// because we need to be able to suspend on the store being ready, as we pull it from effect asynchronously
-
-// we also have to think about how we want to update states in the store, i think it makes most sense if we access the store through its api from the effects
-
 // const viewModel = <T,>(bus: PubSub.PubSub<T>, store: Store) => {};
 
 // find a name that accurately describes with it does behind the scenes
@@ -58,29 +45,23 @@ const createEndpoint = (id?: string): Endpoint => {
 
 export const EndpointPanel: React.FC<Props> = withRuntime(EndpointRuntime)(
   observer(() => {
-    const id = React.useMemo(() => uuid(), []);
     const getStore = useRuntimeFn(EndpointRuntime, EndpointStore);
-    const { data: store, loading } = useAsyncProxy(
+    const { data: store } = useAsync(
       getStore,
       createEndpointStore,
-      (old, current) => {
-        if (current.count.get() === 0) {
-          current.merge(old);
-        }
-        return current;
+      (current, optimistic) => {
+        console.log(current.list.get(), optimistic.list.get());
+        current.merge(optimistic);
+        console.log(current.list.get(), optimistic.list.get());
       }
     );
 
-    console.log({ id, loading, store });
-    useAutorun(
-      () => {
-        console.log('autorun', store.count.get());
-      },
-      {},
-      [store]
-    );
+    // we have to find out why a new store gets created every time, because it should use the same runtime and therefore the same store.
 
-    // still uses the stale store
+    useAutorun(() => {
+      console.log('autorun', store.count.get());
+    }, [store]);
+
     React.useEffect(() => {
       if (store.count.get() === 0) {
         const endpoint = createEndpoint();
@@ -89,25 +70,25 @@ export const EndpointPanel: React.FC<Props> = withRuntime(EndpointRuntime)(
       }
     }, [store]);
 
-    void useRuntime(
-      AppRuntime,
-      Effect.scoped(
-        Effect.gen(function* () {
-          const bus = yield* MessageBus;
-          const dequeue = yield* bus.subscribe;
-          const message = yield* Queue.take(dequeue);
-          console.log('take', message);
-        }).pipe(Effect.forever)
-      )
-    );
+    // void useRuntime(
+    //   AppRuntime,
+    //   Effect.scoped(
+    //     Effect.gen(function* () {
+    //       const bus = yield* MessageBus;
+    //       const dequeue = yield* bus.subscribe;
+    //       const message = yield* Queue.take(dequeue);
+    //       console.log('take', message);
+    //     }).pipe(Effect.forever)
+    //   )
+    // );
 
-    const publish = useRuntimeFn(
-      AppRuntime,
-      pipe(
-        MessageBus,
-        Effect.andThen((bus) => bus.publish({ message: 'foo', payload: 'bar' }))
-      )
-    );
+    // const publish = useRuntimeFn(
+    //   AppRuntime,
+    //   pipe(
+    //     MessageBus,
+    //     Effect.andThen((bus) => bus.publish({ message: 'foo', payload: 'bar' }))
+    //   )
+    // );
 
     return (
       <Paper css={styles.root}>
@@ -144,9 +125,9 @@ export const EndpointPanel: React.FC<Props> = withRuntime(EndpointRuntime)(
           css={styles.addButton}
           onClick={() => {
             store.add(createEndpoint());
-            void publish(
-              `http://192.168.0.${String(Math.round(Math.random() * 100))}`
-            );
+            // void publish(
+            //   `http://192.168.0.${String(Math.round(Math.random() * 100))}`
+            // );
           }}
         >
           Add endpoint

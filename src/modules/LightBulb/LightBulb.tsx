@@ -1,14 +1,14 @@
 import * as React from 'react';
 import { css } from '@mui/material/styles';
 import type { Okhsv } from 'culori';
-import { Effect } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { State } from '__generated/api';
 import { Select } from 'common/components/Select';
 import { Slider } from 'common/components/Slider';
 import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
-import { runtime } from 'common/hoc/runtime';
+import { runtime as withRuntime } from 'common/hoc/runtime';
+import { useAsync } from 'common/hooks/useAsync';
 import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
 import { useRuntimeFn } from 'common/hooks/useRuntimeHandler';
 import { OnOffSwitch } from './components/OnOffSwitch';
@@ -55,7 +55,7 @@ const colorInputs = [
 ] as const;
 
 //TODO: think about default props and how to set them
-export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
+export const LightBulb: React.FC<Props> = withRuntime(LightBulbRuntime)(
   observer(({ className, getStyle, onChange = () => {} }) => {
     //
     // const runtimeRef = React.useContext(LightBulbRuntime);
@@ -73,14 +73,8 @@ export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
     //   })
     // );
 
-    const handle = useRuntimeFn(
-      LightBulbRuntime,
-      (body: Partial<LightbulbDto>) =>
-        Effect.gen(function* () {
-          const queue = yield* ApiThrottler;
-          yield* queue.offer(body);
-        })
-    );
+    const getThrottler = useRuntimeFn(LightBulbRuntime, ApiThrottler);
+    const { data: throttler } = useAsync(getThrottler);
 
     // useRuntime(
     //   LightBulbRuntime,
@@ -108,7 +102,7 @@ export const LightBulb: React.FC<Props> = runtime(LightBulbRuntime)(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const body = { [change.name]: change.newValue } as Partial<LightbulbDto>;
       // const rgb = formatRgb({mode: ''})
-      void handle(body);
+      void throttler.offer(body);
     });
 
     return (
