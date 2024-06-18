@@ -33,7 +33,7 @@ export class HelloRef extends Context.Tag('Hello')<
   Ref.Ref<number>
 >() {}
 
-type Message<T extends Record<string, unknown>> = {
+export type Message<T> = {
   message: string;
   payload: T;
 };

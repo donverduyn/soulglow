@@ -4,7 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 import type { RuntimeContext } from 'context';
 import { useRuntime } from './useRuntime';
 
-// this is converting push based events to a pull based stream, where the consumer has control through the provided effect. Every call to the handler returns a promise when the associated effect has succeeded.
+// This is converting push based events to a pull based stream, where the consumer has control through the provided effect. 
+// Every call to the handler returns a promise when the associated effect has succeeded.
 
 class EventEmitter<T, A> {
   private listeners: Array<(data: T, eventId: string) => void> = [];

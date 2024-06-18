@@ -32,8 +32,11 @@ export const App: React.FC = withRuntime(AppRuntime)(() => {
   //   AppRuntime,
   //   Effect.scoped(
   //     Effect.gen(function* () {
-  //       const hello = yield* MessageBus;
-  //       yield* hello.publish(42);
+  //       const bus = yield* MessageBus;
+  //       yield* bus.publish({
+  //         message: 'Hello, World!',
+  //         payload: 'Hello, World!',
+  //       });
   //       yield* Effect.sleep(1000);
   //     }).pipe(Effect.forever)
   //   )

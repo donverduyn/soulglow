@@ -23,7 +23,7 @@ export const createEndpointStore = pipe(
   withFiltered
 );
 
-export const EndpointRuntime = createRuntimeContext(
+export const EndpointPanelRuntime = createRuntimeContext(
   Layer.effect(
     EndpointStore,
     // here we can provide any dependencies that the store needs

@@ -9,5 +9,6 @@
         "github.copilot-chat",
         "github.vscode-pull-request-github",
         "eamodio.gitlens",
+        "ms-vscode.vscode-speech",
     ]
 }

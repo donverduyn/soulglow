@@ -10,7 +10,7 @@ import { TextField } from 'common/components/TextField';
 import { withRuntime as withRuntime } from 'common/hoc/withRuntime';
 import { useAsync } from 'common/hooks/useAsync';
 import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
-import { useRuntimeFn } from 'common/hooks/useRuntimeHandler';
+import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
 import { OnOffSwitch } from './components/OnOffSwitch';
 import {
   LightMode,

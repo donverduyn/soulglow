@@ -2,7 +2,7 @@ import * as React from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { IconButton, Radio } from '@mui/material';
 import { css } from '@mui/material/styles';
-import { Effect, Queue, pipe } from 'effect';
+import { Effect, Queue, flow, pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { v4 as uuid } from 'uuid';
 import { Button } from 'common/components/Button';
@@ -14,10 +14,10 @@ import { withRuntime } from 'common/hoc/withRuntime';
 import { useAsync } from 'common/hooks/useAsync';
 import { useAutorun } from 'common/hooks/useMobx';
 import { useRuntime } from 'common/hooks/useRuntime';
-import { useRuntimeFn } from 'common/hooks/useRuntimeHandler';
+import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
 import { AppRuntime, MessageBus } from 'context';
 import {
-  EndpointRuntime,
+  EndpointPanelRuntime,
   EndpointStore,
   createEndpointStore,
   type Endpoint,
@@ -34,61 +34,54 @@ const createEndpoint = (id?: string): Endpoint => {
 
 export const EndpointPanel = pipe(
   observer(EndpointPanelC),
-  withRuntime(EndpointRuntime)
+  withRuntime(EndpointPanelRuntime)
 );
 
+const useMessageBus = () => {
+  const getBus = useRuntimeFn(AppRuntime, MessageBus);
+
+  const publish = useRuntimeFn(
+    AppRuntime,
+    flow((message: string) =>
+      Effect.gen(function* () {
+        const bus = yield* MessageBus;
+        yield* bus.publish({ message, payload: message });
+      })
+    )
+  );
+
+  void useRuntime(
+    AppRuntime,
+    Effect.scoped(
+      Effect.gen(function* () {
+        const bus = yield* Effect.promise(getBus);
+        const dequeue = yield* bus.subscribe;
+        const message = yield* Queue.take(dequeue);
+        console.log('log', message);
+      }).pipe(Effect.forever)
+    )
+  );
+  return { publish };
+};
+
+// view model
 const useEndpointPanel = () => {
-  const getStore = useRuntimeFn(EndpointRuntime, EndpointStore);
+  const { publish } = useMessageBus();
+  const getStore = useRuntimeFn(EndpointPanelRuntime, EndpointStore);
   const { data: store } = useAsync(getStore, createEndpointStore);
-
-  // Even though we can interact with the store directly, if we want to use the reactive context, we need to provide the store as a dependency to the hook, because useAutorun, will otherwise keep a reference to the optimistic store.
-
-  // Using the store in useEffect, usually means you interact with the optimistic store, but this is fine, as any changes will be merged into the real store when the async operation completes.
 
   useAutorun(() => {
     console.log('autorun', store.count.get());
   }, [store]);
 
   React.useEffect(() => {
-    if (store.count.get() === 0) {
-      const endpoint = createEndpoint();
-      store.add(endpoint);
-    }
-  }, []);
-
-  void useRuntime(
-    AppRuntime,
-    Effect.scoped(
-      Effect.gen(function* () {
-        const bus = yield* MessageBus;
-        const dequeue = yield* bus.subscribe;
-        const message = yield* Queue.take(dequeue);
-        console.log('take', message);
-      }).pipe(Effect.forever)
-    )
-  );
-
-  const publish = useRuntimeFn(
-    AppRuntime,
-    pipe(
-      MessageBus,
-      Effect.andThen((bus) => {
-        bus.publish({ message: 'foo', payload: 'bar' });
-      })
-    )
-  );
+    store.count.get() === 0 && store.add(createEndpoint());
+  }, [store]);
 
   return { publish, store };
 };
 
-// find a name that accurately describes with it does behind the scenes
-// as in, runs effects on mount etc
-// const useViewModel = () => {};
-
-// const context = Context.empty().pipe(
-//   Context.add(EndpointStore, createEndpointStore())
-// );
-
+//
 function EndpointPanelC() {
   const { publish, store } = useEndpointPanel();
 
