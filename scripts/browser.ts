@@ -34,19 +34,16 @@ const getAlsaOutputDevice = (): string => {
 
 const options: Parameters<(typeof puppeteer)['launch']>[0] = {
   args: [
-    // '--no-sandbox',
-    // '--disable-setuid-sandbox',
     `--alsa-output-device=${getAlsaOutputDevice()}`,
     '--disable-gpu',
-    // '--disable-dev-shm-usage',
     // '--disable-extensions-except=/tmp/react-devtools-extensions/unpacked',
     // '--load-extension=/tmp/react-devtools-extensions/unpacked',
     '--remote-debugging-port=9222',
     // '--auto-accept-camera-and-microphone-capture',
     '--force-dark-mode',
+    '--exclude-switches=enable-automation',
+    '--use-automation-extension=false',
     '--force-device-scale-factor=1',
-    // '--use-gl=egl',
-    // '--use-angle=egl'
   ],
   defaultViewport: { height: 0, width: 0 },
   devtools: true,

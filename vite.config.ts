@@ -29,13 +29,14 @@ const pluginBrowserLaunch = (mode: string): Plugin => {
   const openPage = (server: ViteDevServer) => {
     void createBrowser(
       { devtools: mode === 'development' },
+      // eslint-disable-next-line @typescript-eslint/require-await
       async (page, browser) => {
         const a = server.httpServer?.address();
         const port = (typeof a === 'string' ? a : a?.port) ?? '4173';
         const postfix = mode === 'test' ? '/__vitest__/#/' : '';
         const url = `http://127.0.0.1:${port.toString()}${postfix}`;
 
-        await page.goto(url);
+        // await page.goto(url);
         browser.on('disconnected', () => {
           void server.close();
         });
