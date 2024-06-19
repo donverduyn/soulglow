@@ -67,7 +67,8 @@ export const withSelected = <T extends Identifiable, U>(
       }
     };
 
-    // todo: create dispose chain for entity store and decorators
+    // TODO: create dispose chain for entity store and decorators
+    // TODO: select the previous index if one item above is removed
     const dispose = reaction(
       api.selectedItem.get.bind(api.selectedItem),
       selectAlternative

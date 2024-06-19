@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { RuntimeContext } from 'context';
 import { useRuntime } from './useRuntime';
 
-// This is converting push based events to a pull based stream, where the consumer has control through the provided effect. 
+// This is converting push based events to a pull based stream, where the consumer has control through the provided effect.
 // Every call to the handler returns a promise when the associated effect has succeeded.
 
 class EventEmitter<T, A> {
@@ -59,6 +59,12 @@ class EventEmitter<T, A> {
       this.subscribe(oneTimeListener);
     });
   }
+
+  dispose() {
+    this.listeners = [];
+    this.eventQueue = [];
+    this.resolvers.clear();
+  }
 }
 
 async function* createAsyncIterator<T, A>(
@@ -66,34 +72,36 @@ async function* createAsyncIterator<T, A>(
 ): AsyncGenerator<{ data: T; eventId: string }> {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   while (true) {
-    const event = await emitter.waitForEvent();
-    yield event;
+    yield await emitter.waitForEvent();
   }
 }
 
 export const useRuntimeFn = <T, A, E, R>(
   context: RuntimeContext<R>,
-  handler:
+  fn:
     | ((value: T) => Effect.Effect<A, E, NoInfer<R>>)
     | Effect.Effect<A, E, NoInfer<R>>
 ) => {
-  const emitter = React.useMemo(() => new EventEmitter<T, A>(), []);
+  const [emitter] = React.useState(() => new EventEmitter<T, A>());
   const stream = React.useMemo(
     () =>
       pipe(
         Stream.fromAsyncIterable(createAsyncIterator(emitter), console.log),
         Stream.mapEffect(({ data, eventId }) =>
           pipe(
-            Effect.sync(() =>
-              Effect.isEffect(handler) ? handler : handler(data)
-            ),
+            Effect.sync(() => (Effect.isEffect(fn) ? fn : fn(data))),
             Effect.andThen(Effect.tap(emitter.resolve(eventId)))
           )
         ),
         Stream.runDrain
       ),
-    [handler, emitter]
+    [fn, emitter]
   );
+
+  React.useEffect(() => {
+    return emitter.dispose.bind(emitter);
+  }, []);
+
   useRuntime(context, stream);
   return emitter.emit.bind(emitter);
 };

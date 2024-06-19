@@ -4,6 +4,7 @@ import { IconButton, Radio } from '@mui/material';
 import { css } from '@mui/material/styles';
 import { Effect, Queue, flow, pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
+import { useEffectOnce } from 'react-use';
 import { v4 as uuid } from 'uuid';
 import { Button } from 'common/components/Button';
 import { Paper } from 'common/components/Paper';
@@ -13,9 +14,8 @@ import { Typography } from 'common/components/Typography';
 import { withRuntime } from 'common/hoc/withRuntime';
 import { useAsync } from 'common/hooks/useAsync';
 import { useAutorun } from 'common/hooks/useMobx';
-import { useRuntime } from 'common/hooks/useRuntime';
 import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
-import { AppRuntime, MessageBus } from 'context';
+import { AppRuntime, MessageBus, type Message } from 'context';
 import {
   EndpointPanelRuntime,
   EndpointStore,
@@ -38,8 +38,7 @@ export const EndpointPanel = pipe(
 );
 
 const useMessageBus = () => {
-  const getBus = useRuntimeFn(AppRuntime, MessageBus);
-
+  const id = uuid();
   const publish = useRuntimeFn(
     AppRuntime,
     flow((message: string) =>
@@ -50,32 +49,45 @@ const useMessageBus = () => {
     )
   );
 
-  void useRuntime(
+  const register = useRuntimeFn(
     AppRuntime,
-    Effect.scoped(
-      Effect.gen(function* () {
-        const bus = yield* Effect.promise(getBus);
-        const dequeue = yield* bus.subscribe;
-        const message = yield* Queue.take(dequeue);
-        console.log('log', message);
-      }).pipe(Effect.forever)
-    )
+    (callback: <T>(message: Message<T>) => void) =>
+      Effect.fork(
+        Effect.scoped(
+          Effect.gen(function* () {
+            const bus = yield* MessageBus;
+            const dequeue = yield* bus.subscribe;
+            const item = yield* Queue.take(dequeue);
+            callback({ message: item.message, payload: String(id) });
+          }).pipe(Effect.forever)
+        )
+      )
   );
-  return { publish };
+
+  return { publish, register };
 };
 
-// view model
 const useEndpointPanel = () => {
-  const { publish } = useMessageBus();
+  //
+  const { publish, register } = useMessageBus();
   const getStore = useRuntimeFn(EndpointPanelRuntime, EndpointStore);
   const { data: store } = useAsync(getStore, createEndpointStore);
 
-  useAutorun(() => {
-    console.log('autorun', store.count.get());
-  }, [store]);
+  // even though we are using `useEffectOnce` here, it is still triggered multiple times in concurrent mode, so every thing that is done here should be idempotent.
 
-  React.useEffect(() => {
+  useEffectOnce(() => {
     store.count.get() === 0 && store.add(createEndpoint());
+
+    void register((message) => {
+      console.log('message', message);
+    });
+    void register((message) => {
+      console.log('message2', message);
+    });
+  });
+
+  useAutorun(() => {
+    // console.log('autorun', store.count.get());
   }, [store]);
 
   return { publish, store };

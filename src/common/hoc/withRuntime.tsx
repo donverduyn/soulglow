@@ -21,12 +21,9 @@ const useRuntimeFactory = <T,>(layer: Layer.Layer<T>) => {
 
 // TODO: breaks fast refresh. Should be in a separate file
 export const createRuntimeContext = <T,>(layer: Layer.Layer<T>) => {
-  const factory = () => ManagedRuntime.make(layer);
-
   return React.createContext<
-    React.MutableRefObject<ReturnType<typeof factory> | null>
+    React.MutableRefObject<ManagedRuntime.ManagedRuntime<T, never> | null>
     // we abuse context here to pass through the layer
-    // while casting context to the inferred type of the runtime
   >(layer as unknown as React.MutableRefObject<null>);
 };
 
@@ -36,6 +33,7 @@ export const withRuntime = <T,>(Context: RuntimeContext<T>) => {
       const runtimeRef = useRuntimeFactory(
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error _currentValue does not exist
+        //! This is dangerous, because we are using private API
         Context._currentValue as unknown as Layer.Layer<T>
       );
 
