@@ -19,6 +19,7 @@ import {
   type LightbulbDto,
   LightBulbRuntime,
 } from './context';
+import { Effect } from 'effect';
 
 interface LightBulbState {
   bulb_mode: LightMode;
@@ -72,8 +73,17 @@ export const LightBulb: React.FC<Props> = withRuntime(LightBulbRuntime)(
     //   })
     // );
 
-    const getThrottler = useRuntimeFn(LightBulbRuntime, ApiThrottler);
-    const { data: throttler } = useAsync(getThrottler);
+    // const getThrottler = useRuntimeFn(LightBulbRuntime, ApiThrottler);
+    // const { data: throttler } = useAsync(getThrottler);
+
+    const handle = useRuntimeFn(
+      LightBulbRuntime,
+      (body: Partial<LightbulbDto>) =>
+        Effect.gen(function* () {
+          const queue = yield* ApiThrottler;
+          yield* queue.offer(body);
+        })
+    );
 
     // useRuntime(
     //   LightBulbRuntime,
@@ -105,9 +115,9 @@ export const LightBulb: React.FC<Props> = withRuntime(LightBulbRuntime)(
           [change.name]: change.newValue,
         } as Partial<LightbulbDto>;
         // const rgb = formatRgb({mode: ''})
-        void throttler.offer(body);
+        void handle(body);
       },
-      [throttler]
+      []
     );
 
     return (
