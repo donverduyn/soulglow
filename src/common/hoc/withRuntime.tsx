@@ -7,14 +7,11 @@ This HOC creates a runtime for the context and provides it to the component.
 It allows any downstream components to access the runtime using the context.
 */
 
-export function withRuntime<T>(Context: RuntimeContext<T>) {
+export function WithRuntime<T>(Context: RuntimeContext<T>) {
   return <P extends object>(Component: React.FC<P>) => {
     const Wrapped = (props: P) => {
-      const runtimeRef = useRuntimeFactory(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error _currentValue does not exist
-        Context._currentValue as unknown as Layer.Layer<T>
-      );
+      const layer = React.useContext(Context) as unknown as Layer.Layer<T>;
+      const runtimeRef = useRuntimeFactory(layer);
 
       return (
         <Context.Provider value={runtimeRef}>
@@ -25,6 +22,7 @@ export function withRuntime<T>(Context: RuntimeContext<T>) {
         </Context.Provider>
       );
     };
+    Wrapped.displayName = `WithRuntime`;
     return Wrapped;
   };
 }
@@ -40,21 +38,19 @@ const useRuntimeFactory = <T,>(layer: Layer.Layer<T>) => {
   );
 
   React.useLayoutEffect(() => {
-    const runtime = ManagedRuntime.make(layer);
-    ref.current = runtime;
+    if (ref.current === null) {
+      console.log('Creating runtime');
+      const runtime = ManagedRuntime.make(layer);
+      ref.current = runtime;
+    }
 
     return () => {
-      void runtime.dispose();
-      ref.current = null;
+      if (ref.current) {
+        console.log('Disposing runtime');
+        void ref.current.dispose();
+        ref.current = null;
+      }
     };
   }, [layer]);
   return ref;
-};
-
-// TODO: breaks fast refresh. Should be in a separate file?
-export const createRuntimeContext = <T,>(layer: Layer.Layer<T>) => {
-  return React.createContext<
-    React.MutableRefObject<ManagedRuntime.ManagedRuntime<T, never> | null>
-    // we abuse context here to pass through the layer
-  >(layer as unknown as React.MutableRefObject<null>);
 };

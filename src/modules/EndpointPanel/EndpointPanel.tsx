@@ -3,14 +3,13 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { IconButton, Radio } from '@mui/material';
 import { css } from '@mui/material/styles';
 import { pipe } from 'effect';
-import { untracked } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'common/components/Button';
 import { Paper } from 'common/components/Paper';
 import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
 import { Typography } from 'common/components/Typography';
-import { withRuntime } from 'common/hoc/withRuntime';
+import { WithRuntime } from 'common/hoc/withRuntime';
 import { useAsync } from 'common/hooks/useAsync';
 import { useAutorun } from 'common/hooks/useMobx';
 import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
@@ -24,49 +23,43 @@ import { createEndpoint } from './models/Endpoint';
 
 export const EndpointPanel = pipe(
   observer(EndpointPanelC),
-  // this causes fast refresh to lose state when used directly
-  withRuntime(EndpointPanelRuntime)
+  WithRuntime(EndpointPanelRuntime)
 );
 
 function useEndpointPanel() {
-  const bus = useMessageBus();
   const getStore = useRuntimeFn(EndpointPanelRuntime, EndpointStore);
-  const { data: store } = useAsync(
-    getStore,
-    () => Object.assign(createEndpointStore(), { id: 'optimistic' }),
-    (result, data) => {
-      console.log('merge', result.list.get(), data.list.get());
-      result.merge(data);
-      console.log('merge', result.list.get(), data.list.get());
-    }
-  );
-  console.log({ count: untracked(() => store.count.get()) });
-  // When store is ready and updated async, useEffect will run again.
-  // Note that the previous register callbacks will stay alive and update the optimistic store through the stale closure.
+  const { data: store } = useAsync(() => getStore(null), createEndpointStore);
+
+  // takes a dependency array, to deregister the callbacks
+  // any dependencies used in the callback should be passed here
+  const bus = useMessageBus([store]);
 
   React.useEffect(() => {
     store.count.get() === 0 && store.add(createEndpoint());
+    console.log('from useEffect');
 
-    void bus.register(() => {
-      // console.log(store.count.get());
-      console.log('message2', message);
-      // store.add(createEndpoint());
-    });
-    void bus.register((message) => {
-      console.log('message2', message);
-    });
+    const clearTimeout = setTimeout(() => {
+      void bus.register(() => {
+        store.add(createEndpoint());
+      });
+      void bus.register((message) => {
+        console.log('message1', message);
+      });
+    }, 0);
+
+    return () => clearInterval(clearTimeout);
   }, [store, bus]);
 
   useAutorun(() => {
-    console.log('autorun', store.count.get());
+    // console.log('autorun', store.count.get());
   }, [store]);
 
-  return React.useMemo(() => ({ publish: bus.publish, store }), [store]);
+  return React.useMemo(() => ({ publish: bus.publish, store }), [store, bus]);
 }
 
 function EndpointPanelC() {
   const { publish, store } = useEndpointPanel();
-  console.log(store.id);
+
   return (
     <Paper css={styles.root}>
       <Typography>Endpoints</Typography>
@@ -101,16 +94,14 @@ function EndpointPanelC() {
       <Button
         css={styles.addButton}
         onClick={() => {
-          console.log(store.id);
-          store.add(createEndpoint());
-          // void publish({
-          //   message: 'ENDPOINT_ADD',
-          //   payload: {
-          //     id: uuid(),
-          //     name: 'endpoint-123',
-          //     url: `http://192.168.0.${String(Math.round(Math.random() * 100))}`,
-          //   },
-          // });
+          void publish({
+            message: 'ENDPOINT_ADD',
+            payload: {
+              id: '123',
+              name: 'endpoint-123',
+              url: `http://192.168.0.${String(Math.round(Math.random() * 100))}`,
+            },
+          });
         }}
       >
         Add endpoint

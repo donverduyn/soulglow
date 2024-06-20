@@ -4,7 +4,7 @@ import { css } from '@mui/material/styles';
 // import { Stack } from "common/components/Stack";
 // import { TextField } from "common/components/TextField";
 // import DeleteIcon from '@mui/icons-material/Delete';
-import type { Endpoint } from '../context';
+import type { Endpoint } from './../models/Endpoint';
 
 interface Props {
   endpoint: Endpoint;

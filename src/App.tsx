@@ -5,7 +5,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { formatRgb, type Okhsv } from 'culori';
 import { observable } from 'mobx';
 import { Stack } from 'common/components/Stack';
-import { withRuntime } from 'common/hoc/withRuntime';
+import { WithRuntime } from 'common/hoc/withRuntime';
 import { useMobx } from 'common/hooks/useMobx';
 import { AppRuntime } from 'context';
 import { EndpointPanel } from 'modules/EndpointPanel/EndpointPanel';
@@ -22,7 +22,7 @@ const baseColor: Okhsv = {
   v: 0,
 };
 
-export const App: React.FC = withRuntime(AppRuntime)(() => {
+export const App: React.FC = WithRuntime(AppRuntime)(() => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const state = useMobx(() => ({ color: baseColor }), {
     color: observable.ref,

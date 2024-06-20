@@ -6,7 +6,7 @@ import type {
   GroupState,
   GroupStateCommands,
 } from '__generated/api';
-import { createRuntimeContext } from 'common/hoc/withRuntime';
+import { createRuntimeContext } from 'context';
 import { createDeviceRepo } from './repos/DeviceRepo';
 
 // we really shouldn't couple our dto with the api types

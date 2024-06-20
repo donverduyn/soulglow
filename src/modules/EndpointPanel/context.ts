@@ -1,10 +1,10 @@
 import { Context, Effect, Layer, pipe } from 'effect';
-import { createRuntimeContext } from 'common/hoc/withRuntime';
 import {
   createEntityStore,
   withFiltered,
   withSelected,
 } from 'common/utils/entity';
+import { createRuntimeContext } from 'context';
 import type { Endpoint } from './models/Endpoint';
 
 export class EndpointStore extends Context.Tag('@EndpointPanel/EndpointStore')<
@@ -21,6 +21,9 @@ export const createEndpointStore = pipe(
 export const EndpointPanelRuntime = createRuntimeContext(
   Layer.effect(
     EndpointStore,
-    Effect.sync(() => Object.assign(createEndpointStore(), { id: 'real' }))
+    Effect.sync(() => {
+      console.log('store created from effect');
+      return Object.assign(createEndpointStore(), { id: 'real' });
+    })
   )
 );

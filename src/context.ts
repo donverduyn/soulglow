@@ -7,11 +7,7 @@ import {
   PubSub,
   Effect,
   Queue,
-  flow,
-  Scope,
-  Exit,
 } from 'effect';
-import { createRuntimeContext } from 'common/hoc/withRuntime';
 import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
 // import { DevTools } from '@effect/experimental';
 
@@ -34,30 +30,15 @@ export class MessageBus extends Context.Tag('@App/MessageBus')<
   PubSub.PubSub<Message>
 >() {}
 
-// TODO: We currently use this file to export anything that's imported from above.
-// TODO: Certain parts can likely be moved to common or should be separated.
-
-export type RuntimeContext<T> = React.Context<
-  React.MutableRefObject<ManagedRuntime.ManagedRuntime<T, never> | null>
->;
-
-export const AppRuntime = createRuntimeContext(
-  pipe(Layer.effect(MessageBus, PubSub.unbounded()))
-);
-
 // TODO: the problem with this hook is that it depends on the AppRuntime
-// TODO: and therefore it should not be in common/hooks
+// TODO: and therefore it should not be in common/hooks, unless we can parameterize it
 
-export const useMessageBus = () => {
+export const useMessageBus = (deps: unknown[]) => {
   const publishMessage = React.useCallback(
     (message: Message) =>
       pipe(MessageBus, Effect.andThen(PubSub.publish(message))),
     []
   );
-
-  // const createScope = React.useCallback(flow(Scope.make, Effect.runSync), []);
-
-  // const [scope, setScope] = React.useState(createScope);
 
   const registerCallback = React.useCallback(
     (callback: <T>(message: Message<T>) => void) =>
@@ -67,18 +48,25 @@ export const useMessageBus = () => {
         const message = yield* Queue.take(dequeue);
         callback(message);
       }).pipe(Effect.scoped, Effect.forever, Effect.fork),
-    []
+    deps
   );
-
-  // React.useEffect(() => {
-  //   console.log('useEffect')
-  //   setScope(createScope());
-  //   return () => {
-  //     Effect.runFork(Scope.close(scope, Exit.void));
-  //   };
-  // }, []);
 
   const publish = useRuntimeFn(AppRuntime, publishMessage);
   const register = useRuntimeFn(AppRuntime, registerCallback);
   return React.useMemo(() => ({ publish, register }), []);
 };
+
+export const createRuntimeContext = <T>(layer: Layer.Layer<T>) => {
+  return React.createContext<
+    React.MutableRefObject<ManagedRuntime.ManagedRuntime<T, never> | null>
+    // we abuse context here to pass through the layer
+  >(layer as unknown as React.MutableRefObject<null>);
+};
+
+export type RuntimeContext<T> = React.Context<
+  React.MutableRefObject<ManagedRuntime.ManagedRuntime<T, never> | null>
+>;
+
+export const AppRuntime = createRuntimeContext(
+  pipe(Layer.effect(MessageBus, PubSub.unbounded()))
+);

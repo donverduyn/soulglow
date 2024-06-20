@@ -23,15 +23,17 @@ export function useRuntimeFn<T, A, E, R>(
   fn:
     | ((value: T) => Effect.Effect<A, E, NoInfer<R>>)
     | Effect.Effect<A, E, NoInfer<R>>
+    | null
 ) {
   const [emitter] = React.useState(() => new EventEmitter<T, A>());
   const stream = React.useMemo(
     () =>
       pipe(
         Stream.fromAsyncIterable(createAsyncIterator(emitter), console.log),
+        Stream.filterEffect(() => Effect.sync(() => fn !== null)),
         Stream.mapEffect(({ data, eventId }) =>
           pipe(
-            Effect.sync(() => (Effect.isEffect(fn) ? fn : fn(data))),
+            Effect.sync(() => (Effect.isEffect(fn) ? fn : fn!(data))),
             Effect.andThen(Effect.tap(emitter.resolve(eventId)))
           )
         ),
@@ -85,7 +87,7 @@ const useRuntime = <A, E, R>(
     return () => {
       Effect.runFork(Scope.close(scope, Exit.void));
     };
-  }, []);
+  }, [task]);
 };
 
 /* 
