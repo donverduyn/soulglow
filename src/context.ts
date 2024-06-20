@@ -1,13 +1,18 @@
+import React from 'react';
 import {
   pipe,
   Layer,
   Context,
-  Ref,
-  SynchronizedRef,
   type ManagedRuntime,
   PubSub,
+  Effect,
+  Queue,
+  flow,
+  Scope,
+  Exit,
 } from 'effect';
 import { createRuntimeContext } from 'common/hoc/withRuntime';
+import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
 // import { DevTools } from '@effect/experimental';
 
 // const rootLayer = pipe(
@@ -15,38 +20,65 @@ import { createRuntimeContext } from 'common/hoc/withRuntime';
 //   Layer.merge(Logger.minimumLogLevel(LogLevel.Debug))
 // );
 
-export type RuntimeContext<T> = React.Context<
-  React.MutableRefObject<ManagedRuntime.ManagedRuntime<T, never> | null>
->;
-
-// export class AppConfig extends Context.Tag('AppConfig')<
-//   AppConfig,
-//   Ref.Ref<{ apiUrl: string }>
-// >() {}
-
 // const AppConfigProvider = ConfigProvider.fromJson({
 //   LOG_LEVEL: LogLevel.Debug,
 // });
 
-export class HelloRef extends Context.Tag('Hello')<
-  HelloRef,
-  Ref.Ref<number>
->() {}
-
-export type Message<T> = {
+export type Message<T = object> = {
   message: string;
   payload: T;
 };
 
 export class MessageBus extends Context.Tag('@App/MessageBus')<
   MessageBus,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  PubSub.PubSub<Message<any>>
+  PubSub.PubSub<Message>
 >() {}
 
+// TODO: We currently use this file to export anything that's imported from above.
+// TODO: Certain parts can likely be moved to common or should be separated.
+
+export type RuntimeContext<T> = React.Context<
+  React.MutableRefObject<ManagedRuntime.ManagedRuntime<T, never> | null>
+>;
+
 export const AppRuntime = createRuntimeContext(
-  pipe(
-    Layer.effect(HelloRef, SynchronizedRef.make(0)),
-    Layer.merge(Layer.effect(MessageBus, PubSub.unbounded()))
-  )
+  pipe(Layer.effect(MessageBus, PubSub.unbounded()))
 );
+
+// TODO: the problem with this hook is that it depends on the AppRuntime
+// TODO: and therefore it should not be in common/hooks
+
+export const useMessageBus = () => {
+  const publishMessage = React.useCallback(
+    (message: Message) =>
+      pipe(MessageBus, Effect.andThen(PubSub.publish(message))),
+    []
+  );
+
+  // const createScope = React.useCallback(flow(Scope.make, Effect.runSync), []);
+
+  // const [scope, setScope] = React.useState(createScope);
+
+  const registerCallback = React.useCallback(
+    (callback: <T>(message: Message<T>) => void) =>
+      Effect.gen(function* () {
+        const bus = yield* MessageBus;
+        const dequeue = yield* bus.subscribe;
+        const message = yield* Queue.take(dequeue);
+        callback(message);
+      }).pipe(Effect.scoped, Effect.forever, Effect.fork),
+    []
+  );
+
+  // React.useEffect(() => {
+  //   console.log('useEffect')
+  //   setScope(createScope());
+  //   return () => {
+  //     Effect.runFork(Scope.close(scope, Exit.void));
+  //   };
+  // }, []);
+
+  const publish = useRuntimeFn(AppRuntime, publishMessage);
+  const register = useRuntimeFn(AppRuntime, registerCallback);
+  return React.useMemo(() => ({ publish, register }), []);
+};

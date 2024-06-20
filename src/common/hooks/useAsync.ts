@@ -15,8 +15,7 @@ export const useAsync = <T extends object>(
 ) => {
   const [error, setError] = React.useState<Error | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const optimisticMemo = React.useMemo(optimistic, [optimistic]);
-  const [data, setData] = React.useState<T>(optimisticMemo);
+  const [data, setData] = React.useState<T>(optimistic);
 
   React.useEffect(() => {
     let mounted = true;

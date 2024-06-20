@@ -5,14 +5,9 @@ import {
   withFiltered,
   withSelected,
 } from 'common/utils/entity';
+import type { Endpoint } from './models/Endpoint';
 
-export type Endpoint = {
-  id: string;
-  name: string;
-  url: string;
-};
-
-export class EndpointStore extends Context.Tag('EndpointStore')<
+export class EndpointStore extends Context.Tag('@EndpointPanel/EndpointStore')<
   EndpointStore,
   ReturnType<typeof createEndpointStore>
 >() {}
@@ -26,7 +21,6 @@ export const createEndpointStore = pipe(
 export const EndpointPanelRuntime = createRuntimeContext(
   Layer.effect(
     EndpointStore,
-    // here we can provide any dependencies that the store needs
-    Effect.sync(() => createEndpointStore())
+    Effect.sync(() => Object.assign(createEndpointStore(), { id: 'real' }))
   )
 );

@@ -2,10 +2,9 @@ import * as React from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { IconButton, Radio } from '@mui/material';
 import { css } from '@mui/material/styles';
-import { Effect, Queue, flow, pipe } from 'effect';
+import { pipe } from 'effect';
+import { untracked } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { useEffectOnce } from 'react-use';
-import { v4 as uuid } from 'uuid';
 import { Button } from 'common/components/Button';
 import { Paper } from 'common/components/Paper';
 import { Stack } from 'common/components/Stack';
@@ -15,88 +14,59 @@ import { withRuntime } from 'common/hoc/withRuntime';
 import { useAsync } from 'common/hooks/useAsync';
 import { useAutorun } from 'common/hooks/useMobx';
 import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
-import { AppRuntime, MessageBus, type Message } from 'context';
+import { useMessageBus } from 'context';
 import {
   EndpointPanelRuntime,
   EndpointStore,
   createEndpointStore,
-  type Endpoint,
 } from './context';
-
-const createEndpoint = (id?: string): Endpoint => {
-  const _id = id ?? uuid();
-  return {
-    id: _id,
-    name: `endpoint-${_id}`,
-    url: 'http://192.168.0.153',
-  };
-};
+import { createEndpoint } from './models/Endpoint';
 
 export const EndpointPanel = pipe(
   observer(EndpointPanelC),
+  // this causes fast refresh to lose state when used directly
   withRuntime(EndpointPanelRuntime)
 );
 
-const useMessageBus = () => {
-  const id = uuid();
-  const publish = useRuntimeFn(
-    AppRuntime,
-    flow((message: string) =>
-      Effect.gen(function* () {
-        const bus = yield* MessageBus;
-        yield* bus.publish({ message, payload: message });
-      })
-    )
-  );
-
-  const register = useRuntimeFn(
-    AppRuntime,
-    (callback: <T>(message: Message<T>) => void) =>
-      Effect.fork(
-        Effect.scoped(
-          Effect.gen(function* () {
-            const bus = yield* MessageBus;
-            const dequeue = yield* bus.subscribe;
-            const item = yield* Queue.take(dequeue);
-            callback({ message: item.message, payload: String(id) });
-          }).pipe(Effect.forever)
-        )
-      )
-  );
-
-  return { publish, register };
-};
-
-const useEndpointPanel = () => {
-  //
-  const { publish, register } = useMessageBus();
+function useEndpointPanel() {
+  const bus = useMessageBus();
   const getStore = useRuntimeFn(EndpointPanelRuntime, EndpointStore);
-  const { data: store } = useAsync(getStore, createEndpointStore);
+  const { data: store } = useAsync(
+    getStore,
+    () => Object.assign(createEndpointStore(), { id: 'optimistic' }),
+    (result, data) => {
+      console.log('merge', result.list.get(), data.list.get());
+      result.merge(data);
+      console.log('merge', result.list.get(), data.list.get());
+    }
+  );
+  console.log({ count: untracked(() => store.count.get()) });
+  // When store is ready and updated async, useEffect will run again.
+  // Note that the previous register callbacks will stay alive and update the optimistic store through the stale closure.
 
-  // even though we are using `useEffectOnce` here, it is still triggered multiple times in concurrent mode, so every thing that is done here should be idempotent.
-
-  useEffectOnce(() => {
+  React.useEffect(() => {
     store.count.get() === 0 && store.add(createEndpoint());
 
-    void register((message) => {
-      console.log('message', message);
+    void bus.register(() => {
+      // console.log(store.count.get());
+      console.log('message2', message);
+      // store.add(createEndpoint());
     });
-    void register((message) => {
+    void bus.register((message) => {
       console.log('message2', message);
     });
-  });
+  }, [store, bus]);
 
   useAutorun(() => {
-    // console.log('autorun', store.count.get());
+    console.log('autorun', store.count.get());
   }, [store]);
 
-  return { publish, store };
-};
+  return React.useMemo(() => ({ publish: bus.publish, store }), [store]);
+}
 
-//
 function EndpointPanelC() {
   const { publish, store } = useEndpointPanel();
-
+  console.log(store.id);
   return (
     <Paper css={styles.root}>
       <Typography>Endpoints</Typography>
@@ -131,10 +101,16 @@ function EndpointPanelC() {
       <Button
         css={styles.addButton}
         onClick={() => {
+          console.log(store.id);
           store.add(createEndpoint());
-          void publish(
-            `http://192.168.0.${String(Math.round(Math.random() * 100))}`
-          );
+          // void publish({
+          //   message: 'ENDPOINT_ADD',
+          //   payload: {
+          //     id: uuid(),
+          //     name: 'endpoint-123',
+          //     url: `http://192.168.0.${String(Math.round(Math.random() * 100))}`,
+          //   },
+          // });
         }}
       >
         Add endpoint
