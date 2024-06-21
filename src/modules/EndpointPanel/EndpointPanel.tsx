@@ -2,13 +2,11 @@ import * as React from 'react';
 import { css } from '@mui/material/styles';
 import { pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
-import { useEffectOnce } from 'react-use';
 import { Button } from 'common/components/Button';
 import { Paper } from 'common/components/Paper';
 import { WithContextService } from 'common/hoc/withContextService';
 import { WithRuntime } from 'common/hoc/withRuntime';
-import { useEffectDeferred } from 'common/hooks/useEffectDeferred';
-import { useFn } from 'common/hooks/useFn';
+import { useDeferred } from 'common/hooks/useEffectDeferred';
 import { useStable } from 'common/hooks/useMemoizedObject';
 import { useAutorun } from 'common/hooks/useMobx';
 import { useMessageBus } from 'context';
@@ -45,11 +43,11 @@ function useEndpointPanel() {
   const store = React.useContext(StoreContext)!;
   const bus = useMessageBus([store]);
 
-  useEffectOnce(() => {
+  React.useEffect(() => {
     store.count.get() === 0 && store.add(createEndpoint());
-  });
+  }, [store]);
 
-  useEffectDeferred(() => {
+  useDeferred(() => {
     void bus.register((message) => {
       // @ts-expect-error, not yet narrowed with actions
       store.add(message.payload);
@@ -61,10 +59,10 @@ function useEndpointPanel() {
     console.log('autorun', store.count.get());
   }, [store]);
 
-  const addEndpoint = useFn(() => {
+  const addEndpoint = React.useCallback(() => {
     const endpoint = createEndpoint();
     void bus.publish(addEndpointMessage(endpoint));
-  });
+  }, [bus]);
 
   return useStable({ addEndpoint, store });
 }

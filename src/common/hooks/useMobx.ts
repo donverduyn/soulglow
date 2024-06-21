@@ -10,7 +10,7 @@ import {
   IAutorunOptions,
 } from 'mobx';
 import { deepObserve } from 'mobx-utils';
-import { identity, isFunction } from 'remeda';
+import { isFunction } from 'remeda';
 import { memoize } from 'common/utils/memoize';
 
 // const ref = observable.object(
@@ -72,7 +72,7 @@ export const useMobx = <T extends Record<string, any>>(
       map?: (value: V) => R
     ) => () => R;
 
-    const lazyGet: LazyGetFn<T> = memoize((path, map = identity) => {
+    const lazyGet: LazyGetFn<T> = memoize((path, map = <T>(v: T) => v) => {
       // by using map from the closure, V8 will only preparse it on re-renders
       const keys = getKeys(path);
       const parent = getParent<Parameters<typeof map>[0]>(obs, keys);
