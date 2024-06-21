@@ -1,3 +1,4 @@
+import React from 'react';
 import { Context, Effect, Layer, pipe } from 'effect';
 import {
   createEntityStore,
@@ -23,7 +24,15 @@ export const EndpointPanelRuntime = createRuntimeContext(
     EndpointStore,
     Effect.sync(() => {
       console.log('store created from effect');
-      return Object.assign(createEndpointStore(), { id: 'real' });
+      return createEndpointStore();
     })
   )
 );
+
+export const createStoreContext = <T>(value: T) => {
+  return React.createContext<T>(value);
+};
+
+export const StoreContext = createStoreContext<ReturnType<
+  typeof createEndpointStore
+> | null>(null);

@@ -5,24 +5,30 @@ import { observer } from 'mobx-react-lite';
 import { useEffectOnce } from 'react-use';
 import { Button } from 'common/components/Button';
 import { Paper } from 'common/components/Paper';
+import { WithContextService } from 'common/hoc/withContextService';
 import { WithRuntime } from 'common/hoc/withRuntime';
-import { useAsync } from 'common/hooks/useAsync';
 import { useEffectDeferred } from 'common/hooks/useEffectDeferred';
 import { useFn } from 'common/hooks/useFn';
 import { useStable } from 'common/hooks/useMemoizedObject';
 import { useAutorun } from 'common/hooks/useMobx';
-import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
 import { useMessageBus } from 'context';
 import { EndpointListItem } from './components/EndpointListItem';
 import {
   EndpointPanelRuntime,
   EndpointStore,
+  StoreContext,
   createEndpointStore,
 } from './context';
 import { createEndpoint, type Endpoint } from './models/Endpoint';
 
 export const EndpointPanel = pipe(
   observer(EndpointPanelC),
+  WithContextService(
+    EndpointPanelRuntime,
+    EndpointStore,
+    createEndpointStore,
+    StoreContext
+  ),
   WithRuntime(EndpointPanelRuntime)
 );
 
@@ -36,8 +42,7 @@ const createMessage =
 const addEndpointMessage = createMessage<Endpoint>('ENDPOINT_ADD');
 
 function useEndpointPanel() {
-  const getStore = useRuntimeFn(EndpointPanelRuntime, EndpointStore);
-  const { data: store } = useAsync(() => getStore(null), createEndpointStore);
+  const store = React.useContext(StoreContext)!;
   const bus = useMessageBus([store]);
 
   useEffectOnce(() => {

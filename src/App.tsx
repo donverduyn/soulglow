@@ -12,7 +12,6 @@ import { EndpointPanel } from 'modules/EndpointPanel/EndpointPanel';
 import { LightBulb } from 'modules/LightBulb/LightBulb';
 import { PaletteViewer } from 'modules/PaletteViewer/PaletteViewer';
 // import { TestButton } from 'modules/TestButton/TestButton';
-import TestButton from 'modules/TestButton/TestButton';
 import { darkTheme } from './theme';
 
 const baseColor: Okhsv = {

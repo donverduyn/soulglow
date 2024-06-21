@@ -1,14 +1,15 @@
 import * as React from 'react';
+import { isPlainObject } from 'remeda';
 
 const defaultMerge = <T>(
-  current: { merge?: (a: T) => void },
+  current: { merge?: (a: T) => void } | T,
   optimistic: T
 ) => {
   // we should prevent merging incompatible objects, maybe structural compare
-  current.merge?.(optimistic);
+  isPlainObject(current) && current.merge?.(optimistic);
 };
 
-export const useAsync = <T extends object>(
+export const useAsync = <T>(
   getAsync: () => Promise<T>,
   optimistic: () => T = () => ({}) as T,
   merge: (result: T, data: T) => void = defaultMerge

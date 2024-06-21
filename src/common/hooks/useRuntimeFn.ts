@@ -41,11 +41,7 @@ export function useRuntimeFn<T, A, E, R>(
       ),
     [fn]
   );
-  const emit = React.useCallback(
-    <T extends Parameters<(typeof emitter)['emit']>[0]>(value: T) =>
-      emitter.emit(value),
-    []
-  );
+  const emit = React.useCallback(emitter.emit, []);
 
   React.useEffect(() => {
     return emitter.dispose.bind(emitter);
@@ -102,17 +98,17 @@ class EventEmitter<T, A> {
 
   // TODO: instead of using null, and casting it back to T,
   // TODO: create an override that allows zero arguments
-  emit(data: T | null = null): Promise<A> {
+  emit: ((data: T) => Promise<A>) | (() => Promise<A>) = (data) => {
     const eventId = uuidv4();
     let resolver: (result: A) => void;
     const promise = new Promise<A>((resolve) => {
       resolver = resolve;
     });
-    this.eventQueue.push({ data: data as T, eventId });
+    this.eventQueue.push({ data, eventId });
     this.notifyListeners();
     this.resolvers.set(eventId, resolver!);
     return promise;
-  }
+  };
 
   subscribe(listener: (data: T, eventId: string) => void): void {
     this.listeners.push(listener);

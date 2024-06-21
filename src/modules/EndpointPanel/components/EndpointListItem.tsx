@@ -1,29 +1,25 @@
+import * as React from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import Radio from '@mui/material/Radio';
 import { css } from '@mui/material/styles';
+import { observer } from 'mobx-react-lite';
 import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
-import { useAsync } from 'common/hooks/useAsync';
 import { useStable } from 'common/hooks/useMemoizedObject';
-import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
-import {
-  EndpointPanelRuntime,
-  EndpointStore,
-  createEndpointStore,
-} from '../context';
+import { StoreContext } from '../context';
 import type { Endpoint } from './../models/Endpoint';
-import { observer } from 'mobx-react-lite';
 
 interface Props {
-  endpoint: Endpoint;
-  index: number;
+  readonly endpoint: Endpoint;
+  readonly index: number;
+  // readonly store: ReturnType<typeof createEndpointStore>;
 }
 
 const useEndpointListItem = () => {
-  const getStore = useRuntimeFn(EndpointPanelRuntime, EndpointStore);
-  const { data: store } = useAsync(() => getStore(null), createEndpointStore);
-
+  const store = React.useContext(StoreContext)!;
+  // const getStore = useRuntimeFn(EndpointPanelRuntime, EndpointStore);
+  // const { data: store } = useAsync(() => getStore(null), createEndpointStore);
   return useStable({ store });
 };
 
@@ -37,7 +33,7 @@ function EndpointListItemC({ endpoint, index }: Props) {
       css={styles.endpoint}
     >
       <Radio
-        checked={store.selectedItem.get()?.id === endpoint.id}
+        checked={store.selectedItem.get().id === endpoint.id}
         onChange={() => store.select(index)}
       />
       <TextField
@@ -59,7 +55,7 @@ function EndpointListItemC({ endpoint, index }: Props) {
       </IconButton>
     </Stack>
   );
-};
+}
 
 const styles = {
   addButton: css`
