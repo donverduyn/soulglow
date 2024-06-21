@@ -46,7 +46,7 @@ export const App: React.FC = WithRuntime(AppRuntime)(() => {
     <ThemeProvider theme={prefersDarkMode ? darkTheme : darkTheme}>
       <CssBaseline />
       <Stack css={appStyles.root}>
-        <TestButton />
+        {/* <TestButton /> */}
         <EndpointPanel />
         <LightBulb
           onChange={state.set('color')}

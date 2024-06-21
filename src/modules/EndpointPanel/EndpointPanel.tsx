@@ -1,15 +1,10 @@
 import * as React from 'react';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { IconButton, Radio } from '@mui/material';
 import { css } from '@mui/material/styles';
 import { pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { useEffectOnce } from 'react-use';
 import { Button } from 'common/components/Button';
 import { Paper } from 'common/components/Paper';
-import { Stack } from 'common/components/Stack';
-import { TextField } from 'common/components/TextField';
-import { Typography } from 'common/components/Typography';
 import { WithRuntime } from 'common/hoc/withRuntime';
 import { useAsync } from 'common/hooks/useAsync';
 import { useEffectDeferred } from 'common/hooks/useEffectDeferred';
@@ -18,6 +13,7 @@ import { useStable } from 'common/hooks/useMemoizedObject';
 import { useAutorun } from 'common/hooks/useMobx';
 import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
 import { useMessageBus } from 'context';
+import { EndpointListItem } from './components/EndpointListItem';
 import {
   EndpointPanelRuntime,
   EndpointStore,
@@ -73,34 +69,13 @@ function EndpointPanelC() {
 
   return (
     <Paper css={styles.root}>
-      <Typography>Endpoints</Typography>
+      {/* <Typography>Endpoints</Typography> */}
       {store.list.get().map((endpoint, index) => (
-        <Stack
+        <EndpointListItem
           key={endpoint.id}
-          css={styles.endpoint}
-        >
-          <Radio
-            checked={store.selectedItem.get().id === endpoint.id}
-            onChange={() => store.select(index)}
-          />
-          <TextField
-            css={styles.textField}
-            getValue={() => endpoint.url}
-            onChange={(value) => {
-              store.update(endpoint.id, {
-                ...endpoint,
-                url: value,
-              });
-            }}
-          />
-          {/* TODO: wrap IconButton in common/components */}
-          <IconButton
-            aria-label='delete'
-            onClick={() => store.remove(endpoint.id)}
-          >
-            <DeleteIcon />
-          </IconButton>
-        </Stack>
+          endpoint={endpoint}
+          index={index}
+        />
       ))}
       <Button
         css={styles.addButton}
