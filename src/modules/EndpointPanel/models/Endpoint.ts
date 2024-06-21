@@ -1,11 +1,11 @@
 import { v4 as uuid } from 'uuid';
 
-export const createEndpoint = (id?: string): Endpoint => {
-  const _id = id ?? uuid();
+export const createEndpoint = (overrides?: Partial<Endpoint>): Endpoint => {
+  const id = overrides?.id ?? uuid();
   return {
-    id: _id,
-    name: `endpoint-${_id}`,
-    url: 'http://192.168.0.153',
+    id,
+    name: overrides?.name ?? `endpoint-${id}`,
+    url: overrides?.url ?? 'http://localhost:8081',
   };
 };
 

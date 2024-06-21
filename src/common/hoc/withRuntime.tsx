@@ -39,14 +39,12 @@ const useRuntimeFactory = <T,>(layer: Layer.Layer<T>) => {
 
   React.useLayoutEffect(() => {
     if (ref.current === null) {
-      console.log('Creating runtime');
       const runtime = ManagedRuntime.make(layer);
       ref.current = runtime;
     }
 
     return () => {
       if (ref.current) {
-        console.log('Disposing runtime');
         void ref.current.dispose();
         ref.current = null;
       }
