@@ -9,7 +9,7 @@ export const WithContextService =
     Context: RuntimeContext<R>,
     Service: Effect.Effect<A, E, NoInfer<R>>,
     optimistic: () => A,
-    Target: React.Context<A>
+    Target: React.Context<{ current: A } | null>
   ) =>
   <P extends object>(Component: React.FC<P>) => {
     const Wrapped = (props: P) => {
@@ -17,11 +17,8 @@ export const WithContextService =
       const ref = useOptimisticRef(() => getStore(null), optimistic);
 
       return (
-        <Target.Provider value={ref.current}>
-          <Component
-            // eslint-disable-next-line react/jsx-props-no-spreading
-            {...props}
-          />
+        <Target.Provider value={ref}>
+          <Component {...props} />
         </Target.Provider>
       );
     };

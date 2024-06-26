@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { css } from '@mui/material/styles';
-import { pipe } from 'effect';
+import { Context, Effect, identity, pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'common/components/Button';
 import { Paper } from 'common/components/Paper';
@@ -9,7 +9,8 @@ import { WithRuntime } from 'common/hoc/withRuntime';
 import { useDeferred } from 'common/hooks/useEffectDeferred';
 import { useStable } from 'common/hooks/useMemoizedObject';
 import { useAutorun } from 'common/hooks/useMobx';
-import { useMessageBus } from 'context';
+import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
+import { useMessageBus, type RuntimeContext } from 'context';
 import { EndpointListItem } from './components/EndpointListItem';
 import {
   EndpointPanelRuntime,
@@ -19,14 +20,94 @@ import {
 } from './context';
 import { createEndpoint, type Endpoint } from './models/Endpoint';
 
+type InferTag<T, R> =
+  T extends Effect.Effect<infer A, infer E, infer R1>
+    ? R1 extends R
+      ? Effect.Effect<A, E, R>
+      : never
+    : never;
+
+export type InferResult<T, R> =
+  T extends Effect.Effect<infer A, infer E, infer R1>
+    ? R1 extends R
+      ? A
+      : never
+    : never;
+
+// Helper type to check if a type extends from Array<Context.TagClass<any, any, any>>
+type ExtendsEffectArray<T> =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends Array<Effect.Effect<any, any, any>> ? T : never;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type InferTagsNonEmpty<S extends any[], R> = S extends [
+  infer First,
+  ...infer Rest,
+]
+  ? ExtendsEffectArray<[First]> extends never
+    ? never
+    : [InferResult<First, R>, ...InferTagsNonEmpty<Rest, R>]
+  : [];
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare const fn: <R, S extends Array<Context.TagClass<any, any, any>>>(
+  runtime: RuntimeContext<R>,
+  services: [...S]
+) => InferTagsNonEmpty<S, R>;
+
+// const val = fn(EndpointPanelRuntime, [EndpointStore]);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createMap = <C, R, T extends Context.TagClass<any, any, any>>(
+  context: React.Context<C>,
+  config: [T, () => InferResult<T, R>]
+) => new Map<React.Context<C>, [T, () => InferResult<T, R>]>();
+
+// const map = createMap(StoreContext, [EndpointStore, createEndpointStore]);
+
+const WithRuntimeServices = <
+  R,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  S extends Array<Effect.Effect<any, any, any>>,
+>(
+  runtime: RuntimeContext<R>,
+  services: [...S]
+) => {
+  return <P,>(
+    Component: React.FC<
+      P & { getServices: (data: unknown) => Promise<InferTagsNonEmpty<S, R>> }
+    >
+  ) => {
+    const Wrapper = (props: P) => {
+      const getAll = pipe(services, Effect.forEach(Effect.map(identity)));
+      const getServices = useRuntimeFn(runtime, getAll) as () => Promise<
+        InferTagsNonEmpty<S, R>
+      >;
+
+      return (
+        <Component
+          {...props}
+          getServices={getServices}
+        />
+      );
+    };
+    return Wrapper;
+  };
+};
+// const test = WithRuntimeServices(EndpointPanelRuntime, [EndpointStore])(
+//   ({ getServices }) => <div />
+// );
+
 export const EndpointPanel = pipe(
   observer(EndpointPanelC),
+  // WithRuntimeServices(EndpointPanelRuntime, [EndpointStore]),
   WithContextService(
     EndpointPanelRuntime,
     EndpointStore,
-    createEndpointStore,
+    () => Object.assign(createEndpointStore(), { id: 'optimistic' }),
     StoreContext
   ),
+
   WithRuntime(EndpointPanelRuntime)
 );
 
@@ -40,7 +121,7 @@ const createMessage =
 const addEndpointMessage = createMessage<Endpoint>('ENDPOINT_ADD');
 
 function useEndpointPanel() {
-  const store = React.useContext(StoreContext)!;
+  const store = React.useContext(StoreContext)!.current;
   const bus = useMessageBus([store]);
 
   React.useEffect(() => {
@@ -67,19 +148,30 @@ function useEndpointPanel() {
   return useStable({ addEndpoint, store });
 }
 
-function EndpointPanelC() {
+// eslint-disable-next-line react/no-multi-comp
+function EndpointPanelC({
+  getServices,
+}: {
+  readonly getServices: () => Promise<[]>;
+}) {
   const { addEndpoint, store } = useEndpointPanel();
+
+  React.useEffect(() => {
+    void getServices().then(console.log);
+  }, [getServices]);
 
   return (
     <Paper css={styles.root}>
       {/* <Typography>Endpoints</Typography> */}
-      {store.list.get().map((endpoint, index) => (
-        <EndpointListItem
-          key={endpoint.id}
-          endpoint={endpoint}
-          index={index}
-        />
-      ))}
+      {store.list.get().map((endpoint, index) => {
+        return (
+          <EndpointListItem
+            key={endpoint.id}
+            endpoint={endpoint}
+            index={index}
+          />
+        );
+      })}
       <Button
         css={styles.addButton}
         onClick={addEndpoint}

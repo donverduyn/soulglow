@@ -14,7 +14,6 @@ export const MenuItem = <T,>(props: MenuItemProps<T>) => {
       className={className!}
       css={menuItemStyles.root}
       value={String(value)}
-      // eslint-disable-next-line react/jsx-props-no-spreading
       {...rest}
     >
       {children}

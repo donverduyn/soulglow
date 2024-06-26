@@ -169,6 +169,7 @@ module.exports = {
             patterns: ['@mui/*/*/*'],
           },
         ],
+        "react/jsx-props-no-spreading": 'off',
         'react-hooks/exhaustive-deps': 'warn',
         'react-hooks/rules-of-hooks': 'error',
         'react-refresh/only-export-components': [

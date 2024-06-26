@@ -15,10 +15,7 @@ export function WithRuntime<T>(Context: RuntimeContext<T>) {
 
       return (
         <Context.Provider value={runtimeRef}>
-          <Component
-            // eslint-disable-next-line react/jsx-props-no-spreading
-            {...props}
-          />
+          <Component {...props} />
         </Context.Provider>
       );
     };

@@ -20,7 +20,7 @@ const useEndpointListItem = () => {
   const store = React.useContext(StoreContext)!;
   // const getStore = useRuntimeFn(EndpointPanelRuntime, EndpointStore);
   // const { data: store } = useAsync(() => getStore(null), createEndpointStore);
-  return useStable({ store });
+  return useStable({ store: store.current });
 };
 
 export const EndpointListItem = observer(EndpointListItemC);

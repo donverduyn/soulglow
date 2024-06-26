@@ -18,7 +18,7 @@ This hook returns a function that can be called to trigger an effect.
 It returns a promise that resolves to the value of the effect.
 */
 
-export function useRuntimeFn<T, A, E, R>(
+export function useRuntimeFn<A, E, R, T>(
   context: RuntimeContext<R>,
   fn:
     | ((value: T) => Effect.Effect<A, E, NoInfer<R>>)

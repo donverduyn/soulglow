@@ -34,7 +34,6 @@ export const Slider = observer(<T extends number>(props: Props<T>) => {
       track={track ?? 'normal'}
       value={getValue()}
       valueLabelDisplay='off'
-      // eslint-disable-next-line react/jsx-props-no-spreading
       {...rest}
     />
   );

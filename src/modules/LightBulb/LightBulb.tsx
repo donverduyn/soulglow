@@ -152,7 +152,6 @@ export const LightBulb: React.FC<Props> = WithRuntime(LightBulbRuntime)(
                 onChange={bulb.set(input.key)}
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-expect-error props does not exist
-                // eslint-disable-next-line react/jsx-props-no-spreading
                 {...(input.props ?? {})}
               />
               <TextField
