@@ -156,9 +156,9 @@ function EndpointPanelC({
 }) {
   const { addEndpoint, store } = useEndpointPanel();
 
-  React.useEffect(() => {
-    void getServices().then(console.log);
-  }, [getServices]);
+  // React.useEffect(() => {
+  //   void getServices().then(console.log);
+  // }, [getServices]);
 
   return (
     <Paper css={styles.root}>
