@@ -9,6 +9,7 @@ import {
   Queue,
 } from 'effect';
 import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
+import type { AnyKey, TypedMap } from 'common/utils/map';
 // import { DevTools } from '@effect/experimental';
 
 // const rootLayer = pipe(
@@ -70,3 +71,17 @@ export type RuntimeContext<T> = React.Context<
 export const AppRuntime = createRuntimeContext(
   pipe(Layer.effect(MessageBus, PubSub.unbounded()))
 );
+
+export const createProviderContext = <T extends Record<AnyKey, unknown>, K>(
+  factory: () => TypedMap<T, K>
+) => {
+  return React.createContext<ReturnType<typeof factory>>(
+    // we abuse context here to pass through the factory itself
+    factory as unknown as ReturnType<typeof factory>
+  );
+};
+
+export type ProviderContext<
+  T extends Record<AnyKey, unknown>,
+  K,
+> = React.Context<React.MutableRefObject<TypedMap<T, K>>>;
