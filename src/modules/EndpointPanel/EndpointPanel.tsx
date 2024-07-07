@@ -59,6 +59,8 @@ function useEndpointPanel(
 //
 function EndpointPanelComponent() {
   const store = React.useContext(EndpointPanelProvider).get(EndpointStore);
+  const hello = React.useContext(EndpointPanelProvider).get(Hello);
+  console.log(hello.showCount());
   // TODO: this is tightly coupled, as store is a dependency of bus, because of the implementation of useEndpointPanel
   const bus = useMessageBus([store]);
   const { addEndpoint } = useEndpointPanel(store, bus);

@@ -27,7 +27,7 @@ type InferValue<TagShape, Value> = TagShape extends never
   ? Value
   : TagShape | ((...args: any[]) => TagShape);
 
-export const withKey =
+export const register =
   <
     T extends Record<AnyKey, unknown>,
     Key extends keyof T,

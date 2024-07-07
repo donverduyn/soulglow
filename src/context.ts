@@ -92,8 +92,3 @@ export const createProviderContext = <T extends Record<AnyKey, unknown>, K>(
     createMap as unknown as ResolveTypes<ReturnType<typeof createMap>>
   );
 };
-
-export type ProviderContext<
-  T extends Record<AnyKey, unknown>,
-  K,
-> = React.Context<React.MutableRefObject<TypedMap<T, K>>>;
