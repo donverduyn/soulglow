@@ -23,6 +23,8 @@ interface ResolveTagFn<R> extends Fn {
   return: ReturnTypeOrValue<InferResult<this['arg0'], R>>;
 }
 
+// TODO: constrain the type of tags to be available in the requirements R and provider (possibly through map.keys which infers as a tuple of tags).
+// TODO: constrain the type of the provider to be in accordance with R
 export function WithProvider<
   R,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,14 +54,17 @@ export function WithProvider<
           tags.includes(tag as Context.TagClass<any, any, any>)
         ) as typeof tags;
 
-      const getValues = () =>
-        selectedTags.map((tag) => {
-          const value = map.get(tag);
+      const getValues = React.useCallback(
+        () =>
+          selectedTags.map((tag) => {
+            const value = map.get(tag);
 
-          // TODO: consider a solution for dependency injection at the factory level instead of the effect level
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return typeof value === 'function' ? value() : value;
-        }) as Call<Tuples.Map<ResolveTagFn<R>>, typeof selectedTags>;
+            // TODO: consider a solution for dependency injection at the factory level instead of the effect level
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+            return typeof value === 'function' ? value() : value;
+          }) as Call<Tuples.Map<ResolveTagFn<R>>, typeof selectedTags>,
+        [selectedTags, map]
+      );
 
       const getServices = useRuntimeFn(
         Runtime,
@@ -82,6 +87,7 @@ export function WithProvider<
         }
       );
 
+      // this runs once for the optimistic sync, once for real async
       selectedTags.forEach((tag, index) => {
         map.set(tag, data[index] as Parameters<typeof map.set>[1]);
       });

@@ -6,7 +6,7 @@ import { css } from '@mui/material/styles';
 import { observer } from 'mobx-react-lite';
 import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
-import { useStable } from 'common/hooks/useMemoizedObject';
+import { useStable } from 'common/hooks/useStable';
 import { EndpointPanelProvider, EndpointStore } from '../context';
 import type { Endpoint } from './../models/Endpoint';
 
@@ -20,9 +20,9 @@ const useEndpointListItem = () => {
   return useStable({ store });
 };
 
-export const EndpointListItem = observer(EndpointListItemC);
+export const EndpointListItem = observer(EndpointListItemComponent);
 
-function EndpointListItemC({ endpoint, index }: Props) {
+function EndpointListItemComponent({ endpoint, index }: Props) {
   const { store } = useEndpointListItem();
   return (
     <Stack

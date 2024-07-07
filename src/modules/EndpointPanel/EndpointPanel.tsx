@@ -7,8 +7,8 @@ import { Paper } from 'common/components/Paper';
 import { WithProvider } from 'common/hoc/withProvider';
 import { WithRuntime } from 'common/hoc/withRuntime';
 import { useDeferred } from 'common/hooks/useEffectDeferred';
-import { useStable } from 'common/hooks/useMemoizedObject';
 import { useAutorun } from 'common/hooks/useMobx';
+import { useStable } from 'common/hooks/useStable';
 import { useMessageBus } from 'context';
 import { endpointActions } from './actions';
 import { EndpointListItem } from './components/EndpointListItem';
@@ -29,7 +29,7 @@ export const EndpointPanel = pipe(
 );
 
 //
-//
+// TODO: find a way to infer the types through the tags (this seems only possible with a helper function, but maybe we can use it just for inference)
 function useEndpointPanel(
   store: ReturnType<typeof createEndpointStore>,
   bus: ReturnType<typeof useMessageBus>
@@ -41,11 +41,8 @@ function useEndpointPanel(
   useDeferred(() => {
     void bus.register((message) => {
       // @ts-expect-error, not yet narrowed with actions
-
       store.add(message.payload);
-      console.log('from bus', message, store.list.get());
     });
-    void bus.register(console.log);
   }, [store]);
 
   useAutorun(() => {
@@ -60,9 +57,9 @@ function useEndpointPanel(
 }
 
 //
-//
 function EndpointPanelComponent() {
   const store = React.useContext(EndpointPanelProvider).get(EndpointStore);
+  // TODO: this is tightly coupled, as store is a dependency of bus, because of the implementation of useEndpointPanel
   const bus = useMessageBus([store]);
   const { addEndpoint } = useEndpointPanel(store, bus);
 
