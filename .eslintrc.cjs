@@ -169,7 +169,6 @@ module.exports = {
             patterns: ['@mui/*/*/*'],
           },
         ],
-        "react/jsx-props-no-spreading": 'off',
         'react-hooks/exhaustive-deps': 'warn',
         'react-hooks/rules-of-hooks': 'error',
         'react-refresh/only-export-components': [
@@ -217,6 +216,7 @@ module.exports = {
           { allow: 'single-child' },
         ],
         'react/jsx-props-no-multi-spaces': 'warn',
+        'react/jsx-props-no-spreading': 'off',
         'react/jsx-sort-props': [
           'warn',
           {

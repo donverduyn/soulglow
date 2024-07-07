@@ -10,37 +10,30 @@ import { useDeferred } from 'common/hooks/useEffectDeferred';
 import { useStable } from 'common/hooks/useMemoizedObject';
 import { useAutorun } from 'common/hooks/useMobx';
 import { useMessageBus } from 'context';
+import { endpointActions } from './actions';
 import { EndpointListItem } from './components/EndpointListItem';
 import {
   EndpointPanelProvider as Provider,
   EndpointPanelRuntime as Runtime,
   EndpointStore,
   Hello,
-  StoreContext,
+  EndpointPanelProvider,
+  type createEndpointStore,
 } from './context';
-import { createEndpoint, type Endpoint } from './models/Endpoint';
+import { createEndpoint } from './models/Endpoint';
 
 export const EndpointPanel = pipe(
-  observer(EndpointPanelC),
+  observer(EndpointPanelComponent),
   WithProvider(Runtime, Provider, [Hello, EndpointStore]),
   WithRuntime(Runtime)
 );
 
-const createMessage =
-  <T,>(message: string) =>
-  (payload: T) => ({
-    message,
-    payload,
-  });
-
-const addEndpointMessage = createMessage<Endpoint>('ENDPOINT_ADD');
-
 //
 //
-function useEndpointPanel() {
-  const store = React.useContext(StoreContext)!.current;
-  const bus = useMessageBus([store]);
-
+function useEndpointPanel(
+  store: ReturnType<typeof createEndpointStore>,
+  bus: ReturnType<typeof useMessageBus>
+) {
   React.useEffect(() => {
     store.count.get() === 0 && store.add(createEndpoint());
   }, [store]);
@@ -48,7 +41,9 @@ function useEndpointPanel() {
   useDeferred(() => {
     void bus.register((message) => {
       // @ts-expect-error, not yet narrowed with actions
+
       store.add(message.payload);
+      console.log('from bus', message, store.list.get());
     });
     void bus.register(console.log);
   }, [store]);
@@ -58,7 +53,7 @@ function useEndpointPanel() {
   }, [store]);
 
   const addEndpoint = React.useCallback(() => {
-    void bus.publish(addEndpointMessage(createEndpoint()));
+    void bus.publish(endpointActions.add(createEndpoint()));
   }, [bus]);
 
   return useStable({ addEndpoint, store });
@@ -66,8 +61,10 @@ function useEndpointPanel() {
 
 //
 //
-function EndpointPanelC() {
-  const { addEndpoint, store } = useEndpointPanel();
+function EndpointPanelComponent() {
+  const store = React.useContext(EndpointPanelProvider).get(EndpointStore);
+  const bus = useMessageBus([store]);
+  const { addEndpoint } = useEndpointPanel(store, bus);
 
   return (
     <Paper css={styles.root}>

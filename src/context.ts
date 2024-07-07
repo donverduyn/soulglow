@@ -72,12 +72,24 @@ export const AppRuntime = createRuntimeContext(
   pipe(Layer.effect(MessageBus, PubSub.unbounded()))
 );
 
+type ResolvedType<T> = T extends object
+  ? {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      [K in keyof T]: T[K] extends (...args: any[]) => any
+        ? ReturnType<T[K]>
+        : T[K];
+    }
+  : T;
+
+type ResolveTypes<T> =
+  T extends TypedMap<infer A, infer B> ? TypedMap<ResolvedType<A>, B> : never;
+
 export const createProviderContext = <T extends Record<AnyKey, unknown>, K>(
-  factory: () => TypedMap<T, K>
+  createMap: () => TypedMap<T, K>
 ) => {
-  return React.createContext<ReturnType<typeof factory>>(
+  return React.createContext<ResolveTypes<ReturnType<typeof createMap>>>(
     // we abuse context here to pass through the factory itself
-    factory as unknown as ReturnType<typeof factory>
+    createMap as unknown as ResolveTypes<ReturnType<typeof createMap>>
   );
 };
 

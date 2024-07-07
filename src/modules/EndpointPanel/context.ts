@@ -1,17 +1,6 @@
-import React from 'react';
 import { Context, Effect, flow, Layer, pipe } from 'effect';
-import type { Call, Fn, Tuples } from 'hotscript';
-import {
-  createEntityStore,
-  withFiltered,
-  withSelected,
-} from 'common/utils/entity';
-import {
-  createTypedMap,
-  withKey as register,
-  type AnyKey,
-  type KeyType,
-} from 'common/utils/map';
+import { createEntityStore, withSelected } from 'common/utils/entity';
+import { createTypedMap, withKey as register } from 'common/utils/map';
 import { createProviderContext, createRuntimeContext } from 'context';
 import type { Endpoint } from './models/Endpoint';
 
@@ -27,8 +16,8 @@ export class Hello extends Context.Tag('@EndpointPanel/Hello')<
 
 export const createEndpointStore = pipe(
   createEntityStore<Endpoint>,
-  withSelected,
-  withFiltered
+  withSelected
+  // withFiltered
 );
 
 const createHelloService = (store: ReturnType<typeof createEndpointStore>) =>
@@ -71,14 +60,4 @@ class HelloService {
 
 export const EndpointPanelRuntime = createRuntimeContext(layer);
 
-export const createStoreContext = <T>(value: T) => {
-  return React.createContext<T>(value);
-};
-
-export const StoreContext = createStoreContext<{
-  current: ReturnType<typeof createEndpointStore>;
-} | null>(null);
-
 export const EndpointPanelProvider = createProviderContext(createProviderMap);
-
-// the goal is to map over all of the keys, to automatically create the layers. this way there is a single map where we assign the tags to the values. by mapping every tuple to withKey and get the resulting types in a tuple, we can keep type safety in the layers and in withProvider HOC.
