@@ -65,10 +65,6 @@ const Button: React.FC<Props> = ({ writable }) => {
   );
 };
 
-const getCounter = Effect.gen(function* () {
-  return yield* Counter;
-});
-
 const Component = () => {
   const ref = useRxSuspenseSuccess(counter);
   return (

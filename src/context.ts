@@ -9,6 +9,7 @@ import {
   Queue,
 } from 'effect';
 import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
+import type { AnyKey, TypedMap } from 'common/utils/map';
 // import { DevTools } from '@effect/experimental';
 
 // const rootLayer = pipe(
@@ -70,3 +71,29 @@ export type RuntimeContext<T> = React.Context<
 export const AppRuntime = createRuntimeContext(
   pipe(Layer.effect(MessageBus, PubSub.unbounded()))
 );
+
+type ResolvedType<T> = T extends object
+  ? {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      [K in keyof T]: T[K] extends (...args: any[]) => any
+        ? ReturnType<T[K]>
+        : T[K];
+    }
+  : T;
+
+type ResolveTypes<T> =
+  T extends TypedMap<infer A, infer B> ? TypedMap<ResolvedType<A>, B> : never;
+
+export const createProviderContext = <T extends Record<AnyKey, unknown>, K>(
+  createMap: () => TypedMap<T, K>
+) => {
+  return React.createContext<ResolveTypes<ReturnType<typeof createMap>>>(
+    // we abuse context here to pass through the factory itself
+    createMap as unknown as ResolveTypes<ReturnType<typeof createMap>>
+  );
+};
+
+export type ProviderContext<
+  T extends Record<AnyKey, unknown>,
+  K,
+> = React.Context<React.MutableRefObject<TypedMap<T, K>>>;

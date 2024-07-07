@@ -4,7 +4,7 @@ import { Effect, pipe } from 'effect';
 // this service should be responsible for updating the colors of lightbulbs,
 // It delegates with one or multiple calls to the injected repositories
 // Ultimately it supports
-export const ColorService = () => {
+export const createColorService = () => {
   const updateColor = (color: {
     hue: number;
     level: number;

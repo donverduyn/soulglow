@@ -12,19 +12,19 @@ const defaultMerge = <T>(
 export const useAsync = <T>(
   getAsync: () => Promise<T>,
   optimistic: () => T = () => ({}) as T,
-  merge: (result: T, data: T) => void = defaultMerge
+  merge: (result: T, current: T) => void = defaultMerge
 ) => {
   const [error, setError] = React.useState<Error | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const [data, setData] = React.useState<T>(optimistic);
+  const [current, setCurrent] = React.useState<T>(optimistic);
 
   React.useEffect(() => {
     let mounted = true;
     void getAsync().then(
       (result) => {
         if (mounted) {
-          merge(result, data);
-          setData(result);
+          merge(result, current);
+          setCurrent(result);
           setLoading(false);
         }
       },
@@ -40,5 +40,5 @@ export const useAsync = <T>(
     };
   }, []);
 
-  return { data, error, loading };
+  return { data: current, error, loading };
 };

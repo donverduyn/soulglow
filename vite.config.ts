@@ -77,6 +77,8 @@ const browser = (mode: string): Plugin => {
 };
 
 // https://vitejs.dev/config/
+// @ts-expect-error plugin options type mismatch?
+// TODO: find the regression that causes the type mismatch. Seems to be version mismatch.
 export default defineConfig(({ mode }) => ({
   build: {
     minify: 'esbuild',

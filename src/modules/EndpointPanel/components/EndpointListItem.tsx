@@ -6,26 +6,23 @@ import { css } from '@mui/material/styles';
 import { observer } from 'mobx-react-lite';
 import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
-import { useStable } from 'common/hooks/useMemoizedObject';
-import { StoreContext } from '../context';
+import { useStable } from 'common/hooks/useStable';
+import { EndpointPanelProvider, EndpointStore } from '../context';
 import type { Endpoint } from './../models/Endpoint';
 
 interface Props {
   readonly endpoint: Endpoint;
   readonly index: number;
-  // readonly store: ReturnType<typeof createEndpointStore>;
 }
 
 const useEndpointListItem = () => {
-  const store = React.useContext(StoreContext)!;
-  // const getStore = useRuntimeFn(EndpointPanelRuntime, EndpointStore);
-  // const { data: store } = useAsync(() => getStore(null), createEndpointStore);
-  return useStable({ store: store.current });
+  const store = React.useContext(EndpointPanelProvider).get(EndpointStore);
+  return useStable({ store });
 };
 
-export const EndpointListItem = observer(EndpointListItemC);
+export const EndpointListItem = observer(EndpointListItemComponent);
 
-function EndpointListItemC({ endpoint, index }: Props) {
+function EndpointListItemComponent({ endpoint, index }: Props) {
   const { store } = useEndpointListItem();
   return (
     <Stack

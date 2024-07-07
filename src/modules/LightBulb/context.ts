@@ -8,6 +8,7 @@ import type {
 } from '__generated/api';
 import { createRuntimeContext } from 'context';
 import { createDeviceRepo } from './repos/DeviceRepo';
+import type { createColorService } from './services/ColorService';
 
 // we really shouldn't couple our dto with the api types
 export type LightbulbDto = GroupState & GroupStateCommands;
@@ -43,6 +44,11 @@ export class ApiThrottler extends Context.Tag('@Lightbulb/Throttler')<
 export class DeviceRepo extends Context.Tag('@Lightbulb/DeviceRepo')<
   DeviceRepo,
   Crudable<LightbulbDto, FetchError>
+>() {}
+
+export class ColorService extends Context.Tag('@Lightbulb/ColorService')<
+  ColorService,
+  ReturnType<typeof createColorService>
 >() {}
 
 const take = pipe(
