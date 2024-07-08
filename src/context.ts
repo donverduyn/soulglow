@@ -34,6 +34,8 @@ export class MessageBus extends Context.Tag('@App/MessageBus')<
 // TODO: the problem with this hook is that it depends on the AppRuntime
 // TODO: and therefore it should not be in common/hooks, unless we can parameterize it
 
+// TODO: consider using a service that returns effects from its methods. This allows us to provide all dependencies once through the HOCs, using withRuntime(AppRuntime) and WithProvider(AppRuntime, AppProvider, [MessageBus])
+
 export const useMessageBus = (deps: unknown[]) => {
   const publishMessage = React.useCallback(
     (message: Message) =>
@@ -72,6 +74,15 @@ export const AppRuntime = createRuntimeContext(
   pipe(Layer.effect(MessageBus, PubSub.unbounded()))
 );
 
+export const createProviderContext = <T extends Record<AnyKey, unknown>, K>(
+  createMap: () => TypedMap<T, K>
+) => {
+  return React.createContext<ResolveTypes<ReturnType<typeof createMap>>>(
+    // we abuse context here to pass through the factory itself
+    createMap as unknown as ResolveTypes<ReturnType<typeof createMap>>
+  );
+};
+
 type ResolvedType<T> = T extends object
   ? {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -83,12 +94,3 @@ type ResolvedType<T> = T extends object
 
 type ResolveTypes<T> =
   T extends TypedMap<infer A, infer B> ? TypedMap<ResolvedType<A>, B> : never;
-
-export const createProviderContext = <T extends Record<AnyKey, unknown>, K>(
-  createMap: () => TypedMap<T, K>
-) => {
-  return React.createContext<ResolveTypes<ReturnType<typeof createMap>>>(
-    // we abuse context here to pass through the factory itself
-    createMap as unknown as ResolveTypes<ReturnType<typeof createMap>>
-  );
-};

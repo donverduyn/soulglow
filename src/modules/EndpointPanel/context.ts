@@ -47,6 +47,7 @@ const layer = pipe(
       )
     )
   )
+  // TODO: consider using a layer to provide the map, so we can use a token, instead of using createProviderMap directly
 );
 
 class HelloService {

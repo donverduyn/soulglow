@@ -20,8 +20,10 @@ const useEndpointListItem = () => {
   return useStable({ store });
 };
 
+// TODO: think about having a list component that allows instantiating the view model once, if that view model is stateless and can be shared between items
 export const EndpointListItem = observer(EndpointListItemComponent);
 
+// TODO: change the way we select the item, because it now depends on the index, this is not ideal, given it can change, if we add or remove items. Although it helps to keep the selected item at the same position, if we remove items, it is not be the best way to handle this.
 function EndpointListItemComponent({ endpoint, index }: Props) {
   const { store } = useEndpointListItem();
   return (
@@ -43,7 +45,6 @@ function EndpointListItemComponent({ endpoint, index }: Props) {
           });
         }}
       />
-      {/* TODO: wrap IconButton in common/components */}
       <IconButton
         aria-label='delete'
         onClick={() => store.remove(endpoint.id)}
@@ -53,6 +54,7 @@ function EndpointListItemComponent({ endpoint, index }: Props) {
     </Stack>
   );
 }
+// TODO: wrap IconButton in common/components
 
 const styles = {
   addButton: css`
