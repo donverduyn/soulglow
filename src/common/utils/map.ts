@@ -14,6 +14,7 @@ export interface TypedMap<T extends Record<AnyKey, unknown>, KeyTypes = any[]> {
   // entries(): [KeyType<keyof T, keyof T>, T[keyof T]][];
   get<Key extends keyof T, TagKey extends keyof T, Tag, TagShape>(
     key: KeyType<Key, TagKey, Tag, TagShape>
+    // TODO: use the instance type when T[Key & TagKey] is a class
   ): T[Key & TagKey];
   keys(): KeyTypes;
   set<Key extends keyof T, TagKey extends keyof T, Tag, TagShape>(
@@ -85,6 +86,7 @@ export function createTypedMap<T>() {
       ) as (keyof NoInfer<T>)[];
     },
 
+    // TODO: calling map.set afterwards, doesn't update the types inferred from keys(), so we want might to validate if the provided key is registered.
     set: <K extends keyof T>(key: K, value: T[K]) => {
       const k = Context.isTag(key) ? key.key : key;
       data.set(k, value);

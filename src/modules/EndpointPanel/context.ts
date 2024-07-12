@@ -29,12 +29,8 @@ export class ProviderMap extends Context.Tag(`${PREFIX}/ProviderMap`)<
   ReturnType<typeof createProviderMap>
 >() {}
 
-type Unlabeled<T extends any[]> = T extends [infer First, ...infer Rest]
-  ? [First, ...Unlabeled<Rest>]
-  : [];
-
 export const create =
-  <T extends { new (...args: unknown[]): R }, R>(target: T) =>
+  <T extends { new (...args: any[]): InstanceType<T> }>(target: T) =>
   (args: ConstructorParameters<T>) =>
     new target(...args);
 
@@ -46,19 +42,9 @@ export const extractTags = <T extends { new (...args: any[]): any }>(
 const resolveParams = <C extends { new (...args: any[]): any }>(target: C) =>
   Reflect.getMetadata('design:paramtypes', target) as ConstructorParameters<C>;
 
-export type InferTags<T> = {
-  [K in keyof T]: T[K] extends Context.TagClass<
-    infer Tag,
-    infer Key,
-    infer Shape
-  >
-    ? Context.TagClass<Tag, Key, Shape>
-    : never;
-};
-
-type InferTags2<T> = {
+type InferTags<T> = {
   [K in keyof T]: T[K] extends Context.TagClassShape<infer Id, infer Shape>
-    ? Context.TagClassShape<Id, Shape>
+    ? Context.TagClass<T[K], Id, Shape>
     : never;
 };
 
@@ -73,24 +59,20 @@ class WorldService {
   }
 }
 
-const test0 = resolveParams(WorldService);
-const test = inferTags(test0);
-
 @Injectable()
 class HelloService {
   // TODO: think about how we want to return an effect from methods, to suspend the composed effects, allowing to merge over the event emitter queue and only start consuming when the layers are resolved and the map updated. This can create some noticable lag, if resolving the layers takes long, so this might need to be optional through arguments?
 
-  // TODO: the problem we have to solve, is that we need to use the initialized values in the map, but this is living in React land. Currently we reference directly to providers here, but that causes createProviderMap to reference itself through the service factory methods. So, we should think about moving this logic to withProvider, where we can directly access the synchronously instantiated instances on the map.
+  store: Context.Tag.Service<EndpointStore>;
+  world: Context.Tag.Service<World>;
 
-  constructor(
-    private store: EndpointStore
-    // private world: WorldService
-  ) {
-    console.log(this.store, 'HelloService constructor');
+  constructor(store: EndpointStore, world: World) {
+    this.store = store as unknown as this['store'];
+    this.world = world as unknown as this['world'];
   }
 
   showCount() {
-    // console.log(this.store?.count.get(), 'from HelloService');
+    console.log('count', this.store.count.get());
   }
 }
 
@@ -102,8 +84,8 @@ export const createEndpointStore = pipe(
 const createProviderMap = pipe(
   createTypedMap,
   register(EndpointStore, createEndpointStore),
-  register(Hello, HelloService),
-  register(World, WorldService)
+  register(World, WorldService),
+  register(Hello, HelloService)
 );
 
 export function Injectable() {
@@ -116,13 +98,11 @@ const layer = pipe(
     pipe(
       ProviderMap,
       Effect.andThen((map) => {
-        // const test = inferTags(extractTags(map.get(World)));
         return pipe(
           // tODO: find out why inferTags infers differently when used inside another function, probably has to do with inference context.
           inferTags(extractTags(map.get(Hello))),
           Effect.all,
-          Effect.tap((tags) => console.log(tags)),
-          // @ts-expect-error missing argument
+          // @ts-expect-error expecting tags, but getting deps
           Effect.andThen(create(map.get(Hello)))
         );
       })
@@ -135,11 +115,10 @@ const layer = pipe(
         ProviderMap,
         Effect.andThen((map) => {
           return pipe(
-            // TODO: this should come from the map?
-            extractTags(map.get(World)),
+            inferTags(extractTags(map.get(World))),
             Effect.all,
-            // @ts-expect-error missing argument
-            Effect.andThen(create(map.get(World)))
+            // @ts-expect-error expecting tags, but getting deps
+            Effect.andThen((deps) => create(map.get(World))(deps))
           );
         })
       )
