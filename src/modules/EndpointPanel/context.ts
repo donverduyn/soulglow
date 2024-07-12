@@ -53,7 +53,6 @@ const inferTags = <T extends any[]>(tags: [...T]) =>
 
 @Injectable()
 class WorldService {
-  // TODO: consider a better way to inject the dependencies, because directly using the tags as type parameters doesn't represent what is actually injected. This might require an inverse lookup, where we get the tag associated with the class. Not sure this is a good idea, but it is better than using typeof Hello, after which we have to infer the actual type of what is injected. The alternative would be to somehow infer the class type from the constructor parameters (if possible). This is is actually possible with factory functions, because we do it with typed map. Note that we cannot directly type the parameter as typeof Hello in this case, because this breaks reflect-metadata at runtime.
   constructor(private hello: EndpointStore) {
     console.log('WorldService', this.hello);
   }
@@ -66,6 +65,7 @@ class HelloService {
   store: Context.Tag.Service<EndpointStore>;
   world: Context.Tag.Service<World>;
 
+  // TODO: this totally sucks, because we have to cast the store and world to the actual service type, because the constructor doesn't know the actual type of the injected service. This is because we use the tag as a type parameter, but the actual type is the service. We might want to consider a different approach, by obtaining the tags from a different place. This might also allow us to use factory functions instead.
   constructor(store: EndpointStore, world: World) {
     this.store = store as unknown as this['store'];
     this.world = world as unknown as this['world'];

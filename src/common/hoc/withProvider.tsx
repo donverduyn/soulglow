@@ -42,7 +42,7 @@ export function WithProvider<
 ) {
   return <P extends object>(Component: React.FC<P>) => {
     const Wrapped = (props: P) => {
-      // we actually pass the factory during context creation, so we can use it here. Note that the values are also factories, when the map is created, but the context is already casted to the resolved type. For this reason, we infer from the tags again in getValues
+      // we actually pass the factory during context creation, so we can use it here. Note that the values are also factories, when the map is created, but the context is already casted to the resolved type. For this reason, we infer from the tags again in mapResolve
       const createMap = React.useContext(Provider) as unknown as () => TypedMap<
         TagRecord,
         Keys

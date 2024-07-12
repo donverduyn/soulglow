@@ -36,8 +36,6 @@ export class MessageBus extends Context.Tag('@App/MessageBus')<
 // TODO: the problem with this hook is that it depends on the AppRuntime
 // TODO: and therefore it should not be in common/hooks, unless we can parameterize it
 
-// TODO: consider using a service that returns effects from its methods. This allows us to provide all dependencies once through the HOCs, using withRuntime(AppRuntime) and WithProvider(AppRuntime, AppProvider, [MessageBus])
-
 export const useMessageBus = (deps: unknown[]) => {
   const publishMessage = React.useCallback(
     (message: Message) =>
@@ -102,7 +100,10 @@ type ResolvedType<T> =
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         [K in keyof T]: T[K] extends (...args: any[]) => any
           ? ReturnType<T[K]>
-          : T[K];
+          : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            T[K] extends { new (...args: any[]): infer U }
+            ? U
+            : T[K];
       }
     : T;
 

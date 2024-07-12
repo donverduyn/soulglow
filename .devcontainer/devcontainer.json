@@ -88,7 +88,8 @@
 				"stylelint.vscode-stylelint",
 				"effectful-tech.effect-vscode",
 				"ms-kubernetes-tools.vscode-kubernetes-tools",
-				"YoavBls.pretty-ts-errors"
+				"YoavBls.pretty-ts-errors",
+				"Gruntfuggly.todo-tree"
 			]
 		}
 	}

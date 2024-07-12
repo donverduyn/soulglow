@@ -59,9 +59,9 @@ function useEndpointPanel(
 function EndpointPanelComponent() {
   const store = React.useContext(Provider).get(EndpointStore);
   const hello = React.useContext(Provider).get(Hello);
-  // hello.showCount();
+  hello.showCount();
 
-  // TODO: this is tightly coupled, as store is a dependency of bus, because of the implementation of useEndpointPanel
+  // TODO: this is tightly coupled, as store is a dependency of bus, because of the implementation of useEndpointPanel. Think about using a service to use the bus where the methods return effects to compose, instead of encapsulating the hooks.
 
   const bus = useMessageBus([store]);
   const { addEndpoint } = useEndpointPanel(store, bus);
