@@ -11,6 +11,7 @@ export type KeyType<Key, TagKey, Tag = any, TagShape = any> =
 // Because either Key or TagKey cannot be inferred, one of them falls back to AnyKey because of the keyof T constraint. This allows either Key or TagKey to demand the most specific type in the intersection Key & TagKey, effectively keeping the literal type of the actual key.
 
 export interface TypedMap<T extends Record<AnyKey, unknown>, KeyTypes = any[]> {
+  // entries(): [KeyType<keyof T, keyof T>, T[keyof T]][];
   get<Key extends keyof T, TagKey extends keyof T, Tag, TagShape>(
     key: KeyType<Key, TagKey, Tag, TagShape>
   ): T[Key & TagKey];
@@ -19,13 +20,18 @@ export interface TypedMap<T extends Record<AnyKey, unknown>, KeyTypes = any[]> {
     k: KeyType<Key, TagKey, Tag, TagShape>,
     v: T[Key & TagKey]
   ): void;
+  // values(): T[keyof T][];
+  values: () => IterableIterator<T[keyof T]>;
 }
 
 // This validates if the type of the value matches the shape of a tag, when used as a key. Both an instance and factory are allowed. TagShape is inferred through KeyType.
 
 type InferValue<TagShape, Value> = TagShape extends never
   ? Value
-  : TagShape | ((...args: any[]) => TagShape);
+  :
+      | TagShape
+      | ((...args: any[]) => TagShape)
+      | { new (...args: any[]): TagShape };
 
 export const register =
   <
@@ -48,12 +54,18 @@ export const register =
         T & Record<Key & TagKey, Value>,
         Call<
           Tuples.Append,
-          IsPrimitiveKey<Key> extends true ? Key : Tag,
+          IsPrimitiveKey<Key> extends true ? Key : Tag, //Context.TagClass<Tag, TagKey, TagShape>,
           KeyTypes extends never[] ? [] : KeyTypes
         >
       >;
     };
   };
+
+// type ConstructorTypes<T extends any[]> = {
+//   [K in keyof T]: T[K] extends new (...args: any[]) => any ? T[K] : never;
+// };
+
+// type Test = typeof EndpointStore;
 
 // TODO: find a way to use AnyKey (including symbol doesn't work, possibly because it overlaps with TagKey)
 type IsPrimitiveKey<T> = T extends string | number ? true : false;
@@ -66,15 +78,27 @@ export function createTypedMap<T>() {
     get: <K extends keyof T>(key: K) => {
       return data.get(Context.isTag(key) ? key.key : key) as T[K];
     },
+
     keys: () => {
       return Array.from(data.keys()).map(
         (key) => keyCache.get(key) as keyof T
       ) as (keyof NoInfer<T>)[];
     },
+
     set: <K extends keyof T>(key: K, value: T[K]) => {
       const k = Context.isTag(key) ? key.key : key;
       data.set(k, value);
       keyCache.set(k, key);
+    },
+    // entries: () => {
+    //   return Array.from(data.entries()).map(([key, value]) => [
+    //     keyCache.get(key) as keyof T,
+    //     value,
+    //   ]) as [keyof T, T[keyof T]][];
+    // },
+    values: () => {
+      // return Array.from(data.values()) as T[keyof T][];
+      return data.values() as IterableIterator<T[keyof T]>;
     },
   };
 }

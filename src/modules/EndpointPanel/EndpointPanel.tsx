@@ -17,7 +17,6 @@ import {
   EndpointPanelRuntime as Runtime,
   EndpointStore,
   Hello,
-  EndpointPanelProvider,
   type createEndpointStore,
 } from './context';
 import { createEndpoint } from './models/Endpoint';
@@ -28,8 +27,8 @@ export const EndpointPanel = pipe(
   WithRuntime(Runtime)
 );
 
-//
 // TODO: find a way to infer the types through the tags (this seems only possible with a helper function, but maybe we can use it just for inference)
+
 function useEndpointPanel(
   store: ReturnType<typeof createEndpointStore>,
   bus: ReturnType<typeof useMessageBus>
@@ -58,10 +57,12 @@ function useEndpointPanel(
 
 //
 function EndpointPanelComponent() {
-  const store = React.useContext(EndpointPanelProvider).get(EndpointStore);
-  const hello = React.useContext(EndpointPanelProvider).get(Hello);
-  hello.showCount();
+  const store = React.useContext(Provider).get(EndpointStore);
+  const hello = React.useContext(Provider).get(Hello);
+  // hello.showCount();
+
   // TODO: this is tightly coupled, as store is a dependency of bus, because of the implementation of useEndpointPanel
+
   const bus = useMessageBus([store]);
   const { addEndpoint } = useEndpointPanel(store, bus);
 

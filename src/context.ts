@@ -31,6 +31,8 @@ export class MessageBus extends Context.Tag('@App/MessageBus')<
   PubSub.PubSub<Message>
 >() {}
 
+// TODO: consider using a true global store/config, that stores data that is shared between modules after events. For example the endpoint url, when selected which is updated over the bus in the LightBulb module. By pulling from the global store/config we can set default values. It might make sense to make this more atomic, where the defaults are set in different modules based on a single entity.
+
 // TODO: the problem with this hook is that it depends on the AppRuntime
 // TODO: and therefore it should not be in common/hooks, unless we can parameterize it
 
@@ -83,14 +85,26 @@ export const createProviderContext = <T extends Record<AnyKey, unknown>, K>(
   );
 };
 
-type ResolvedType<T> = T extends object
-  ? {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      [K in keyof T]: T[K] extends (...args: any[]) => any
-        ? ReturnType<T[K]>
-        : T[K];
-    }
-  : T;
+/* 
+TODO: filter out
+  [x: string]: unknown;
+  [x: number]: unknown;
+  [x: symbol]: unknown;
+*/
 
-type ResolveTypes<T> =
+type WithoutIndexSignatures<T> = {
+  [K in keyof T as K extends AnyKey ? never : K]: T[K];
+};
+
+type ResolvedType<T> =
+  T extends Record<AnyKey, unknown>
+    ? {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        [K in keyof T]: T[K] extends (...args: any[]) => any
+          ? ReturnType<T[K]>
+          : T[K];
+      }
+    : T;
+
+export type ResolveTypes<T> =
   T extends TypedMap<infer A, infer B> ? TypedMap<ResolvedType<A>, B> : never;

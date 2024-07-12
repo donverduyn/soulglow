@@ -18,6 +18,7 @@ This hook returns a function that can be called to trigger an effect.
 It returns a promise that resolves to the value of the effect.
 */
 
+// TODO: accept a function without arguments
 export function useRuntimeFn<A, E, R, T>(
   context: RuntimeContext<R>,
   fn:
