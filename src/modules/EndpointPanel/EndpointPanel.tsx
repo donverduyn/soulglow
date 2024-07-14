@@ -17,7 +17,6 @@ import {
   EndpointPanelRuntime as Runtime,
   EndpointStore,
   Hello,
-  type createEndpointStore,
 } from './context';
 import { createEndpoint } from './models/Endpoint';
 
@@ -27,44 +26,10 @@ export const EndpointPanel = pipe(
   WithRuntime(Runtime)
 );
 
-// TODO: find a way to infer the types through the tags (this seems only possible with a helper function, but maybe we can use it just for inference)
-
-function useEndpointPanel(
-  store: ReturnType<typeof createEndpointStore>,
-  bus: ReturnType<typeof useMessageBus>
-) {
-  React.useEffect(() => {
-    store.count.get() === 0 && store.add(createEndpoint());
-  }, [store]);
-
-  useDeferred(() => {
-    void bus.register((message) => {
-      // @ts-expect-error, not yet narrowed with actions
-      store.add(message.payload);
-    });
-  }, [store]);
-
-  useAutorun(() => {
-    console.log('autorun', store.count.get());
-  }, [store]);
-
-  const addEndpoint = React.useCallback(() => {
-    void bus.publish(endpointActions.add(createEndpoint()));
-  }, [bus]);
-
-  return useStable({ addEndpoint, store });
-}
-
 //
 function EndpointPanelComponent() {
-  const store = React.useContext(Provider).get(EndpointStore);
-  const hello = React.useContext(Provider).get(Hello);
+  const { addEndpoint, store, hello } = useEndpointPanel();
   hello.showCount();
-
-  // TODO: this is tightly coupled, as store is a dependency of bus, because of the implementation of useEndpointPanel. Think about using a service to use the bus where the methods return effects to compose, instead of encapsulating the hooks.
-
-  const bus = useMessageBus([store]);
-  const { addEndpoint } = useEndpointPanel(store, bus);
 
   return (
     <Paper css={styles.root}>
@@ -86,6 +51,35 @@ function EndpointPanelComponent() {
       </Button>
     </Paper>
   );
+}
+
+function useEndpointPanel() {
+  const store = React.useContext(Provider).get(EndpointStore);
+  const hello = React.useContext(Provider).get(Hello);
+
+  // TODO: Think about using a service to use the bus where the methods return effects to compose, instead of encapsulating the hooks.
+  const bus = useMessageBus([store]);
+
+  React.useEffect(() => {
+    store.count.get() === 0 && store.add(createEndpoint());
+  }, [store]);
+
+  useDeferred(() => {
+    void bus.register((message) => {
+      // @ts-expect-error, not yet narrowed with actions
+      store.add(message.payload);
+    });
+  }, [store]);
+
+  useAutorun(() => {
+    console.log('[autorun] count:', hello.showCount());
+  }, [store]);
+
+  const addEndpoint = React.useCallback(() => {
+    void bus.publish(endpointActions.add(createEndpoint()));
+  }, [bus]);
+
+  return useStable({ addEndpoint, hello, store });
 }
 
 const styles = {

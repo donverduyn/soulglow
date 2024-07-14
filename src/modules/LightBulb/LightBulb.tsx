@@ -74,7 +74,7 @@ function LightBulbComponent({
   useDeferred(() => {
     // TODO: we should register on the action ENDPOINT_SELECT, so register should take an array of actions as the first argument and narrow message down to the payload of the action, the way angular does it with ngrx.
 
-    // TODO: we should also think about using something similar as a behavior subject, so we can provide the last value to the service, when it is registered. This way we can avoid the need to store the url in the view model. This might be possible by using the new replay option of pubsub from Effect 3.5
+    // TODO: we should also think about using something similar as a behavior subject, so we can provide the last value to the service, when it is registered. This way we can avoid the need to store the url in the view model. This might be possible by using the new replay option of pubsub from Effect 3.5. We should consider having a replay of 1 for each action, such that when we register for multiple actions, we get the last value of each action. We should think this through, because it is not always desired, let's say when an action removes something. There might need to be a separation of concepts between actions and streams, where we can do both over the same bus.
 
     void bus.register((message) => {
       // TODO: from here we need to store the url so it can be provided as a nargument to the color service. We might want to think about a generic way to provide this kind of information to services. I'd say, just keep this state inside the view model by using a custom hook, but it might need a second thought, because of concurrent rendering.

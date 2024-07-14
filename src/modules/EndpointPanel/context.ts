@@ -72,7 +72,7 @@ class HelloService {
   }
 
   showCount() {
-    console.log('count', this.store.count.get());
+    return this.store.count.get();
   }
 }
 
@@ -108,7 +108,7 @@ const layer = pipe(
       })
     )
   ),
-  Layer.provide(
+  Layer.provideMerge(
     Layer.effect(
       World,
       pipe(
