@@ -1,6 +1,6 @@
 // eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Context, Effect, Layer, pipe } from 'effect';
+import { Context, Effect, Layer, pipe, Runtime } from 'effect';
 import { createEntityStore, withSelected } from 'common/utils/entity';
 import { createTypedMap, register } from 'common/utils/map';
 import { createProviderContext, createRuntimeContext } from 'context';
@@ -71,6 +71,9 @@ class HelloService {
     this.world = world as unknown as this['world'];
   }
 
+  sayHello() {
+    console.log('Hello');
+  }
   showCount() {
     return this.store.count.get();
   }
@@ -80,6 +83,18 @@ export const createEndpointStore = pipe(
   createEntityStore<Endpoint>,
   withSelected
 );
+
+const createEndpointStore2 = (hello: HelloService) => {
+  hello.sayHello();
+  return createEndpointStore();
+};
+
+const context = Context.empty().pipe(
+  Context.add(EndpointStore, createEndpointStore())
+);
+
+const ctx1 = context.pipe(Context.get(EndpointStore));
+console.log({ ctx1 });
 
 const createProviderMap = pipe(
   createTypedMap,
@@ -92,6 +107,56 @@ export function Injectable() {
   return (..._: any[]): any => {};
 }
 
+// TODO: maybe, we can have a factory function, where we can access the parameters, yet infer the services through map.get, such that the resulting function is correctly typed. This would still require the ability to get the tags from the parameter types. If this is not possible, we could consider using either an object, or maybe a higher order function that first returns the tags and then a factory function that is provided the tags where the parameters are inferred correctly from the tags. This would require a tuple of exact types to be passed to the factory function, but it should be possible.
+
+// type InferShapes<T> = {
+//   [K in keyof T]: T[K] extends Context.TagClass<any, any, infer Shape>
+//     ? Shape
+//     : never;
+// };
+// const createFactory =
+//   <D extends any[]>(deps: [...D]) =>
+//   <R>(fac: (arg: InferShapes<typeof deps>) => R) =>
+//     fac(deps);
+
+type InferShapes<T> = {
+  [K in keyof T]: T[K] extends Context.TagClass<any, any, infer Shape>
+    ? Shape
+    : never;
+};
+
+type ToInstanceType<T> = {
+  [K in keyof T]: T[K] extends new (...args: infer _) => infer R ? R : T[K];
+};
+
+const createFactory =
+  // <M extends TypedMap<any, any>>(map: M) =>
+
+
+    <D extends Array<Context.TagClass<any, any, any>>>(
+      // TODO: find a way to keep the tuple, as intersecting IncludedIn makes it a union
+      ...deps: /*IncludedIn<
+      ReturnType<(typeof map)['keys']>,
+      ToInstanceType<D>
+    > extends true
+      ? */ [...D]
+      /*  : never 8 */
+    ) =>
+    <R>(fac: (...arg: [...D]) => R) =>
+      pipe(
+        deps,
+        Effect.all
+        // Effect.tap((deps) => {
+        //   console.log({ deps });
+        // }),
+      );
+
+const testtest = createFactory(
+  EndpointStore,
+  World
+)((...args) => createEndpointStore());
+// Effect.runSync(testtest)
+
 const layer = pipe(
   Layer.effect(
     Hello,
@@ -99,7 +164,6 @@ const layer = pipe(
       ProviderMap,
       Effect.andThen((map) => {
         return pipe(
-          // tODO: find out why inferTags infers differently when used inside another function, probably has to do with inference context.
           inferTags(extractTags(map.get(Hello))),
           Effect.all,
           // @ts-expect-error expecting tags, but getting deps
@@ -135,6 +199,17 @@ const layer = pipe(
   ),
   Layer.provide(Layer.effect(ProviderMap, Effect.sync(createProviderMap)))
 );
+
+const helloService = Effect.runSync(
+  pipe(
+    Layer.toRuntime(layer),
+    Effect.scoped,
+    Effect.andThen(Runtime.runSync),
+    Effect.andThen((runSync) => runSync(Hello))
+  )
+);
+
+console.log({ helloService });
 
 export const EndpointPanelRuntime = createRuntimeContext(layer);
 export const EndpointPanelProvider = createProviderContext(createProviderMap);

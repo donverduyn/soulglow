@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Context, Effect, identity, pipe } from 'effect';
-import type { Booleans, Call, Fn, Tuples } from 'hotscript';
+import type { B, Call, Fn, Tuples } from 'hotscript';
 import { isFunction } from 'remeda';
 import { useAsync } from 'common/hooks/useAsync';
 import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
@@ -17,13 +17,15 @@ function isClass(impl: any): impl is { new (...args: any[]): any } {
 }
 
 interface IncludesFn<T> extends Fn {
-  return: Call<Tuples.Find<Booleans.Extends<this['arg0']>>, T> extends never
+  return: Call<Tuples.Find<B.Extends<this['arg0']>>, T> extends never
     ? false
     : true;
 }
 
-type IncludedIn<TTarget, T> =
-  Call<Tuples.Every<IncludesFn<TTarget>>, T> extends true ? T : never;
+// checks if every element of T is included in TTarget
+export type IncludedIn<TTarget, T> = Call<Tuples.Every<IncludesFn<TTarget>>, T>;
+
+type Test = IncludedIn<[1, 2, 3], [1, 3, 2]>;
 
 // TODO: constrain the type of tags to be available in the requirements R and provider (possibly through map.keys which infers as a tuple of tags).
 // TODO: constrain the type of the provider to be in accordance with R
