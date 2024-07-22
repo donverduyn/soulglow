@@ -1,20 +1,12 @@
 import * as React from 'react';
-import { Context, Effect, identity, pipe } from 'effect';
+import { Context, Effect, identity, Layer, Runtime, pipe } from 'effect';
 import type { B, Call, Fn, Tuples } from 'hotscript';
-import { isFunction } from 'remeda';
+import { map } from 'remeda';
 import { useAsync } from 'common/hooks/useAsync';
 import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
 import { type AnyKey, type TypedMap } from 'common/utils/map';
-import type { ResolveTypes, RuntimeContext } from 'context';
-import { create, extractTags } from 'modules/EndpointPanel/context';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isClass(impl: any): impl is { new (...args: any[]): any } {
-  return (
-    typeof impl === 'function' &&
-    /^class\s/.test(Function.prototype.toString.call(impl))
-  );
-}
+import type { RuntimeContext } from 'context';
+import { layer } from 'modules/EndpointPanel/context';
 
 interface IncludesFn<T> extends Fn {
   return: Call<Tuples.Find<B.Extends<this['arg0']>>, T> extends never
@@ -37,7 +29,7 @@ export function WithProvider<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Keys extends any[],
 >(
-  Runtime: RuntimeContext<R>,
+  runtime: RuntimeContext<R>,
   Provider: React.Context<TypedMap<TagRecord, Keys>>,
   // TODO: intersection type omits never
   deps: [...Deps] // & IncludedIn<Keys, Deps> // TODO: needs to be converted to tag classes
@@ -59,32 +51,22 @@ export function WithProvider<
         ) as unknown as typeof deps; // TODO: needs constraint on deps
 
       const mapResolve = React.useCallback(() => {
-        // TODO: ideally the type of TypedMap should be a subtype of Map
-        const target = new Map() as unknown as ResolveTypes<
-          TypedMap<TagRecord, Keys>
-        >;
-        const getTag = target.get.bind(target);
-
-        selectedTags.forEach((tag) => {
-          const impl = map.get(tag);
-
-          // TODO: consider a solution for dependency injection at the factory level instead of the effect level. This constitutes ordering the instantiation, such that acc contains all the necessary dependencies for lookup.
-
-          if (isClass(impl)) {
-            const deps = extractTags(impl).map(getTag);
-            // @ts-expect-error we inject the services instead of the tags
-            const result = create(impl)(deps);
-            target.set(tag, result as ReturnTypeOrValue<typeof impl>);
-          } else if (isFunction(impl)) {
-            const result = impl() as ReturnTypeOrValue<typeof impl>;
-            target.set(tag, result);
-          }
-        });
-        return Array.from(target.values());
-      }, [selectedTags, map]);
+        return Effect.runSync(
+          pipe(
+            // TODO: either make the runtime available synchronously or find a way to provide the layer, which is now only available in withRuntime HOC
+            Layer.toRuntime(layer),
+            Effect.scoped,
+            Effect.andThen(Runtime.runSync),
+            Effect.andThen((runSync) =>
+              // TODO: find a way to use the type of the tags
+              runSync(pipe(selectedTags as unknown as [], Effect.all))
+            )
+          )
+        );
+      }, [selectedTags]);
 
       const getServices = useRuntimeFn(
-        Runtime,
+        runtime,
         pipe(selectedTags, Effect.forEach(identity), Effect.delay(1000))
       );
 
@@ -104,8 +86,14 @@ export function WithProvider<
         }
       );
 
-      // this runs once for the optimistic sync, once for real async
-      // if it rerenders afterwards it just reassigns the values
+      // TODO: the problem we have to solve, is that the return types of the layers should be inferrable from the tags outside of effect. Previously we did this using TypedMap, but since the source of truth is now the layers, we can no longer declare the types directly from there. Mapping the correct types here from both the result and optimistic result, requires a solution that maps a tuple to a tuple on the type level. We should consider using Context.Tag.Service<T> to infer the types from the tags and apply this to every item in a tuple.
+
+      // const createContext = () => {
+      //   const ctx = Context.empty().pipe(
+      //     selectedTags.map()
+      //   )
+      // }
+      // TODO: instead of using a map, use a Effect.Context instead, which also has a get method that resolves the associated type downstream?
       selectedTags.forEach((tag, index) => {
         map.set(tag, data[index] as Parameters<typeof map.set>[1]);
       });
@@ -120,19 +108,3 @@ export function WithProvider<
     return React.memo(Wrapped);
   };
 }
-
-export type InferShape<T, R> =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  T extends Context.TagClass<infer Self, any, infer Shape>
-    ? Self extends R
-      ? Shape
-      : never
-    : never;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ReturnTypeOrValue<T> = T extends (...args: any[]) => any
-  ? ReturnType<T>
-  : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    T extends { new (...args: any[]): infer R }
-    ? R
-    : T;
