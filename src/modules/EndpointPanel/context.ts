@@ -5,7 +5,6 @@ import { createEntityStore, withSelected } from 'common/utils/entity';
 import { createTypedMap, register } from 'common/utils/map';
 import { createProviderContext, createRuntimeContext } from 'context';
 import type { Endpoint } from './models/Endpoint';
-import 'reflect-metadata/lite';
 
 const PREFIX = '@EndpointPanel';
 
@@ -29,12 +28,36 @@ export class ProviderMap extends Context.Tag(`${PREFIX}/ProviderMap`)<
   ReturnType<typeof createProviderMap>
 >() {}
 
+export const create =
+  <T extends { new (...args: any[]): InstanceType<T> }>(target: T) =>
+  (args: ConstructorParameters<T>) =>
+    new target(...args);
+
+// TODO: distinguish between functions and classes. functions return an empty array, because their dependencies cannot be inferred from the type parameters. maybe something to consider for the future.
+// export const extractTags = <T extends { new (...args: any[]): any }>(
+//   target: T
+// ) => resolveParams(target);
+
+// const resolveParams = <C extends { new (...args: any[]): any }>(target: C) =>
+//   Reflect.getMetadata('design:paramtypes', target) as ConstructorParameters<C>;
+
+type InferTags<T> = {
+  [K in keyof T]: T[K] extends Context.TagClassShape<infer Id, infer Shape>
+    ? Context.TagClass<T[K], Id, Shape>
+    : never;
+};
+
+const inferTags = <T extends any[]>(tags: [...T]) =>
+  tags as InferTags<typeof tags>;
+
+// @Injectable()
 class WorldService {
   constructor(private hello: ReturnType<typeof createEndpointStore>) {
     console.log('WorldService', this.hello);
   }
 }
 
+// @Injectable()
 class HelloService {
   // TODO: think about how we want to return an effect from methods, to suspend the composed effects, allowing to merge over the event emitter queue and only start consuming when the layers are resolved and the map updated. This can create some noticable lag, if resolving the layers takes long, so this might need to be optional through arguments?
 

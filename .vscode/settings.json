@@ -22,7 +22,7 @@
         "**/.swc": true
     },
     "window.autoDetectColorScheme": true,
-    "workbench.preferredDarkColorTheme": "Default Dark+",
+    "workbench.preferredDarkColorTheme": "Default Light Modern",
     "workbench.preferredLightColorTheme": "Default Light Modern",
     "typescript.tsserver.experimental.useVsCodeWatcher": true,
     "typescript.tsserver.experimental.enableProjectDiagnostics": false,
