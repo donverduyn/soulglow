@@ -1,17 +1,7 @@
 import * as React from 'react';
-import {
-  Cause,
-  Effect,
-  Exit,
-  Fiber,
-  flow,
-  pipe,
-  Scope,
-  Stream,
-  Option,
-} from 'effect';
+import { Effect, pipe, Stream, Fiber, FiberId } from 'effect';
 import { v4 as uuidv4 } from 'uuid';
-import type { RuntimeContext } from 'context';
+import type { RuntimeContext } from 'common/utils/context';
 
 /*
 This hook returns a function that can be called to trigger an effect.
@@ -24,32 +14,40 @@ export function useRuntimeFn<A, E, R, T>(
   fn:
     | ((value: T) => Effect.Effect<A, E, NoInfer<R>>)
     | Effect.Effect<A, E, NoInfer<R>>
-    | null
+    | null,
+  label?: string
 ) {
-  const [emitter] = React.useState(() => new EventEmitter<T, A>());
+  // console.log('useRuntimeFn', label);
+  const emitter = React.useMemo(() => new EventEmitter<T, A>(), [fn]);
   const stream = React.useMemo(
     () =>
       pipe(
         Stream.fromAsyncIterable(createAsyncIterator(emitter), console.log),
         Stream.filterEffect(() => Effect.sync(() => fn !== null)),
-        Stream.mapEffect(({ data, eventId }) =>
-          pipe(
+        Stream.mapEffect(({ data, eventId }) => {
+          return pipe(
             Effect.sync(() => (Effect.isEffect(fn) ? fn : fn!(data))),
+            Effect.tap((r) => console.log('useRuntimeFn', label, r)),
             Effect.andThen(Effect.tap(emitter.resolve(eventId)))
-          )
-        ),
+          );
+        }),
         Stream.runDrain
       ),
     [fn]
   );
-  const emit = React.useCallback(emitter.emit, []);
 
-  React.useEffect(() => {
-    return emitter.dispose.bind(emitter);
-  }, []);
+  // TODO: think about using SynchronizedRef to store the emit function, such that we can pipe the reference of the ref into an operator
+  // const emitRef = React.useRef<EmitOpsPush<never, unknown> | null>(null);
+  // const stream = React.useMemo(() => Stream.asyncPush(
+  //   (emit) => {
+  //     emitRef.current = emit;
+  //     return Effect.sync(() => emit.single(''));
+  //   },
+  //   { bufferSize: 10, strategy: 'dropping' }
+  // ), [fn]);
 
-  useRuntime(context, stream);
-  return emit;
+  useRuntime(context, stream, label);
+  return emitter.emit;
 }
 
 /*
@@ -61,30 +59,35 @@ const noRuntimeMessage = `No runtime available.
   Did you forget to wrap your component using withRuntime?
   `;
 
-const useRuntime = <A, E, R>(
+export const useRuntime = <A, E, R>(
+  context: RuntimeContext<R>,
+  task: Effect.Effect<A, E, NoInfer<R>>,
+  label?: string
+) => {
+  const runtime = React.useContext(context);
+  React.useEffect(() => {
+    // TODO: handle no runtime
+    // console.log('mount/fork', label, runtime.id0);
+    const f = pipe(task, runtime.runFork);
+    return () => {
+      // console.log('interrupting', label, runtime.id0);
+      Effect.runSync(pipe(f, Fiber.interruptAsFork(FiberId.none)));
+    };
+  }, [runtime, task]);
+};
+
+export const useRuntimeSync = <A, E, R>(
   context: RuntimeContext<R>,
   task: Effect.Effect<A, E, NoInfer<R>>
 ) => {
-  const runtimeRef = React.useContext(context);
-  const createScope = React.useCallback(flow(Scope.make, Effect.runSync), []);
+  const runtime = React.useContext(context);
+  const [result, setResult] = React.useState(() => runtime.runSync(task));
 
   React.useEffect(() => {
-    const scope = createScope();
-    void pipe(
-      task,
-      Effect.forkIn(scope),
-      Effect.andThen(Fiber.join),
-      Effect.catchAllCause((cause) =>
-        Cause.isInterruptedOnly(cause) ? Option.some(Exit.void) : Option.none()
-      ),
-      runtimeRef.current?.runPromise ??
-        (() => Promise.reject(new Error(noRuntimeMessage)))
-    );
+    setResult(runtime.runSync(task));
+  }, [runtime, task]);
 
-    return () => {
-      Effect.runFork(Scope.close(scope, Exit.void));
-    };
-  }, [task]);
+  return result;
 };
 
 /* 

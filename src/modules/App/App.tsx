@@ -3,16 +3,17 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, css } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { formatRgb, type Okhsv } from 'culori';
+import { pipe } from 'effect';
 import { observable } from 'mobx';
 import { Stack } from 'common/components/Stack';
 import { WithRuntime } from 'common/hoc/withRuntime';
 import { useMobx } from 'common/hooks/useMobx';
-import { AppRuntime } from 'context';
+import { AppRuntime } from 'modules/App/context';
 import { EndpointPanel } from 'modules/EndpointPanel/EndpointPanel';
 import { LightBulb } from 'modules/LightBulb/LightBulb';
 import { PaletteViewer } from 'modules/PaletteViewer/PaletteViewer';
 // import { TestButton } from 'modules/TestButton/TestButton';
-import { darkTheme } from './theme';
+import { darkTheme } from '../../theme';
 
 const baseColor: Okhsv = {
   h: 0,
@@ -21,7 +22,9 @@ const baseColor: Okhsv = {
   v: 0,
 };
 
-export const App: React.FC = WithRuntime(AppRuntime)(() => {
+export const App = pipe(AppComponent, WithRuntime(AppRuntime));
+
+function AppComponent() {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const state = useMobx(() => ({ color: baseColor }), {
     color: observable.ref,
@@ -58,7 +61,7 @@ export const App: React.FC = WithRuntime(AppRuntime)(() => {
       </Stack>
     </ThemeProvider>
   );
-});
+}
 
 const appStyles = {
   root: css`

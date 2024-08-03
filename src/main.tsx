@@ -4,7 +4,7 @@ import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
 import { createClient } from '@hey-api/client-fetch';
 import ReactDOM from 'react-dom/client';
-import { App } from './App.tsx';
+import { App } from './modules/App/App.tsx';
 import './index.css';
 import './config/console.ts';
 

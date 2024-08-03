@@ -31,7 +31,7 @@
     "@trpc/server": "^10.45.2",
     "culori": "^4.0.1",
     "dayjs": "^1.11.11",
-    "effect": "^3.4.5",
+    "effect": "^3.6.0",
     "fast-check": "^3.18.0",
     "mobx": "^6.12.3",
     "mobx-react-lite": "^4.0.7",

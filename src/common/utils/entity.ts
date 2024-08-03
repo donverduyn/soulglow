@@ -1,10 +1,4 @@
-import {
-  action,
-  computed,
-  observable,
-  reaction,
-  type IComputedValue,
-} from 'mobx';
+import { action, computed, observable, type IComputedValue } from 'mobx';
 
 interface Identifiable {
   id: string;
@@ -51,33 +45,33 @@ export const withSelected = <T extends Identifiable, U>(
 ) => {
   return () => {
     const { merge, ...store } = createStore();
-    const index = observable.box<number>(0);
+    const id = observable.box<string | null>(null);
 
     const api = {
       ...(store as EntityStore<T> & U),
-      select: action((i: number) => index.set(i)),
-      selectedIndex: computed(() => index.get()),
-      selectedItem: computed(() => store.list.get()[index.get()] ?? null),
+      selectById: action((value: string) => id.set(value)),
+      selectedId: computed(() => id.get()),
+      selectedItem: computed(() => store.get(id.get() ?? '')),
     };
 
-    const selectAlternative = (item: T | null) => {
-      const prevIndex = index.get() - 1;
-      if (!item && prevIndex >= 0) {
-        api.select(prevIndex);
-      }
-    };
+    // const selectAlternative = (item: T | null) => {
+    //   const prevIndex = id.get() - 1;
+    //   if (!item && prevIndex >= 0) {
+    //     api.select(prevIndex);
+    //   }
+    // };
 
     // TODO: create dispose chain for entity store and decorators
     // TODO: select the previous index if one item above is removed
-    const dispose = reaction(
-      api.selectedItem.get.bind(api.selectedItem),
-      selectAlternative
-    );
+    // const dispose = reaction(
+    //   api.selectedItem.get.bind(api.selectedItem),
+    //   selectAlternative
+    // );
 
     return Object.assign(api, {
       merge: (other: typeof api) => {
         merge(other);
-        api.select(other.selectedIndex.get());
+        // api.select(other.selectedIndex.get());
       },
     });
   };

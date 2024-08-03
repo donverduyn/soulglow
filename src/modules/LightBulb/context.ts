@@ -6,7 +6,7 @@ import type {
   GroupState,
   GroupStateCommands,
 } from '__generated/api';
-import { createRuntimeContext } from 'context';
+import { createRuntimeContext } from 'common/utils/context';
 import { createDeviceRepo } from './repos/DeviceRepo';
 import type { createColorService } from './services/ColorService';
 
@@ -76,8 +76,6 @@ const singleItemQueue = Effect.gen(function* () {
   return queue;
 });
 
-// this breaks fast-refresh unfortunately even though it is nice this way.
-// maybe we can export this from constants.ts or another file at the module root
 export const LightBulbRuntime = createRuntimeContext(
   pipe(
     Layer.scopedDiscard(take),

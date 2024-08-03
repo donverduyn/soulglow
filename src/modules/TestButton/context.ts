@@ -1,8 +1,8 @@
 import { Context, Ref, Layer } from 'effect';
+import { createRuntimeContext } from 'common/utils/context';
 import { createEntityStore } from 'common/utils/entity';
-import { createRuntimeContext } from 'context';
 
-export class Count extends Context.Tag('@MyComponent/Count')<
+export class Count extends Context.Tag('@TestButton/Count')<
   Count,
   Ref.Ref<number>
 >() {}

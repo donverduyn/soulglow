@@ -3,46 +3,37 @@ import { css } from '@mui/material/styles';
 import { pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'common/components/Button';
+import { List } from 'common/components/List';
 import { Paper } from 'common/components/Paper';
-import { WithProvider } from 'common/hoc/withProvider';
 import { WithRuntime } from 'common/hoc/withRuntime';
-import { useDeferred } from 'common/hooks/useEffectDeferred';
 import { useAutorun } from 'common/hooks/useMobx';
+import { useRuntimeSync } from 'common/hooks/useRuntimeFn';
 import { useStable } from 'common/hooks/useStable';
-import { useMessageBus } from 'context';
+import { useMessageBus } from 'modules/App/hooks/useMessageBus';
 import { endpointActions } from './actions';
 import { EndpointListItem } from './components/EndpointListItem';
-import {
-  EndpointPanelProvider as Provider,
-  EndpointPanelRuntime as Runtime,
-  EndpointStore,
-  Hello,
-} from './context';
+import { EndpointPanelRuntime, EndpointStore } from './context';
 import { createEndpoint } from './models/Endpoint';
 
 export const EndpointPanel = pipe(
   observer(EndpointPanelComponent),
-  WithProvider(Runtime, Provider, [Hello, EndpointStore]),
-  WithRuntime(Runtime)
+  WithRuntime(EndpointPanelRuntime)
 );
 
-//
 function EndpointPanelComponent() {
-  const { addEndpoint, store, hello } = useEndpointPanel();
-  hello.showCount();
+  const store = useRuntimeSync(EndpointPanelRuntime, EndpointStore);
+  const { addEndpoint } = useEndpointPanel();
 
   return (
     <Paper css={styles.root}>
-      {/* <Typography>Endpoints</Typography> */}
-      {store.list.get().map((endpoint, index) => {
-        return (
+      <List>
+        {store.list.get().map((endpoint) => (
           <EndpointListItem
             key={endpoint.id}
             endpoint={endpoint}
-            index={index}
           />
-        );
-      })}
+        ))}
+      </List>
       <Button
         css={styles.addButton}
         onClick={addEndpoint}
@@ -54,32 +45,35 @@ function EndpointPanelComponent() {
 }
 
 function useEndpointPanel() {
-  const store = React.useContext(Provider).get(EndpointStore);
-  const hello = React.useContext(Provider).get(Hello);
-
-  // TODO: Think about using a service to use the bus where the methods return effects to compose, instead of encapsulating the hooks.
-  const bus = useMessageBus([store]);
+  const store = useRuntimeSync(EndpointPanelRuntime, EndpointStore);
+  const bus = useMessageBus([store], 'EndpointPanel');
 
   React.useEffect(() => {
-    store.count.get() === 0 && store.add(createEndpoint());
-  }, [store]);
+    console.log(
+      'register (current endpoint id)',
+      store.list.get().map((item) => ({ ...item }))
+    );
 
-  useDeferred(() => {
+    // TODO: we need a way to unsubscribe from the bus when the component is unmounted, because somehow the callback of register is called again with fast refresh, likely because of a stale reference in one of the hooks, causing the old item to be rendered on top of the new one.
     void bus.register((message) => {
+      // console.log(message.payload)
       // @ts-expect-error, not yet narrowed with actions
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       store.add(message.payload);
+      console.log('store add', message);
     });
-  }, [store]);
-
-  useAutorun(() => {
-    console.log('[autorun] count:', hello.showCount());
-  }, [store]);
+  }, [store, bus]);
 
   const addEndpoint = React.useCallback(() => {
+    console.log('add endpoint');
     void bus.publish(endpointActions.add(createEndpoint()));
   }, [bus]);
 
-  return useStable({ addEndpoint, hello, store });
+  useAutorun(() => {
+    // console.log('[autorun] count:', hello.showCount());
+  }, [store]);
+
+  return useStable({ addEndpoint, store });
 }
 
 const styles = {
