@@ -123,9 +123,9 @@ const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
     // TODO: we should register on the action ENDPOINT_SELECT, so register should take an array of actions as the first argument and narrow message down to the payload of the action, the way angular does it with ngrx.
 
     // TODO: It makes sense for state updates to be replayed but actions not. Maybe we can subscribe to certain channels
-    void bus.register((message) => {
-      console.log('message from LightBulbComponent', message);
-    });
+    // void bus.register((message) => {
+    //   console.log('message from LightBulbComponent', message);
+    // });
   }, [bus]);
 
   const bulb = useMobx(() => defaultState);
@@ -153,6 +153,7 @@ const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
     const hueShift = (20 * Math.sin((bulb.hue / 360) * 2 * Math.PI)) % 360;
     const saturation = 0.4 + (bulb.saturation / 100) * (1 - 0.4);
     const value = 0.6 + (bulb.level / 100) * (1 - 0.6);
+
     onChange({
       h: hue + hueShift,
       mode: 'okhsv',

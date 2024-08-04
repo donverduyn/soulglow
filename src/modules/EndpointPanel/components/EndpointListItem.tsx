@@ -30,7 +30,7 @@ function EndpointListItemComponent({ endpoint }: Props) {
       />
       <TextField
         css={styles.textField}
-        getValue={() => endpoint.id}
+        getValue={() => endpoint.url}
         onChange={(value) => {
           store.update(endpoint.id, {
             ...endpoint,

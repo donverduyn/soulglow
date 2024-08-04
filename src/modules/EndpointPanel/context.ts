@@ -70,8 +70,8 @@ const layer = pipe(
         const store = createEndpointStore();
         const endpoint = createEndpoint();
         store.add(endpoint);
-        console.log('create endpoint store');
-        // store.selectById(endpoint.id);
+        // console.log('create endpoint store');
+        store.selectById(endpoint.id);
         return store;
       })
     )

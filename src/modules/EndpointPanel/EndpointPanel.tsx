@@ -49,10 +49,10 @@ function useEndpointPanel() {
   const bus = useMessageBus([store], 'EndpointPanel');
 
   React.useEffect(() => {
-    console.log(
-      'register (current endpoint id)',
-      store.list.get().map((item) => ({ ...item }))
-    );
+    // console.log(
+    //   'register (current endpoint id)',
+    //   store.list.get().map((item) => ({ ...item }))
+    // );
 
     // TODO: we need a way to unsubscribe from the bus when the component is unmounted, because somehow the callback of register is called again with fast refresh, likely because of a stale reference in one of the hooks, causing the old item to be rendered on top of the new one.
     void bus.register((message) => {
@@ -60,7 +60,7 @@ function useEndpointPanel() {
       // @ts-expect-error, not yet narrowed with actions
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       store.add(message.payload);
-      console.log('store add', message);
+      // console.log('store add', message);
     });
   }, [store, bus]);
 
