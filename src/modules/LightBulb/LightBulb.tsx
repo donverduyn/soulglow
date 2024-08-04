@@ -131,12 +131,13 @@ const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
   const bulb = useMobx(() => defaultState);
   const inputs = bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
 
-  const handle = useRuntimeFn(
-    LightBulbRuntime,
+  const updateColor = React.useCallback(
     (body: Partial<LightbulbDto>) =>
       ApiThrottler.pipe(Effect.andThen(Queue.offer(body))),
-    'handle'
+    []
   );
+  // TODO: accept inline functions. This requires thinking about what it means to recreate the effect in terms of queue timing, because this seems to break the implementation.
+  const handle = useRuntimeFn(LightBulbRuntime, updateColor, 'handle');
 
   // useRuntime(
   //   LightBulbRuntime,

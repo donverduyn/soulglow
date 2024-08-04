@@ -24,7 +24,7 @@ const layer = pipe(
   Layer.effect(
     MessageBus,
     pipe(
-      PubSub.unbounded<Message>({ replay: 1 }),
+      PubSub.unbounded<Message>({ replay: 0 }),
       Effect.andThen((bus) => new MessageBusService(bus))
     )
   )

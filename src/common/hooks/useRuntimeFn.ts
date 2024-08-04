@@ -27,7 +27,6 @@ export function useRuntimeFn<A, E, R, T>(
         Stream.mapEffect(({ data, eventId }) => {
           return pipe(
             Effect.sync(() => (Effect.isEffect(fn) ? fn : fn!(data))),
-            Effect.tap((r) => console.log('useRuntimeFn', label, r)),
             Effect.andThen(Effect.tap(emitter.resolve(eventId)))
           );
         }),
@@ -35,16 +34,6 @@ export function useRuntimeFn<A, E, R, T>(
       ),
     [fn]
   );
-
-  // TODO: think about using SynchronizedRef to store the emit function, such that we can pipe the reference of the ref into an operator
-  // const emitRef = React.useRef<EmitOpsPush<never, unknown> | null>(null);
-  // const stream = React.useMemo(() => Stream.asyncPush(
-  //   (emit) => {
-  //     emitRef.current = emit;
-  //     return Effect.sync(() => emit.single(''));
-  //   },
-  //   { bufferSize: 10, strategy: 'dropping' }
-  // ), [fn]);
 
   useRuntime(context, stream, label);
   return emitter.emit;
@@ -67,12 +56,8 @@ export const useRuntime = <A, E, R>(
   const runtime = React.useContext(context);
   React.useEffect(() => {
     // TODO: handle no runtime
-    // console.log('mount/fork', label, runtime.id0);
     const f = pipe(task, runtime.runFork);
-    return () => {
-      // console.log('interrupting', label, runtime.id0);
-      Effect.runSync(pipe(f, Fiber.interruptAsFork(FiberId.none)));
-    };
+    return () => Effect.runSync(pipe(f, Fiber.interruptAsFork(FiberId.none)));
   }, [runtime, task]);
 };
 

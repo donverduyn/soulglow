@@ -51,6 +51,7 @@ export class ColorService extends Context.Tag('@Lightbulb/ColorService')<
   ReturnType<typeof createColorService>
 >() {}
 
+// TODO: use service with constructor injection instead of using ApiThrottler directly
 const take = pipe(
   Effect.gen(function* () {
     const queue = yield* ApiThrottler;

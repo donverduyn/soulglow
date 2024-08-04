@@ -32,25 +32,16 @@ It is used by withRuntime to create a runtime for the context.
 const useRuntimeFactory = <T,>(layer: Layer.Layer<T>, label?: string) => {
   const disposed = React.useRef(false);
   const [runtime, setRuntime] = React.useState(() =>
-    Object.assign(ManagedRuntime.make(layer), {
-      id0: Math.round(Math.random() * 1000),
-    })
+    ManagedRuntime.make(layer)
   );
 
   React.useEffect(() => {
-    // console.log('mount useRuntimeFactory', label, state.id0);
     if (disposed.current) {
-      setRuntime(() =>
-        Object.assign(ManagedRuntime.make(layer), {
-          id0: Math.round(Math.random() * 1000),
-        })
-      );
-      // console.log('attach async useRuntimeFactory', label, state.id0);
+      setRuntime(() => ManagedRuntime.make(layer));
       disposed.current = false;
     }
 
     return () => {
-      // console.log('unmount useRuntimeFactory', label, state.id0);
       void runtime.dispose();
       disposed.current = true;
     };
