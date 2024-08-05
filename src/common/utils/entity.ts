@@ -1,10 +1,4 @@
-import {
-  action,
-  comparer,
-  computed,
-  observable,
-  type IComputedValue,
-} from 'mobx';
+import { action, computed, observable, type IComputedValue } from 'mobx';
 
 interface Identifiable {
   id: string;
@@ -17,7 +11,7 @@ interface EntityStore<T extends Identifiable> {
   indexOf: (id: string) => number;
   list: IComputedValue<T[]>;
   remove: (id: string) => void;
-  update: (id: string, newEntity: T) => void;
+  update: (id: string, map: (current: T) => void) => void;
 }
 
 // TODO: we might want to consider a composable crud mapper, that allows to map actions on a certain entity to a store instance using an effect. This way, if we need to share state between different modules, we can fetch and populate from a single source. By combining this with global event replays, we can restore previous state on a component remount, if this is not synced on the backend.
@@ -34,7 +28,7 @@ export const createEntityStore = <T extends Identifiable>() => {
     indexOf: (id: string) => Array.from(store.keys()).indexOf(id),
     list: computed(() => Array.from(store.values())),
     remove: action((id) => store.delete(id)),
-    update: action((id, newEntity) => store.set(id, newEntity)),
+    update: action((id, mapFn) => mapFn(store.get(id)!)),
   };
 
   return Object.assign(api, {

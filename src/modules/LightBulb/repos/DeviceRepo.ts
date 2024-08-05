@@ -3,23 +3,23 @@ import type { UnknownException } from 'effect/Cause';
 import { RemoteType, DeviceControlService } from '__generated/api';
 import { FetchError, type LightbulbDto } from '../context';
 
-export const createDeviceRepo = () => {
-  const options = { deviceId: 5, groupId: 5, remoteType: RemoteType.FUT089 };
-  const createOptions = (body?: LightbulbDto) => ({
+export class DeviceRepoImpl {
+  options = { deviceId: 5, groupId: 5, remoteType: RemoteType.FUT089 };
+  createOptions = (body?: LightbulbDto) => ({
     ...(body && { body }),
     headers: {
       // TODO: this should be injected from the global runtime
       endpoint: 'http://192.168.0.153',
     },
     path: {
-      'device-id': options.deviceId,
-      'group-id': options.groupId,
-      'remote-type': options.remoteType,
+      'device-id': this.options.deviceId,
+      'group-id': this.options.groupId,
+      'remote-type': this.options.remoteType,
     },
     query: { blockOnQueue: true },
   });
 
-  const handle = flow(
+  handle = flow(
     <T>(
       effect: Effect.Effect<{ data?: T; error?: unknown }, UnknownException>
     ) => effect,
@@ -30,30 +30,26 @@ export const createDeviceRepo = () => {
     Effect.catchAll(() => Effect.fail(new FetchError()))
   );
 
-  const handlers = {
-    create: (dto: LightbulbDto) => handlers.update(dto),
-    delete: flow(() => {
-      return Effect.tryPromise(() =>
-        DeviceControlService.deleteGatewaysByDeviceIdByRemoteTypeByGroupId(
-          createOptions()
-        )
-      );
-    }, handle),
-    read: flow(() => {
-      return Effect.tryPromise(() =>
-        DeviceControlService.getGatewaysByDeviceIdByRemoteTypeByGroupId(
-          createOptions()
-        )
-      );
-    }, handle),
-    update: flow((dto: LightbulbDto) => {
-      return Effect.tryPromise(() =>
-        DeviceControlService.putGatewaysByDeviceIdByRemoteTypeByGroupId(
-          createOptions(dto)
-        )
-      );
-    }, handle),
-  };
-
-  return handlers;
-};
+  create = (dto: LightbulbDto) => this.update(dto);
+  delete = flow(() => {
+    return Effect.tryPromise(() =>
+      DeviceControlService.deleteGatewaysByDeviceIdByRemoteTypeByGroupId(
+        this.createOptions()
+      )
+    );
+  }, this.handle);
+  read = flow(() => {
+    return Effect.tryPromise(() =>
+      DeviceControlService.getGatewaysByDeviceIdByRemoteTypeByGroupId(
+        this.createOptions()
+      )
+    );
+  }, this.handle);
+  update = flow((dto: LightbulbDto) => {
+    return Effect.tryPromise(() =>
+      DeviceControlService.putGatewaysByDeviceIdByRemoteTypeByGroupId(
+        this.createOptions(dto)
+      )
+    );
+  }, this.handle);
+}

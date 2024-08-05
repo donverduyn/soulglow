@@ -7,8 +7,8 @@ import type {
   GroupStateCommands,
 } from '__generated/api';
 import { createRuntimeContext } from 'common/utils/context';
-import { createDeviceRepo } from './repos/DeviceRepo';
-import type { createColorService } from './services/ColorService';
+import { DeviceRepoImpl } from './repos/DeviceRepo';
+import type { ColorServiceImpl } from './services/ColorService';
 
 // we really shouldn't couple our dto with the api types
 export type LightbulbDto = GroupState & GroupStateCommands;
@@ -42,13 +42,13 @@ export class ApiThrottler extends Context.Tag('@Lightbulb/Throttler')<
 >() {}
 
 export class DeviceRepo extends Context.Tag('@Lightbulb/DeviceRepo')<
-  DeviceRepo,
+  DeviceRepoImpl,
   Crudable<LightbulbDto, FetchError>
 >() {}
 
 export class ColorService extends Context.Tag('@Lightbulb/ColorService')<
   ColorService,
-  ReturnType<typeof createColorService>
+  ColorServiceImpl
 >() {}
 
 // TODO: use service with constructor injection instead of using ApiThrottler directly
@@ -77,10 +77,16 @@ const singleItemQueue = Effect.gen(function* () {
   return queue;
 });
 
+// TODO: find out why fast refresh breaks LightBulb. Endpoint keeps working. Note that the same is true for useRuntimeFn (but this makes it work one more time, before it breaks)
 export const LightBulbRuntime = createRuntimeContext(
   pipe(
     Layer.scopedDiscard(take),
     Layer.provideMerge(Layer.scoped(ApiThrottler, singleItemQueue)),
-    Layer.provideMerge(Layer.effect(DeviceRepo, Effect.sync(createDeviceRepo)))
+    Layer.provideMerge(
+      Layer.effect(
+        DeviceRepo,
+        Effect.sync(() => new DeviceRepoImpl())
+      )
+    )
   )
 );

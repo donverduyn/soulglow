@@ -11,17 +11,14 @@ export type KeyType<Key, TagKey, Tag = any, TagShape = any> =
 // Because either Key or TagKey cannot be inferred, one of them falls back to AnyKey because of the keyof T constraint. This allows either Key or TagKey to demand the most specific type in the intersection Key & TagKey, effectively keeping the literal type of the actual key.
 
 export interface TypedMap<T extends Record<AnyKey, unknown>, KeyTypes = any[]> {
-  // entries(): [KeyType<keyof T, keyof T>, T[keyof T]][];
   get<Key extends keyof T, TagKey extends keyof T, Tag, TagShape>(
     key: KeyType<Key, TagKey, Tag, TagShape>
-    // TODO: use the instance type when T[Key & TagKey] is a class
   ): T[Key & TagKey];
   keys(): KeyTypes;
   set<Key extends keyof T, TagKey extends keyof T, Tag, TagShape>(
     k: KeyType<Key, TagKey, Tag, TagShape>,
     v: T[Key & TagKey]
   ): void;
-  // values(): T[keyof T][];
   values: () => IterableIterator<T[keyof T]>;
 }
 
@@ -62,12 +59,6 @@ export const register =
     };
   };
 
-// type ConstructorTypes<T extends any[]> = {
-//   [K in keyof T]: T[K] extends new (...args: any[]) => any ? T[K] : never;
-// };
-
-// type Test = typeof EndpointStore;
-
 // TODO: find a way to use AnyKey (including symbol doesn't work, possibly because it overlaps with TagKey)
 type IsPrimitiveKey<T> = T extends string | number ? true : false;
 
@@ -92,14 +83,7 @@ export function createTypedMap<T>() {
       data.set(k, value);
       keyCache.set(k, key);
     },
-    // entries: () => {
-    //   return Array.from(data.entries()).map(([key, value]) => [
-    //     keyCache.get(key) as keyof T,
-    //     value,
-    //   ]) as [keyof T, T[keyof T]][];
-    // },
     values: () => {
-      // return Array.from(data.values()) as T[keyof T][];
       return data.values() as IterableIterator<T[keyof T]>;
     },
   };

@@ -23,7 +23,6 @@ function EndpointListItemComponent({ endpoint }: Props) {
 
   return (
     <Stack css={styles.endpoint}>
-      {/* TODO: wrap Radio in common/components and use late derefencing */}
       <Radio
         getValue={() => checked.get()}
         onChange={() => store.selectById(endpoint.id)}
@@ -32,11 +31,8 @@ function EndpointListItemComponent({ endpoint }: Props) {
         css={styles.textField}
         getValue={() => endpoint.url}
         onChange={(value) => {
-          // TODO: consider using lazySet interface, because immutable updates cause unnecessary re-renders
-          store.update(endpoint.id, {
-            ...endpoint,
-            url: value,
-          });
+          // TODO: consider using lazySet interface, for more functional aesthetics.
+          store.update(endpoint.id, (c) => c.url = value);
         }}
       />
       <IconButton
