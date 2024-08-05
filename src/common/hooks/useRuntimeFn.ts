@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Effect, pipe, Stream, Fiber, FiberId } from 'effect';
+import { Effect, pipe, Stream, Fiber, FiberId, Layer } from 'effect';
 import { v4 as uuidv4 } from 'uuid';
 import type { RuntimeContext } from 'common/utils/context';
 
@@ -14,19 +14,17 @@ export function useRuntimeFn<A, E, R, T>(
   fn:
     | ((value: T) => Effect.Effect<A, E, NoInfer<R>>)
     | Effect.Effect<A, E, NoInfer<R>>
-    | null,
-  label?: string
 ) {
-  // console.log('useRuntimeFn', label);
+  // TODO: find out why fast refresh breaks LightBulb (it only works once, then it stops working). Endpoint keeps working.
+
   const emitter = React.useMemo(() => new EventEmitter<T, A>(), [fn]);
   const stream = React.useMemo(
     () =>
       pipe(
-        Stream.fromAsyncIterable(createAsyncIterator(emitter), console.log),
-        Stream.filterEffect(() => Effect.sync(() => fn !== null)),
+        Stream.fromAsyncIterable(createAsyncIterator(emitter), () => {}),
         Stream.mapEffect(({ data, eventId }) => {
           return pipe(
-            Effect.sync(() => (Effect.isEffect(fn) ? fn : fn!(data))),
+            Effect.sync(() => (Effect.isEffect(fn) ? fn : fn(data))),
             Effect.andThen(Effect.tap(emitter.resolve(eventId)))
           );
         }),
@@ -35,7 +33,7 @@ export function useRuntimeFn<A, E, R, T>(
     [fn]
   );
 
-  useRuntime(context, stream, label);
+  useRuntime(context, stream);
   return emitter.emit;
 }
 
@@ -45,18 +43,19 @@ It takes a context and an effect and runs the effect in the runtime provided by 
 */
 
 const noRuntimeMessage = `No runtime available. 
-  Did you forget to wrap your component using withRuntime?
+  Did you forget to wrap your component using WithRuntime?
   `;
 
 export const useRuntime = <A, E, R>(
   context: RuntimeContext<R>,
-  task: Effect.Effect<A, E, NoInfer<R>>,
-  label?: string
+  task: Effect.Effect<A, E, NoInfer<R>>
 ) => {
   const runtime = React.useContext(context);
+  if (Layer.isLayer(runtime)) throw new Error(noRuntimeMessage);
+
+  //
   React.useEffect(() => {
-    // TODO: handle no runtime
-    const f = pipe(task, runtime.runFork);
+    const f = pipe(task, runtime!.runFork);
     return () => Effect.runSync(pipe(f, Fiber.interruptAsFork(FiberId.none)));
   }, [runtime, task]);
 };
@@ -66,10 +65,11 @@ export const useRuntimeSync = <A, E, R>(
   task: Effect.Effect<A, E, NoInfer<R>>
 ) => {
   const runtime = React.useContext(context);
-  const [result, setResult] = React.useState(() => runtime.runSync(task));
+  if (Layer.isLayer(runtime)) throw new Error(noRuntimeMessage);
+  const [result, setResult] = React.useState(() => runtime!.runSync(task));
 
   React.useEffect(() => {
-    setResult(runtime.runSync(task));
+    setResult(runtime!.runSync(task));
   }, [runtime, task]);
 
   return result;
@@ -133,12 +133,6 @@ class EventEmitter<T, A> {
       };
       this.subscribe(oneTimeListener);
     });
-  }
-
-  dispose() {
-    this.listeners = [];
-    this.eventQueue = [];
-    this.resolvers.clear();
   }
 }
 

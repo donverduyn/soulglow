@@ -79,8 +79,4 @@ const layer = pipe(
 );
 
 const createEndpointStore = pipe(createEntityStore<Endpoint>, withSelected);
-
-// TODO: find out why fast refresh breaks from this file. It seems that context is not provided as a dependency to certain hooks.
-
-/* @refresh reset */
 export const EndpointPanelRuntime = createRuntimeContext(layer);

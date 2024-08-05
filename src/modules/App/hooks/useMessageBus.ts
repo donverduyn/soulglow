@@ -5,7 +5,7 @@ import { useStable } from 'common/hooks/useStable';
 import { MessageBus, AppRuntime } from 'modules/App/context';
 import type { Message } from 'modules/App/models/message';
 
-export const useMessageBus = (deps: unknown[], label?: string) => {
+export const useMessageBus = (deps: unknown[]) => {
   const publishFn = React.useCallback(
     (message: Message) =>
       MessageBus.pipe(Effect.andThen((bus) => bus.publish(message))),
@@ -20,7 +20,7 @@ export const useMessageBus = (deps: unknown[], label?: string) => {
 
   // TODO: consider using both an action bus and state bus, or a way to individually set the replay count for a subscription, such that we can replay on demand, but not replay actions such as delete etc.
 
-  const publish = useRuntimeFn(AppRuntime, publishFn, 'publish ' + label!);
-  const register = useRuntimeFn(AppRuntime, registerFn, 'register ' + label!);
+  const publish = useRuntimeFn(AppRuntime, publishFn);
+  const register = useRuntimeFn(AppRuntime, registerFn);
   return useStable({ publish, register });
 };

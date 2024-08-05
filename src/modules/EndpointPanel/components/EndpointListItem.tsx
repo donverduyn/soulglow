@@ -1,9 +1,10 @@
 import * as React from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
-import Radio from '@mui/material/Radio';
 import { css } from '@mui/material/styles';
+import { computed } from 'mobx';
 import { observer } from 'mobx-react-lite';
+import { Radio } from 'common/components/Radio';
 import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
 import { useRuntimeSync } from 'common/hooks/useRuntimeFn';
@@ -16,22 +17,22 @@ interface Props {
 
 export const EndpointListItem = observer(EndpointListItemComponent);
 
-// TODO: change the way we select the item, because it now depends on the index, this is not ideal, given it can change, if we add or remove items. Although it helps to keep the selected item at the same position, if we remove items, it is not be the best way to handle this.
 function EndpointListItemComponent({ endpoint }: Props) {
   const store = useRuntimeSync(EndpointPanelRuntime, EndpointStore);
+  const checked = computed(() => store.selectedId.get() === endpoint.id);
+
   return (
-    <Stack
-      key={endpoint.id}
-      css={styles.endpoint}
-    >
+    <Stack css={styles.endpoint}>
+      {/* TODO: wrap Radio in common/components and use late derefencing */}
       <Radio
-        checked={store.selectedId.get() === endpoint.id}
+        getValue={() => checked.get()}
         onChange={() => store.selectById(endpoint.id)}
       />
       <TextField
         css={styles.textField}
         getValue={() => endpoint.url}
         onChange={(value) => {
+          // TODO: consider using lazySet interface, because immutable updates cause unnecessary re-renders
           store.update(endpoint.id, {
             ...endpoint,
             url: value,

@@ -7,11 +7,11 @@ This HOC creates a runtime for the context and provides it to the component.
 It allows any downstream components to access the runtime using the context.
 */
 
-export function WithRuntime<T>(Context: RuntimeContext<T>, label?: string) {
+export function WithRuntime<T>(Context: RuntimeContext<T>) {
   return <P extends object>(Component: React.FC<P>) => {
     const Wrapped = (props: P) => {
       const layer = React.useContext(Context) as unknown as Layer.Layer<T>;
-      const runtime = useRuntimeFactory(layer, label);
+      const runtime = useRuntimeFactory(layer);
 
       return (
         <Context.Provider value={runtime}>
@@ -29,7 +29,7 @@ This hook creates a runtime and disposes it when the component is unmounted.
 It is used by withRuntime to create a runtime for the context.
 */
 
-const useRuntimeFactory = <T,>(layer: Layer.Layer<T>, label?: string) => {
+const useRuntimeFactory = <T,>(layer: Layer.Layer<T>) => {
   const disposed = React.useRef(false);
   const [runtime, setRuntime] = React.useState(() =>
     ManagedRuntime.make(layer)
@@ -46,7 +46,7 @@ const useRuntimeFactory = <T,>(layer: Layer.Layer<T>, label?: string) => {
       disposed.current = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layer, label]);
+  }, [layer]);
 
   return runtime;
 };
