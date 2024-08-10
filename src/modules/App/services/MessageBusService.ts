@@ -15,4 +15,6 @@ export class MessageBusImpl {
       Effect.scoped
     );
   }
+
+  // TODO: think about using addFinalizer to shutdown the bus, or at least investigate the consequences of not doing so. If references to the bus are kept, it will not be garbage collected.
 }

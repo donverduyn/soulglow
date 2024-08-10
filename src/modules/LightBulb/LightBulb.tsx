@@ -147,6 +147,8 @@ const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
   //   })
   // );
 
+  // TODO: think about how to model a lightbulb such that we can manage state in the form of an entity store, using the same patterns as endpoint, to share derived state between loosely coupled modules, by syncing and reapplying events to multiple entity stores.
+
   useAutorun(() => {
     const hue = 360 + bulb.hue + 30;
     const hueShift = (20 * Math.sin((bulb.hue / 360) * 2 * Math.PI)) % 360;

@@ -69,6 +69,7 @@ const layer = pipe(
       Effect.sync(() => {
         const store = createEndpointStore();
         const endpoint = createEndpoint();
+        // TODO: consider using persistent storage instead of recreating the first endpoint every time (because it will overwrite the previous one)
         store.add(endpoint);
         // console.log('create endpoint store');
         store.selectById(endpoint.id);

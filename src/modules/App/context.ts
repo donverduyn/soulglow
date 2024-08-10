@@ -30,4 +30,6 @@ const layer = pipe(
   )
 );
 
+// TODO: consider using Stream.asyncPush with Effect.acquireRelease, to setup an actor with xState, such that the Stream can be made available with an injection token within the layer responsible for the store initialization. This way we can update entity stores from xState.
+
 export const AppRuntime = createRuntimeContext(layer);

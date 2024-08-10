@@ -18,6 +18,9 @@ export function useRuntimeFn<A, E, R, T>(
   // TODO: find out why fast refresh breaks LightBulb (it only works once, then it stops working). Endpoint keeps working.
 
   const emitter = React.useMemo(() => new EventEmitter<T, A>(), [fn]);
+
+  // TODO: consider if using a straem is a good idea, because we can also pass a reference of the effect to Effect.runPromise to run it. There might be no real benefit, except for usecases that involve delays inside the effect (since the stream would buffer the events).
+
   const stream = React.useMemo(
     () =>
       pipe(
