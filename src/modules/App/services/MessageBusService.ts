@@ -1,17 +1,16 @@
-import { Effect, pipe, PubSub, Queue } from 'effect';
+import { Effect, PubSub, Queue } from 'effect';
 import type { Message } from 'modules/App/models/message';
 
 export class MessageBusImpl {
   constructor(private readonly bus: PubSub.PubSub<Message>) {}
 
-  publish = (message: Message) => pipe(this.bus, PubSub.publish(message));
-  register(callback: <T>(message: Message<T>) => void) {
-    return pipe(
-      this.bus,
+  publish = (message: Message) => this.bus.pipe(PubSub.publish(message));
+  register(fn: <T>(message: Message<T>) => void) {
+    return this.bus.pipe(
       PubSub.subscribe,
-      Effect.andThen((sub) => {
-        return pipe(sub, Queue.take, Effect.tap(callback), Effect.forever);
-      }),
+      Effect.andThen((sub) =>
+        sub.pipe(Queue.take, Effect.tap(fn), Effect.forever)
+      ),
       Effect.scoped
     );
   }
