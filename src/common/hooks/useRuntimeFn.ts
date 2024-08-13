@@ -58,8 +58,8 @@ export const useRuntime = <A, E, R>(
 
   //
   React.useEffect(() => {
-    const f = pipe(task, runtime!.runFork);
-    return () => Effect.runSync(pipe(f, Fiber.interruptAsFork(FiberId.none)));
+    const f = task.pipe(runtime!.runFork);
+    return () => Effect.runSync(f.pipe(Fiber.interruptAsFork(FiberId.none)));
   }, [runtime, task]);
 };
 
