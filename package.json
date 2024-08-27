@@ -20,7 +20,6 @@
     "dep:stats": "npx --yes tsx -e \"import { view } from './scripts/dep-stats'; view('./package.json');\""
   },
   "dependencies": {
-    "@effect-rx/rx-react": "^0.30.11",
     "@effect/platform": "^0.58.13",
     "@effect/schema": "^0.68.12",
     "@emotion/react": "^11.11.4",
@@ -44,7 +43,8 @@
     "remeda": "^2.2.1",
     "scheduler": "^0.23.2",
     "uuid": "^10.0.0",
-    "ws": "^8.17.0"
+    "ws": "^8.17.0",
+    "xstate": "^5.17.4"
   },
   "devDependencies": {
     "@emotion/eslint-plugin": "^11.11.0",

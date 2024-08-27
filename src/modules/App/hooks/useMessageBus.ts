@@ -1,7 +1,7 @@
 import React from 'react';
 import { Effect } from 'effect';
+import { useReturn as useReturn } from 'common/hooks/useReturn';
 import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
-import { useStable } from 'common/hooks/useStable';
 import { MessageBus, AppRuntime } from 'modules/App/context';
 import type { Message } from 'modules/App/models/message';
 
@@ -26,5 +26,5 @@ export const useMessageBus = (deps: unknown[]) => {
 
   const publish = useRuntimeFn(AppRuntime, publishFn);
   const register = useRuntimeFn(AppRuntime, registerFn);
-  return useStable({ publish, register });
+  return useReturn({ publish, register });
 };

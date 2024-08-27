@@ -10,8 +10,8 @@ import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
 import { WithRuntime as WithRuntime } from 'common/hoc/withRuntime';
 import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
+import { useReturn } from 'common/hooks/useReturn';
 import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
-import { useStable } from 'common/hooks/useStable';
 import { useMessageBus } from 'modules/App/hooks/useMessageBus';
 import { OnOffSwitch } from './components/OnOffSwitch';
 import {
@@ -176,7 +176,7 @@ const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
     []
   );
 
-  return useStable({ bulb, inputs });
+  return useReturn({ bulb, inputs });
 };
 
 const styles = {

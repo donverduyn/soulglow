@@ -22,7 +22,7 @@ function EndpointListItemComponent({ endpoint }: Props) {
   const checked = computed(() => store.selectedId.get() === endpoint.id);
 
   return (
-    <Stack css={styles.endpoint}>
+    <Stack css={styles.root}>
       <Radio
         getValue={() => checked.get()}
         onChange={() => store.selectById(endpoint.id)}
@@ -31,8 +31,8 @@ function EndpointListItemComponent({ endpoint }: Props) {
         css={styles.textField}
         getValue={() => endpoint.url}
         onChange={(value) => {
-          // TODO: consider using lazySet interface, for more functional aesthetics.
-          store.update(endpoint.id, (c) => c.url = value);
+          // TODO: consider using lazySet interface, for more functional aesthetics, or even better, avoid direct mutations altogether and use xstate actions.
+          store.update(endpoint.id, (c) => (c.url = value));
         }}
       />
       <IconButton
@@ -47,20 +47,11 @@ function EndpointListItemComponent({ endpoint }: Props) {
 // TODO: wrap IconButton in common/components
 
 const styles = {
-  addButton: css`
-    /* background: green; */
-  `,
-  endpoint: css`
+  root: css`
+    --label: EndpointListItem;
     display: flex;
     flex-direction: row;
     gap: 1em;
-    /* flex: 1; */
-  `,
-  root: css`
-    display: flex;
-    flex-direction: column;
-    gap: 1em;
-    padding: 0;
   `,
   textField: css`
     --label: TextField;

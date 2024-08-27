@@ -414,18 +414,6 @@
   resolved "https://registry.yarnpkg.com/@dual-bundle/import-meta-resolve/-/import-meta-resolve-4.1.0.tgz#519c1549b0e147759e7825701ecffd25e5819f7b"
   integrity sha512-+nxncfwHM5SgAtrVzgpzJOI1ol0PkumhVo469KCf9lUi21IGcY90G98VuHm9VRrUypmAzawAHO9bs6hqeADaVg==
 
-"@effect-rx/rx-react@^0.30.11":
-  version "0.30.11"
-  resolved "https://registry.yarnpkg.com/@effect-rx/rx-react/-/rx-react-0.30.11.tgz#af1638e4505acba7c9a30f8a8dd43b99944eccaf"
-  integrity sha512-Z0HwvrJbzgUvpjgMS5qH2+4dYL0oYKbsx2UJ9S7b1iV8ZippJnLf//FsOqDjzUdXKNLuW1L/h+as70o7DLDrgw==
-  dependencies:
-    "@effect-rx/rx" "^0.33.8"
-
-"@effect-rx/rx@^0.33.8":
-  version "0.33.8"
-  resolved "https://registry.yarnpkg.com/@effect-rx/rx/-/rx-0.33.8.tgz#90b4076ea29750bc641c6adb1e878fbacc34ba0c"
-  integrity sha512-dZZW2BbXNRcvNB37tdjWzCZQpz6D+xPaZcaFusQImvwMzMNhqzVHQa9a8V7r8+fZrgzY1nJpM2HypdfGSsjAng==
-
 "@effect/platform@^0.58.13":
   version "0.58.27"
   resolved "https://registry.yarnpkg.com/@effect/platform/-/platform-0.58.27.tgz#aba006e5917794e63534e9e23d8a0d5feb07b538"
@@ -7173,6 +7161,11 @@ ws@^8.17.0, ws@^8.18.0:
   version "8.18.0"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.18.0.tgz#0d7505a6eafe2b0e712d232b42279f53bc289bbc"
   integrity sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==
+
+xstate@^5.17.4:
+  version "5.17.4"
+  resolved "https://registry.yarnpkg.com/xstate/-/xstate-5.17.4.tgz#334ab2da123973634097f7ca48387ae1589c774e"
+  integrity sha512-KM2FYVOUJ04HlOO4TY3wEXqoYPR/XsDu+ewm+IWw0vilXqND0jVfvv04tEFwp8Mkk7I/oHXM8t1Ex9xJyUS4ZA==
 
 y18n@^5.0.5:
   version "5.0.8"

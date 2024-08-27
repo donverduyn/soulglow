@@ -42,7 +42,7 @@ export function useRuntimeFn<A, E, R, T>(
 
 /*
 This hook is used to run an effect in a runtime.
-It takes a context and an effect and runs the effect in the runtime provided by the context. It is used by useRuntimeFn.
+It takes a context and an effect and runs the effect in the runtime provided by the context. It is used by useRuntimeFn. Assumes createRuntimeContext is used to create the context, because it expects a Layer when withRuntime is missing.
 */
 
 const noRuntimeMessage = `No runtime available. 
@@ -56,7 +56,6 @@ export const useRuntime = <A, E, R>(
   const runtime = React.useContext(context);
   if (Layer.isLayer(runtime)) throw new Error(noRuntimeMessage);
 
-  //
   React.useEffect(() => {
     const f = task.pipe(runtime!.runFork);
     return () => Effect.runSync(f.pipe(Fiber.interruptAsFork(FiberId.none)));

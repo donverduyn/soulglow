@@ -35,12 +35,12 @@
 	"mounts": [
 		"source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
 		"source=/run/user/1000/bus,target=/run/user/1000/bus,type=bind,consistency=cached",
-		"source=${localEnv:HOME}/.kube,target=/tmp/.kube,type=bind,consistency=cached",
-		"source=${localEnv:HOME}/.minikube,target=/tmp/.minikube,type=bind,consistency=cached"
+		// "source=${localEnv:HOME}/.kube,target=/tmp/.kube,type=bind,consistency=cached",
+		// "source=${localEnv:HOME}/.minikube,target=/tmp/.minikube,type=bind,consistency=cached"
 	],
 	// we statically bind the dev server so external machines on the network can view it.
 	// if the firewall allows, that is.
-	"runArgs": ["--device=/dev/dri:/dev/dri", "--device=/dev/snd", "-p=0.0.0.0:4173:4173", "--network=minikube"],
+	"runArgs": ["--device=/dev/dri:/dev/dri", "--device=/dev/snd", "-p=0.0.0.0:4173:4173"], // "--network=minikube"],
 	"postCreateCommand": "yarn install",
 	"postStartCommand": {
 		// If we consider cross-platform we should run dbus in the container
