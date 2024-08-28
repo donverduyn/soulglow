@@ -1,13 +1,4 @@
-import {
-  Console,
-  Context,
-  Effect,
-  Layer,
-  pipe,
-  String,
-  Stream,
-  Runtime,
-} from 'effect';
+import { Console, Context, Effect, Layer, pipe, String, Stream } from 'effect';
 import { createRuntimeContext } from 'common/utils/context';
 import { createEntityStore, withSelected } from 'common/utils/entity';
 import { createEndpoint, type Endpoint } from './models/Endpoint';
@@ -86,11 +77,11 @@ const layer = pipe(
     Layer.scoped(
       EndpointStore,
       Effect.gen(function* () {
-        const core = yield* EndpointCore;
-        const foo = yield* Foo;
-        const runFork = yield* Effect.runtime().pipe(
-          Effect.andThen(Runtime.runFork)
-        );
+        // const core = yield* EndpointCore;
+        // const foo = yield* Foo;
+        // const runFork = yield* Effect.runtime().pipe(
+        //   Effect.andThen(Runtime.runFork)
+        // );
 
         // const fiber2 = runFork(
         //   core.pipe(Stream.tap(Console.log), Stream.runDrain)
@@ -99,6 +90,7 @@ const layer = pipe(
 
         const store = createEndpointStore();
         const endpoint = createEndpoint();
+        yield* Console.log('add endpoint', endpoint);
 
         // TODO: consider using persistent storage instead of recreating the first endpoint every time (because it will overwrite the previous one)
         store.add(endpoint);

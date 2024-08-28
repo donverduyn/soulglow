@@ -133,9 +133,9 @@ const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
   const updateColor = React.useCallback(
     (body: Partial<LightbulbDto>) =>
       ApiThrottler.pipe(Effect.andThen(Queue.offer(body))),
-    [bus]
+    []
   );
-  // TODO: accept inline functions. This requires thinking about what it means to recreate the effect in terms of queue timing, because this seems to break the implementation.
+
   const handle = useRuntimeFn(LightBulbRuntime, updateColor);
 
   // useRuntime(
