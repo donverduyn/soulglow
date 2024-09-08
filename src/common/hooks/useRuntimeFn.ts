@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { Effect, pipe, Stream, Fiber, FiberId, Layer } from 'effect';
+import { Effect, pipe, Stream, Fiber, FiberId, Layer, Console } from 'effect';
 import { v4 as uuidv4 } from 'uuid';
 import type { RuntimeContext } from 'common/utils/context';
+import { a } from 'vitest/dist/suite-IbNSsUWN.js';
 
 /*
 This hook returns a function that can be called to trigger an effect.
@@ -28,7 +29,8 @@ export function useRuntimeFn<A, E, R, T>(
         Stream.mapEffect(({ data, eventId }) => {
           return pipe(
             Effect.sync(() => (Effect.isEffect(fn) ? fn : fn(data))),
-            Effect.andThen(Effect.tap(emitter.resolve(eventId)))
+            Effect.andThen(Effect.tap(emitter.resolve(eventId))),
+            Effect.andThen(Console.log({ data, eventId }))
           );
         }),
         Stream.runDrain

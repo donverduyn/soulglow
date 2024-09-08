@@ -9,7 +9,12 @@ export class MessageBusImpl {
     return this.bus.pipe(
       PubSub.subscribe,
       Effect.andThen((sub) =>
-        sub.pipe(Queue.take, Effect.tap(fn), Effect.forever)
+        sub.pipe(
+          Queue.take,
+          Effect.tap(fn),
+          Effect.forever
+          // Effect.andThen(Effect.addFinalizer(() => Console.log('Finalizing')))
+        )
       ),
       Effect.scoped
     );

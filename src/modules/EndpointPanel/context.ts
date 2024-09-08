@@ -1,4 +1,14 @@
-import { Console, Context, Effect, Layer, pipe, String, Stream } from 'effect';
+import {
+  Console,
+  Context,
+  Effect,
+  Layer,
+  pipe,
+  String,
+  Stream,
+  Fiber,
+  Runtime,
+} from 'effect';
 import { createRuntimeContext } from 'common/utils/context';
 import { createEntityStore, withSelected } from 'common/utils/entity';
 import { createEndpoint, type Endpoint } from './models/Endpoint';
@@ -27,8 +37,10 @@ export class World extends Context.Tag(`${PREFIX}/World`)<
 
 export class Foo extends Context.Tag(`${PREFIX}/Foo`)<
   Foo,
-  Stream.Stream<void>
+  Stream.Stream<PointerEvent>
 >() {}
+
+export class Bar extends Context.Tag(`${PREFIX}/Bar`)<Bar, string>() {}
 
 class WorldService {
   constructor(private hello: ReturnType<typeof createEndpointStore>) {
@@ -58,8 +70,7 @@ const layer = pipe(
   Layer.effect(
     Hello,
     pipe(
-      [EndpointStore, World] as const,
-      Effect.all,
+      Effect.all([EndpointStore, World] as const),
       Effect.andThen((deps) => new HelloService(...deps))
     )
   ),
@@ -67,8 +78,7 @@ const layer = pipe(
     Layer.effect(
       World,
       pipe(
-        [EndpointStore] as const,
-        Effect.all,
+        Effect.all([EndpointStore] as const),
         Effect.andThen((deps) => new WorldService(...deps))
       )
     )
@@ -77,49 +87,49 @@ const layer = pipe(
     Layer.scoped(
       EndpointStore,
       Effect.gen(function* () {
-        // const core = yield* EndpointCore;
-        // const foo = yield* Foo;
-        // const runFork = yield* Effect.runtime().pipe(
-        //   Effect.andThen(Runtime.runFork)
-        // );
+        const core = yield* EndpointCore;
+        const runFork = yield* Effect.runtime().pipe(
+          Effect.andThen(Runtime.runFork)
+        );
 
-        // const fiber2 = runFork(
-        //   core.pipe(Stream.tap(Console.log), Stream.runDrain)
-        // );
-        // yield* Effect.addFinalizer(() => Fiber.interrupt(fiber2));
+        // TODO: think about using runIntoPubSub instead of runDrain, so we can inject the pubsub across different layers, preventing the problem of instantiating multiple actors across different layers, because the layer currently returns a stream that is recreated.
+        const adder = core.pipe(
+          Stream.tap(Console.log)
+          // Stream.map((event) => store.add(createEndpoint({ url: event })))
+        );
+
+        // TODO: consider abstracting away the setup and teardown of async fibers
+        const eventStreamFiber = runFork(adder.pipe(Stream.runDrain));
+        yield* Effect.addFinalizer(() => Fiber.interrupt(eventStreamFiber));
 
         const store = createEndpointStore();
         const endpoint = createEndpoint();
-        yield* Console.log('add endpoint', endpoint);
 
-        // TODO: consider using persistent storage instead of recreating the first endpoint every time (because it will overwrite the previous one)
+        // TODO: consider using persistent storage instead of recreating the first endpoint every time (because it will overwrite the previous one). we should persist both the entitystore and the actor on unmount, or think about keeping it alive, or restart it early, on mount, to avoid having async s ide effects after the first render, from replaying new events from the root event stream.
         store.add(endpoint);
         store.selectById(endpoint.id);
         return store;
       })
     )
   ),
-  Layer.provide(Layer.succeed(Foo, Stream.fromEventListener(window, 'click'))),
   Layer.provide(
-    Layer.effect(
+    Layer.succeed(Foo, Stream.fromEventListener<PointerEvent>(window, 'click'))
+  ),
+  Layer.provide(Layer.succeed(Bar, 'bar')),
+  Layer.provide(
+    Layer.succeed(
       EndpointCore,
-      Effect.sync(() =>
-        Stream.asyncPush<string>((emit) =>
-          Effect.acquireRelease(
-            Effect.gen(function* () {
-              yield* Effect.log('subscribing');
-              return setInterval(() => emit.single('tick'), 1000);
-            }),
-            (handle) =>
-              Effect.gen(function* () {
-                yield* Effect.log('unsubscribing');
-                clearInterval(handle);
-              })
-          )
+      Stream.asyncPush<string>((emit) =>
+        Effect.acquireRelease(
+          Effect.sync(() => setInterval(() => emit.single('tick'), 1000)),
+          (handle) => Effect.sync(() => clearInterval(handle))
         )
       )
     )
-  )
+  ),
+  // Layer.provide(
+  //   Layer.scopedDiscard(Effect.addFinalizer(() => Console.log('cleanup')))
+  // )
 );
 
 const createEndpointStore = pipe(createEntityStore<Endpoint>, withSelected);

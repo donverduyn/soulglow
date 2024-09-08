@@ -173,7 +173,7 @@ const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
       // const rgb = formatRgb({mode: ''})
       void handle(body);
     },
-    []
+    [handle]
   );
 
   return useReturn({ bulb, inputs });
