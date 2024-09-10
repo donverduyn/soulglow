@@ -9,7 +9,8 @@ import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
 import { useRuntimeSync } from 'common/hooks/useRuntimeFn';
 import { EndpointPanelRuntime, EndpointStore } from '../context';
-import type { Endpoint } from './../models/Endpoint';
+import type { Endpoint } from 'common/models/endpoint/endpoint';
+
 
 interface Props {
   readonly endpoint: Endpoint;
