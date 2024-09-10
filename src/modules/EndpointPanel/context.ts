@@ -7,11 +7,16 @@ import {
   String,
   Stream,
   Fiber,
+  PubSub,
   Runtime,
+  Queue,
+  Take,
+  Chunk,
 } from 'effect';
 import { createRuntimeContext } from 'common/utils/context';
 import { createEntityStore, withSelected } from 'common/utils/entity';
-import { createEndpoint, type Endpoint } from './models/Endpoint';
+import { createEndpoint } from './models/Endpoint';
+import type { Endpoint } from 'common/models/endpoint/endpoint';
 
 const PREFIX = '@EndpointPanel';
 
@@ -22,7 +27,7 @@ export class EndpointStore extends Context.Tag(`${PREFIX}/EndpointStore`)<
 
 export class EndpointCore extends Context.Tag(`${PREFIX}/EndpointCore`)<
   EndpointCore,
-  Stream.Stream<string>
+  PubSub.PubSub<Take.Take<string>>
 >() {}
 
 export class Hello extends Context.Tag(`${PREFIX}/Hello`)<
@@ -92,15 +97,27 @@ const layer = pipe(
           Effect.andThen(Runtime.runFork)
         );
 
+        // yield* Queue
         // TODO: think about using runIntoPubSub instead of runDrain, so we can inject the pubsub across different layers, preventing the problem of instantiating multiple actors across different layers, because the layer currently returns a stream that is recreated.
         const adder = core.pipe(
-          Stream.tap(Console.log)
-          // Stream.map((event) => store.add(createEndpoint({ url: event })))
+          PubSub.subscribe,
+          Effect.andThen((sub) =>
+            sub.pipe(
+              Queue.take,
+              Effect.andThen(Take.done),
+              Effect.andThen(Chunk.last),
+              Effect.tap(Console.log),
+              Effect.forever
+            )
+          )
         );
 
         // TODO: consider abstracting away the setup and teardown of async fibers
         const eventStreamFiber = runFork(adder.pipe(Stream.runDrain));
         yield* Effect.addFinalizer(() => Fiber.interrupt(eventStreamFiber));
+
+        // const eventStreamFiber2 = runFork(adder.pipe(Stream.runDrain));
+        // yield* Effect.addFinalizer(() => Fiber.interrupt(eventStreamFiber2));
 
         const store = createEndpointStore();
         const endpoint = createEndpoint();
@@ -117,16 +134,22 @@ const layer = pipe(
   ),
   Layer.provide(Layer.succeed(Bar, 'bar')),
   Layer.provide(
-    Layer.succeed(
+    Layer.scoped(
       EndpointCore,
-      Stream.asyncPush<string>((emit) =>
-        Effect.acquireRelease(
-          Effect.sync(() => setInterval(() => emit.single('tick'), 1000)),
-          (handle) => Effect.sync(() => clearInterval(handle))
-        )
+      pipe(
+        Stream.asyncPush<string>(
+          (emit) =>
+            Effect.acquireRelease(
+              Effect.sync(() => setInterval(() => emit.single(`🟢`), 1000)),
+              (handle) => Effect.sync(() => clearInterval(handle))
+            ),
+          { bufferSize: 'unbounded' }
+        ),
+        // TODO: think about an alternative to asyncPush, because it doesn't make sense to go from push to pull and back to push
+        Stream.toPubSub({ capacity: 'unbounded' })
       )
     )
-  ),
+  )
   // Layer.provide(
   //   Layer.scopedDiscard(Effect.addFinalizer(() => Console.log('cleanup')))
   // )

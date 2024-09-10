@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Layer, ManagedRuntime } from 'effect';
+import { Effect, pipe, type Layer, type ManagedRuntime } from 'effect';
 
 export const createRuntimeContext = <T>(layer: Layer.Layer<T>) => {
   return React.createContext<
@@ -11,3 +11,8 @@ export const createRuntimeContext = <T>(layer: Layer.Layer<T>) => {
 export type RuntimeContext<T> = React.Context<
   ManagedRuntime.ManagedRuntime<T, never> | undefined
 >;
+
+export const fromLayer = <A, E, R, TResult>(
+  layer: Effect.Effect<A, E, R>,
+  cb: (arg: A) => TResult
+) => pipe(layer, Effect.andThen(cb));

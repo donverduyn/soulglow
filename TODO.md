@@ -8,7 +8,6 @@
 - [ ] Configure github actions to run e2e tests with minikube
 
 # Ideas
-- Use white UI elements against colored background to simulate brightness
 - Color pattern selector (user wants to see all the patterns first based on the changing color, then select the one that matches the preference)
 - Add/remove light bulbs
 - Color history for each light bulb (or time travel)

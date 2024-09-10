@@ -12,7 +12,6 @@ import { WithRuntime as WithRuntime } from 'common/hoc/withRuntime';
 import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
 import { useReturn } from 'common/hooks/useReturn';
 import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
-import { useMessageBus } from 'modules/App/hooks/useMessageBus';
 import { OnOffSwitch } from './components/OnOffSwitch';
 import {
   LightMode,
@@ -116,27 +115,35 @@ function LightBulbComponent({
 }
 
 const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
-  const bus = useMessageBus([]);
-  // TODO: consider using an initial state from the backend which we use to hydrate the stores across multiple modules. For example, let's say we need the selected endpoint in LightbulbC and the list of endpoints in EndpointC. By hydrating the stores in the layer construction, we might want to use the root runtime, to provide an http client, which allows caching between multiple fetches. Then, after hydration, we use a central event log to replay the events on component remounts, when modules are reloaded. This can also be done during layer construction (this can all happen async, we might want to think about having some loading state, to decide what the use in case of the selected endpoint in this case). The only thing to consider, is that we would have to store derived state in the backend, just to avoid large event logs locally, unless we find a solution for this.
+  // const bus = useMessageBus([]);
 
   React.useEffect(() => {
-    // TODO: we should register on the action ENDPOINT_SELECT, so register should take an array of actions as the first argument and narrow message down to the payload of the action, the way angular does it with ngrx.
-    // TODO: It makes sense for state updates to be replayed but actions not. Maybe we can subscribe to certain channels
     // void bus.register((message) => {
     //   console.log('message from LightBulbComponent', message);
     // });
-  }, [bus]);
+  }, []);
+
+  // const getRuntime = React.useMemo(
+  //   () =>
+  //     pipe(
+  //       Effect.runtime(),
+  //       Effect.andThen(Runtime.runFork),
+  //       Effect.andThen((runFork) => runFork(Console.log('foo')))
+  //     ),
+  //   []
+  // );
+
+  // useRuntime(LightBulbRuntime, getRuntime);
 
   const bulb = useMobx(() => defaultState);
   const inputs = bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
 
-  const updateColor = React.useCallback(
+  const handle = useRuntimeFn(
+    LightBulbRuntime,
     (body: Partial<LightbulbDto>) =>
       ApiThrottler.pipe(Effect.andThen(Queue.offer(body))),
     []
   );
-
-  const handle = useRuntimeFn(LightBulbRuntime, updateColor);
 
   // useRuntime(
   //   LightBulbRuntime,

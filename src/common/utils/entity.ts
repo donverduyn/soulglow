@@ -58,24 +58,10 @@ export const withSelected = <T extends Identifiable, U>(
       selectedItem: computed(() => store.get(id.get() ?? '')),
     };
 
-    // const selectAlternative = (item: T | null) => {
-    //   const prevIndex = id.get() - 1;
-    //   if (!item && prevIndex >= 0) {
-    //     api.select(prevIndex);
-    //   }
-    // };
-
-    // TODO: create dispose chain for entity store and decorators
-    // TODO: select the previous index if one item above is removed
-    // const dispose = reaction(
-    //   api.selectedItem.get.bind(api.selectedItem),
-    //   selectAlternative
-    // );
-
     return Object.assign(api, {
       merge: (other: typeof api) => {
         merge(other);
-        // api.select(other.selectedIndex.get());
+        // api.selectById(other.selectedId.get() ?? '');
       },
     });
   };

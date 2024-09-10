@@ -1,20 +1,21 @@
 import { Effect, PubSub, Queue } from 'effect';
-import type { Message } from 'modules/App/models/message';
+import type { createEvent } from 'common/utils/event';
 
-export class MessageBusImpl {
-  constructor(private readonly bus: PubSub.PubSub<Message>) {}
+export class MessageBusService {
+  constructor(
+    private readonly bus: PubSub.PubSub<
+      ReturnType<ReturnType<typeof createEvent>>
+    >
+  ) {}
 
-  publish = (message: Message) => this.bus.pipe(PubSub.publish(message));
-  register(fn: <T>(message: Message<T>) => void) {
+  publish = (message: ReturnType<ReturnType<typeof createEvent>>) =>
+    this.bus.pipe(PubSub.publish(message));
+
+  register(fn: (message: ReturnType<ReturnType<typeof createEvent>>) => void) {
     return this.bus.pipe(
       PubSub.subscribe,
       Effect.andThen((sub) =>
-        sub.pipe(
-          Queue.take,
-          Effect.tap(fn),
-          Effect.forever
-          // Effect.andThen(Effect.addFinalizer(() => Console.log('Finalizing')))
-        )
+        sub.pipe(Queue.take, Effect.tap(fn), Effect.forever)
       ),
       Effect.scoped
     );

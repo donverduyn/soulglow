@@ -7,7 +7,6 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import { Plugin, ViteDevServer } from 'vite';
 import { checker } from 'vite-plugin-checker';
 import inspect from 'vite-plugin-inspect';
-// import swc from 'vite-plugin-swc-transform';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
 import { createBrowser } from './scripts/browser';
@@ -78,7 +77,6 @@ const browser = (mode: string): Plugin => {
 };
 
 // https://vitejs.dev/config/
-// @ts-expect-error plugin options type mismatch?
 // TODO: find the regression that causes the type mismatch. Seems to be version mismatch.
 export default defineConfig(({ mode }) => ({
   build: {
@@ -110,20 +108,6 @@ export default defineConfig(({ mode }) => ({
     mode !== 'production' && process.env.CI !== 'true' && browser(mode),
     dynamicProxyPlugin(),
     tsconfigPaths(),
-    // swc({
-    //   include: ['src/**/*.ts'],
-    //   swcOptions: {
-    //     jsc: {
-    //       externalHelpers: true,
-    //       target: 'es2020',
-    //       transform: {
-    //         decoratorMetadata: true,
-    //         legacyDecorator: true,
-    //         useDefineForClassFields: false,
-    //       },
-    //     },
-    //   },
-    // }),
     react({ jsxImportSource: '@emotion/react', tsDecorators: true }),
     checker({
       eslint: {

@@ -1,27 +1,24 @@
 import * as React from 'react';
-import { Effect, pipe, Stream, Fiber, FiberId, Layer, Console } from 'effect';
+import { Effect, pipe, Stream, Fiber, FiberId, Layer } from 'effect';
 import { v4 as uuidv4 } from 'uuid';
 import type { RuntimeContext } from 'common/utils/context';
-import { a } from 'vitest/dist/suite-IbNSsUWN.js';
 
 /*
 This hook returns a function that can be called to trigger an effect.
 It returns a promise that resolves to the value of the effect.
 */
 
-// TODO: accept a function without arguments
 export function useRuntimeFn<A, E, R, T>(
   context: RuntimeContext<R>,
   fn:
+    | (() => Effect.Effect<A, E, NoInfer<R>>)
     | ((value: T) => Effect.Effect<A, E, NoInfer<R>>)
-    | Effect.Effect<A, E, NoInfer<R>>
+    | Effect.Effect<A, E, NoInfer<R>>,
+  deps: React.DependencyList
 ) {
-  // TODO: find out why fast refresh breaks LightBulb (it only works once, then it stops working). Endpoint keeps working.
-
-  const emitter = React.useMemo(() => new EventEmitter<T, A>(), [fn]);
-
-  // TODO: consider if using a straem is a good idea, because we can also pass a reference of the effect to Effect.runPromise to run it. There might be no real benefit, except for usecases that involve delays inside the effect (since the stream would buffer the events).
-
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  const safeDeps = React.useMemo(() => deps ?? [fn], deps);
+  const emitter = React.useMemo(() => new EventEmitter<T, A>(), safeDeps);
   const stream = React.useMemo(
     () =>
       pipe(
@@ -29,13 +26,12 @@ export function useRuntimeFn<A, E, R, T>(
         Stream.mapEffect(({ data, eventId }) => {
           return pipe(
             Effect.sync(() => (Effect.isEffect(fn) ? fn : fn(data))),
-            Effect.andThen(Effect.tap(emitter.resolve(eventId))),
-            Effect.andThen(Console.log({ data, eventId }))
+            Effect.andThen(Effect.tap(emitter.resolve(eventId)))
           );
         }),
         Stream.runDrain
       ),
-    [fn]
+    safeDeps
   );
 
   useRuntime(context, stream);
@@ -70,13 +66,7 @@ export const useRuntimeSync = <A, E, R>(
 ) => {
   const runtime = React.useContext(context);
   if (Layer.isLayer(runtime)) throw new Error(noRuntimeMessage);
-  const [result, setResult] = React.useState(() => runtime!.runSync(task));
-
-  React.useEffect(() => {
-    setResult(runtime!.runSync(task));
-  }, [runtime, task]);
-
-  return result;
+  return runtime!.runSync(task);
 };
 
 /* 

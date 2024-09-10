@@ -22,6 +22,7 @@ export const Slider = observer(<T extends number>(props: Props<T>) => {
     (e: Event, v: number | number[]) => void
   >((_, v) => onChange(v as T), [onChange]);
 
+  // TODO: find out why event handlers are attached on every hover, over the movable part of the slider. See devtools perf monitor.
   return (
     <MuiSlider
       className={className!}

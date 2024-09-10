@@ -1,3 +1,4 @@
+import type { Endpoint } from 'common/models/endpoint/endpoint';
 import { v4 as uuid } from 'uuid';
 
 export const createEndpoint = (overrides?: Partial<Endpoint>): Endpoint => {
@@ -9,8 +10,8 @@ export const createEndpoint = (overrides?: Partial<Endpoint>): Endpoint => {
   };
 };
 
-export type Endpoint = {
-  id: string;
-  name: string;
-  url: string;
-};
+// export type Endpoint = {
+//   id: string;
+//   name: string;
+//   url: string;
+// };

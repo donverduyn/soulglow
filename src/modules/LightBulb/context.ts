@@ -77,7 +77,6 @@ const singleItemQueue = Effect.gen(function* () {
   return queue;
 });
 
-// TODO: find out why fast refresh breaks LightBulb. Endpoint keeps working. Note that the same is true for useRuntimeFn (but this makes it work one more time, before it breaks)
 export const LightBulbRuntime = createRuntimeContext(
   pipe(
     Layer.scopedDiscard(take),
