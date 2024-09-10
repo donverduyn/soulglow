@@ -1,4 +1,4 @@
-import type { Endpoint } from './models/Endpoint';
+import type { Endpoint } from 'common/models/endpoint/endpoint';
 
 const createMessage =
   <T>(message: string) =>
