@@ -34,7 +34,7 @@ function AppComponent() {
   //   AppRuntime,
   //   Effect.scoped(
   //     Effect.gen(function* () {
-  //       const bus = yield* MessageBus;
+  //       const bus = yield* EventBus;
   //       yield* bus.publish({
   //         message: 'Hello, World!',
   //         payload: 'Hello, World!',

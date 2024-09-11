@@ -8,9 +8,9 @@ import type {
 } from '__generated/api';
 import { createRuntimeContext } from 'common/utils/context';
 import { DeviceRepoImpl } from './repos/DeviceRepo';
-import type { ColorServiceImpl } from './services/ColorService';
+import { ColorServiceImpl } from './services/ColorService';
 
-// we really shouldn't couple our dto with the api types
+// TODO: we really shouldn't couple our dto with the api types
 export type LightbulbDto = GroupState & GroupStateCommands;
 
 export enum LightMode {
@@ -51,41 +51,55 @@ export class ColorService extends Context.Tag('@Lightbulb/ColorService')<
   ColorServiceImpl
 >() {}
 
+export const LightBulbRuntime = createRuntimeContext(layer);
+
 // TODO: use service with constructor injection instead of using ApiThrottler directly
-const take = pipe(
-  Effect.gen(function* () {
-    const queue = yield* ApiThrottler;
-    const item = yield* queue.take;
-    console.log(item);
+function layer() {
+  return pipe(
+    Layer.scopedDiscard(
+      pipe(
+        Effect.gen(function* () {
+          const queue = yield* ApiThrottler;
+          const item = yield* queue.take;
+          console.log(item);
 
-    const repo = yield* DeviceRepo;
-    yield* repo.update(item);
-    yield* Effect.logDebug('Queue take', item);
-  }),
-  Effect.forever,
-  Effect.forkScoped
-);
-
-const singleItemQueue = Effect.gen(function* () {
-  const queue = yield* Queue.sliding<LightbulbDto>(1);
-  yield* Effect.addFinalizer(() =>
-    Effect.gen(function* () {
-      yield* Queue.shutdown(queue);
-      yield* Effect.logDebug('Queue shutdown');
-    })
-  );
-  return queue;
-});
-
-export const LightBulbRuntime = createRuntimeContext(
-  pipe(
-    Layer.scopedDiscard(take),
-    Layer.provideMerge(Layer.scoped(ApiThrottler, singleItemQueue)),
+          const repo = yield* DeviceRepo;
+          yield* repo.update(item);
+          yield* Effect.logDebug('Queue take', item);
+        }),
+        Effect.forever,
+        Effect.forkScoped
+      )
+    ),
+    Layer.provideMerge(
+      Layer.scoped(
+        ApiThrottler,
+        Effect.gen(function* () {
+          const queue = yield* Queue.sliding<LightbulbDto>(1);
+          yield* Effect.addFinalizer(() =>
+            Effect.gen(function* () {
+              yield* Queue.shutdown(queue);
+              yield* Effect.logDebug('Queue shutdown');
+            })
+          );
+          return queue;
+        })
+      )
+    ),
+    Layer.provideMerge(
+      Layer.effect(
+        ColorService,
+        pipe(
+          DeviceRepo,
+          Effect.andThen((repo) => new ColorServiceImpl(repo))
+        )
+      )
+    ),
     Layer.provideMerge(
       Layer.effect(
         DeviceRepo,
         Effect.sync(() => new DeviceRepoImpl())
       )
     )
-  )
-);
+  );
+}

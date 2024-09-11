@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { css } from '@mui/material/styles';
 import type { Okhsv } from 'culori';
-import { Effect, identity, pipe, Queue } from 'effect';
+import { Console, Effect, Fiber, identity, pipe, Queue, Runtime } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { State } from '__generated/api';
 import { Select } from 'common/components/Select';
@@ -11,7 +11,9 @@ import { TextField } from 'common/components/TextField';
 import { WithRuntime as WithRuntime } from 'common/hoc/withRuntime';
 import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
 import { useReturn } from 'common/hooks/useReturn';
-import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
+import { useRuntime, useRuntimeFn } from 'common/hooks/useRuntimeFn';
+import { fromLayer } from 'common/utils/context';
+import { AppRuntime, EventBus } from 'modules/App/context';
 import { OnOffSwitch } from './components/OnOffSwitch';
 import {
   LightMode,
@@ -115,25 +117,24 @@ function LightBulbComponent({
 }
 
 const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
-  // const bus = useMessageBus([]);
-
-  React.useEffect(() => {
-    // void bus.register((message) => {
-    //   console.log('message from LightBulbComponent', message);
-    // });
-  }, []);
-
-  // const getRuntime = React.useMemo(
-  //   () =>
-  //     pipe(
-  //       Effect.runtime(),
-  //       Effect.andThen(Runtime.runFork),
-  //       Effect.andThen((runFork) => runFork(Console.log('foo')))
-  //     ),
-  //   []
+  // useRuntime(
+  //   AppRuntime,
+  //   fromLayer(EventBus, (bus) =>
+  //     bus.register((event) => {
+  //       console.log('event from LightBulbComponent', event);
+  //     })
+  //   )
   // );
 
-  // useRuntime(LightBulbRuntime, getRuntime);
+  useRuntime(
+    LightBulbRuntime,
+    pipe(
+      Effect.runtime(),
+      Effect.andThen(Runtime.runFork),
+      Effect.andThen((runFork) => runFork(Console.log('foo'))),
+      Effect.andThen(Fiber.join)
+    )
+  );
 
   const bulb = useMobx(() => defaultState);
   const inputs = bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
@@ -177,7 +178,6 @@ const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         [change.name]: change.newValue,
       } as Partial<LightbulbDto>;
-      // const rgb = formatRgb({mode: ''})
       void handle(body);
     },
     [handle]

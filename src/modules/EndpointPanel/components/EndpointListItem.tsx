@@ -31,7 +31,7 @@ function EndpointListItemComponent({ endpoint }: Props) {
         css={styles.textField}
         getValue={() => endpoint.url}
         onChange={(value) => {
-          // TODO: consider using lazySet interface, for more functional aesthetics, or even better, avoid direct mutations altogether and use xstate actions.
+          // TODO: avoid direct mutations altogether and use xstate actions.
           store.update(endpoint.id, (c) => (c.url = value));
         }}
       />

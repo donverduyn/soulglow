@@ -1,11 +1,11 @@
 import React from 'react';
 import { Effect, pipe, type Layer, type ManagedRuntime } from 'effect';
 
-export const createRuntimeContext = <T>(layer: Layer.Layer<T>) => {
+export const createRuntimeContext = <T>(layer: () => Layer.Layer<T>) => {
   return React.createContext<
     ManagedRuntime.ManagedRuntime<T, never> | undefined
-    // we abuse context here to pass through the layer
-  >(layer as unknown as ManagedRuntime.ManagedRuntime<T, never>);
+    // TODO: consider keeping layer in the closure and obtain it in WithRuntime when needed. We can also modify the utility hooks to obtain the runtime from the closure instead of dropping it directly into useContext. This would avoid the need for abusing the context API here.
+  >(layer() as unknown as ManagedRuntime.ManagedRuntime<T, never>);
 };
 
 export type RuntimeContext<T> = React.Context<

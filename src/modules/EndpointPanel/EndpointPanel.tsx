@@ -7,11 +7,15 @@ import { List } from 'common/components/List';
 import { Paper } from 'common/components/Paper';
 import { WithRuntime } from 'common/hoc/withRuntime';
 import { useReturn } from 'common/hooks/useReturn';
-import { useRuntimeFn, useRuntimeSync } from 'common/hooks/useRuntimeFn';
+import {
+  useRuntime,
+  useRuntimeFn,
+  useRuntimeSync,
+} from 'common/hooks/useRuntimeFn';
 import { addEndpointRequested } from 'common/models/endpoint/events';
 import { fromLayer } from 'common/utils/context';
 import type { EventType } from 'common/utils/event';
-import { AppRuntime, MessageBus } from 'modules/App/context';
+import { AppRuntime, EventBus } from 'modules/App/context';
 import { EndpointListItem } from './components/EndpointListItem';
 import { EndpointPanelRuntime, EndpointStore } from './context';
 import { createEndpoint } from './models/Endpoint';
@@ -49,14 +53,13 @@ function EndpointPanelComponent() {
 
 function useEndpointPanel() {
   const store = useRuntimeSync(EndpointPanelRuntime, EndpointStore);
+  const r = React.useContext(EndpointPanelRuntime);
 
-  const publish = useRuntimeFn(AppRuntime, (msg: EventType<unknown>) =>
-    fromLayer(MessageBus, (bus) => bus.publish(msg))
-  );
-  const register = useRuntimeFn(
+  // TODO: find a way to add the runtime associated with this component to the dependency array of the useRuntimeFn. This is necessary to ensure that the functions are re-created when the runtime changes of this component, not a runtime of the parent component. We might need to create a linked list of runtimes where each runtime has a reference to the parent runtime. This way we always have a reference to the runtime of the component that hosts the useRuntimeFn. We can then use the linked list to find other runtimes based on the context that is provided to the useRuntimeFn. This also holds for the useRuntimeSync and useRuntime hooks as they also rely on the context for rerendering.
+  const publish = useRuntimeFn(
     AppRuntime,
-    (fn: (message: EventType<unknown>) => void) =>
-      fromLayer(MessageBus, (bus) => bus.register(fn))
+    (msg: EventType<unknown>) => fromLayer(EventBus, (bus) => bus.publish(msg)),
+    [r]
   );
 
   const addEndpoint = React.useCallback(() => {
@@ -64,16 +67,18 @@ function useEndpointPanel() {
     void publish(addEndpointRequested(endpoint));
   }, [publish]);
 
-  React.useEffect(() => {
-    void register((message) => {
-      console.log(message);
-      // @ts-expect-error message.payload is not typed
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      store.add(message.payload.endpoint);
-    });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [register]);
+  useRuntime(
+    AppRuntime,
+    fromLayer(EventBus, (bus) =>
+      bus.register((message) => {
+        console.log(message);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error message.payload is not typed
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        store.add(message.payload.endpoint);
+      })
+    )
+  );
 
   return useReturn({ addEndpoint });
 }

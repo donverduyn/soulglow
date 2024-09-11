@@ -1,5 +1,5 @@
 import { action, computed, observable, type IComputedValue } from 'mobx';
-
+import { v4 as uuid } from 'uuid';
 interface Identifiable {
   id: string;
 }
@@ -8,6 +8,7 @@ interface EntityStore<T extends Identifiable> {
   add: (entity: T) => void;
   count: IComputedValue<number>;
   get: (id: string) => T | null;
+  id: string;
   indexOf: (id: string) => number;
   list: IComputedValue<T[]>;
   remove: (id: string) => void;
@@ -25,6 +26,7 @@ export const createEntityStore = <T extends Identifiable>() => {
     add: action((entity) => store.set(entity.id, entity)),
     count: computed(() => store.size),
     get: (id) => store.get(id) ?? null,
+    id: uuid(),
     indexOf: (id: string) => Array.from(store.keys()).indexOf(id),
     list: computed(() => Array.from(store.values())),
     remove: action((id) => store.delete(id)),

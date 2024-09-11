@@ -17,9 +17,10 @@ export function useRuntimeFn<A, E, R, T>(
   deps: React.DependencyList = []
 ) {
   const runtime = React.useContext(context);
-  const safeDeps = React.useMemo(() => [...deps, runtime], [...deps, runtime]);
-  const emitter = React.useMemo(() => new EventEmitter<T, A>(), safeDeps);
-  const stream = React.useMemo(
+  const finalDeps = [runtime, ...deps];
+
+  const emitter = React.useMemo(() => new EventEmitter<T, A>(), finalDeps);
+  const effect = React.useMemo(
     () =>
       pipe(
         Stream.fromAsyncIterable(createAsyncIterator(emitter), () => {}),
@@ -31,10 +32,10 @@ export function useRuntimeFn<A, E, R, T>(
         }),
         Stream.runDrain
       ),
-    safeDeps
+    finalDeps
   );
 
-  useRuntime(context, stream);
+  useRuntime(context, effect, deps);
   return emitter.emit as IsUnknown<T> extends true
     ? () => Promise<A>
     : (value: T) => Promise<A>;
@@ -51,30 +52,36 @@ const noRuntimeMessage = `No runtime available.
 
 export const useRuntime = <A, E, R>(
   context: RuntimeContext<R>,
-  task: Effect.Effect<A, E, NoInfer<R>>
+  effect: Effect.Effect<A, E, NoInfer<R>>,
+  deps: React.DependencyList = []
 ) => {
   const runtime = React.useContext(context);
   if (Layer.isLayer(runtime)) throw new Error(noRuntimeMessage);
 
   React.useEffect(() => {
-    const f = task.pipe(runtime!.runFork);
-    return () => Effect.runSync(f.pipe(Fiber.interruptAsFork(FiberId.none)));
-  }, [runtime, task]);
+    const F = effect.pipe(runtime!.runFork);
+    return () => Effect.runSync(F.pipe(Fiber.interruptAsFork(FiberId.none)));
+  }, [runtime, ...deps]);
 };
+
+/*
+This hook is used to run an effect synchronously in a runtime and return the value of the effect.
+It takes a context and an effect and runs the effect in the runtime provided by the context.
+*/
 
 export const useRuntimeSync = <A, E, R>(
   context: RuntimeContext<R>,
-  task: Effect.Effect<A, E, NoInfer<R>>
+  effect: Effect.Effect<A, E, NoInfer<R>>,
+  deps: React.DependencyList = []
 ) => {
   const runtime = React.useContext(context);
   if (Layer.isLayer(runtime)) throw new Error(noRuntimeMessage);
-  const [result] = React.useState(() => runtime!.runSync(task));
-  return result;
+  return React.useMemo(() => runtime!.runSync(effect), [...deps, runtime]);
 };
 
 /* 
-This is converting push based events to a pull based stream, where the consumer has control through the provided effect.
-Every call to the function returned from useRuntimeFn, returns a promise with the value of the associated effect if it succeeds. 
+This is converting push based events to a pull based stream, 
+where the consumer has control through the provided effect.
 */
 
 class EventEmitter<T, A> {
