@@ -1,17 +1,13 @@
 import { Effect, PubSub, Queue } from 'effect';
-import type { createEvent } from 'common/utils/event';
+import type { EventType } from 'common/utils/event';
 
 export class MessageBusService {
-  constructor(
-    private readonly bus: PubSub.PubSub<
-      ReturnType<ReturnType<typeof createEvent>>
-    >
-  ) {}
+  constructor(private readonly bus: PubSub.PubSub<EventType<unknown>>) {}
 
-  publish = (message: ReturnType<ReturnType<typeof createEvent>>) =>
+  publish = (message: EventType<unknown>) =>
     this.bus.pipe(PubSub.publish(message));
 
-  register(fn: (message: ReturnType<ReturnType<typeof createEvent>>) => void) {
+  register(fn: (message: EventType<unknown>) => void) {
     return this.bus.pipe(
       PubSub.subscribe,
       Effect.andThen((sub) =>

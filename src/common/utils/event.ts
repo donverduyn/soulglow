@@ -24,3 +24,7 @@ export const createEvent =
       payload: fn(arg, eventMetadata),
     };
   };
+
+export type EventType<R, T = never, S extends string = string> = ReturnType<
+  ReturnType<typeof createEvent<S, T, R>>
+>;

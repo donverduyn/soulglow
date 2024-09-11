@@ -8,9 +8,8 @@ import { Radio } from 'common/components/Radio';
 import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
 import { useRuntimeSync } from 'common/hooks/useRuntimeFn';
-import { EndpointPanelRuntime, EndpointStore } from '../context';
 import type { Endpoint } from 'common/models/endpoint/endpoint';
-
+import { EndpointPanelRuntime, EndpointStore } from '../context';
 
 interface Props {
   readonly endpoint: Endpoint;

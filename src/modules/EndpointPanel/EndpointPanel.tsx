@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { css } from '@mui/material/styles';
-import { Effect, pipe } from 'effect';
+import { pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'common/components/Button';
 import { List } from 'common/components/List';
@@ -10,30 +10,20 @@ import { useReturn } from 'common/hooks/useReturn';
 import { useRuntimeFn, useRuntimeSync } from 'common/hooks/useRuntimeFn';
 import { addEndpointRequested } from 'common/models/endpoint/events';
 import { fromLayer } from 'common/utils/context';
-import type { createEvent } from 'common/utils/event';
+import type { EventType } from 'common/utils/event';
 import { AppRuntime, MessageBus } from 'modules/App/context';
 import { EndpointListItem } from './components/EndpointListItem';
-import { EndpointPanelRuntime, EndpointStore, Hello } from './context';
+import { EndpointPanelRuntime, EndpointStore } from './context';
 import { createEndpoint } from './models/Endpoint';
 
 export const EndpointPanel = pipe(
   observer(EndpointPanelComponent),
   WithRuntime(EndpointPanelRuntime)
-  // TODO: consider using WithSubscriber for cross cutting concerns between runtimes (subscribing to root event bus)
 );
 
 function EndpointPanelComponent() {
   const store = useRuntimeSync(EndpointPanelRuntime, EndpointStore);
   const { addEndpoint } = useEndpointPanel();
-
-  const hello = useRuntimeFn(
-    EndpointPanelRuntime,
-    () => Hello.pipe(Effect.andThen((s) => s.sayHello)),
-    []
-  );
-
-  console.log('hello');
-  void hello(null);
 
   return (
     <Paper css={styles.root}>
@@ -60,33 +50,30 @@ function EndpointPanelComponent() {
 function useEndpointPanel() {
   const store = useRuntimeSync(EndpointPanelRuntime, EndpointStore);
 
+  const publish = useRuntimeFn(AppRuntime, (msg: EventType<unknown>) =>
+    fromLayer(MessageBus, (bus) => bus.publish(msg))
+  );
   const register = useRuntimeFn(
     AppRuntime,
-    (callback: <T>(message: T) => void) =>
-      fromLayer(MessageBus, (bus) => bus.register(callback)),
-    [store]
-  );
-
-  React.useEffect(() => {
-    void register((message) => {
-      // @ts-expect-error, not yet narrowed with actions
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-      store.add(message.payload.endpoint);
-    });
-  }, [register]);
-
-  const publish = useRuntimeFn(
-    AppRuntime,
-    (msg: ReturnType<ReturnType<typeof createEvent>>) =>
-      fromLayer(MessageBus, (bus) => bus.publish(msg)),
-    []
+    (fn: (message: EventType<unknown>) => void) =>
+      fromLayer(MessageBus, (bus) => bus.register(fn))
   );
 
   const addEndpoint = React.useCallback(() => {
     const endpoint = createEndpoint();
-    console.log('add endpoint', endpoint);
     void publish(addEndpointRequested(endpoint));
   }, [publish]);
+
+  React.useEffect(() => {
+    void register((message) => {
+      console.log(message);
+      // @ts-expect-error message.payload is not typed
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      store.add(message.payload.endpoint);
+    });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [register]);
 
   return useReturn({ addEndpoint });
 }

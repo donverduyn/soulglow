@@ -39,7 +39,7 @@ const useRuntimeFactory = <T,>(layer: Layer.Layer<T>) => {
     ManagedRuntime.make(layer)
   );
 
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     let current = runtime;
     if (disposed.current) {
       current = ManagedRuntime.make(layer);

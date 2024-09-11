@@ -13,10 +13,10 @@ import {
   Take,
   Chunk,
 } from 'effect';
+import type { Endpoint } from 'common/models/endpoint/endpoint';
 import { createRuntimeContext } from 'common/utils/context';
 import { createEntityStore, withSelected } from 'common/utils/entity';
 import { createEndpoint } from './models/Endpoint';
-import type { Endpoint } from 'common/models/endpoint/endpoint';
 
 const PREFIX = '@EndpointPanel';
 
@@ -63,8 +63,8 @@ class HelloService {
 
   sayHello = pipe(
     this.world.sayWorld,
-    Effect.andThen((t) => String.concat('Hello ', t)),
-    Effect.andThen(Console.log)
+    Effect.andThen((t) => String.concat('Hello ', t))
+    // Effect.andThen(Console.log)
   );
 
   showCount() {

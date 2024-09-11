@@ -1,6 +1,6 @@
 import { pipe, Layer, Context, PubSub, Effect } from 'effect';
 import { createRuntimeContext } from 'common/utils/context';
-import type { createEvent } from 'common/utils/event';
+import type { EventType } from 'common/utils/event';
 import { MessageBusService } from 'modules/App/services/MessageBusService';
 // import { DevTools } from '@effect/experimental';
 
@@ -24,14 +24,10 @@ const layer = pipe(
   Layer.effect(
     MessageBus,
     pipe(
-      PubSub.unbounded<ReturnType<ReturnType<typeof createEvent>>>({
-        replay: 0,
-      }),
+      PubSub.unbounded<EventType<unknown>>({ replay: 0 }),
       Effect.andThen((bus) => new MessageBusService(bus))
     )
   )
 );
-
-// TODO: consider using Stream.asyncPush with Effect.acquireRelease, to setup an actor with xState, such that the Stream can be made available with an injection token within the layer responsible for the store initialization. This way we can update entity stores from xState.
 
 export const AppRuntime = createRuntimeContext(layer);

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Effect, pipe, Stream, Fiber, FiberId, Layer } from 'effect';
+import type { IsUnknown } from 'type-fest';
 import { v4 as uuidv4 } from 'uuid';
 import type { RuntimeContext } from 'common/utils/context';
 
@@ -11,13 +12,12 @@ It returns a promise that resolves to the value of the effect.
 export function useRuntimeFn<A, E, R, T>(
   context: RuntimeContext<R>,
   fn:
-    | (() => Effect.Effect<A, E, NoInfer<R>>)
     | ((value: T) => Effect.Effect<A, E, NoInfer<R>>)
     | Effect.Effect<A, E, NoInfer<R>>,
-  deps: React.DependencyList
+  deps: React.DependencyList = []
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  const safeDeps = React.useMemo(() => deps ?? [fn], deps);
+  const runtime = React.useContext(context);
+  const safeDeps = React.useMemo(() => [...deps, runtime], [...deps, runtime]);
   const emitter = React.useMemo(() => new EventEmitter<T, A>(), safeDeps);
   const stream = React.useMemo(
     () =>
@@ -35,7 +35,9 @@ export function useRuntimeFn<A, E, R, T>(
   );
 
   useRuntime(context, stream);
-  return emitter.emit;
+  return emitter.emit as IsUnknown<T> extends true
+    ? () => Promise<A>
+    : (value: T) => Promise<A>;
 }
 
 /*
@@ -66,7 +68,8 @@ export const useRuntimeSync = <A, E, R>(
 ) => {
   const runtime = React.useContext(context);
   if (Layer.isLayer(runtime)) throw new Error(noRuntimeMessage);
-  return runtime!.runSync(task);
+  const [result] = React.useState(() => runtime!.runSync(task));
+  return result;
 };
 
 /* 
@@ -79,9 +82,7 @@ class EventEmitter<T, A> {
   private resolvers: Map<string, (result: A) => void> = new Map();
   private eventQueue: Array<{ data: T; eventId: string }> = [];
 
-  // TODO: instead of using null, and casting it back to T,
-  // TODO: create an override that allows zero arguments
-  emit: ((data: T) => Promise<A>) | (() => Promise<A>) = (data) => {
+  emit = (data: T): Promise<A> => {
     const eventId = uuidv4();
     let resolver: (result: A) => void;
     const promise = new Promise<A>((resolve) => {

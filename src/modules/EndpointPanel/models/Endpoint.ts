@@ -1,5 +1,5 @@
-import type { Endpoint } from 'common/models/endpoint/endpoint';
 import { v4 as uuid } from 'uuid';
+import type { Endpoint } from 'common/models/endpoint/endpoint';
 
 export const createEndpoint = (overrides?: Partial<Endpoint>): Endpoint => {
   const id = overrides?.id ?? uuid();
