@@ -9,15 +9,18 @@ import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
 import { useRuntimeSync } from 'common/hooks/useRuntimeFn';
 import type { Endpoint } from 'common/models/endpoint/endpoint';
+import { updateEndpointRequested } from 'common/models/endpoint/events';
+import type { Publishable } from 'common/utils/event';
 import { EndpointPanelRuntime, EndpointStore } from '../context';
 
-interface Props {
+interface Props extends Publishable {
   readonly endpoint: Endpoint;
 }
 
 export const EndpointListItem = observer(EndpointListItemComponent);
 
-function EndpointListItemComponent({ endpoint }: Props) {
+function EndpointListItemComponent({ endpoint, publish }: Props) {
+  // TODO: think about the cost of holding a memoized reference to the store for each item
   const store = useRuntimeSync(EndpointPanelRuntime, EndpointStore);
   const checked = computed(() => store.selectedId.get() === endpoint.id);
 
@@ -31,8 +34,10 @@ function EndpointListItemComponent({ endpoint }: Props) {
         css={styles.textField}
         getValue={() => endpoint.url}
         onChange={(value) => {
-          // TODO: avoid direct mutations altogether and use xstate actions.
-          store.update(endpoint.id, (c) => (c.url = value));
+          // TODO: find out why updates are blocked when holding down keys. Only happens when characters are added, not when removed. Might have to do with how the updated value is passed to the store.
+          void publish(
+            updateEndpointRequested({ id: endpoint.id, url: value })
+          );
         }}
       />
       <IconButton

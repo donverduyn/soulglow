@@ -13,7 +13,7 @@ export const removeEndpointRequested = createEvent(
 
 export const updateEndpointRequested = createEvent(
   'UPDATE_ENDPOINT_REQUESTED',
-  (endpoint: Endpoint) => ({ endpoint })
+  (endpoint: Partial<Endpoint>) => ({ endpoint })
 );
 
 export const selectEndpointRequested = createEvent(

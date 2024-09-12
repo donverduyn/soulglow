@@ -36,8 +36,9 @@ function AppComponent() {
   //     Effect.gen(function* () {
   //       const bus = yield* EventBus;
   //       yield* bus.publish({
-  //         message: 'Hello, World!',
-  //         payload: 'Hello, World!',
+  //         event: { source: 'foo', timestamp: Date.now() },
+  //         name: 'AppStarted',
+  //         payload: {},
   //       });
   //       yield* Effect.sleep(1000);
   //     }).pipe(Effect.forever)

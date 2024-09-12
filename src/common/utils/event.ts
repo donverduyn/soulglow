@@ -8,6 +8,10 @@ interface TimeRelatable {
 
 interface EventMetadata extends Locatable, TimeRelatable {}
 
+export interface Publishable<R = unknown> {
+  readonly publish: (value: EventType<unknown>) => R;
+}
+
 export const createEventMetadata = (source: string): EventMetadata => ({
   source,
   timestamp: Date.now(),

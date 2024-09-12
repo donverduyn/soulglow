@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { css } from '@mui/material/styles';
 import type { Okhsv } from 'culori';
-import { Console, Effect, Fiber, identity, pipe, Queue, Runtime } from 'effect';
+import { identity, pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { State } from '__generated/api';
 import { Select } from 'common/components/Select';
@@ -11,9 +11,8 @@ import { TextField } from 'common/components/TextField';
 import { WithRuntime as WithRuntime } from 'common/hoc/withRuntime';
 import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
 import { useReturn } from 'common/hooks/useReturn';
-import { useRuntime, useRuntimeFn } from 'common/hooks/useRuntimeFn';
+import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
 import { fromLayer } from 'common/utils/context';
-import { AppRuntime, EventBus } from 'modules/App/context';
 import { OnOffSwitch } from './components/OnOffSwitch';
 import {
   LightMode,
@@ -120,30 +119,18 @@ const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
   // useRuntime(
   //   AppRuntime,
   //   fromLayer(EventBus, (bus) =>
-  //     bus.register((event) => {
-  //       console.log('event from LightBulbComponent', event);
-  //     })
+  //     bus.register((event) =>
+  //       Console.log('event from LightBulbComponent', event)
+  //     )
   //   )
   // );
-
-  useRuntime(
-    LightBulbRuntime,
-    pipe(
-      Effect.runtime(),
-      Effect.andThen(Runtime.runFork),
-      Effect.andThen((runFork) => runFork(Console.log('foo'))),
-      Effect.andThen(Fiber.join)
-    )
-  );
 
   const bulb = useMobx(() => defaultState);
   const inputs = bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
 
-  const handle = useRuntimeFn(
-    LightBulbRuntime,
-    (body: Partial<LightbulbDto>) =>
-      ApiThrottler.pipe(Effect.andThen(Queue.offer(body))),
-    []
+  // TODO: convert to event and use runtime to handle the event
+  const handle = useRuntimeFn(LightBulbRuntime, (body: Partial<LightbulbDto>) =>
+    fromLayer(ApiThrottler, (queue) => queue.offer(body))
   );
 
   // useRuntime(

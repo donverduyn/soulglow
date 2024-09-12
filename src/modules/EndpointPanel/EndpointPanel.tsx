@@ -1,33 +1,48 @@
 import * as React from 'react';
 import { css } from '@mui/material/styles';
-import { pipe } from 'effect';
+import { pipe, Queue } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'common/components/Button';
 import { List } from 'common/components/List';
 import { Paper } from 'common/components/Paper';
 import { WithRuntime } from 'common/hoc/withRuntime';
 import { useReturn } from 'common/hooks/useReturn';
-import {
-  useRuntime,
-  useRuntimeFn,
-  useRuntimeSync,
-} from 'common/hooks/useRuntimeFn';
+import { useRuntimeSync } from 'common/hooks/useRuntimeFn';
 import { addEndpointRequested } from 'common/models/endpoint/events';
 import { fromLayer } from 'common/utils/context';
-import type { EventType } from 'common/utils/event';
+import type { EventType, Publishable } from 'common/utils/event';
 import { AppRuntime, EventBus } from 'modules/App/context';
 import { EndpointListItem } from './components/EndpointListItem';
-import { EndpointPanelRuntime, EndpointStore } from './context';
+import { EndpointPanelRuntime, EndpointStore, InboundQueue } from './context';
 import { createEndpoint } from './models/Endpoint';
 
+interface Props extends Publishable {}
+
 export const EndpointPanel = pipe(
-  observer(EndpointPanelComponent),
-  WithRuntime(EndpointPanelRuntime)
+  observer(EndpointPanelComponent as () => JSX.Element),
+  WithRuntime(EndpointPanelRuntime, ({ inject, attachTo }) => {
+    //
+    inject(
+      AppRuntime,
+      (runFork): Props => ({
+        publish: (msg: EventType<unknown>) =>
+          runFork(fromLayer(EventBus, (bus) => bus.publish(msg))),
+      })
+    );
+    //
+    attachTo(AppRuntime, (runFork) =>
+      fromLayer(EventBus, (bus) =>
+        bus.register((event) =>
+          runFork(fromLayer(InboundQueue, Queue.offer(event)))
+        )
+      )
+    );
+  })
 );
 
-function EndpointPanelComponent() {
+function EndpointPanelComponent(props: Props) {
   const store = useRuntimeSync(EndpointPanelRuntime, EndpointStore);
-  const { addEndpoint } = useEndpointPanel();
+  const { addEndpoint } = useEndpointPanel(props);
 
   return (
     <Paper css={styles.root}>
@@ -37,6 +52,7 @@ function EndpointPanelComponent() {
             <EndpointListItem
               key={endpoint.id}
               endpoint={endpoint}
+              publish={props.publish}
             />
           ))
         }
@@ -51,34 +67,11 @@ function EndpointPanelComponent() {
   );
 }
 
-function useEndpointPanel() {
-  const store = useRuntimeSync(EndpointPanelRuntime, EndpointStore);
-  const r = React.useContext(EndpointPanelRuntime);
-
-  // TODO: find a way to add the runtime associated with this component to the dependency array of the useRuntimeFn. This is necessary to ensure that the functions are re-created when the runtime changes of this component, not a runtime of the parent component. We might need to create a linked list of runtimes where each runtime has a reference to the parent runtime. This way we always have a reference to the runtime of the component that hosts the useRuntimeFn. We can then use the linked list to find other runtimes based on the context that is provided to the useRuntimeFn. This also holds for the useRuntimeSync and useRuntime hooks as they also rely on the context for rerendering.
-  const publish = useRuntimeFn(
-    AppRuntime,
-    (msg: EventType<unknown>) => fromLayer(EventBus, (bus) => bus.publish(msg)),
-    [r]
-  );
-
+function useEndpointPanel(props: Props) {
   const addEndpoint = React.useCallback(() => {
     const endpoint = createEndpoint();
-    void publish(addEndpointRequested(endpoint));
-  }, [publish]);
-
-  useRuntime(
-    AppRuntime,
-    fromLayer(EventBus, (bus) =>
-      bus.register((message) => {
-        console.log(message);
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error message.payload is not typed
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        store.add(message.payload.endpoint);
-      })
-    )
-  );
+    void props.publish(addEndpointRequested(endpoint));
+  }, [props]);
 
   return useReturn({ addEndpoint });
 }

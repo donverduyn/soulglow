@@ -12,6 +12,8 @@ export type RuntimeContext<T> = React.Context<
   ManagedRuntime.ManagedRuntime<T, never> | undefined
 >;
 
+export type GetContextType<T> = T extends RuntimeContext<infer U> ? U : never;
+
 export const fromLayer = <A, E, R, TResult>(
   layer: Effect.Effect<A, E, R>,
   cb: (arg: A) => TResult

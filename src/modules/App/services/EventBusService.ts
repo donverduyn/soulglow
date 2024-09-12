@@ -8,11 +8,11 @@ export class EventBusService {
     return this.bus.pipe(PubSub.publish(event));
   };
 
-  register(fn: (event: EventType<unknown>) => void) {
+  register<R>(fn: (event: EventType<unknown>) => R) {
     return this.bus.pipe(
       PubSub.subscribe,
       Effect.andThen((sub) =>
-        sub.pipe(Queue.take, Effect.tap(fn), Effect.forever)
+        sub.pipe(Queue.take, Effect.andThen(fn), Effect.forever)
       ),
       Effect.scoped
     );
