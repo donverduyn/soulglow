@@ -1,3 +1,5 @@
+import type { RuntimeFiber } from 'effect/Fiber';
+
 interface Locatable {
   source: string;
 }
@@ -8,7 +10,7 @@ interface TimeRelatable {
 
 interface EventMetadata extends Locatable, TimeRelatable {}
 
-export interface Publishable<R = unknown> {
+export interface Publishable<R = RuntimeFiber<boolean>> {
   readonly publish: (value: EventType<unknown>) => R;
 }
 

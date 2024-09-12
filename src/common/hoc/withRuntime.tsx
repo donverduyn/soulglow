@@ -43,7 +43,7 @@ export const WithRuntime =
       >(
         context: R1,
         factory: F1
-      ) => void;
+      ) => ReturnType<F1>;
     }) => void
   ) =>
   <P,>(Component: React.FC<P>) => {
@@ -71,7 +71,10 @@ export const WithRuntime =
             // eslint-disable-next-line react-hooks/rules-of-hooks
             const runtime = React.useContext(context);
             if (Layer.isLayer(runtime)) throw new Error('No runtime found.');
-            Object.assign(injectedProps, factory(runtime!.runFork));
+            return Object.assign(
+              injectedProps,
+              factory(runtime!.runFork)
+            ) as ReturnType<typeof factory>;
           },
         });
 

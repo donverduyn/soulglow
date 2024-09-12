@@ -9,7 +9,6 @@ import {
   Runtime,
   Queue,
   Take,
-  Console,
 } from 'effect';
 import type { Endpoint } from 'common/models/endpoint/endpoint';
 import { createRuntimeContext } from 'common/utils/context';
@@ -66,17 +65,15 @@ export function layer() {
 
         const consumer = pipe(
           Queue.take(queue),
-          Effect.tap(Console.log),
+          Effect.tap(Effect.logInfo),
           Effect.andThen((event) => {
             // TODO: use xstate to handle side effects
             if (event.name === 'ADD_ENDPOINT_REQUESTED') {
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-expect-error event.payload is not typed
               // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
               store.add(event.payload.endpoint);
             }
             if (event.name === 'UPDATE_ENDPOINT_REQUESTED') {
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-expect-error event.payload is not typed
               const endpoint = event.payload.endpoint as Endpoint;
               store.update(endpoint.id, (c) => (c.url = endpoint.url));

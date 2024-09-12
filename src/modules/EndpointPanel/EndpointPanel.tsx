@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { css } from '@mui/material/styles';
-import { pipe, Queue } from 'effect';
+import { flow, pipe, Queue } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'common/components/Button';
 import { List } from 'common/components/List';
@@ -16,19 +16,17 @@ import { EndpointListItem } from './components/EndpointListItem';
 import { EndpointPanelRuntime, EndpointStore, InboundQueue } from './context';
 import { createEndpoint } from './models/Endpoint';
 
-interface Props extends Publishable {}
+interface Props {}
+interface InnerProps extends Props, Publishable {}
 
 export const EndpointPanel = pipe(
-  observer(EndpointPanelComponent as () => JSX.Element),
+  observer(EndpointPanelComponent as (props: Props) => JSX.Element),
   WithRuntime(EndpointPanelRuntime, ({ inject, attachTo }) => {
     //
-    inject(
-      AppRuntime,
-      (runFork): Props => ({
-        publish: (msg: EventType<unknown>) =>
-          runFork(fromLayer(EventBus, (bus) => bus.publish(msg))),
-      })
-    );
+    inject(AppRuntime, (runFork) => ({
+      publish: (msg: EventType<unknown>) =>
+        runFork(fromLayer(EventBus, (bus) => bus.publish(msg))),
+    })) satisfies InnerProps;
     //
     attachTo(AppRuntime, (runFork) =>
       fromLayer(EventBus, (bus) =>
@@ -40,7 +38,7 @@ export const EndpointPanel = pipe(
   })
 );
 
-function EndpointPanelComponent(props: Props) {
+function EndpointPanelComponent(props: InnerProps) {
   const store = useRuntimeSync(EndpointPanelRuntime, EndpointStore);
   const { addEndpoint } = useEndpointPanel(props);
 
@@ -67,11 +65,11 @@ function EndpointPanelComponent(props: Props) {
   );
 }
 
-function useEndpointPanel(props: Props) {
-  const addEndpoint = React.useCallback(() => {
-    const endpoint = createEndpoint();
-    void props.publish(addEndpointRequested(endpoint));
-  }, [props]);
+function useEndpointPanel(props: InnerProps) {
+  const addEndpoint = React.useMemo(
+    () => flow(createEndpoint, addEndpointRequested, props.publish),
+    [props]
+  );
 
   return useReturn({ addEndpoint });
 }

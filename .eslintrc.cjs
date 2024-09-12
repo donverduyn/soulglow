@@ -86,10 +86,10 @@ module.exports = {
           'warn',
           { ignoreArrowShorthand: true },
         ],
-        '@typescript-eslint/no-empty-interface': [
+        '@typescript-eslint/no-empty-object-type': [
           'error',
           {
-            allowSingleExtends: true,
+            allowInterfaces: 'always',
           },
         ],
         '@typescript-eslint/no-floating-promises': [
