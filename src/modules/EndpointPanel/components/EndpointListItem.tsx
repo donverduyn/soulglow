@@ -20,7 +20,7 @@ interface Props extends Publishable {
 export const EndpointListItem = observer(EndpointListItemComponent);
 
 function EndpointListItemComponent({ endpoint, publish }: Props) {
-  // TODO: think about the cost of holding a memoized reference to the store for each item
+  // TODO: obviously we don't need the store here if we use events to update the store. in that case we just publish the event and the store will update itself.
   const store = useRuntimeSync(EndpointPanelRuntime, EndpointStore);
   const checked = computed(() => store.selectedId.get() === endpoint.id);
 
@@ -28,6 +28,7 @@ function EndpointListItemComponent({ endpoint, publish }: Props) {
     <Stack css={styles.root}>
       <Radio
         getValue={() => checked.get()}
+        name={`select_${endpoint.id}`}
         onChange={() => store.selectById(endpoint.id)}
       />
       <TextField
@@ -36,7 +37,10 @@ function EndpointListItemComponent({ endpoint, publish }: Props) {
         onChange={(value) => {
           // TODO: find out why updates are blocked when holding down keys. Only happens when characters are added, not when removed. Might have to do with how the updated value is passed to the store.
           void publish(
-            updateEndpointRequested({ id: endpoint.id, url: value })
+            updateEndpointRequested(
+              { id: endpoint.id, url: value },
+              { source: 'EndpointListItem' }
+            )
           );
         }}
       />

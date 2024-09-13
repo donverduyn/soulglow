@@ -22,6 +22,7 @@ export const OnOffSwitch: React.FC<Props> = ({
       <Typography>Off</Typography>
       <Toggle
         getValue={getValue}
+        name='on_off_switch'
         onChange={onChange}
       />
       <Typography>On</Typography>

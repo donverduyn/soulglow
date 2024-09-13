@@ -22,12 +22,14 @@ export const AppRuntime = createRuntimeContext(layer);
 
 function layer() {
   return pipe(
-    Layer.effect(
+    Layer.scoped(
       EventBus,
-      pipe(
-        PubSub.unbounded<EventType<unknown>>({ replay: 0 }),
-        Effect.andThen((bus) => new EventBusService(bus))
-      )
+      Effect.gen(function* () {
+        const bus = yield* PubSub.unbounded<EventType<unknown>>({
+          replay: Number.POSITIVE_INFINITY,
+        });
+        return new EventBusService(bus);
+      })
     )
   );
 }

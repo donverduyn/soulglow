@@ -3,16 +3,18 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, css } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { formatRgb, type Okhsv } from 'culori';
-import { pipe } from 'effect';
+import { Effect, pipe } from 'effect';
 import { observable } from 'mobx';
 import { Stack } from 'common/components/Stack';
+import { Toggle } from 'common/components/Toggle';
 import { WithRuntime } from 'common/hoc/withRuntime';
 import { useMobx } from 'common/hooks/useMobx';
-import { AppRuntime } from 'modules/App/context';
+import { useRuntime } from 'common/hooks/useRuntimeFn';
+import { fromLayer } from 'common/utils/context';
+import { AppRuntime, EventBus } from 'modules/App/context';
 import { EndpointPanel } from 'modules/EndpointPanel/EndpointPanel';
 import { LightBulb } from 'modules/LightBulb/LightBulb';
 import { PaletteViewer } from 'modules/PaletteViewer/PaletteViewer';
-// import { TestButton } from 'modules/TestButton/TestButton';
 import { darkTheme } from '../../theme';
 
 const baseColor: Okhsv = {
@@ -30,27 +32,22 @@ function AppComponent() {
     color: observable.ref,
   });
 
-  // useRuntime(
-  //   AppRuntime,
-  //   Effect.scoped(
-  //     Effect.gen(function* () {
-  //       const bus = yield* EventBus;
-  //       yield* bus.publish({
-  //         event: { source: 'foo', timestamp: Date.now() },
-  //         name: 'AppStarted',
-  //         payload: {},
-  //       });
-  //       yield* Effect.sleep(1000);
-  //     }).pipe(Effect.forever)
-  //   )
-  // );
+  useRuntime(
+    AppRuntime,
+    fromLayer(EventBus, (bus) => bus.register(Effect.logInfo))
+  );
+  const [isVisible, setIsVisible] = React.useState(true);
 
   return (
     <ThemeProvider theme={prefersDarkMode ? darkTheme : darkTheme}>
       <CssBaseline />
       <Stack css={appStyles.root}>
-        {/* <TestButton /> */}
-        <EndpointPanel />
+        <Toggle
+          getValue={() => isVisible}
+          name='endpoint_panel_toggle'
+          onChange={() => setIsVisible((current) => !current)}
+        />
+        {isVisible ? <EndpointPanel /> : null}
         <LightBulb
           onChange={state.set('color')}
           getStyle={state.lazyGet('color', (value) => ({

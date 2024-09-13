@@ -88,6 +88,7 @@ function LightBulbComponent({
           getValue={bulb.lazyGet('bulb_mode')}
           items={MODE_ITEMS}
           label='Mode'
+          name='bulb_mode'
           onChange={bulb.set('bulb_mode')}
         />
         {inputs.map((input) => (

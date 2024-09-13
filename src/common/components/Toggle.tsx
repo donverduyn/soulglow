@@ -4,11 +4,12 @@ import { observer } from 'mobx-react-lite';
 
 interface Props extends DefaultProps {
   readonly getValue: () => boolean;
+  readonly name: string;
   readonly onChange: (value: boolean) => void;
 }
 
 export const Toggle: React.FC<Props> = observer(
-  ({ className, getValue, onChange }) => {
+  ({ className, getValue, onChange, name }) => {
     //
     const handleChange = React.useCallback<
       (e: React.ChangeEvent<HTMLInputElement>, v: boolean) => void
@@ -19,7 +20,7 @@ export const Toggle: React.FC<Props> = observer(
         checked={getValue()}
         className={className!}
         color='primary'
-        inputProps={{ 'aria-label': 'controlled' }}
+        name={name}
         onChange={handleChange}
       />
     );

@@ -6,7 +6,7 @@ interface TimeRelatable {
   timestamp: number;
 }
 
-interface EventMetadata extends Locatable, TimeRelatable {}
+interface EventMetadata extends Locatable, Partial<TimeRelatable> {}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface Publishable<R = any> {

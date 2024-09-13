@@ -43,7 +43,6 @@ export const TextField = observer(
         value={value()}
         variant='outlined'
         inputProps={{
-          'aria-labelledby': 'number-input',
           css: textFieldStyles.input,
           inputMode: 'numeric',
           max: 255,

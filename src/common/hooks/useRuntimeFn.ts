@@ -54,7 +54,7 @@ const noRuntimeMessage = `No runtime available.
 
 export const useRuntime = <A, E, R>(
   context: RuntimeContext<R>,
-  effect: Effect.Effect<A, E, NoInfer<R>>,
+  effect: Effect.Effect<A, E, R>,
   deps: React.DependencyList = []
 ) => {
   const runtime = React.useContext(context);

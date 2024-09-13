@@ -14,17 +14,35 @@ interface SelectProps<TValue> extends DefaultProps {
   readonly getValue: (() => TValue) | TValue;
   readonly items: Item<TValue>[];
   readonly label: string;
+  readonly name: string;
   readonly onChange: (value: TValue) => void;
   readonly renderItem?: (item: Item<TValue>) => React.ReactElement;
 }
 
 export const Select = observer(<TValue,>(props: SelectProps<TValue>) => {
-  const { className, label, getValue, onChange, items, renderItem } = props;
+  const { className, label, getValue, onChange, items, renderItem, name } =
+    props;
+
   const safeRender = renderItem ?? renderDefaultSelectItem;
-  //
   const handleChange = React.useCallback<
     (event: SelectChangeEvent<TValue>) => void
   >((e) => onChange(e.target.value as TValue), [onChange]);
+
+  const menuProps = React.useMemo(
+    () => ({
+      slotProps: {
+        paper: {
+          elevation: 16,
+          sx: {
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+            transform: 'translate(0, -0.5px) !important',
+          },
+        },
+      },
+    }),
+    []
+  );
 
   return (
     <FormControl
@@ -32,24 +50,13 @@ export const Select = observer(<TValue,>(props: SelectProps<TValue>) => {
       css={selectStyles.root}
       variant='filled'
     >
-      <InputLabel>{label}</InputLabel>
+      <InputLabel htmlFor={name}>{label}</InputLabel>
       <MuiSelect
+        inputProps={{ id: name }}
+        MenuProps={menuProps}
+        name={name}
         onChange={handleChange}
-        // onClose={() => setOpen(false)}
-        // onOpen={() => setOpen(true)}
         value={unwrap(getValue)}
-        MenuProps={{
-          slotProps: {
-            paper: {
-              elevation: 16,
-              sx: {
-                borderTopLeftRadius: 0,
-                borderTopRightRadius: 0,
-                transform: 'translate(0, -0.5px) !important',
-              },
-            },
-          },
-        }}
       >
         {items.map(safeRender)}
       </MuiSelect>

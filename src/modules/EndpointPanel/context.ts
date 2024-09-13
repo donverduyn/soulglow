@@ -65,9 +65,9 @@ export function layer() {
 
         const consumer = pipe(
           Queue.take(queue),
-          Effect.tap(Effect.logInfo),
           Effect.andThen((event) => {
             // TODO: use xstate to handle side effects
+            // TODO: think about how we can batch updates to the store with mobx, when multiple events are received in quick succession. This happens for example when we events are replayed from the bus on remount.
             if (event.name === 'ADD_ENDPOINT_REQUESTED') {
               // @ts-expect-error event.payload is not typed
               // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -80,6 +80,8 @@ export function layer() {
             }
           }),
           Effect.forever
+          // Effect.provide(Logger.logFmt),
+          // Effect.annotateLogs({ key1: "value1", key2: "value2" }),
         );
 
         // TODO: consider abstracting away the setup and teardown of async fibers
