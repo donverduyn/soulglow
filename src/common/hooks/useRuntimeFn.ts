@@ -4,6 +4,8 @@ import type { IsUnknown } from 'type-fest';
 import { v4 as uuidv4 } from 'uuid';
 import type { RuntimeContext } from 'common/utils/context';
 
+//* It is important to note that the runtime of the host component should always be provided to the dependency array, if runtimes higher up the tree are accessed using useRuntimeFn, useRuntime or useRuntimeSync. This is automatically done by WithRuntime its attachTo utility function and might be something to recommend, because this creates a good overview of how the component interacts with external runtimes.
+
 /*
 This hook returns a function that can be called to trigger an effect.
 It returns a promise that resolves to the value of the effect.

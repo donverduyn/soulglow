@@ -20,69 +20,62 @@ export const WithRuntime =
     Context: TTarget,
     getSource?: (utils: {
       attachTo: <
-        R1 extends RuntimeContext<any>,
-        E1 extends Effect.Effect<any, any, any>,
+        TContext extends RuntimeContext<any>,
+        TEffect extends Effect.Effect<any, any, any>,
       >(
-        Context: R1,
+        Context: TContext,
         effect: (
           runFork: <A, E>(
             self: Effect.Effect<A, E, GetContextType<TTarget>>,
             options?: Runtime.RunForkOptions
           ) => RuntimeFiber<A, E>
-        ) => E1
+        ) => TEffect
       ) => void;
       inject: <
-        R1 extends RuntimeContext<any>,
-        D1,
-        F1 extends (
+        TContext extends RuntimeContext<any>,
+        TFactory extends (
           runFork: <A, E>(
-            self: Effect.Effect<A, E, GetContextType<R1>>,
+            self: Effect.Effect<A, E, GetContextType<TContext>>,
             options?: Runtime.RunForkOptions
           ) => RuntimeFiber<A, E>
-        ) => D1,
+        ) => ReturnType<TFactory>,
       >(
-        context: R1,
-        factory: F1
-      ) => ReturnType<F1>;
+        context: TContext,
+        factory: TFactory
+      ) => ReturnType<TFactory>;
     }) => void
   ) =>
   <P,>(Component: React.FC<P>) => {
     const MemoComponent = React.memo(Component);
-    const Wrapped = (props: P) => {
+    //
+    const Wrapped: React.FC<P> = (props) => {
       const layer = React.useContext(Context) as unknown as Layer.Layer<
         GetContextType<TTarget>
       >;
+
       const targetRuntime = useRuntimeFactory(layer);
-      // const targetRuntime = React.useContext(targetContext);
-      const runFork = targetRuntime.runFork;
+      const extraProps: Record<string, any> = {};
 
-      let sourceContext: TSource[0];
-      let sourceEffect: TSource[1];
-      const injectedProps: Record<string, (...args: any[]) => any> = {};
-
-      // getSource never changes so we can use hooks here
       if (getSource) {
         getSource({
           attachTo: (context, createEffect) => {
-            sourceContext = context as TSource[0];
-            sourceEffect = createEffect(runFork) as TSource[1];
+            //* getSource never changes over the lifetime of the component
+            // eslint-disable-next-line react-hooks/rules-of-hooks
+            useRuntime(
+              context as TSource[0],
+              createEffect(targetRuntime.runFork) as TSource[1],
+              [targetRuntime]
+            );
           },
           inject: (context, factory) => {
             // eslint-disable-next-line react-hooks/rules-of-hooks
             const runtime = React.useContext(context);
             if (Layer.isLayer(runtime)) throw new Error('No runtime found.');
-            return Object.assign(
-              injectedProps,
-              factory(runtime!.runFork)
-            ) as ReturnType<typeof factory>;
+            const result = factory(runtime!.runFork);
+            Object.assign(extraProps, result);
+            return result;
           },
         });
-
-        // TODO: we have to think about what happens when attachTo is used multiple times. we need an alternative to useRuntime, that allows us to dynamically provide the context and effect.
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error used before being assigned
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        useRuntime(sourceContext, sourceEffect, [targetRuntime]);
       }
 
       return (
@@ -91,13 +84,12 @@ export const WithRuntime =
           {/* @ts-expect-error EmotionJSX pragma related */}
           <MemoComponent
             {...props}
-            {...injectedProps}
+            {...extraProps}
           />
         </Context.Provider>
       );
-      // return <MemoComponent {...props} {...injectedProps} />;
     };
-    Wrapped.displayName = `WithConsumer`;
+    Wrapped.displayName = `WithRuntime`;
     return React.memo(Wrapped);
   };
 

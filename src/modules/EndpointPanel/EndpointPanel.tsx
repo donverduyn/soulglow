@@ -16,11 +16,12 @@ import { EndpointListItem } from './components/EndpointListItem';
 import { EndpointPanelRuntime, EndpointStore, InboundQueue } from './context';
 import { createEndpoint } from './models/Endpoint';
 
-interface Props {}
-interface InnerProps extends Props, Publishable {}
+interface OuterProps {}
+interface InnerProps extends Publishable {}
+interface Props extends OuterProps, InnerProps {}
 
 export const EndpointPanel = pipe(
-  observer(EndpointPanelComponent as (props: Props) => JSX.Element),
+  observer(EndpointPanelComponent as (props: OuterProps) => JSX.Element),
   WithRuntime(EndpointPanelRuntime, ({ inject, attachTo }) => {
     //
     inject(AppRuntime, (runFork) => ({
@@ -38,23 +39,25 @@ export const EndpointPanel = pipe(
   })
 );
 
-function EndpointPanelComponent(props: InnerProps) {
+function EndpointPanelComponent(props: Props) {
   const store = useRuntimeSync(EndpointPanelRuntime, EndpointStore);
   const { addEndpoint } = useEndpointPanel(props);
+  //
+  const renderList = React.useCallback(
+    () =>
+      store.list.get().map((endpoint) => (
+        <EndpointListItem
+          key={endpoint.id}
+          endpoint={endpoint}
+          publish={props.publish}
+        />
+      )),
+    [store, props.publish]
+  );
 
   return (
     <Paper css={styles.root}>
-      <List
-        render={() =>
-          store.list.get().map((endpoint) => (
-            <EndpointListItem
-              key={endpoint.id}
-              endpoint={endpoint}
-              publish={props.publish}
-            />
-          ))
-        }
-      />
+      <List render={renderList} />
       <Button
         css={styles.addButton}
         onClick={addEndpoint}
@@ -65,7 +68,7 @@ function EndpointPanelComponent(props: InnerProps) {
   );
 }
 
-function useEndpointPanel(props: InnerProps) {
+function useEndpointPanel(props: Props) {
   const addEndpoint = React.useMemo(
     () => flow(createEndpoint, addEndpointRequested, props.publish),
     [props]

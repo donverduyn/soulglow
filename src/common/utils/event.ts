@@ -1,5 +1,3 @@
-import type { RuntimeFiber } from 'effect/Fiber';
-
 interface Locatable {
   source: string;
 }
@@ -10,7 +8,8 @@ interface TimeRelatable {
 
 interface EventMetadata extends Locatable, TimeRelatable {}
 
-export interface Publishable<R = RuntimeFiber<boolean>> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface Publishable<R = any> {
   readonly publish: (value: EventType<unknown>) => R;
 }
 
