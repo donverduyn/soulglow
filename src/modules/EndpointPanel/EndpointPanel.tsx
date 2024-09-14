@@ -20,15 +20,17 @@ interface OuterProps {}
 interface InnerProps extends Publishable {}
 interface Props extends OuterProps, InnerProps {}
 
+// TODO: think about ways to avoid losing focus on fast refresh, because we recreate the component. This happens in WithRuntime, but also happens if you just use pipe. using the observer hoc doesn't cause problems on its own, so maybe it has the answer.
+
 export const EndpointPanel = pipe(
-  observer(EndpointPanelComponent as (props: OuterProps) => JSX.Element),
+  observer(EndpointPanelComponent as (props: OuterProps) => React.JSX.Element),
   WithRuntime(EndpointPanelRuntime, ({ inject, attachTo }) => {
     //
     inject(AppRuntime, (runFork) => ({
       publish: (msg: EventType<unknown>) =>
         runFork(fromLayer(EventBus, (bus) => bus.publish(msg))),
     })) satisfies InnerProps;
-    //
+
     attachTo(AppRuntime, (runFork) =>
       fromLayer(EventBus, (bus) =>
         bus.register((event) =>

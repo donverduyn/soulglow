@@ -9,7 +9,7 @@ import puppeteerPrefs from 'puppeteer-extra-plugin-user-preferences';
 const safeExecSync = (command: string) => {
   try {
     return execSync(command);
-  } catch (error) {
+  } catch {
     return null;
   }
 };

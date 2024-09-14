@@ -6,7 +6,9 @@ const defaultMerge = <T>(
   optimistic: T
 ) => {
   // we should prevent merging incompatible objects, maybe structural compare
-  isPlainObject(current) && current.merge?.(optimistic);
+  if (isPlainObject(current)) {
+    current.merge?.(optimistic);
+  }
 };
 
 export const useAsync = <T>(
@@ -14,7 +16,7 @@ export const useAsync = <T>(
   optimistic: () => T = () => ({}) as T,
   merge: (result: T, current: T) => void = defaultMerge
 ) => {
-  const [error, setError] = React.useState<Error | null>(null);
+  const [error, setError] = React.useState<unknown>(null);
   const [loading, setLoading] = React.useState(true);
   const [current, setCurrent] = React.useState<T>(optimistic);
 
@@ -28,7 +30,7 @@ export const useAsync = <T>(
           setLoading(false);
         }
       },
-      (error: Error) => {
+      (error: unknown) => {
         if (mounted) {
           setError(error);
           setLoading(false);

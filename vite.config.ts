@@ -68,7 +68,9 @@ const browser = (mode: string): Plugin => {
   return {
     configureServer(server) {
       server.httpServer?.on('listening', () => {
-        !launched && openPage(server);
+        if (!launched) {
+          openPage(server);
+        }
         launched = true;
       });
     },

@@ -98,6 +98,9 @@ module.exports = {
         ],
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-unnecessary-condition': 'warn',
+        '@typescript-eslint/no-unnecessary-template-expression': 'warn',
+        // TODO: see in the future if this can be enabled. Currently not beneficial.
+        '@typescript-eslint/no-unnecessary-type-parameters': 'off',
         '@typescript-eslint/no-unused-vars': [
           'warn',
           {
@@ -108,7 +111,6 @@ module.exports = {
             varsIgnorePattern: '^_$',
           },
         ],
-        '@typescript-eslint/no-useless-template-literals': 'warn',
         '@typescript-eslint/unbound-method': 'off',
         'prefer-const': 'warn',
         'prefer-spread': 'off',

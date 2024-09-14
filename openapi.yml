@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.1.1
 info:
   title: ESP8266 MiLight Hub
   description: Official documention for MiLight Hub's REST API.

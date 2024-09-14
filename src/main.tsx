@@ -3,6 +3,7 @@ import * as React from 'react';
 import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
 import { createClient } from '@hey-api/client-fetch';
+import { configure } from 'mobx';
 import ReactDOM from 'react-dom/client';
 import { App } from './modules/App/App.tsx';
 import './index.css';
@@ -17,6 +18,8 @@ import './config/console.ts';
 createClient({
   baseUrl: '/api',
 });
+
+configure({ computedRequiresReaction: true, enforceActions: 'always' });
 
 const emotionCache = createCache({
   key: 'css',

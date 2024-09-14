@@ -36,6 +36,8 @@ function AppComponent() {
     AppRuntime,
     fromLayer(EventBus, (bus) => bus.register(Effect.logInfo))
   );
+
+  // TODO: When this toggles one of the entity stores does not become unobserved. the next cycle it is unobserved. This keeps alternating. Find out why.
   const [isVisible, setIsVisible] = React.useState(true);
 
   return (

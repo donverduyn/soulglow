@@ -33,6 +33,13 @@ export const createEntityStore = <T extends Identifiable>() => {
     update: action((id, mapFn) => mapFn(store.get(id)!)),
   };
 
+  // onBecomeObserved(store, () => {
+  //   console.log('observed', api.id);
+  // });
+  // onBecomeUnobserved(store, () => {
+  //   console.log('unobserved', api.id);
+  // });
+
   return Object.assign(api, {
     merge: (other: typeof api) => {
       other.list.get().forEach((item) => api.add(item));

@@ -10,7 +10,6 @@ import {
   IAutorunOptions,
 } from 'mobx';
 import { deepObserve } from 'mobx-utils';
-import { isFunction } from 'remeda';
 import { memoize } from 'common/utils/memoize';
 
 // const ref = observable.object(
@@ -95,7 +94,7 @@ export const useMobx = <T extends Record<string, any>>(
     const set: SetFn<T> = memoize(
       // we currently don't typecheck without the map function
       // although it would be great
-      (path, map = (value, state) => value as unknown as typeof state) => {
+      (path, map = (value, _) => value as unknown as typeof _) => {
         const keys = getKeys(path);
         const parent = getParent<Parameters<typeof map>[0]>(obs, keys);
         const key = keys[keys.length - 1];
@@ -122,14 +121,14 @@ export const useMobx = <T extends Record<string, any>>(
     );
 
     // This is the autobinding part we don't need anymore.
-    for (const key in obs) {
-      if (isFunction(obs[key])) {
-        const currentFn = obs[key] as <T>(a: T) => void;
-        (obs[key] as <T>(a: T) => void) = <T>(a: T) => {
-          currentFn(a);
-        };
-      }
-    }
+    // for (const key in obs) {
+    //   if (isFunction(obs[key])) {
+    //     const currentFn = obs[key] as <T>(a: T) => void;
+    //     (obs[key] as <T>(a: T) => void) = <T>(a: T) => {
+    //       currentFn(a);
+    //     };
+    //   }
+    // }
     return Object.assign(obs, {
       lazyGet,
       set,
