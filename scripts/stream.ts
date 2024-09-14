@@ -7,50 +7,54 @@ import {
   Layer,
   ManagedRuntime,
   Queue,
+  Sink,
+  GroupBy,
 } from 'effect';
-
+import { v4 as uuid } from 'uuid';
 export class Bus extends Context.Tag(`Bus`)<Bus, Queue.Queue<number>>() {}
 
 const runtime = ManagedRuntime.make(
   Layer.effect(Bus, Queue.unbounded<number>())
 );
 
-const program = pipe(
-  Effect.gen(function* () {
-    yield* pipe(
-      Stream.fromQueue(yield* Bus),
-      Stream.broadcast(1, 40),
-      Stream.flatMap(([first]) =>
-        pipe(
-          // Stream.fromIterable([100]),
-          // Stream.concat(first),
-          // Stream.
+const DEBOUNCE_TRESHOLD = 10;
 
-          // Stream.repeat(Schedule.spaced(100)),
-          first,
-          Stream.debounce(10),
-          // Stream.
-          // Stream.map(() => uuid()),
-          // Stream.drain,
-          Stream.zip(first)
-          // Stream.runCollect
+const program = Effect.gen(function* () {
+  yield* pipe(
+    Stream.fromQueue(yield* Bus),
+    Stream.broadcast(2, 1),
+    Stream.flatMap(([first, second]) =>
+      pipe(
+        first,
+        Stream.debounce(DEBOUNCE_TRESHOLD),
+        Stream.map(() => uuid()),
+        Stream.aggregate(Sink.collectAll()),
+        Stream.flattenChunks,
+        Stream.zipLatest(second),
+        Stream.groupByKey(([a]) => a),
+        GroupBy.evaluate((_, stream) =>
+          pipe(stream, Stream.accumulate, Stream.debounce(DEBOUNCE_TRESHOLD))
         )
-      ),
-      Stream.tap(Console.log),
-      Stream.runDrain
-    );
-  })
-);
-
-// Sink.
-// Stream.aggregate
+      )
+    ),
+    Stream.tap(pipe(Console.log)),
+    Stream.runDrain
+  );
+});
 
 runtime.runFork(program);
 
-for (let i = 0; i < 50; i++) {
-  ((i: number) => {
+for (let i = 0; i < 3; i++) {
+  ((a: number) => {
     setTimeout(() => {
-      runtime.runFork(pipe(Bus, Effect.andThen(Queue.offer(i))));
-    }, i * 50);
+      for (let j = 0; j < 10; j++) {
+        ((b: number) => {
+          setTimeout(() => {
+            console.log(`Emitting ${(a * 10 + b).toString()}`);
+            runtime.runFork(pipe(Bus, Effect.andThen(Queue.offer(a * 10 + b))));
+          }, b * DEBOUNCE_TRESHOLD);
+        })(j);
+      }
+    }, a * 500);
   })(i);
 }
