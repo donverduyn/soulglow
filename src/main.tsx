@@ -2,9 +2,9 @@
 import * as React from 'react';
 import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
-import { createClient } from '@hey-api/client-fetch';
 import { configure } from 'mobx';
 import ReactDOM from 'react-dom/client';
+import { client } from './__generated/api';
 import { App } from './modules/App/App.tsx';
 import './index.css';
 import './config/console.ts';
@@ -14,8 +14,7 @@ import './config/console.ts';
 //   process.env.NODE_ENV === 'production' ? uuid().split('-')[0] : componentName
 // );
 
-// fetch API client
-createClient({
+client.setConfig({
   baseUrl: '/api',
 });
 
