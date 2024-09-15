@@ -28,6 +28,8 @@ const dynamicProxyPlugin = (): Plugin => {
 
   return {
     configureServer(server) {
+      // console.log('Dynamic Proxy Plugin', server);
+      // TODO: find out why this is not working, since the last time upgrading the packages
       server.middlewares.use('/api', (req, res, next) => {
         const endpoint = req.headers.endpoint as string;
         if (!endpoint) {
@@ -79,7 +81,7 @@ const browser = (mode: string): Plugin => {
 };
 
 // https://vitejs.dev/config/
-// TODO: find the regression that causes the type mismatch. Seems to be version mismatch.
+// TODO: find a way to avoid killing the server when this file is changed. this is a bug in the browser plugin above.
 export default defineConfig(({ mode }) => ({
   build: {
     minify: 'esbuild',
@@ -169,15 +171,15 @@ export default defineConfig(({ mode }) => ({
     hmr: { overlay: true },
     host: true,
     port: 4173,
-    // proxy: {
-    //   '/api': {
-    //     // The base URL of your API
-    //     changeOrigin: true,
-    //     // Needed for virtual hosted sites
-    //     rewrite: (path) => path.replace(/^\/api/, ''),
-    //     target: 'http://192.168.0.153:80',
-    //   },
-    // },
+    proxy: {
+      // '/api': {
+      //   // The base URL of your API
+      //   changeOrigin: true,
+      //   // Needed for virtual hosted sites
+      //   rewrite: (path) => path.replace(/^\/api/, ''),
+      //   target: 'http://192.168.0.153:80',
+      // },
+    },
   },
   test: {
     environment: 'happy-dom',

@@ -27,7 +27,7 @@ const program = Effect.gen(function* () {
       pipe(
         first,
         Stream.debounce(DEBOUNCE_TRESHOLD),
-        Stream.map(() => uuid()),
+        // Stream.map(() => uuid()),
         Stream.aggregate(Sink.collectAll()),
         Stream.flattenChunks,
         Stream.zipLatest(second),
