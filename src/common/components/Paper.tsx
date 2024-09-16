@@ -6,16 +6,15 @@ interface Props extends DefaultProps {
   readonly getStyle?: (theme: Theme) => React.CSSProperties;
 }
 
-export const Paper: React.FC<Props> = observer(
-  ({ className, getStyle, children }) => {
-    const theme = useTheme();
-    return (
-      <div
-        className={className}
-        style={getStyle ? getStyle(theme) : {}}
-      >
-        {children}
-      </div>
-    );
-  }
-);
+export const Paper: React.FC<Props> = observer(function Paper(props) {
+  const { children, className, getStyle } = props;
+  const theme = useTheme();
+  return (
+    <div
+      className={className}
+      style={getStyle ? getStyle(theme) : undefined}
+    >
+      {children}
+    </div>
+  );
+});

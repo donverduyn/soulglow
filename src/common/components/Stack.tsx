@@ -11,17 +11,16 @@ interface Props extends DefaultProps {
   readonly sx?: PropsOf<typeof MuiStack>['sx'];
 }
 
-export const Stack: React.FC<Props> = observer(
-  ({ children, render, className, style = {}, getStyle }) => {
-    const styles = getStyle ? Object.assign(style, getStyle()) : style;
-    return (
-      <div
-        className={className}
-        style={styles}
-      >
-        {children}
-        {render ? render() : null}
-      </div>
-    );
-  }
-);
+export const Stack: React.FC<Props> = observer(function Stack(props) {
+  const { children, render, className, style = {}, getStyle } = props;
+  const styles = getStyle ? Object.assign(style, getStyle()) : style;
+  return (
+    <div
+      className={className}
+      style={styles}
+    >
+      {children}
+      {render ? render() : null}
+    </div>
+  );
+});

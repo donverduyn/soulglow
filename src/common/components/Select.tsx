@@ -6,6 +6,7 @@ import MuiSelect from '@mui/material/Select';
 import type { SelectChangeEvent } from '@mui/material/Select';
 import { css } from '@mui/material/styles';
 import { Observer, observer } from 'mobx-react-lite';
+import moize from 'moize';
 import { unwrap } from 'common/utils/unwrap';
 
 type Item<TValue> = { id: string; label: string; value: TValue };
@@ -19,7 +20,9 @@ interface SelectProps<TValue> extends DefaultProps {
   readonly renderItem?: (item: Item<TValue>) => React.ReactElement;
 }
 
-export const Select = observer(<TValue,>(props: SelectProps<TValue>) => {
+export const Select = observer(function Select<TValue>(
+  props: SelectProps<TValue>
+) {
   const { className, label, getValue, onChange, items, renderItem, name } =
     props;
 
@@ -28,6 +31,7 @@ export const Select = observer(<TValue,>(props: SelectProps<TValue>) => {
     (event: SelectChangeEvent<TValue>) => void
   >((e) => onChange(e.target.value as TValue), [onChange]);
 
+  const inputProps = React.useMemo(() => ({ id: name }), [name]);
   const menuProps = React.useMemo(
     () => ({
       slotProps: {
@@ -52,7 +56,7 @@ export const Select = observer(<TValue,>(props: SelectProps<TValue>) => {
     >
       <InputLabel htmlFor={name}>{label}</InputLabel>
       <MuiSelect
-        inputProps={{ id: name }}
+        inputProps={inputProps}
         MenuProps={menuProps}
         name={name}
         onChange={handleChange}
@@ -73,12 +77,13 @@ const selectStyles = {
 };
 
 const renderDefaultSelectItem = <T,>(item: Item<T>) => {
+  const render = moize(() => <span>{item.label}</span>);
   return (
     <MenuItem
       key={item.id}
       value={String(item.value)}
     >
-      <Observer render={() => <span>{item.label}</span>} />
+      <Observer render={render} />
     </MenuItem>
   );
 };

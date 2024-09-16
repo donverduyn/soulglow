@@ -3,6 +3,7 @@ import { css, type Theme } from '@mui/material/styles';
 import { formatHex, type Okhsv } from 'culori';
 import { computed, untracked } from 'mobx';
 import { observer } from 'mobx-react-lite';
+import moize from 'moize';
 import { Paper } from 'common/components/Paper';
 import { Stack } from 'common/components/Stack';
 import { createPalettes } from 'common/utils/color';
@@ -11,43 +12,45 @@ interface Props extends DefaultProps {
   readonly getColor: () => Okhsv;
 }
 
-export const PaletteViewer: React.FC<Props> = observer(
-  ({ getColor, className }) => {
-    // we don't need useMemo here because props are stable
-    const palettes = computed(() => createPalettes(getColor()));
-    // prevent reconciliation on every update
-    const entries = Object.entries(untracked(() => palettes.get()));
+export const PaletteViewer: React.FC<Props> = observer(PaletteViewer_);
 
-    return (
-      <Paper
-        className={className}
-        css={styles.root}
-        getStyle={styles.rootSx}
-      >
-        {entries.map(([key, palette]) => (
-          <Stack
-            key={key}
-            css={styles.palette}
-          >
-            {palette.map((_, i) => {
-              // cache the color computation
-              const color = computed(() => formatHex(palettes.get()[key][i]));
-              return (
-                <Stack
-                  key={key.concat(i.toString())}
-                  css={styles.swatch}
-                  // late dereference the color
-                  getStyle={() => ({ background: color.get() })}
-                  render={() => color.get()}
-                />
-              );
-            })}
-          </Stack>
-        ))}
-      </Paper>
-    );
-  }
-);
+function PaletteViewer_({ getColor, className }: Props) {
+  // we don't need useMemo here because props are stable
+  const palettes = computed(() => createPalettes(getColor()));
+  // prevent reconciliation on every update
+  const entries = Object.entries(untracked(() => palettes.get()));
+  return (
+    <Paper
+      className={className}
+      css={styles.root}
+      getStyle={styles.rootSx}
+    >
+      {entries.map(([key, palette]) => (
+        <Stack
+          key={key}
+          css={styles.palette}
+        >
+          {palette.map((_, i) => {
+            // cache the color computation
+            const color = computed(() => formatHex(palettes.get()[key][i]));
+            // TODO: does this actually clean up itself on rerender?
+            const getStyle = moize(() => ({ background: color.get() }));
+            const render = moize(() => color.get());
+            return (
+              <Stack
+                key={key.concat(i.toString())}
+                css={styles.swatch}
+                // late dereference the color
+                getStyle={getStyle}
+                render={render}
+              />
+            );
+          })}
+        </Stack>
+      ))}
+    </Paper>
+  );
+}
 
 const styles = {
   palette: css`

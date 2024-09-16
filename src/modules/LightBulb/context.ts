@@ -51,7 +51,7 @@ export class ColorService extends Context.Tag('@Lightbulb/ColorService')<
   ColorServiceImpl
 >() {}
 
-export const LightBulbRuntime = createRuntimeContext(layer);
+export const LightBulbRuntime = createRuntimeContext(layer());
 
 // TODO: use service with constructor injection instead of using ApiThrottler directly
 function layer() {

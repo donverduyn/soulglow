@@ -17,36 +17,27 @@ interface Props extends Publishable {
   readonly endpoint: Endpoint;
 }
 
-export const EndpointListItem = observer(EndpointListItemComponent);
+export const EndpointListItem = observer(EndpointListItem_);
 
-function EndpointListItemComponent({ endpoint, publish }: Props) {
-  // TODO: obviously we don't need the store here if we use events to update the store. in that case we just publish the event and the store will update itself.
-  const store = useRuntimeSync(EndpointPanelRuntime, EndpointStore);
-  const checked = computed(() => store.selectedId.get() === endpoint.id);
+function EndpointListItem_(props: Props) {
+  const { getChecked, getUrl } = useGetters(props);
+  const { updateFn, removeFn, selectFn } = useActions(props);
 
   return (
     <Stack css={styles.root}>
       <Radio
-        getValue={() => checked.get()}
-        name={`select_${endpoint.id}`}
-        onChange={() => store.selectById(endpoint.id)}
+        getValue={getChecked}
+        name={`select_${props.endpoint.id}`}
+        onChange={selectFn}
       />
       <TextField
         css={styles.textField}
-        getValue={() => endpoint.url}
-        onChange={(value) => {
-          // TODO: find out why updates are blocked when holding down keys. Only happens when characters are added, not when removed. Might have to do with how the updated value is passed to the store.
-          void publish(
-            updateEndpointRequested(
-              { id: endpoint.id, url: value },
-              { source: 'EndpointListItem' }
-            )
-          );
-        }}
+        getValue={getUrl}
+        onChange={updateFn}
       />
       <IconButton
         aria-label='delete'
-        onClick={() => store.remove(endpoint.id)}
+        onClick={removeFn}
       >
         <DeleteIcon />
       </IconButton>
@@ -54,6 +45,46 @@ function EndpointListItemComponent({ endpoint, publish }: Props) {
   );
 }
 // TODO: wrap IconButton in common/components
+
+const useGetters = ({ endpoint }: Props) => {
+  const store = useRuntimeSync(EndpointPanelRuntime, EndpointStore);
+  const checked = React.useMemo(
+    () => computed(() => store.selectedId.get() === endpoint.id),
+    [store, endpoint]
+  );
+  const getChecked = React.useCallback(() => checked.get(), [checked]);
+  const getUrl = React.useCallback(() => endpoint.url, [endpoint]);
+  return { getChecked, getUrl };
+};
+
+const useActions = ({ endpoint, publish }: Props) => {
+  const store = useRuntimeSync(EndpointPanelRuntime, EndpointStore);
+  const selectFn = React.useCallback(
+    () => store.selectById(endpoint.id),
+    [store, endpoint]
+  );
+
+  // TODO: find out why updates are blocked when holding down keys. Only happens when characters are added, not when removed. Might have to do with how the updated value is passed to the store.
+
+  const updateFn = React.useCallback(
+    (value: string) => {
+      void publish(
+        updateEndpointRequested(
+          { id: endpoint.id, url: value },
+          { source: 'EndpointListItem' }
+        )
+      );
+    },
+    [publish, endpoint]
+  );
+
+  const removeFn = React.useCallback(
+    () => store.remove(endpoint.id),
+    [store, endpoint]
+  );
+
+  return { removeFn, selectFn, updateFn };
+};
 
 const styles = {
   root: css`

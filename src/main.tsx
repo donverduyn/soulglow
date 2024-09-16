@@ -19,6 +19,7 @@ client.setConfig({
 });
 
 configure({ computedRequiresReaction: true, enforceActions: 'always' });
+// enableStaticRendering(true)
 
 const emotionCache = createCache({
   key: 'css',

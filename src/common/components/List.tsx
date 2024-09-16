@@ -7,7 +7,8 @@ interface Props {
   readonly render?: () => React.ReactNode;
 }
 
-export const List: React.FC<Props> = observer(({ children, render }) => {
+export const List: React.FC<Props> = observer(function List(props) {
+  const { children, render } = props;
   return (
     <ul css={listStyles.root}>{render ? render() : (children ?? null)}</ul>
   );

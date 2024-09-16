@@ -45,8 +45,9 @@ export const WithRuntime =
       ) => ReturnType<TFactory>;
     }) => void
   ) =>
+  // TODO: consider using a separate component that takes Context and getSource as props, and uses a render prop to render the component. This would avoid recreating the component on fast refresh. It would also allow us to use one component for injecting and attaching, and one for rendering the component after the events have been replayed.
+
   <P,>(Component: React.FC<P>) => {
-    const MemoComponent = React.memo(Component);
     //
     const Wrapped: React.FC<P> = (props) => {
       const layer = React.useContext(Context) as unknown as Layer.Layer<
@@ -58,20 +59,20 @@ export const WithRuntime =
 
       if (getSource) {
         getSource({
-          attachTo: (context, createEffect) => {
+          attachTo: (context, attachEffect) => {
             //* getSource never changes over the lifetime of the component
             // eslint-disable-next-line react-hooks/rules-of-hooks
             useRuntime(
               context as TSource[0],
-              createEffect(targetRuntime.runFork) as TSource[1],
+              attachEffect(targetRuntime.runFork) as TSource[1],
               [targetRuntime]
             );
           },
-          inject: (context, factory) => {
+          inject: (context, injectEffect) => {
             // eslint-disable-next-line react-hooks/rules-of-hooks
             const runtime = React.useContext(context);
             if (Layer.isLayer(runtime)) throw new Error('No runtime found.');
-            const result = factory(runtime!.runFork);
+            const result = injectEffect(runtime!.runFork);
             Object.assign(extraProps, result);
             return result;
           },
@@ -82,7 +83,7 @@ export const WithRuntime =
         <Context.Provider value={targetRuntime}>
           {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
           {/* @ts-expect-error EmotionJSX pragma related */}
-          <MemoComponent
+          <Component
             {...props}
             {...extraProps}
           />
@@ -90,7 +91,7 @@ export const WithRuntime =
       );
     };
     Wrapped.displayName = `WithRuntime`;
-    return React.memo(Wrapped);
+    return Wrapped;
   };
 
 /*

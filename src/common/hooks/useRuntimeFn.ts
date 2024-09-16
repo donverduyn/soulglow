@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Effect, pipe, Fiber, FiberId, Layer, Queue, Stream } from 'effect';
+import { Effect, pipe, Fiber, FiberId, Layer, Stream } from 'effect';
 import type { IsUnknown } from 'type-fest';
 import { v4 as uuidv4 } from 'uuid';
 import type { RuntimeContext } from 'common/utils/context';
@@ -22,7 +22,7 @@ export function useRuntimeFn<A, E, R, T>(
   const finalDeps = [runtime, ...deps];
 
   const emitter = React.useMemo(() => new EventEmitter<T, A>(), finalDeps);
-  const queue = React.useMemo(() => Queue.unbounded<{ data: T }>(), finalDeps);
+  // const queue = React.useMemo(() => Queue.unbounded<{ data: T }>(), finalDeps);
   // const effect0 = React.useMemo(
   //   () =>
   //     Effect.gen(function* () {
@@ -59,19 +59,19 @@ export function useRuntimeFn<A, E, R, T>(
     finalDeps
   );
 
-  useRuntime(
-    context,
-    Effect.gen(function* () {
-      const q = yield* Queue.take(yield* queue);
-      console.log(q);
-    }).pipe(Effect.forever),
-    // queue.pipe(
-    //   Effect.andThen(Queue.take),
-    //   Effect.tap(() => Console.log('take')),
-    //   Effect.forever
-    // ),
-    finalDeps
-  );
+  // useRuntime(
+  //   context,
+  //   Effect.gen(function* () {
+  //     const q = yield* Queue.take(yield* queue);
+  //     console.log(q);
+  //   }).pipe(Effect.forever),
+  // queue.pipe(
+  //   Effect.andThen(Queue.take),
+  //   Effect.tap(() => Console.log('take')),
+  //   Effect.forever
+  // ),
+  //   finalDeps
+  // );
 
   useRuntime(context, effect, deps);
 

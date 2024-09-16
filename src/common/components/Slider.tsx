@@ -12,12 +12,14 @@ interface Props<T> extends DefaultProps {
   readonly track?: false | 'normal';
 }
 
-export const Slider = observer(<T extends number>(props: Props<T>) => {
+export const Slider = observer(function Slider<T extends number>(
+  props: Props<T>
+) {
   const { className, min, max, track, getValue, onChange, ...rest } = props;
-
   const slotProps = React.useRef<PropsOf<typeof MuiSlider>['slotProps']>({
     track: { style: { border: 0 } },
   });
+
   const handleChange = React.useCallback<
     (e: Event, v: number | number[]) => void
   >((_, v) => onChange(v as T), [onChange]);

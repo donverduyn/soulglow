@@ -19,13 +19,14 @@ export class EventBusService {
           Queue.take,
           Effect.andThen(fn),
           Effect.andThen((result) =>
+            // TODO: find out why this makes E and R become unknown
             isFiber(result) ? Fiber.join(result) : result
           ),
           Effect.forever
         )
       ),
       Effect.scoped
-    );
+    ) as Effect.Effect<A, E, R>;
   };
 
   // TODO: think about using addFinalizer to shutdown the bus, or at least investigate the consequences of not doing so.

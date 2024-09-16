@@ -57,16 +57,12 @@ const colorInputs = [
 ] as const;
 
 export const LightBulb = pipe(
-  observer(LightBulbComponent),
+  observer(LightBulb_),
   WithRuntime(LightBulbRuntime)
 );
 
 //TODO: think about default props and how to set them
-function LightBulbComponent({
-  className,
-  getStyle,
-  onChange = identity,
-}: Props) {
+function LightBulb_({ className, getStyle, onChange = identity }: Props) {
   const { bulb, inputs } = useLightBulbComponent(onChange);
 
   return (

@@ -161,8 +161,15 @@ module.exports = {
         'plugin:react/jsx-runtime',
         'plugin:react/all',
         'plugin:react-hooks/recommended',
+        'plugin:react-perf/all',
       ],
-      plugins: ['react', 'react-hooks', 'react-refresh', '@emotion'],
+      plugins: [
+        'react',
+        'react-hooks',
+        'react-refresh',
+        'react-perf',
+        '@emotion',
+      ],
       rules: {
         '@emotion/syntax-preference': ['warn', 'string'],
         'no-restricted-imports': [

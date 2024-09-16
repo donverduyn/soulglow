@@ -9,18 +9,17 @@ interface Props extends DefaultProps {
   readonly onChange: () => void;
 }
 
-export const Radio: React.FC<Props> = observer(
-  ({ getValue, onChange, name }) => {
-    return (
-      <MuiRadio
-        checked={getValue()}
-        css={radioStyles.root}
-        name={name}
-        onChange={onChange}
-      />
-    );
-  }
-);
+export const Radio: React.FC<Props> = observer(function Radio(props) {
+  const { getValue, onChange, name } = props;
+  return (
+    <MuiRadio
+      checked={getValue()}
+      css={radioStyles.root}
+      name={name}
+      onChange={onChange}
+    />
+  );
+});
 
 const radioStyles = {
   root: css`

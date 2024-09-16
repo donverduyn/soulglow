@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { identity } from 'effect';
 import { Call, O, S } from 'hotscript';
 import {
   AnnotationsMap,
@@ -10,7 +11,8 @@ import {
   IAutorunOptions,
 } from 'mobx';
 import { deepObserve } from 'mobx-utils';
-import { memoize } from 'common/utils/memoize';
+// import { memoize } from 'common/utils/memoize';
+import moize from 'moize';
 
 // const ref = observable.object(
 //   { h: 0, mode: 'okhsv', s: 0, v: 0 } as Okhsv,
@@ -71,16 +73,20 @@ export const useMobx = <T extends Record<string, any>>(
       map?: (value: V) => R
     ) => () => R;
 
-    const lazyGet: LazyGetFn<T> = memoize((path, map = <T>(v: T) => v) => {
-      // by using map from the closure, V8 will only preparse it on re-renders
-      const keys = getKeys(path);
-      const parent = getParent<Parameters<typeof map>[0]>(obs, keys);
-      const key = keys[keys.length - 1];
-      // Note how we keep the parent reference in the closure that is kept alive,
-      // until the component that calls useMobx unmounts.
-      // This is important, to avoid traversing every re-render
-      return () => map(parent[key] as Call<O.Get<typeof path>, T>);
-    });
+    const lazyGet: LazyGetFn<T> = moize(
+      (path, map = identity) => {
+        // by using map from the closure, V8 will only preparse it on re-renders,
+        // TODO: make sure functions are serialized for comparison
+        const keys = getKeys(path);
+        const parent = getParent<Parameters<typeof map>[0]>(obs, keys);
+        const key = keys[keys.length - 1];
+        // Note how we keep the parent reference in the closure that is kept alive,
+        // until the component that calls useMobx unmounts.
+        // This is important, to avoid traversing every re-render
+        return () => map(parent[key] as Call<O.Get<typeof path>, T>);
+      },
+      { isSerialized: true }
+    );
 
     type SetFn<TType> = <
       P extends Call<O.AllPaths, TType>,
@@ -91,7 +97,7 @@ export const useMobx = <T extends Record<string, any>>(
       map?: (value: V, state: S) => S
     ) => (value: V) => void;
 
-    const set: SetFn<T> = memoize(
+    const set: SetFn<T> = moize(
       // we currently don't typecheck without the map function
       // although it would be great
       (path, map = (value, _) => value as unknown as typeof _) => {
@@ -117,7 +123,8 @@ export const useMobx = <T extends Record<string, any>>(
             parent[key] = result;
             // }
           });
-      }
+      },
+      { isSerialized: true }
     );
 
     // This is the autobinding part we don't need anymore.

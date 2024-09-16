@@ -1,11 +1,13 @@
+import * as React from 'react';
 import { Theme, createTheme, css } from '@mui/material/styles';
+import moize from 'moize';
 import { isNumber } from 'remeda';
 import { Paper } from 'common/components/Paper';
 import { Stack } from 'common/components/Stack';
 import { Typography } from 'common/components/Typography';
 
 interface ThemeVisualizerProps extends DefaultProps {
-  theme?: Theme;
+  readonly theme?: Theme;
 }
 
 export const ThemeVisualizer: React.FC<ThemeVisualizerProps> = ({
@@ -52,14 +54,17 @@ export const ThemeVisualizer: React.FC<ThemeVisualizerProps> = ({
             ([key, value]) => {
               const isColor = !isNumber(value);
               if (!isColor) return null;
+
+              // TODO: does this clean up on rerender and stay in sync with value?
+              const getStyle = moize(() => ({
+                backgroundColor: value as string,
+                color: theme.palette.getContrastText(value as string),
+              }));
               return (
                 <Stack
                   key={key}
                   css={styles.color}
-                  getStyle={() => ({
-                    backgroundColor: value as string,
-                    color: theme.palette.getContrastText(value as string),
-                  })}
+                  getStyle={getStyle}
                 >
                   <Typography variant='body2'>{key}</Typography>
                   <Typography variant='body1'>{value}</Typography>

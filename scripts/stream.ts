@@ -8,16 +8,15 @@ import {
   ManagedRuntime,
   Queue,
   Sink,
-  GroupBy,
+  Chunk,
 } from 'effect';
-import { v4 as uuid } from 'uuid';
 export class Bus extends Context.Tag(`Bus`)<Bus, Queue.Queue<number>>() {}
 
 const runtime = ManagedRuntime.make(
   Layer.effect(Bus, Queue.unbounded<number>())
 );
 
-const DEBOUNCE_TRESHOLD = 10;
+const DEBOUNCE_THRESHOLD = 10;
 
 const program = Effect.gen(function* () {
   yield* pipe(
@@ -26,18 +25,14 @@ const program = Effect.gen(function* () {
     Stream.flatMap(([first, second]) =>
       pipe(
         first,
-        Stream.debounce(DEBOUNCE_TRESHOLD),
-        // Stream.map(() => uuid()),
-        Stream.aggregate(Sink.collectAll()),
-        Stream.flattenChunks,
-        Stream.zipLatest(second),
-        Stream.groupByKey(([a]) => a),
-        GroupBy.evaluate((_, stream) =>
-          pipe(stream, Stream.accumulate, Stream.debounce(DEBOUNCE_TRESHOLD))
-        )
+        Stream.debounce(DEBOUNCE_THRESHOLD),
+        Stream.aggregate(pipe(Sink.drain, Sink.as(null))),
+        Stream.merge(second),
+        Stream.split((item) => item === null),
+        Stream.map(Chunk.toArray)
       )
     ),
-    Stream.tap(pipe(Console.log)),
+    Stream.tap(Console.log),
     Stream.runDrain
   );
 });
@@ -49,10 +44,15 @@ for (let i = 0; i < 3; i++) {
     setTimeout(() => {
       for (let j = 0; j < 10; j++) {
         ((b: number) => {
-          setTimeout(() => {
-            console.log(`Emitting ${(a * 10 + b).toString()}`);
-            runtime.runFork(pipe(Bus, Effect.andThen(Queue.offer(a * 10 + b))));
-          }, b * DEBOUNCE_TRESHOLD);
+          setTimeout(
+            () => {
+              // console.log(`Emitting ${(a * 10 + b).toString()}`);
+              runtime.runFork(
+                pipe(Bus, Effect.andThen(Queue.offer(a * 10 + b)))
+              );
+            },
+            b * (DEBOUNCE_THRESHOLD * 0.5)
+          );
         })(j);
       }
     }, a * 500);

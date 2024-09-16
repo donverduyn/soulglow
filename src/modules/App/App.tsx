@@ -3,8 +3,9 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, css } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { formatRgb, type Okhsv } from 'culori';
-import { Effect, pipe } from 'effect';
+import { Console, pipe } from 'effect';
 import { observable } from 'mobx';
+import { Observer } from 'mobx-react-lite';
 import { Stack } from 'common/components/Stack';
 import { Toggle } from 'common/components/Toggle';
 import { WithRuntime } from 'common/hoc/withRuntime';
@@ -34,22 +35,27 @@ function AppComponent() {
 
   useRuntime(
     AppRuntime,
-    fromLayer(EventBus, (bus) => bus.register(Effect.logInfo))
+    // EventBus.pipe(Effect.andThen((bus) => bus.register(Effect.logInfo)))
+    fromLayer(EventBus, (bus) => bus.register((event) => Console.log(event)))
   );
 
   // TODO: When this toggles one of the entity stores does not become unobserved. the next cycle it is unobserved. This keeps alternating. Find out why.
-  const [isVisible, setIsVisible] = React.useState(true);
+  const panel = useMobx(() => ({ isVisible: true }));
 
   return (
     <ThemeProvider theme={prefersDarkMode ? darkTheme : darkTheme}>
       <CssBaseline />
       <Stack css={appStyles.root}>
         <Toggle
-          getValue={() => isVisible}
+          getValue={panel.lazyGet('isVisible')}
           name='endpoint_panel_toggle'
-          onChange={() => setIsVisible((current) => !current)}
+          onChange={panel.set('isVisible')}
         />
-        {isVisible ? <EndpointPanel /> : null}
+        <Observer
+          render={panel.lazyGet('isVisible', (isVisible) =>
+            isVisible ? <EndpointPanel /> : null
+          )}
+        />
         <LightBulb
           onChange={state.set('color')}
           getStyle={state.lazyGet('color', (value) => ({

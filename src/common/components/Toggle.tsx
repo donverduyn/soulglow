@@ -8,21 +8,20 @@ interface Props extends DefaultProps {
   readonly onChange: (value: boolean) => void;
 }
 
-export const Toggle: React.FC<Props> = observer(
-  ({ className, getValue, onChange, name }) => {
-    //
-    const handleChange = React.useCallback<
-      (e: React.ChangeEvent<HTMLInputElement>, v: boolean) => void
-    >((_, v) => onChange(v), [onChange]);
+export const Toggle: React.FC<Props> = observer(function Toggle(props) {
+  const { className, getValue, onChange, name } = props;
+  //
+  const handleChange = React.useCallback<
+    (e: React.ChangeEvent<HTMLInputElement>, v: boolean) => void
+  >((_, v) => onChange(v), [onChange]);
 
-    return (
-      <Switch
-        checked={getValue()}
-        className={className!}
-        color='primary'
-        name={name}
-        onChange={handleChange}
-      />
-    );
-  }
-);
+  return (
+    <Switch
+      checked={getValue()}
+      className={className!}
+      color='primary'
+      name={name}
+      onChange={handleChange}
+    />
+  );
+});
