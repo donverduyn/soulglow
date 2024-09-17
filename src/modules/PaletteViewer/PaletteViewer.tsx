@@ -33,16 +33,20 @@ function PaletteViewer_({ getColor, className }: Props) {
           {palette.map((_, i) => {
             // cache the color computation
             const color = computed(() => formatHex(palettes.get()[key][i]));
-            // TODO: does this actually clean up itself on rerender?
-            const getStyle = moize(() => ({ background: color.get() }));
-            const render = moize(() => color.get());
+
+            // this doesn't actually do anything because color is not stable.
+            // that is also not worth it, because it would memoize linearly
+            const render = moize((c: typeof color) => () => c.get());
+            const getStyle = moize((c: typeof color) => () => ({
+              background: c.get(),
+            }));
+
             return (
               <Stack
                 key={key.concat(i.toString())}
                 css={styles.swatch}
-                // late dereference the color
-                getStyle={getStyle}
-                render={render}
+                getStyle={getStyle(color)}
+                render={render(color)}
               />
             );
           })}

@@ -49,5 +49,7 @@
     },
     "typescript.preferences.autoImportSpecifierExcludeRegexes": [
         ""
-    ]
+    ],
+    "editor.wordWrap": "wordWrapColumn",
+    "editor.wordWrapColumn": 90
 }

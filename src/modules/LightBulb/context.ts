@@ -1,17 +1,10 @@
 import { Context, Effect, Layer, Queue, pipe } from 'effect';
 import { observable } from 'mobx';
 import { v4 as uuid } from 'uuid';
-import type {
-  BooleanResponse,
-  GroupState,
-  GroupStateCommands,
-} from '__generated/api';
 import { createRuntimeContext } from 'common/utils/context';
+import { Device } from 'modules/App/models/device/Device';
 import { DeviceRepoImpl } from './repos/DeviceRepo';
 import { ColorServiceImpl } from './services/ColorService';
-
-// TODO: we really shouldn't couple our dto with the api types
-export type LightbulbDto = GroupState & GroupStateCommands;
 
 export enum LightMode {
   COLOR = 'color',
@@ -25,25 +18,21 @@ export const MODE_ITEMS = observable.array([
   { id: uuid(), label: 'White', value: LightMode.WHITE },
 ]);
 
-interface Crudable<T, E> {
-  create: (dto: T) => Effect.Effect<T | BooleanResponse | undefined, E>;
-  delete: () => Effect.Effect<BooleanResponse | undefined, E>;
-  read: () => Effect.Effect<T | undefined, E>;
-  update: (dto: T) => Effect.Effect<T | BooleanResponse | undefined, E>;
-}
-
-export class FetchError {
-  readonly _tag = 'FetchError';
-}
+// interface Crudable<T, E> {
+//   create: (dto: T) => Effect.Effect<T | BooleanResponse | undefined, E>;
+//   delete: () => Effect.Effect<BooleanResponse | undefined, E>;
+//   read: () => Effect.Effect<T | undefined, E>;
+//   update: (dto: T) => Effect.Effect<T | BooleanResponse | undefined, E>;
+// }
 
 export class ApiThrottler extends Context.Tag('@Lightbulb/Throttler')<
   ApiThrottler,
-  Queue.Queue<Partial<LightbulbDto>>
+  Queue.Queue<Device>
 >() {}
 
 export class DeviceRepo extends Context.Tag('@Lightbulb/DeviceRepo')<
-  DeviceRepoImpl,
-  Crudable<LightbulbDto, FetchError>
+  DeviceRepo,
+  DeviceRepoImpl
 >() {}
 
 export class ColorService extends Context.Tag('@Lightbulb/ColorService')<
@@ -75,7 +64,7 @@ function layer() {
       Layer.scoped(
         ApiThrottler,
         Effect.gen(function* () {
-          const queue = yield* Queue.sliding<LightbulbDto>(1);
+          const queue = yield* Queue.sliding<Device>(1);
           yield* Effect.addFinalizer(() =>
             Effect.gen(function* () {
               yield* Queue.shutdown(queue);

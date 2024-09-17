@@ -1,5 +1,11 @@
 import { Chunk, Effect, Logger, pipe, Runtime, Sink, Stream } from 'effect';
 
+// Common Error types
+
+export class FetchError {
+  readonly _tag = 'FetchError';
+}
+
 // Common layers
 
 export const browserLogger = Logger.replace(

@@ -1,11 +1,12 @@
 import { Effect, flow } from 'effect';
 import type { UnknownException } from 'effect/Cause';
 import { RemoteType, DeviceControlService } from '__generated/api';
-import { FetchError, type LightbulbDto } from '../context';
+import { FetchError } from 'common/utils/effect';
+import { Device } from '../../App/models/device/Device';
 
 export class DeviceRepoImpl {
   options = { deviceId: 5, groupId: 5, remoteType: RemoteType.FUT089 };
-  createOptions = (body?: LightbulbDto) => ({
+  createOptions = (body?: Device) => ({
     ...(body && { body }),
     headers: {
       // TODO: this should be injected from the global runtime
@@ -30,7 +31,7 @@ export class DeviceRepoImpl {
     Effect.catchAll(() => Effect.fail(new FetchError()))
   );
 
-  create = (dto: LightbulbDto) => this.update(dto);
+  create = (dto: Device) => this.update(dto);
   delete = flow(() => {
     return Effect.tryPromise(() =>
       DeviceControlService.deleteGatewaysByDeviceIdByRemoteTypeByGroupId(
@@ -45,7 +46,7 @@ export class DeviceRepoImpl {
       )
     );
   }, this.handle);
-  update = flow((dto: LightbulbDto) => {
+  update = flow((dto: Device) => {
     return Effect.tryPromise(() =>
       DeviceControlService.putGatewaysByDeviceIdByRemoteTypeByGroupId(
         this.createOptions(dto)

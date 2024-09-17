@@ -1,10 +1,7 @@
 import { action, computed, observable, type IComputedValue } from 'mobx';
 import { v4 as uuid } from 'uuid';
-interface Identifiable {
-  id: string;
-}
 
-interface EntityStore<T extends Identifiable> {
+export interface EntityStore<T extends Identifiable> {
   add: (entity: T) => void;
   count: IComputedValue<number>;
   get: (id: string) => T | null;

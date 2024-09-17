@@ -7,11 +7,12 @@ import { observer } from 'mobx-react-lite';
 import { Radio } from 'common/components/Radio';
 import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
+import { useReturn } from 'common/hooks/useReturn';
 import { useRuntimeSync } from 'common/hooks/useRuntimeFn';
-import type { Endpoint } from 'common/models/endpoint/endpoint';
-import { updateEndpointRequested } from 'common/models/endpoint/events';
 import type { Publishable } from 'common/utils/event';
-import { EndpointPanelRuntime, EndpointStore } from '../context';
+import { AppRuntime, EndpointStore } from 'modules/App/context';
+import type { Endpoint } from 'modules/App/models/endpoint/endpoint';
+import { updateEndpointRequested } from 'modules/App/models/endpoint/events';
 
 interface Props extends Publishable {
   readonly endpoint: Endpoint;
@@ -21,7 +22,7 @@ export const EndpointListItem = observer(EndpointListItem_);
 
 function EndpointListItem_(props: Props) {
   const { getChecked, getUrl } = useGetters(props);
-  const { updateFn, removeFn, selectFn } = useActions(props);
+  const { updateFn, removeFn, selectFn } = useHandlers(props);
 
   return (
     <Stack css={styles.root}>
@@ -46,44 +47,44 @@ function EndpointListItem_(props: Props) {
 }
 // TODO: wrap IconButton in common/components
 
-const useGetters = ({ endpoint }: Props) => {
-  const store = useRuntimeSync(EndpointPanelRuntime, EndpointStore);
+const useGetters = (props: Props) => {
+  const store = useRuntimeSync(AppRuntime, EndpointStore);
+  //
   const checked = React.useMemo(
-    () => computed(() => store.selectedId.get() === endpoint.id),
-    [store, endpoint]
+    () => computed(() => store.selectedId.get() === props.endpoint.id),
+    [store, props.endpoint]
   );
+
   const getChecked = React.useCallback(() => checked.get(), [checked]);
-  const getUrl = React.useCallback(() => endpoint.url, [endpoint]);
-  return { getChecked, getUrl };
+  const getUrl = React.useCallback(() => props.endpoint.url, [props.endpoint]);
+  return useReturn({ getChecked, getUrl });
 };
 
-const useActions = ({ endpoint, publish }: Props) => {
-  const store = useRuntimeSync(EndpointPanelRuntime, EndpointStore);
+const useHandlers = (props: Props) => {
+  const store = useRuntimeSync(AppRuntime, EndpointStore);
+  //
+  // TODO: publish event instead of using store directly
   const selectFn = React.useCallback(
-    () => store.selectById(endpoint.id),
-    [store, endpoint]
+    () => store.selectById(props.endpoint.id),
+    [store, props.endpoint]
   );
 
   // TODO: find out why updates are blocked when holding down keys. Only happens when characters are added, not when removed. Might have to do with how the updated value is passed to the store.
 
   const updateFn = React.useCallback(
-    (value: string) => {
-      void publish(
-        updateEndpointRequested(
-          { id: endpoint.id, url: value },
-          { source: 'EndpointListItem' }
-        )
-      );
-    },
-    [publish, endpoint]
+    (value: string) =>
+      void props.publish(
+        updateEndpointRequested({ id: props.endpoint.id, url: value })
+      ),
+    [props]
   );
 
+  // TODO: publish event instead of using store directly
   const removeFn = React.useCallback(
-    () => store.remove(endpoint.id),
-    [store, endpoint]
+    () => store.remove(props.endpoint.id),
+    [store, props.endpoint]
   );
-
-  return { removeFn, selectFn, updateFn };
+  return useReturn({ removeFn, selectFn, updateFn });
 };
 
 const styles = {

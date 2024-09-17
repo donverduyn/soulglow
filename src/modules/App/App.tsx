@@ -3,15 +3,15 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, css } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { formatRgb, type Okhsv } from 'culori';
-import { Console, pipe } from 'effect';
+import { Effect, pipe } from 'effect';
 import { observable } from 'mobx';
 import { Observer } from 'mobx-react-lite';
+import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { Stack } from 'common/components/Stack';
 import { Toggle } from 'common/components/Toggle';
-import { WithRuntime } from 'common/hoc/withRuntime';
 import { useMobx } from 'common/hooks/useMobx';
 import { useRuntime } from 'common/hooks/useRuntimeFn';
-import { fromLayer } from 'common/utils/context';
+import { fromLayer, GetContextType } from 'common/utils/context';
 import { AppRuntime, EventBus } from 'modules/App/context';
 import { EndpointPanel } from 'modules/EndpointPanel/EndpointPanel';
 import { LightBulb } from 'modules/LightBulb/LightBulb';
@@ -35,8 +35,9 @@ function AppComponent() {
 
   useRuntime(
     AppRuntime,
-    // EventBus.pipe(Effect.andThen((bus) => bus.register(Effect.logInfo)))
-    fromLayer(EventBus, (bus) => bus.register((event) => Console.log(event)))
+    fromLayer(EventBus, (bus) =>
+      bus.register<GetContextType<typeof AppRuntime>>()(Effect.logInfo)
+    )
   );
 
   // TODO: When this toggles one of the entity stores does not become unobserved. the next cycle it is unobserved. This keeps alternating. Find out why.

@@ -1,6 +1,7 @@
 import type { Okhsv } from 'culori';
 import { Effect, pipe, type Context } from 'effect';
-import type { DeviceRepo, LightbulbDto } from '../context';
+import type { Device } from 'modules/App/models/device/Device';
+import type { DeviceRepo } from '../context';
 
 // this service should be responsible for updating the colors of lightbulbs,
 // It delegates with one or multiple calls to the injected repositories
@@ -9,7 +10,7 @@ import type { DeviceRepo, LightbulbDto } from '../context';
 export class ColorServiceImpl {
   constructor(private deviceRepo: Context.Tag.Service<DeviceRepo>) {}
 
-  updateColor(color: Partial<LightbulbDto>) {
+  updateColor(color: Partial<Device>) {
     return this.deviceRepo.update(color);
   }
 

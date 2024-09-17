@@ -4,39 +4,39 @@ import type { Okhsv } from 'culori';
 import { identity, pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { State } from '__generated/api';
+import { WithRuntime as WithRuntime } from 'common/components/hoc/withRuntime';
 import { Select } from 'common/components/Select';
 import { Slider } from 'common/components/Slider';
 import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
-import { WithRuntime as WithRuntime } from 'common/hoc/withRuntime';
 import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
 import { useReturn } from 'common/hooks/useReturn';
 import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
 import { fromLayer } from 'common/utils/context';
+import type { Device } from 'modules/App/models/device/Device';
 import { OnOffSwitch } from './components/OnOffSwitch';
 import {
-  LightMode,
   MODE_ITEMS,
-  type LightbulbDto,
+  LightMode,
   LightBulbRuntime,
   ApiThrottler,
 } from './context';
 
 interface LightBulbState {
-  bulb_mode: LightMode;
+  bulb_mode: `${LightMode}`;
   hue: number;
   level: number;
   saturation: number;
-  status: State;
+  status: `${State}`;
   temperature: number;
 }
 
 const defaultState: LightBulbState = {
-  bulb_mode: LightMode.COLOR,
+  bulb_mode: 'color',
   hue: 270,
   level: 87,
   saturation: 70,
-  status: State.OFF,
+  status: 'Off',
   temperature: 100,
 };
 
@@ -113,33 +113,15 @@ function LightBulb_({ className, getStyle, onChange = identity }: Props) {
 }
 
 const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
-  // useRuntime(
-  //   AppRuntime,
-  //   fromLayer(EventBus, (bus) =>
-  //     bus.register((event) =>
-  //       Console.log('event from LightBulbComponent', event)
-  //     )
-  //   )
-  // );
-
   const bulb = useMobx(() => defaultState);
   const inputs = bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
 
   // TODO: convert to event and use runtime to handle the event
-  const handle = useRuntimeFn(LightBulbRuntime, (body: Partial<LightbulbDto>) =>
+  const handle = useRuntimeFn(LightBulbRuntime, (body: Partial<Device>) =>
     fromLayer(ApiThrottler, (queue) => queue.offer(body))
   );
 
-  // useRuntime(
-  //   LightBulbRuntime,
-  //   Effect.gen(function* () {
-  //     const repo = yield* DeviceRepo;
-  //     const result = yield* repo.read();
-  //     console.log(result?.color);
-  //   })
-  // );
-
-  // TODO: think about how to model a lightbulb such that we can manage state in the form of an entity store, using the same patterns as endpoint, to share derived state between loosely coupled modules, by syncing and reapplying events to multiple entity stores.
+  // TODO: think about how to model a lightbulb such that we can manage state in the form of an entity store, using the same patterns as endpoint.
 
   useAutorun(() => {
     const hue = 360 + bulb.hue + 30;
@@ -161,7 +143,7 @@ const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
       const body = {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         [change.name]: change.newValue,
-      } as Partial<LightbulbDto>;
+      } as Partial<Device>;
       void handle(body);
     },
     [handle]

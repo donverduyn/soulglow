@@ -32,15 +32,15 @@ export const WithRuntime =
         ) => TEffect
       ) => void;
       inject: <
-        TContext extends RuntimeContext<any>,
+        TContextType,
         TFactory extends (
-          runFork: <A, E>(
-            self: Effect.Effect<A, E, GetContextType<TContext>>,
-            options?: Runtime.RunForkOptions
-          ) => RuntimeFiber<A, E>
+          runtime: ManagedRuntime.ManagedRuntime<
+            GetContextType<RuntimeContext<TContextType>>,
+            never
+          >
         ) => ReturnType<TFactory>,
       >(
-        context: TContext,
+        context: RuntimeContext<TContextType>,
         factory: TFactory
       ) => ReturnType<TFactory>;
     }) => void
@@ -72,7 +72,7 @@ export const WithRuntime =
             // eslint-disable-next-line react-hooks/rules-of-hooks
             const runtime = React.useContext(context);
             if (Layer.isLayer(runtime)) throw new Error('No runtime found.');
-            const result = injectEffect(runtime!.runFork);
+            const result = injectEffect(runtime!);
             Object.assign(extraProps, result);
             return result;
           },

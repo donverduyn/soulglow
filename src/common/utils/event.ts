@@ -8,8 +8,7 @@ interface TimeRelatable {
 
 interface EventMetadata extends Locatable, Partial<TimeRelatable> {}
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface Publishable<R = any> {
+export interface Publishable<R = unknown> {
   readonly publish: (value: EventType<unknown>) => R;
 }
 
