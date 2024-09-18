@@ -20,8 +20,8 @@
     "dep:stats": "npx --yes tsx -e \"import { view } from './scripts/dep-stats'; view('./package.json');\""
   },
   "dependencies": {
-    "@effect/platform": "^0.65.1",
-    "@effect/schema": "^0.73.0",
+    "@effect/platform": "^0.65.2",
+    "@effect/schema": "^0.73.1",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.0",
@@ -30,7 +30,7 @@
     "@trpc/server": "^10.45.2",
     "culori": "^4.0.1",
     "dayjs": "^1.11.11",
-    "effect": "^3.8.0",
+    "effect": "^3.8.1",
     "mobx": "^6.12.3",
     "mobx-react-lite": "^4.0.7",
     "mobx-utils": "^6.0.8",
@@ -39,7 +39,7 @@
     "react-dom": "^18.3.1",
     "react-router": "^6.26.2",
     "react-use": "^17.5.0",
-    "remeda": "^2.12.1",
+    "remeda": "^2.13.0",
     "scheduler": "^0.23.2",
     "uuid": "^10.0.0",
     "ws": "^8.17.0",

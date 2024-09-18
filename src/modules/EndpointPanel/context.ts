@@ -9,10 +9,13 @@ export class InboundQueue extends Context.Tag(`${PREFIX}/InboundQueue`)<
   Queue.Queue<EventType<unknown>>
 >() {}
 
+export class Foo extends Context.Tag(`${PREFIX}/Foo`)<Foo, string>() {}
+
 export const EndpointPanelRuntime = createRuntimeContext(layer());
 
 function layer() {
   return pipe(
-    Layer.effect(InboundQueue, Queue.unbounded<EventType<unknown>>())
+    Layer.effect(InboundQueue, Queue.unbounded<EventType<unknown>>()),
+    Layer.merge(Layer.succeed(Foo, 'foo'))
   );
 }

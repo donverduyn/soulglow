@@ -1,9 +1,9 @@
 import * as React from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
-import IconButton from '@mui/material/IconButton';
 import { css } from '@mui/material/styles';
 import { computed } from 'mobx';
 import { observer } from 'mobx-react-lite';
+import { IconButton } from 'common/components/IconButton';
 import { Radio } from 'common/components/Radio';
 import { Stack } from 'common/components/Stack';
 import { TextField } from 'common/components/TextField';
@@ -12,7 +12,11 @@ import { useRuntimeSync } from 'common/hooks/useRuntimeFn';
 import type { Publishable } from 'common/utils/event';
 import { AppRuntime, EndpointStore } from 'modules/App/context';
 import type { Endpoint } from 'modules/App/models/endpoint/endpoint';
-import { updateEndpointRequested } from 'modules/App/models/endpoint/events';
+import {
+  updateEndpointRequested,
+  removeEndpointRequested,
+  selectEndpointRequested,
+} from 'modules/App/models/endpoint/events';
 
 interface Props extends Publishable {
   readonly endpoint: Endpoint;
@@ -45,48 +49,46 @@ function EndpointListItem_(props: Props) {
     </Stack>
   );
 }
-// TODO: wrap IconButton in common/components
 
-const useGetters = (props: Props) => {
+//
+const useGetters = ({ endpoint }: Props) => {
   const store = useRuntimeSync(AppRuntime, EndpointStore);
   //
   const checked = React.useMemo(
-    () => computed(() => store.selectedId.get() === props.endpoint.id),
-    [store, props.endpoint]
+    () => computed(() => store.selectedId.get() === endpoint.id),
+    [store, endpoint]
   );
 
   const getChecked = React.useCallback(() => checked.get(), [checked]);
-  const getUrl = React.useCallback(() => props.endpoint.url, [props.endpoint]);
+  const getUrl = React.useCallback(() => endpoint.url, [endpoint]);
   return useReturn({ getChecked, getUrl });
 };
 
-const useHandlers = (props: Props) => {
-  const store = useRuntimeSync(AppRuntime, EndpointStore);
+// TODO: instead of passing handlers as props, that take dependencies that change often, we migh as well just use an intermediary hook that takes the dependencies and returns the handlers. This way we can memoize the handlers and avoid unnecessary re-renders.
+//
+const useHandlers = ({ endpoint, publish }: Props) => {
   //
-  // TODO: publish event instead of using store directly
   const selectFn = React.useCallback(
-    () => store.selectById(props.endpoint.id),
-    [store, props.endpoint]
+    () => publish(selectEndpointRequested(endpoint.id)),
+    [publish, endpoint]
   );
-
-  // TODO: find out why updates are blocked when holding down keys. Only happens when characters are added, not when removed. Might have to do with how the updated value is passed to the store.
 
   const updateFn = React.useCallback(
     (value: string) =>
-      void props.publish(
-        updateEndpointRequested({ id: props.endpoint.id, url: value })
-      ),
-    [props]
+      // TODO: find out why updates are blocked when holding down keys. Only happens when characters are added, not when removed. Might have to do with how the updated value is passed to the store.
+
+      void publish(updateEndpointRequested({ id: endpoint.id, url: value })),
+    [publish, endpoint]
   );
 
-  // TODO: publish event instead of using store directly
   const removeFn = React.useCallback(
-    () => store.remove(props.endpoint.id),
-    [store, props.endpoint]
+    () => void publish(removeEndpointRequested(endpoint.id)),
+    [publish, endpoint]
   );
   return useReturn({ removeFn, selectFn, updateFn });
 };
 
+//
 const styles = {
   root: css`
     --label: EndpointListItem;

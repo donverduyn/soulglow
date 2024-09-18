@@ -99,16 +99,20 @@ const noRuntimeMessage = `No runtime available.
   Did you forget to wrap your component using WithRuntime?
   `;
 
-export const useRuntime = <A, E, R>(
-  context: RuntimeContext<R>,
-  effect: Effect.Effect<A, E, R>,
+type SubsetSource<T, U> = U extends T ? U : never;
+
+export const useRuntime = <A, E, RContext, REffect>(
+  context: RuntimeContext<RContext>,
+  effect: Effect.Effect<A, E, SubsetSource<RContext, REffect>>,
   deps: React.DependencyList = []
 ) => {
   const runtime = React.useContext(context);
   if (Layer.isLayer(runtime)) throw new Error(noRuntimeMessage);
 
   React.useEffect(() => {
-    const F = runtime!.runFork(effect);
+    const F = runtime!.runFork(
+      effect as unknown as Effect.Effect<A, E, RContext>
+    );
     return () => Effect.runSync(F.pipe(Fiber.interruptAsFork(FiberId.none)));
   }, [runtime, ...deps]);
 };

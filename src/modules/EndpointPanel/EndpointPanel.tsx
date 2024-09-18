@@ -9,34 +9,33 @@ import { Paper } from 'common/components/Paper';
 import { useReturn } from 'common/hooks/useReturn';
 import { fromLayer } from 'common/utils/context';
 import type { EventType, Publishable } from 'common/utils/event';
-import { AppRuntime, EndpointStore, EventBus } from 'modules/App/context';
+import { AppRuntime, EventBus, EndpointStore } from 'modules/App/context';
 import { createEndpoint } from 'modules/App/models/endpoint/endpoint';
 import { addEndpointRequested } from 'modules/App/models/endpoint/events';
 import { EndpointListItem } from './components/EndpointListItem';
 import { EndpointPanelRuntime, InboundQueue } from './context';
 
-interface OuterProps {}
+interface Props extends OuterProps, InnerProps {}
 interface InnerProps extends Publishable {
   readonly store: Context.Tag.Service<EndpointStore>;
 }
-interface Props extends OuterProps, InnerProps {}
+interface OuterProps {}
 
-// TODO: think about ways to avoid losing focus on fast refresh, because we recreate the component. This happens in WithRuntime, but also happens if you just use pipe. using the observer hoc doesn't cause problems on its own, so maybe it has the answer.
-
+//
 export const EndpointPanel = pipe(
   observer(EndpointPanel_ as (props: OuterProps) => React.JSX.Element),
   WithRuntime(EndpointPanelRuntime, ({ inject, attachTo }) => {
     //
-    inject(AppRuntime, (runtime) => ({
+    inject(AppRuntime, ({ runSync }) => ({
       publish: (msg: EventType<unknown>) => {
-        runtime.runSync(fromLayer(EventBus, (bus) => bus.publish(msg)));
+        runSync(fromLayer(EventBus, (bus) => bus.publish(msg)));
       },
-      store: runtime.runSync(EndpointStore),
+      store: runSync(EndpointStore),
     })) satisfies InnerProps;
 
     attachTo(AppRuntime, (runFork) =>
       fromLayer(EventBus, (bus) =>
-        bus.register()((event) =>
+        bus.register((event) =>
           runFork(fromLayer(InboundQueue, Queue.offer(event)))
         )
       )
@@ -45,18 +44,19 @@ export const EndpointPanel = pipe(
 );
 
 function EndpointPanel_(props: Props) {
-  const { addEndpoint } = useEndpointPanel(props);
+  const { publish, store } = props;
+  const { addEndpoint } = useHandlers(props);
   //
   const renderList = React.useCallback(
     () =>
-      props.store.list.get().map((endpoint) => (
+      store.list.get().map((endpoint) => (
         <EndpointListItem
           key={endpoint.id}
           endpoint={endpoint}
-          publish={props.publish}
+          publish={publish}
         />
       )),
-    [props.store, props.publish]
+    [store, publish]
   );
 
   return (
@@ -72,10 +72,10 @@ function EndpointPanel_(props: Props) {
   );
 }
 
-function useEndpointPanel(props: Props) {
+function useHandlers({ publish }: Props) {
   const addEndpoint = React.useCallback(
-    () => props.publish(addEndpointRequested(createEndpoint())),
-    [props]
+    () => publish(addEndpointRequested(createEndpoint())),
+    [publish]
   );
 
   return useReturn({ addEndpoint });
@@ -83,7 +83,7 @@ function useEndpointPanel(props: Props) {
 
 const styles = {
   addButton: css`
-    --label: addButton;
+    --label: AddButton;
   `,
   root: css`
     --label: EndpointPanel;
