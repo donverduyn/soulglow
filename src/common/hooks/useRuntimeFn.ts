@@ -3,6 +3,7 @@ import { Effect, pipe, Fiber, FiberId, Layer, Stream } from 'effect';
 import type { IsUnknown } from 'type-fest';
 import { v4 as uuidv4 } from 'uuid';
 import type { RuntimeContext } from 'common/utils/context';
+import { isReactContext } from 'common/utils/react';
 
 //* It is important to note that the runtime of the host component should always be provided to the dependency array, if runtimes higher up the tree are accessed using useRuntimeFn, useRuntime or useRuntimeSync. This is automatically done by WithRuntime its attachTo utility function and might be something to recommend, because this creates a good overview of how the component interacts with external runtimes.
 
@@ -99,20 +100,26 @@ const noRuntimeMessage = `No runtime available.
   Did you forget to wrap your component using WithRuntime?
   `;
 
-type SubsetSource<T, U> = U extends T ? U : never;
+type UpcastSubType<T, U> = U extends T ? U : never;
 
 export const useRuntime = <A, E, RContext, REffect>(
-  context: RuntimeContext<RContext>,
-  effect: Effect.Effect<A, E, SubsetSource<RContext, REffect>>,
+  context:
+    | RuntimeContext<RContext>
+    | React.ContextType<RuntimeContext<RContext>>,
+  effect: Effect.Effect<A, E, UpcastSubType<RContext, REffect>>,
   deps: React.DependencyList = []
 ) => {
-  const runtime = React.useContext(context);
-  if (Layer.isLayer(runtime)) throw new Error(noRuntimeMessage);
+  let runtime = context as NonNullable<
+    React.ContextType<RuntimeContext<RContext>>
+  >;
+
+  if (isReactContext<RuntimeContext<RContext>>(context)) {
+    runtime = React.useContext(context)!;
+    if (Layer.isLayer(runtime)) throw new Error(noRuntimeMessage);
+  }
 
   React.useEffect(() => {
-    const F = runtime!.runFork(
-      effect as unknown as Effect.Effect<A, E, RContext>
-    );
+    const F = runtime.runFork(effect);
     return () => Effect.runSync(F.pipe(Fiber.interruptAsFork(FiberId.none)));
   }, [runtime, ...deps]);
 };

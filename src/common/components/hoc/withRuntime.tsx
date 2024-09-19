@@ -2,8 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as React from 'react';
-import { Effect, Layer, ManagedRuntime, Runtime } from 'effect';
-import type { RuntimeFiber } from 'effect/Fiber';
+import { Effect, Layer, ManagedRuntime } from 'effect';
 import { useRuntime } from 'common/hooks/useRuntimeFn';
 import { type GetContextType, type RuntimeContext } from 'common/utils/context';
 
@@ -12,41 +11,38 @@ This HOC creates a runtime for the context and provides it to the component.
 It allows any downstream components to access the runtime using the context.
 */
 
+// TODO: think about assigning a method to the function, to obtain the provided react context objects in the hoc as an array, for testing purposes. We can separate the hoc from the pipe function and export the method as a named export.
+
 export const WithRuntime =
-  <
-    TTarget extends RuntimeContext<any>,
-    TSource extends [RuntimeContext<any>, Effect.Effect<any, any, any>],
-  >(
+  <TTarget extends RuntimeContext<any>>(
     Context: TTarget,
     getSource?: (utils: {
-      attachTo: <
-        TContext extends RuntimeContext<any>,
-        TEffect extends Effect.Effect<any, any, any>,
-      >(
-        Context: TContext,
-        effect: (
-          runFork: <A, E>(
-            self: Effect.Effect<A, E, GetContextType<TTarget>>,
-            options?: Runtime.RunForkOptions
-          ) => RuntimeFiber<A, E>
+      from: <TContext, TEffect extends Effect.Effect<any, any, any>>(
+        context: RuntimeContext<TContext>,
+        linkEffect: (
+          runtime: ManagedRuntime.ManagedRuntime<TContext, never>
         ) => TEffect
       ) => void;
-      inject: <
-        TContextType,
+
+      propsOf: <
+        TContext,
         TFactory extends (
-          runtime: ManagedRuntime.ManagedRuntime<
-            GetContextType<RuntimeContext<TContextType>>,
-            never
-          >
-        ) => ReturnType<TFactory>,
+          runtime: ManagedRuntime.ManagedRuntime<TContext, never>
+        ) => TResult,
+        TResult,
       >(
-        context: RuntimeContext<TContextType>,
-        factory: TFactory
-      ) => ReturnType<TFactory>;
+        context: RuntimeContext<TContext>,
+        injectEffect: TFactory
+      ) => TResult;
+
+      to: <TContext, TEffect extends Effect.Effect<any, any, any>>(
+        context: RuntimeContext<TContext>,
+        attachEffect: (
+          runtime: ManagedRuntime.ManagedRuntime<GetContextType<TTarget>, never>
+        ) => TEffect
+      ) => void;
     }) => void
   ) =>
-  // TODO: consider using a separate component that takes Context and getSource as props, and uses a render prop to render the component. This would avoid recreating the component on fast refresh. It would also allow us to use one component for injecting and attaching, and one for rendering the component after the events have been replayed.
-
   <P,>(Component: React.FC<P>) => {
     //
     const Wrapped: React.FC<P> = (props) => {
@@ -59,22 +55,32 @@ export const WithRuntime =
 
       if (getSource) {
         getSource({
-          attachTo: (context, attachEffect) => {
-            //* getSource never changes over the lifetime of the component
+          //* getSource never changes over the lifetime of the component, so it is safe to break the rules of hooks here.
+
+          from: (context, linkEffect) => {
             // eslint-disable-next-line react-hooks/rules-of-hooks
-            useRuntime(
-              context as TSource[0],
-              attachEffect(targetRuntime.runFork) as TSource[1],
-              [targetRuntime]
-            );
+            const runtime = React.useContext(context);
+            if (Layer.isLayer(runtime)) throw new Error('No runtime found.');
+
+            const effect = linkEffect(runtime!);
+            // eslint-disable-next-line react-hooks/rules-of-hooks
+            useRuntime(targetRuntime, effect, [targetRuntime]);
           },
-          inject: (context, injectEffect) => {
+
+          propsOf: (context, injectEffect) => {
             // eslint-disable-next-line react-hooks/rules-of-hooks
             const runtime = React.useContext(context);
             if (Layer.isLayer(runtime)) throw new Error('No runtime found.');
             const result = injectEffect(runtime!);
             Object.assign(extraProps, result);
             return result;
+          },
+
+          to: (context, attachEffect) => {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
+            const runtime = React.useContext(context);
+            // eslint-disable-next-line react-hooks/rules-of-hooks
+            useRuntime(context, attachEffect(targetRuntime), [runtime]);
           },
         });
       }

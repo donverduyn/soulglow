@@ -1,19 +1,18 @@
 import * as React from 'react';
 import { css } from '@mui/material/styles';
-import { pipe, Queue, type Context } from 'effect';
+import { Effect, pipe, Queue, type Context } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'common/components/Button';
 import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { List } from 'common/components/List';
 import { Paper } from 'common/components/Paper';
 import { useReturn } from 'common/hooks/useReturn';
-import { fromLayer } from 'common/utils/context';
 import type { EventType, Publishable } from 'common/utils/event';
 import { AppRuntime, EventBus, EndpointStore } from 'modules/App/context';
 import { createEndpoint } from 'modules/App/models/endpoint/endpoint';
 import { addEndpointRequested } from 'modules/App/models/endpoint/events';
 import { EndpointListItem } from './components/EndpointListItem';
-import { EndpointPanelRuntime, InboundQueue } from './context';
+import { EndpointPanelRuntime, Foo, InboundQueue } from './context';
 
 interface Props extends OuterProps, InnerProps {}
 interface InnerProps extends Publishable {
@@ -24,19 +23,26 @@ interface OuterProps {}
 //
 export const EndpointPanel = pipe(
   observer(EndpointPanel_ as (props: OuterProps) => React.JSX.Element),
-  WithRuntime(EndpointPanelRuntime, ({ inject, attachTo }) => {
+  WithRuntime(EndpointPanelRuntime, ({ propsOf, to, from }) => {
     //
-    inject(AppRuntime, ({ runSync }) => ({
-      publish: (msg: EventType<unknown>) => {
-        runSync(fromLayer(EventBus, (bus) => bus.publish(msg)));
+    // TODO: consider using decorator composition, but we have to think how to type "to", because it depends on the first argument to WithRuntime.
+
+    propsOf(AppRuntime, ({ runFork, runSync }) => ({
+      publish(msg: EventType<unknown>) {
+        runFork(Effect.andThen(EventBus, (bus) => bus.publish(msg)));
       },
       store: runSync(EndpointStore),
     })) satisfies InnerProps;
 
-    attachTo(AppRuntime, (runFork) =>
-      fromLayer(EventBus, (bus) =>
+    // TODO: use synchronizedRef to keep a reference to the store, in the component runtime, so it can be injected into effects
+    from(AppRuntime, ({ runSync }) =>
+      Effect.andThen(Foo, (_) => runSync(EndpointStore))
+    );
+
+    to(AppRuntime, ({ runFork }) =>
+      Effect.andThen(EventBus, (bus) =>
         bus.register((event) =>
-          runFork(fromLayer(InboundQueue, Queue.offer(event)))
+          runFork(Effect.andThen(InboundQueue, Queue.offer(event)))
         )
       )
     );

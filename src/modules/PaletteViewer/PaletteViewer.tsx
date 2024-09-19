@@ -3,7 +3,6 @@ import { css, type Theme } from '@mui/material/styles';
 import { formatHex, type Okhsv } from 'culori';
 import { computed, untracked } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import moize from 'moize';
 import { Paper } from 'common/components/Paper';
 import { Stack } from 'common/components/Stack';
 import { createPalettes } from 'common/utils/color';
@@ -31,22 +30,19 @@ function PaletteViewer_({ getColor, className }: Props) {
           css={styles.palette}
         >
           {palette.map((_, i) => {
-            // cache the color computation
             const color = computed(() => formatHex(palettes.get()[key][i]));
-
-            // this doesn't actually do anything because color is not stable.
-            // that is also not worth it, because it would memoize linearly
-            const render = moize((c: typeof color) => () => c.get());
-            const getStyle = moize((c: typeof color) => () => ({
-              background: c.get(),
-            }));
 
             return (
               <Stack
                 key={key.concat(i.toString())}
                 css={styles.swatch}
-                getStyle={getStyle(color)}
-                render={render(color)}
+                //* color cannot be stable across renders
+                // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop
+                render={() => color.get()}
+                // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop
+                getStyle={() => ({
+                  background: color.get(),
+                })}
               />
             );
           })}

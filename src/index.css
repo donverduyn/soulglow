@@ -5,6 +5,10 @@
   text-rendering: optimizelegibility;
 }
 
+html {
+  background: black;
+}
+
 body {
   display: flex;
   margin: 0;
