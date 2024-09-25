@@ -3,12 +3,15 @@
 {
 	"name": "Node.js & GitHub Actions",
 	"build": {
-		"dockerfile": "Dockerfile"
+		"dockerfile": "Dockerfile",
+		"context": "."
 	},
 	"features": {
 		"ghcr.io/devcontainers/features/node:1": {
 			"nodeGypDependencies": true,
-			"version": "lts",
+			"installYarnUsingApt": true,
+			"version": "latest",
+			"pnpmVersion": "latest",
 			"nvmVersion": "latest"
 		},
 		"ghcr.io/devcontainers-contrib/features/actions-runner:1": {
@@ -34,15 +37,20 @@
 	],
 	"mounts": [
 		"source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
-		"source=/run/user/1000/bus,target=/run/user/1000/bus,type=bind,consistency=cached",
+		// "source=/run/user/1000/bus,target=/run/user/1000/bus,type=bind,consistency=cached"
 		// "source=${localEnv:HOME}/.kube,target=/tmp/.kube,type=bind,consistency=cached",
 		// "source=${localEnv:HOME}/.minikube,target=/tmp/.minikube,type=bind,consistency=cached"
 	],
 	// we statically bind the dev server so external machines on the network can view it.
 	// if the firewall allows, that is.
 	"runArgs": ["--device=/dev/dri:/dev/dri", "--device=/dev/snd", "-p=0.0.0.0:4173:4173"], // "--network=minikube"],
-	"postCreateCommand": "yarn install",
+	
+	"postCreateCommand": {
+		// "venv": "echo 'source /opt/venv/bin/activate' >> ~/.bashrc",
+		"yarn": "yarn install"
+	},
 	"postStartCommand": {
+		// "gpu": "sudo chown root:video /dev/dri/renderD128 && sudo usermod -aG video $USER"
 		// If we consider cross-platform we should run dbus in the container
 		// and create mappings for windows and mac by investigating what is communicated
 		// over the bind mounted dbus right now.
@@ -50,9 +58,9 @@
 		// In terms of x11 we should investigate how to support (xquartz, x410, vcxsrv, etc.)
 		// "dbus": "dbus-daemon --session --address=unix:path=/run/user/1000/bus >/dev/null 2>&1 &"
 	},
-	"initializeCommand": [
-		"./.devcontainer/host.sh"
-	],
+	// "initializeCommand": [
+	// 	"./.devcontainer/host.sh"
+	// ],
 	"portsAttributes": {
 		"8080": {
 			"label": "Preview",
@@ -71,8 +79,11 @@
 		"ESLINT_USE_FLAT_CONFIG": "false",
 		"EDITOR": "code",
 		"DISPLAY": "${localEnv:DISPLAY}",
-		"DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
+		// "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
+		// "DBUS_SESSION_BUS_ADDRESS": "disabled",
 		"XDG_RUNTIME_DIR": "/tmp/runtime-vscode",
+		"PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium",
+		"PUPPETEER_SKIP_CHROMIUM_DOWNLOAD": "true",
 		"PUPPETEER_CACHE_DIR": "${containerWorkspaceFolder}/node_modules/puppeteer/.local-chromium",
 		"MINIKUBE_HOME": "/tmp/.minikube"
 	},

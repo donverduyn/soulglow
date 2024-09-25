@@ -24,24 +24,87 @@ RUN apt-get update && apt-get install -y curl gnupg \
     && apt-get update && apt-get install -y yarn
 
 # Clone and build
-RUN git clone https://github.com/facebook/react.git /tmp/react \
-    && cd /tmp/react \
-    && yarn install \
-    && yarn build-for-devtools \
-    && cd ./packages/react-devtools-extensions \
-    && yarn build:chrome
+# RUN git clone https://github.com/facebook/react.git /tmp/react \
+#     && cd /tmp/react \
+#     && yarn install \
+#     && yarn build-for-devtools \
+#     && cd ./packages/react-devtools-extensions \
+#     && yarn build:chrome
 
-# Stage 3: Setup the final image
+# Step 3: Create the final image
 FROM mcr.microsoft.com/devcontainers/base:bullseye
 
-# Install general dependencies and Chrome
 RUN apt-get update \
-    && apt-get install -y wget gnupg \
-    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/googlechrome-linux-keyring.gpg \
-    && sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/googlechrome-linux-keyring.gpg] https://dl-ssl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
-    && apt-get update \
-    && apt-get install -y libnss3 libgbm1 fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-khmeros fonts-kacst fonts-freefont-ttf libxss1 dbus dbus-x11 libappindicator3-1 libasound2 libatk-bridge2.0-0 libatk1.0-0 libcups2 libdbus-1-3 libgdk-pixbuf2.0-0 libnspr4 libnss3 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 xdg-utils alsa-utils vulkan-tools mesa-vulkan-drivers upower libglib2.0-bin fonts-recommended --no-install-recommends \
+    && apt-get install -y \
+    xdg-utils \ 
+    fonts-dejavu \ 
+    fonts-liberation \ 
+    fonts-liberation2 \
+    fonts-noto \ 
+    fonts-noto-cjk \
+    fonts-freefont-ttf \
+    fonts-recommended \
+    fonts-firacode \
+    dbus \ 
+    dbus-x11 \
+    chromium \
+    alsa-utils \ 
+    pulseaudio \
+    mesa-utils-extra \
+    # vulkan-tools \ 
+    # upower \ 
+    --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* /var/tmp/*
+
+
+# RUN apt-get update && apt-get install -y \
+#     pkg-config \
+#     cmake \
+#     build-essential \
+#     python3 \
+#     python3-pip \
+#     python3-venv \
+#     && apt-get clean
+
+
+# # Create a virtual environment for Python packages
+# RUN python3 -m venv /opt/venv
+# RUN echo "source /opt/venv/bin/activate" | tee -a ~/.bashrc
+
+# # Extract the current 'secure_path' from sudoers, append the venv path, and patch it in /etc/sudoers.d
+# RUN CURRENT_SECURE_PATH=$(grep -Po '^Defaults\s+secure_path\s*=\s*"\K[^"]*' /etc/sudoers) \
+#     && echo "Defaults secure_path=\"/opt/venv/bin:$CURRENT_SECURE_PATH\"" | tee /etc/sudoers.d/custom_secure_path
+
+# # Ensure the sudoers file has the correct permissions
+# RUN chmod 440 /etc/sudoers.d/custom_secure_path
+
+# # Activate the virtual environment and install Meson
+# RUN /opt/venv/bin/pip install --upgrade pip --no-cache-dir pip && \
+#     /opt/venv/bin/pip install --no-cache-dir pycparser PyYAML Mako meson
+
+# # Add virtual environment to PATH to make meson available globally
+# ENV PATH="/opt/venv/bin:$PATH"
+
+# RUN echo "deb-src http://deb.debian.org/debian bookworm main" >> /etc/apt/sources.list
+# RUN apt-get update && apt-get build-dep -y mesa && apt-get build-dep -y libdrm
+
+# ENV LIBDIR=/usr/lib/aarch64-linux-gnu
+# ENV TOP=/opt
+
+# # Clone and build libdrm
+# RUN git clone https://gitlab.freedesktop.org/mesa/drm.git $TOP/drm && \
+#     cd $TOP/drm && \
+#     meson builddir --prefix=/usr --libdir=${LIBDIR} && \
+#     meson compile -C builddir && \
+#     meson install -C builddir
+
+# # # Clone and build Mesa with SVGA3D driver support
+# RUN git clone https://gitlab.freedesktop.org/mesa/mesa.git $TOP/mesa && \
+#     cd $TOP/mesa && \
+#     meson builddir -Dvulkan-drivers= -Dgallium-drivers=svga -Dglvnd=enabled -Dglvnd-vendor-name=mesa --prefix=/usr && \
+#     meson compile -C builddir && \
+#     meson install -C builddir
+    
 
 # Additional container configuration
 RUN mkdir -p /tmp/runtime-vscode \
@@ -50,7 +113,7 @@ RUN mkdir -p /tmp/runtime-vscode \
     && usermod -a -G audio,video vscode
 
 # Copy built React DevTools from the builder stage
-COPY --from=builder /tmp/react/packages/react-devtools-extensions/chrome/build /tmp/react-devtools-extensions
+# COPY --from=builder /tmp/react/packages/react-devtools-extensions/chrome/build /tmp/react-devtools-extensions
 
 # Add Node binaries to PATH
 ENV PATH=./node_modules/.bin:$PATH
