@@ -30,18 +30,14 @@
 			"version": "latest",
 			"helm": "latest",
 			"minikube": "latest"
-		},
-		// "ghcr.io/kreemer/features/chrometesting:1": {
-		// 	"version": "Stable"
-		// },
+		}
 	},
 	"capAdd": [
 		"SYS_ADMIN" // for sandboxing chromium
 	],
 	"mounts": [
-		// "source=/usr/lib/aarch64-linux-gnu/dri/,target=/usr/lib/aarch64-linux-gnu/dri/,type=bind,consistency=cached",
-		// "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
-		// "source=/run/user/1000/bus,target=/run/user/1000/bus,type=bind,consistency=cached",
+		"source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
+		// "source=/run/user/1000/bus,target=/run/user/1000/bus,type=bind,consistency=cached"
 		// "source=${localEnv:HOME}/.kube,target=/tmp/.kube,type=bind,consistency=cached",
 		// "source=${localEnv:HOME}/.minikube,target=/tmp/.minikube,type=bind,consistency=cached"
 	],
@@ -49,8 +45,12 @@
 	// if the firewall allows, that is.
 	"runArgs": ["--device=/dev/dri:/dev/dri", "--device=/dev/snd", "-p=0.0.0.0:4173:4173"], // "--network=minikube"],
 	
-	"postCreateCommand": "yarn install && sudo chown root:video /dev/dri/renderD128 && sudo usermod -aG video $USER",
+	"postCreateCommand": {
+		// "venv": "echo 'source /opt/venv/bin/activate' >> ~/.bashrc",
+		"yarn": "yarn install"
+	},
 	"postStartCommand": {
+		// "gpu": "sudo chown root:video /dev/dri/renderD128 && sudo usermod -aG video $USER"
 		// If we consider cross-platform we should run dbus in the container
 		// and create mappings for windows and mac by investigating what is communicated
 		// over the bind mounted dbus right now.
@@ -58,9 +58,9 @@
 		// In terms of x11 we should investigate how to support (xquartz, x410, vcxsrv, etc.)
 		// "dbus": "dbus-daemon --session --address=unix:path=/run/user/1000/bus >/dev/null 2>&1 &"
 	},
-	"initializeCommand": [
-		"./.devcontainer/host.sh"
-	],
+	// "initializeCommand": [
+	// 	"./.devcontainer/host.sh"
+	// ],
 	"portsAttributes": {
 		"8080": {
 			"label": "Preview",
@@ -82,8 +82,7 @@
 		// "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
 		// "DBUS_SESSION_BUS_ADDRESS": "disabled",
 		"XDG_RUNTIME_DIR": "/tmp/runtime-vscode",
-		// "LIBGL_DRIVERS_PATH": "/usr/lib/aarch64-linux-gnu/dri",
-		// "MESA_PLATFORM": "surfaceless",
+		"PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium",
 		"PUPPETEER_SKIP_CHROMIUM_DOWNLOAD": "true",
 		"PUPPETEER_CACHE_DIR": "${containerWorkspaceFolder}/node_modules/puppeteer/.local-chromium",
 		"MINIKUBE_HOME": "/tmp/.minikube"

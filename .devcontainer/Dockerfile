@@ -31,71 +31,15 @@ RUN apt-get update && apt-get install -y curl gnupg \
 #     && cd ./packages/react-devtools-extensions \
 #     && yarn build:chrome
 
-# Stage 3: Setup the final image
+# Step 3: Create the final image
 FROM mcr.microsoft.com/devcontainers/base:bullseye
-
-
-# Install general dependencies and Chrome
-# RUN apt-get update \
-#     && apt-get install -y wget gnupg \
-#     && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/googlechrome-linux-keyring.gpg \
-#     && sh -c 'echo "deb [arch=arm64 signed-by=/usr/share/keyrings/googlechrome-linux-keyring.gpg] https://dl-ssl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
-
-# Update package lists and install necessary tools
-RUN apt-get update && \
-    apt-get install -y software-properties-common nano
-
-# Add contrib and non-free to sources.list
-RUN echo "deb http://deb.debian.org/debian bullseye main contrib non-free" > /etc/apt/sources.list && \
-    echo "deb http://deb.debian.org/debian-security bullseye-security main contrib non-free" >> /etc/apt/sources.list && \
-    echo "deb http://deb.debian.org/debian bullseye-updates main contrib non-free" >> /etc/apt/sources.list && \
-    echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-free" >> /etc/apt/sources.list
-
-RUN apt-get update && apt-get -t bullseye-backports install -y open-vm-tools
 
 RUN apt-get update \
     && apt-get install -y \
-    ca-certificates \
-    fonts-liberation \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libc6 \
-    libcairo2 \
-    libcups2 \
-    libdbus-1-3 \
-    libexpat1 \
-    libfontconfig1 \
-    libgbm1 \
-    libgcc1 \
-    libglib2.0-0 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libstdc++6 \
-    libx11-6 \
-    libx11-xcb1 \
-    libxcb1 \
-    libxcomposite1 \
-    libxcursor1 \
-    libxdamage1 \
-    libxext6 \
-    libxfixes3 \
-    libxi6 \
-    libxrandr2 \
-    libxrender1 \
-    libxss1 \
-    libxtst6 \
-    lsb-release \
-    wget \
     xdg-utils \ 
-    #
     fonts-dejavu \ 
     fonts-liberation \ 
     fonts-liberation2 \
-    # ttf-mscorefonts-installer \ 
     fonts-noto \ 
     fonts-noto-cjk \
     fonts-freefont-ttf \
@@ -104,29 +48,63 @@ RUN apt-get update \
     dbus \ 
     dbus-x11 \
     chromium \
-    # libappindicator3-1 \
-    # ibgdk-pixbuf2.0-0 \ 
-    # libxdamage1 \
     alsa-utils \ 
     pulseaudio \
-    mesa-utils \
     mesa-utils-extra \
-    # eglinfo \
-    libgl1-mesa-dri \
-    libegl1-mesa \
-    libgles2-mesa \
-    libglx-mesa0 \
     # vulkan-tools \ 
-    # mesa-vulkan-drivers \ 
     # upower \ 
     --no-install-recommends \
-    # && sudo usermod -aG video $USER \
     && rm -rf /var/lib/apt/lists/* /var/tmp/*
+
+
+# RUN apt-get update && apt-get install -y \
+#     pkg-config \
+#     cmake \
+#     build-essential \
+#     python3 \
+#     python3-pip \
+#     python3-venv \
+#     && apt-get clean
+
+
+# # Create a virtual environment for Python packages
+# RUN python3 -m venv /opt/venv
+# RUN echo "source /opt/venv/bin/activate" | tee -a ~/.bashrc
+
+# # Extract the current 'secure_path' from sudoers, append the venv path, and patch it in /etc/sudoers.d
+# RUN CURRENT_SECURE_PATH=$(grep -Po '^Defaults\s+secure_path\s*=\s*"\K[^"]*' /etc/sudoers) \
+#     && echo "Defaults secure_path=\"/opt/venv/bin:$CURRENT_SECURE_PATH\"" | tee /etc/sudoers.d/custom_secure_path
+
+# # Ensure the sudoers file has the correct permissions
+# RUN chmod 440 /etc/sudoers.d/custom_secure_path
+
+# # Activate the virtual environment and install Meson
+# RUN /opt/venv/bin/pip install --upgrade pip --no-cache-dir pip && \
+#     /opt/venv/bin/pip install --no-cache-dir pycparser PyYAML Mako meson
+
+# # Add virtual environment to PATH to make meson available globally
+# ENV PATH="/opt/venv/bin:$PATH"
+
+# RUN echo "deb-src http://deb.debian.org/debian bookworm main" >> /etc/apt/sources.list
+# RUN apt-get update && apt-get build-dep -y mesa && apt-get build-dep -y libdrm
+
+# ENV LIBDIR=/usr/lib/aarch64-linux-gnu
+# ENV TOP=/opt
+
+# # Clone and build libdrm
+# RUN git clone https://gitlab.freedesktop.org/mesa/drm.git $TOP/drm && \
+#     cd $TOP/drm && \
+#     meson builddir --prefix=/usr --libdir=${LIBDIR} && \
+#     meson compile -C builddir && \
+#     meson install -C builddir
+
+# # # Clone and build Mesa with SVGA3D driver support
+# RUN git clone https://gitlab.freedesktop.org/mesa/mesa.git $TOP/mesa && \
+#     cd $TOP/mesa && \
+#     meson builddir -Dvulkan-drivers= -Dgallium-drivers=svga -Dglvnd=enabled -Dglvnd-vendor-name=mesa --prefix=/usr && \
+#     meson compile -C builddir && \
+#     meson install -C builddir
     
-# COPY install.sh /tmp/install.sh
-# RUN chmod +x /tmp/install.sh \
-#     && /tmp/install.sh \
-#     && rm /tmp/install.sh
 
 # Additional container configuration
 RUN mkdir -p /tmp/runtime-vscode \
