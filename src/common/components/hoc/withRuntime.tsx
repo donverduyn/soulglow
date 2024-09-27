@@ -46,9 +46,9 @@ export const WithRuntime =
   <P,>(Component: React.FC<P>) => {
     //
     const Wrapped: React.FC<P> = (props) => {
-      const layer = React.useContext(Context) as unknown as Layer.Layer<
-        GetContextType<TTarget>
-      >;
+      const { layer } = Context as unknown as {
+        layer: Layer.Layer<GetContextType<TTarget>>;
+      };
 
       const targetRuntime = useRuntimeFactory(layer);
       const extraProps: Record<string, any> = {};

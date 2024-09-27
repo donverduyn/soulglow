@@ -4,15 +4,23 @@ node_modules/
 .pnp.js
 
 # Build outputs
-/build
-/dist
-/out
-/.next
+build
+dist
+out
+.next
+
+dist-ssr
+dev-dist
+*.local
 
 # Generated files
 src/__generated
 
 # Debug logs
+logs
+*.log
+pnpm-debug.log*
+lerna-debug.log*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -50,13 +58,6 @@ yarn-error.log*
 
 # Temporary files
 /tmp
-
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
 # Others
 *.sublime-workspace

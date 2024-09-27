@@ -7,6 +7,7 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import { Plugin, ViteDevServer } from 'vite';
 import { checker } from 'vite-plugin-checker';
 import inspect from 'vite-plugin-inspect';
+import { VitePWA } from 'vite-plugin-pwa';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
 import { createBrowser } from './scripts/browser';
@@ -82,6 +83,7 @@ const browser = (mode: string): Plugin => {
 
 // https://vitejs.dev/config/
 // TODO: find a way to avoid killing the server when this file is changed. this is a bug in the browser plugin above.
+// @ts-expect-error vite version mismatch
 export default defineConfig(({ mode }) => ({
   build: {
     minify: 'esbuild',
@@ -113,6 +115,37 @@ export default defineConfig(({ mode }) => ({
     dynamicProxyPlugin(),
     tsconfigPaths(),
     react({ jsxImportSource: '@emotion/react', tsDecorators: true }),
+    VitePWA({
+      devOptions: {
+        enabled: false,
+        navigateFallback: 'index.html',
+        suppressWarnings: true,
+        type: 'module',
+      },
+      filename: 'worker.ts',
+      injectManifest: {
+        // globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+        globPatterns: [
+          '**/*.{js,css,html,svg,png,ico}',
+          'fonts/*.{woff,woff2,ttf,otf}', // Add fonts to be cached
+        ],
+      },
+      injectRegister: 'script-defer',
+      manifest: {
+        description: 'milight-ui',
+        name: 'milight-ui',
+        short_name: 'milight-ui',
+        theme_color: '#ffffff',
+      },
+
+      pwaAssets: {
+        config: './pwa.config.ts',
+        disabled: false,
+      },
+      registerType: 'autoUpdate',
+      srcDir: 'src',
+      strategies: 'injectManifest',
+    }),
     checker({
       eslint: {
         dev: { logLevel: ['error', 'warning'] },
@@ -169,7 +202,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     headers: noCacheHeaders,
     hmr: { overlay: true },
-    host: true,
+    host: '127.0.0.1',
     port: 4173,
     proxy: {
       // '/api': {

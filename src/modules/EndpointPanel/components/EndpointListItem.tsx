@@ -10,13 +10,14 @@ import { TextField } from 'common/components/TextField';
 import { useReturn } from 'common/hooks/useReturn';
 import { useRuntimeSync } from 'common/hooks/useRuntimeFn';
 import type { Publishable } from 'common/utils/event';
-import { AppRuntime, EndpointStore } from 'modules/App/context';
+import { AppRuntime } from 'modules/App/context';
 import type { Endpoint } from 'modules/App/models/endpoint/endpoint';
 import {
   updateEndpointRequested,
   removeEndpointRequested,
   selectEndpointRequested,
 } from 'modules/App/models/endpoint/events';
+import AppTokens from 'modules/App/tokens';
 
 interface Props extends Publishable {
   readonly endpoint: Endpoint;
@@ -52,7 +53,7 @@ function EndpointListItem_(props: Props) {
 
 //
 const useGetters = ({ endpoint }: Props) => {
-  const store = useRuntimeSync(AppRuntime, EndpointStore);
+  const store = useRuntimeSync(AppRuntime, AppTokens.EndpointStore);
   //
   const checked = React.useMemo(
     () => computed(() => store.selectedId.get() === endpoint.id),
@@ -64,7 +65,7 @@ const useGetters = ({ endpoint }: Props) => {
   return useReturn({ getChecked, getUrl });
 };
 
-// TODO: instead of passing handlers as props, that take dependencies that change often, we migh as well just use an intermediary hook that takes the dependencies and returns the handlers. This way we can memoize the handlers and avoid unnecessary re-renders.
+// TODO: think about delegating events to the parent component, because we currently memoize on a per listitem basis, which is not ideal. We can simply pass the handlers as props from the parent component and memoize them
 //
 const useHandlers = ({ endpoint, publish }: Props) => {
   //

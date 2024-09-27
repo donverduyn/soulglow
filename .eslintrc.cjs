@@ -6,7 +6,7 @@ module.exports = {
     'plugin:import/recommended',
     'plugin:eslint-comments/recommended',
   ],
-  ignorePatterns: ['node_modules', 'dist', '!**/.stylelintrc.mjs'],
+  ignorePatterns: ['node_modules', 'dist', 'dev-dist', '!**/.stylelintrc.mjs'],
   overrides: [
     {
       files: ['./**/*.js', './**/*.cjs', './**/*.mjs'],
@@ -38,6 +38,7 @@ module.exports = {
     // node environment
     {
       files: [
+        '*.config.ts',
         'vite.config.ts',
         './src/**/*.test.ts?(x)',
         './test/**/*.ts',

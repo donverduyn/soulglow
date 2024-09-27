@@ -8,10 +8,10 @@ import {
 } from 'effect';
 
 export const createRuntimeContext = <T>(layer: Layer.Layer<T>) => {
-  return React.createContext<
+  const context = React.createContext<
     ManagedRuntime.ManagedRuntime<T, never> | undefined
-    // TODO: consider keeping layer in the closure and obtain it in WithRuntime when needed. We can also modify the utility hooks to obtain the runtime from the closure instead of dropping it directly into useContext. This would avoid the need for abusing the context API here.
-  >(layer as unknown as ManagedRuntime.ManagedRuntime<T, never>);
+  >(undefined);
+  return Object.assign(context, { layer });
 };
 
 export type RuntimeContext<T> = React.Context<

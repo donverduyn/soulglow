@@ -8,19 +8,19 @@ import { List } from 'common/components/List';
 import { Paper } from 'common/components/Paper';
 import { useReturn } from 'common/hooks/useReturn';
 import type { EventType, Publishable } from 'common/utils/event';
-import { AppRuntime, EventBus, EndpointStore } from 'modules/App/context';
+import { AppRuntime } from 'modules/App/context';
 import { createEndpoint } from 'modules/App/models/endpoint/endpoint';
 import { addEndpointRequested } from 'modules/App/models/endpoint/events';
+import AppTokens from 'modules/App/tokens';
 import { EndpointListItem } from './components/EndpointListItem';
 import { EndpointPanelRuntime, Foo, InboundQueue } from './context';
 
 interface Props extends OuterProps, InnerProps {}
 interface InnerProps extends Publishable {
-  readonly store: Context.Tag.Service<EndpointStore>;
+  readonly store: Context.Tag.Service<typeof AppTokens.EndpointStore>;
 }
 interface OuterProps {}
 
-//
 export const EndpointPanel = pipe(
   observer(EndpointPanel_ as (props: OuterProps) => React.JSX.Element),
   WithRuntime(EndpointPanelRuntime, ({ propsOf, to, from }) => {
@@ -29,18 +29,18 @@ export const EndpointPanel = pipe(
 
     propsOf(AppRuntime, ({ runFork, runSync }) => ({
       publish(msg: EventType<unknown>) {
-        runFork(Effect.andThen(EventBus, (bus) => bus.publish(msg)));
+        runFork(Effect.andThen(AppTokens.EventBus, (bus) => bus.publish(msg)));
       },
-      store: runSync(EndpointStore),
+      store: runSync(AppTokens.EndpointStore),
     })) satisfies InnerProps;
 
     // TODO: use synchronizedRef to keep a reference to the store, in the component runtime, so it can be injected into effects
     from(AppRuntime, ({ runSync }) =>
-      Effect.andThen(Foo, (_) => runSync(EndpointStore))
+      Effect.map(Foo, (_) => runSync(AppTokens.EndpointStore))
     );
 
     to(AppRuntime, ({ runFork }) =>
-      Effect.andThen(EventBus, (bus) =>
+      Effect.andThen(AppTokens.EventBus, (bus) =>
         bus.register((event) =>
           runFork(Effect.andThen(InboundQueue, Queue.offer(event)))
         )
@@ -52,6 +52,7 @@ export const EndpointPanel = pipe(
 function EndpointPanel_(props: Props) {
   const { publish, store } = props;
   const { addEndpoint } = useHandlers(props);
+
   //
   const renderList = React.useCallback(
     () =>

@@ -88,3 +88,7 @@ export function createTypedMap<T>() {
     },
   };
 }
+
+// const map = pipe(createTypedMap, register('foo', 1));
+// const foo = map().get('foo');
+// number

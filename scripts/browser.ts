@@ -41,7 +41,7 @@ const options: Parameters<(typeof puppeteer)['launch']>[0] = {
     // '--load-extension=/tmp/react-devtools-extensions/unpacked',
     '--remote-debugging-port=9222',
     // '--auto-accept-camera-and-microphone-capture',
-    // '--force-dark-mode',
+    '--force-dark-mode',
   ],
   defaultViewport: { height: 0, width: 0 },
   devtools: true,
@@ -53,7 +53,7 @@ const options: Parameters<(typeof puppeteer)['launch']>[0] = {
 const userPrefs = {
   devtools: {
     preferences: {
-      currentDockState: '"right"',
+      currentDockState: '"bottom"',
       'panel-selected-tab': '"console"',
       // 'ui-theme': '"dark"',
     },

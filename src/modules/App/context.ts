@@ -1,5 +1,5 @@
 import { pipe, Layer, Context, PubSub, Effect, Stream, Fiber } from 'effect';
-import { runInAction } from 'mobx';
+import * as Mobx from 'mobx';
 import { createRuntimeContext } from 'common/utils/context';
 import { browserLogger, getRunFork } from 'common/utils/effect';
 import { createEntityStore, withSelected } from 'common/utils/entity';
@@ -9,30 +9,19 @@ import {
   type Endpoint,
 } from 'modules/App/models/endpoint/endpoint';
 import { EventBusService } from 'modules/App/services/EventBusService';
+import AppTokens from './tokens';
 
 // TODO: think about how we want to use this from commom/utils/effect
 // const AppConfigProvider = ConfigProvider.fromJson({
 //   LOG_LEVEL: LogLevel.Debug,
 // });
 
-// TODO: namespace the context tags
-export class EventBus extends Context.Tag('@App/EventBus')<
-  EventBus,
-  EventBusService
->() {}
-
-export class EndpointStore extends Context.Tag('@App/EndpointStore2')<
-  EndpointStore,
-  ReturnType<typeof createEndpointStore>
->() {}
-
 export const AppRuntime = createRuntimeContext(layer());
-const createEndpointStore = pipe(createEntityStore<Endpoint>, withSelected);
 
 const processEvents =
-  (store: Context.Tag.Service<EndpointStore>) =>
+  (store: Context.Tag.Service<typeof AppTokens.EndpointStore>) =>
   (event: EventType<unknown>) => {
-    runInAction(() => {
+    Mobx.runInAction(() => {
       // TODO: use XState to handle side effects.
       if (event.name === 'ADD_ENDPOINT_REQUESTED') {
         // @ts-expect-error event.payload is not typed
@@ -60,14 +49,20 @@ const processEvents =
 function layer() {
   return pipe(
     Layer.scoped(
-      EndpointStore,
+      AppTokens.EndpointStore,
       Effect.gen(function* () {
         const runFork = yield* getRunFork;
 
+        const createEndpointStore = pipe(
+          createEntityStore<Endpoint>,
+          withSelected
+        );
         const store = createEndpointStore();
         const consumer = pipe(
           // TODO: bus should be provided through a layer
-          Stream.fromPubSub(yield* Effect.andThen(EventBus, (bus) => bus.bus)),
+          Stream.fromPubSub(
+            yield* Effect.andThen(AppTokens.EventBus, (bus) => bus.bus)
+          ),
           Stream.tap(Effect.logInfo),
           Stream.map(processEvents(store)),
           Stream.runDrain
@@ -86,7 +81,7 @@ function layer() {
     ),
     Layer.provideMerge(
       Layer.effect(
-        EventBus,
+        AppTokens.EventBus,
         pipe(
           PubSub.unbounded<EventType<unknown>>({
             replay: Number.POSITIVE_INFINITY,

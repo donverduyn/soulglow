@@ -73,6 +73,12 @@ export const withSelected = <T extends Identifiable, U>(
   };
 };
 
+export type WithSelected<T> = {
+  selectById: (id: string) => void;
+  selectedId: IComputedValue<string | null>;
+  selectedItem: IComputedValue<T | null>;
+};
+
 export const withFiltered = <T extends Identifiable, U>(
   createStore: () => EntityStore<T> & WithPrevious<U>
 ) => {
@@ -99,4 +105,10 @@ export const withFiltered = <T extends Identifiable, U>(
       },
     });
   };
+};
+
+export type WithFiltered<T> = {
+  filter: IComputedValue<string | null>;
+  filteredItems: IComputedValue<T[]>;
+  setFilter: (value: string) => void;
 };
