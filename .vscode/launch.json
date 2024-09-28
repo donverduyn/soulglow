@@ -10,7 +10,8 @@
             "request": "attach",
             "type": "chrome",
             "url": "http://localhost:4173",
-            "webRoot": "${workspaceFolder}/src"
+            "webRoot": "${workspaceFolder}/src",
+            "preLaunchTask": "launch-vite-debug",
         },
         {
             "name": "Launch Node",

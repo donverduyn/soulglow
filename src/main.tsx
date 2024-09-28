@@ -6,7 +6,7 @@ import './index.css';
 import './config/console.ts';
 import ReactDOM from 'react-dom/client';
 import { client } from './__generated/api';
-import App from './modules/App';
+import App from './modules/App/main';
 
 // const getComponentName = moize((componentName: string) =>
 //   process.env.NODE_ENV === 'production' ? 'css' : componentName

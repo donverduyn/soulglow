@@ -10,13 +10,14 @@ import { TextField } from 'common/components/TextField';
 import { useReturn } from 'common/hooks/useReturn';
 import { useRuntimeSync } from 'common/hooks/useRuntimeFn';
 import type { Publishable } from 'common/utils/event';
-import type { Endpoint } from 'models/endpoint';
 import {
   updateEndpointRequested,
   removeEndpointRequested,
   selectEndpointRequested,
-} from 'models/endpoint';
-import { AppRuntime, AppTags } from 'modules/App';
+} from 'models/endpoint/events';
+import type { Endpoint } from 'models/endpoint/model';
+import { AppRuntime } from 'modules/App/context';
+import * as AppTags from 'modules/App/tags';
 
 interface Props extends Publishable {
   readonly endpoint: Endpoint;

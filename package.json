@@ -7,6 +7,7 @@
     "postinstall": "patch-package && yarn api:generate",
     "api:generate": "rm -rf ./src/__generated && tsx -e \"import { generate } from './scripts/api-gen'; generate('./openapi.yml', './src/__generated/api');\"",
     "dev": "vite",
+    "debug": "INTERNAL_CHROMIUM=true vite",
     "build": "rm -rf dist && vite build",
     "lint": "tsx -e \"import { lint } from './scripts/lint'; lint(['tsc', 'eslint ./**/*.{js,cjs,ts,tsx}','stylelint \"src/**/*.{css,tsx}\"']);\"",
     "lint:fix": "eslint ./**/*.{js,cjs,ts,tsx} --fix && stylelint \"src/**/*.{css,tsx}\" --fix",

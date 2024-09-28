@@ -49,32 +49,30 @@ const browser = (mode: string): Plugin => {
   let launched = false;
 
   const openPage = (server: ViteDevServer) => {
-    void createBrowser(
-      { devtools: mode === 'development' },
-      async (page, browser) => {
-        const a = server.httpServer?.address();
-        const port = (typeof a === 'string' ? a : a?.port) ?? '4173';
-        const postfix = mode === 'test' ? '/__vitest__/#/' : '';
-        const url = `http://localhost:${port.toString()}${postfix}`;
+    if (process.env.INTERNAL_CHROMIUM)
+      void createBrowser(
+        { devtools: mode === 'development' },
+        async (page, browser) => {
+          const a = server.httpServer?.address();
+          const port = (typeof a === 'string' ? a : a?.port) ?? '4173';
+          const postfix = mode === 'test' ? '/__vitest__/#/' : '';
+          const url = `http://localhost:${port.toString()}${postfix}`;
 
-        await page.goto(url);
-        browser.on('disconnected', () => {
-          void server.close();
-        });
-        server.httpServer?.on('close', () => {
-          void browser.close();
-          process.exit(0);
-        });
-      }
-    );
+          await page.goto(url);
+          server.httpServer?.on('close', () => {
+            void browser.close();
+          });
+        }
+      );
   };
+
   return {
     configureServer(server) {
       server.httpServer?.on('listening', () => {
         if (!launched) {
           openPage(server);
+          launched = true;
         }
-        launched = true;
       });
     },
     name: 'puppeteer',
@@ -82,7 +80,6 @@ const browser = (mode: string): Plugin => {
 };
 
 // https://vitejs.dev/config/
-// TODO: find a way to avoid killing the server when this file is changed. this is a bug in the browser plugin above.
 // @ts-expect-error vite version mismatch
 export default defineConfig(({ mode }) => ({
   build: {
@@ -221,15 +218,16 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-  resolve: { alias: {} },
+  resolve: { alias: {}, extensions: ['.js', '.ts', '.tsx'] },
   server: {
     headers: noCacheHeaders,
     hmr: { overlay: true },
     host: '127.0.0.1',
+    // open: process.env.INTERNAL_CHROMIUM ? false : true,
     port: 4173,
     proxy: {
       // '/api': {
-      //   // The base URL of your API
+      //   // The base URL of youhr API
       //   changeOrigin: true,
       //   // Needed for virtual hosted sites
       //   rewrite: (path) => path.replace(/^\/api/, ''),

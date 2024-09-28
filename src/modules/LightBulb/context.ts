@@ -2,7 +2,7 @@ import { Effect, Layer, Queue, pipe } from 'effect';
 import { observable } from 'mobx';
 import { v4 as uuid } from 'uuid';
 import { createRuntimeContext } from 'common/utils/context';
-import { Device } from 'models/device';
+import { Device } from 'models/device/model';
 import { DeviceRepoImpl } from './repos/DeviceRepo';
 import { ColorServiceImpl } from './services/ColorService';
 import * as Tags from './tags';

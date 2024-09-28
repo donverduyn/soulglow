@@ -1,6 +1,6 @@
 import type { Okhsv } from 'culori';
 import { Effect, pipe, type Context } from 'effect';
-import type { Device } from 'models/device';
+import type { Device } from 'models/device/model';
 import * as Tags from '../tags';
 
 // this service should be responsible for updating the colors of lightbulbs,

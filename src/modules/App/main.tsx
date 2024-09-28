@@ -11,10 +11,10 @@ import * as ReduxSaga from 'redux-saga';
 import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { Stack } from 'common/components/Stack';
 import { useMobx } from 'common/hooks/useMobx';
-import { AppRuntime } from 'modules/App';
-import EndpointPanel from 'modules/EndpointPanel';
+import { AppRuntime } from 'modules/App/context';
+import EndpointPanel from 'modules/EndpointPanel/main';
 import LightBulb from 'modules/LightBulb/main';
-import PaletteViewer from 'modules/PaletteViewer';
+import PaletteViewer from 'modules/PaletteViewer/main';
 import { darkTheme } from '../../theme';
 import { EndpointVisibilitySwitch } from './components/EndpointVisibilitySwitch';
 

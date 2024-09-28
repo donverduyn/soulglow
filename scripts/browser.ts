@@ -1,4 +1,5 @@
 import { execSync } from 'child_process';
+import net from 'node:net';
 import { createServer } from 'http-server';
 import { Browser, Page } from 'puppeteer';
 import puppeteer, { PuppeteerExtraPlugin } from 'puppeteer-extra';
@@ -105,3 +106,27 @@ export const viewStatic = (
     });
   });
 };
+
+export function waitForPort(port: number, host: string) {
+  return new Promise((resolve) => {
+    const interval = setInterval(() => {
+      const socket = net.createConnection(port, host, () => {
+        clearInterval(interval);
+        socket.end();
+        resolve(null);
+      });
+
+      socket.on('error', () => {
+        socket.destroy();
+      });
+    }, 1000); // Check every second
+  });
+}
+
+// waitForPort(9222, '127.0.0.1')
+//   .then(() => {
+//     console.log('Chrome is ready on port 9222');
+//   })
+//   .catch((err: unknown) => {
+//     console.error('Error waiting for Chrome:', err);
+//   });

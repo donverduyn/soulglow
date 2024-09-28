@@ -1,0 +1,45 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "vite-debug",
+        "type": "npm",
+        "script": "debug", 
+        "isBackground": true,
+        "problemMatcher": {
+          "owner": "vite",
+          "fileLocation": ["relative", "${workspaceFolder}"],
+          "pattern": [
+            {
+              "regexp": ".*",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "VITE v",
+            "endsPattern": "ready in \\d+ ms" 
+          }
+        }
+      },
+      {
+        "label": "wait-for-port",
+        "type": "shell",
+        "command": "NODE_NO_WARNINGS=1 tsx -e \"import { waitForPort } from './scripts/browser'; waitForPort(9222, '127.0.0.1');\"",
+        "problemMatcher": [],
+        "isBackground": true
+      },
+      {
+        "label": "launch-vite-debug",
+        "type": "shell",
+        "dependsOn": [
+          "vite-debug", 
+          "wait-for-port"   
+        ],
+        "problemMatcher": [],
+        "dependsOrder": "parallel"
+      }
+    ]
+  }
