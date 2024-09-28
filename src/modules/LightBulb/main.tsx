@@ -13,8 +13,7 @@ import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
 import { useReturn } from 'common/hooks/useReturn';
 import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
 import { fromLayer } from 'common/utils/context';
-// TODO: do not import models from different modules
-import type { Device } from 'modules/App/models/device/Device';
+import type { Device } from 'models/device/Device';
 import { OnOffSwitch } from './components/OnOffSwitch';
 import { MODE_ITEMS, LightMode, LightBulbRuntime } from './context';
 import * as Tags from './tags';

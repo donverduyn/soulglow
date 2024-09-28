@@ -42,6 +42,7 @@ const options: Parameters<(typeof puppeteer)['launch']>[0] = {
     '--remote-debugging-port=9222',
     // '--auto-accept-camera-and-microphone-capture',
     '--force-dark-mode',
+    // '--js-flags=--expose-gc --trace-opt --traced-deopt --trace-bailout',
   ],
   defaultViewport: { height: 0, width: 0 },
   devtools: true,

@@ -9,9 +9,8 @@ import { Paper } from 'common/components/Paper';
 import { useReturn } from 'common/hooks/useReturn';
 import type { EventType, Publishable } from 'common/utils/event';
 import { AppRuntime, AppTags } from 'modules/App';
-// TODO: do not import models from different modules
-import { createEndpoint } from 'modules/App/models/endpoint/endpoint';
-import { addEndpointRequested } from 'modules/App/models/endpoint/events';
+import { createEndpoint } from 'models/endpoint/endpoint';
+import { addEndpointRequested } from 'models/endpoint/events';
 import { EndpointListItem } from './components/EndpointListItem';
 import { EndpointPanelRuntime } from './context';
 import * as Tags from './tags';
