@@ -6,7 +6,7 @@ module.exports = {
     'plugin:import/recommended',
     'plugin:eslint-comments/recommended',
   ],
-  ignorePatterns: ['node_modules', 'dist', 'dev-dist', '!**/.stylelintrc.mjs'],
+  ignorePatterns: ['node_modules', 'dist', 'dev-dist', '!.stylelintrc.js'],
   overrides: [
     {
       files: ['./**/*.js', './**/*.cjs', './**/*.mjs'],
@@ -35,6 +35,7 @@ module.exports = {
         },
       },
     },
+
     // node environment
     {
       files: [
@@ -98,7 +99,10 @@ module.exports = {
           { ignoreVoid: true },
         ],
         '@typescript-eslint/no-non-null-assertion': 'off',
-        '@typescript-eslint/no-unnecessary-condition': 'warn',
+        '@typescript-eslint/no-unnecessary-condition': [
+          'warn',
+          { allowConstantLoopConditions: true },
+        ],
         '@typescript-eslint/no-unnecessary-template-expression': 'warn',
         // TODO: see in the future if this can be enabled. Currently not beneficial.
         '@typescript-eslint/no-unnecessary-type-parameters': 'off',
@@ -195,7 +199,7 @@ module.exports = {
           },
         ],
         'react/hook-use-state': 'off',
-        'react/jsx-boolean-value': 'warn',
+        'react/jsx-boolean-value': 'off',
         'react/jsx-child-element-spacing': 'off',
         'react/jsx-closing-bracket-location': ['warn', 'line-aligned'],
         'react/jsx-closing-tag-location': 'off',

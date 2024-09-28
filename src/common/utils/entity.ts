@@ -16,6 +16,7 @@ export interface EntityStore<T extends Identifiable> {
 
 export const createEntityStore = <T extends Identifiable>() => {
   const store = observable.map<string, T>([], {
+    // deep: false,
     proxy: false,
   });
 

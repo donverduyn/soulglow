@@ -21,6 +21,14 @@
     "jsx": "react-jsx",
     "jsxImportSource": "@emotion/react",
 
+    "plugins": [
+      {
+        "name": "@styled/typescript-styled-plugin",
+        "lint": {
+          "validProperties": ["label"]
+        }
+      }
+    ],
     /* Linting */
     "strict": true,
     /* Paths */

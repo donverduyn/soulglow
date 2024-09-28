@@ -12,7 +12,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
 import { createBrowser } from './scripts/browser';
 
-const noCacheHeaders = {
+export const noCacheHeaders = {
   'Cache-Control': 'no-cache, no-store, must-revalidate',
   Expires: '0',
   Pragma: 'no-cache',
@@ -97,6 +97,7 @@ export default defineConfig(({ mode }) => ({
           '@mobx': ['mobx', 'mobx-react-lite', 'mobx-utils'],
           '@mui': ['@mui/material', '@mui/icons-material'],
           '@react': ['react', 'react-dom'],
+          '@redux': ['redux', 'redux-saga'],
           '@utils': ['moize', 'uuid', '@hey-api/client-fetch'],
         },
       },
@@ -114,7 +115,29 @@ export default defineConfig(({ mode }) => ({
     mode !== 'production' && process.env.CI !== 'true' && browser(mode),
     dynamicProxyPlugin(),
     tsconfigPaths(),
-    react({ jsxImportSource: '@emotion/react', tsDecorators: true }),
+    react({
+      jsxImportSource: '@emotion/react',
+      plugins: [
+        [
+          '@swc/plugin-emotion',
+          {
+            importMap: {
+              '@mui/material/styles': {
+                css: {
+                  canonicalImport: ['@emotion/react', 'css'],
+                  styledBaseImport: ['@mui/material/styles', 'css'],
+                },
+                styled: {
+                  canonicalImport: ['@emotion/styled', 'default'],
+                  styledBaseImport: ['@mui/material/styles', 'styled'],
+                },
+              },
+            },
+            sourceMap: true,
+          },
+        ],
+      ],
+    }),
     VitePWA({
       devOptions: {
         enabled: false,

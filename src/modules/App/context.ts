@@ -4,22 +4,17 @@ import { createRuntimeContext } from 'common/utils/context';
 import { browserLogger, getRunFork } from 'common/utils/effect';
 import { createEntityStore, withSelected } from 'common/utils/entity';
 import type { EventType } from 'common/utils/event';
-import {
-  createEndpoint,
-  type Endpoint,
-} from 'modules/App/models/endpoint/endpoint';
-import { EventBusService } from 'modules/App/services/EventBusService';
-import AppTokens from './tokens';
+import { createEndpoint, type Endpoint } from './models/endpoint/endpoint';
+import { EventBusService } from './services/EventBusService';
+import * as AppTags from './tags';
 
 // TODO: think about how we want to use this from commom/utils/effect
 // const AppConfigProvider = ConfigProvider.fromJson({
 //   LOG_LEVEL: LogLevel.Debug,
 // });
 
-export const AppRuntime = createRuntimeContext(layer());
-
 const processEvents =
-  (store: Context.Tag.Service<typeof AppTokens.EndpointStore>) =>
+  (store: Context.Tag.Service<typeof AppTags.EndpointStore>) =>
   (event: EventType<unknown>) => {
     Mobx.runInAction(() => {
       // TODO: use XState to handle side effects.
@@ -46,73 +41,51 @@ const processEvents =
     });
   };
 
-function layer() {
-  return pipe(
-    Layer.scoped(
-      AppTokens.EndpointStore,
-      Effect.gen(function* () {
-        const runFork = yield* getRunFork;
+export const AppRuntime = pipe(
+  Layer.scoped(
+    AppTags.EndpointStore,
+    Effect.gen(function* () {
+      const runFork = yield* getRunFork;
 
-        const createEndpointStore = pipe(
-          createEntityStore<Endpoint>,
-          withSelected
-        );
-        const store = createEndpointStore();
-        const consumer = pipe(
-          // TODO: bus should be provided through a layer
-          Stream.fromPubSub(
-            yield* Effect.andThen(AppTokens.EventBus, (bus) => bus.bus)
-          ),
-          Stream.tap(Effect.logInfo),
-          Stream.map(processEvents(store)),
-          Stream.runDrain
-        );
+      const createEndpointStore = pipe(
+        createEntityStore<Endpoint>,
+        withSelected
+      );
+      const store = createEndpointStore();
+      const consumer = pipe(
+        // TODO: bus should be provided through a layer
+        Stream.fromPubSub(
+          yield* Effect.andThen(AppTags.EventBus, (bus) => bus.bus)
+        ),
+        Stream.tap(Effect.logInfo),
+        Stream.map(processEvents(store)),
+        Stream.runDrain
+      );
 
-        const consumerFiber = runFork(consumer);
-        yield* Effect.addFinalizer(() => Fiber.interrupt(consumerFiber));
+      const consumerFiber = runFork(consumer);
+      yield* Effect.addFinalizer(() => Fiber.interrupt(consumerFiber));
 
-        // TODO: consider using persistent storage instead of recreating the first endpoint every time. we should persist both the entitystore and the actor on unmount. Also consider if we want to apply these changes through events, as this would solve the problem before anything is persisted.
+      // TODO: consider using persistent storage instead of recreating the first endpoint every time. we should persist both the entitystore and the actor on unmount. Also consider if we want to apply these changes through events, as this would solve the problem before anything is persisted.
 
-        const endpoint = createEndpoint();
-        store.add(endpoint);
-        store.selectById(endpoint.id);
-        return store;
-      })
-    ),
-    Layer.provideMerge(
-      Layer.effect(
-        AppTokens.EventBus,
-        pipe(
-          PubSub.unbounded<EventType<unknown>>({
-            replay: Number.POSITIVE_INFINITY,
-          }),
-          Effect.andThen((bus) => {
-            return new EventBusService(bus);
-          })
-        )
+      const endpoint = createEndpoint();
+      store.add(endpoint);
+      store.selectById(endpoint.id);
+      return store;
+    })
+  ),
+  Layer.provideMerge(
+    Layer.effect(
+      AppTags.EventBus,
+      pipe(
+        PubSub.unbounded<EventType<unknown>>({
+          replay: Number.POSITIVE_INFINITY,
+        }),
+        Effect.andThen((bus) => {
+          return new EventBusService(bus);
+        })
       )
-    ),
-    Layer.merge(browserLogger)
-  );
-}
-
-// const machine = createMachine({
-//   id: 'endpoint',
-//   initial: 'idle',
-//   states: {
-//     idle: {
-//       on: {
-//         ADD_ENDPOINT_REQUESTED: {
-//           actions: emit({ type: 'ADD_ENDPOINT_REQUESTED 2' }),
-//         },
-//         UPDATE_ENDPOINT_REQUESTED: {
-//           actions: emit({ type: 'UPDATE_ENDPOINT_REQUESTED 2' }),
-//         },
-//       },
-//     },
-//   },
-// });
-
-// const actor = createActor(machine);
-// actor.start();
-// actor.send({ type: 'ADD_ENDPOINT_REQUESTED' });
+    )
+  ),
+  Layer.merge(browserLogger),
+  createRuntimeContext
+);

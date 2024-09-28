@@ -203,7 +203,6 @@ class EventEmitter<T, A> {
 async function* createAsyncIterator<T, A>(
   emitter: EventEmitter<T, A>
 ): AsyncGenerator<{ data: T; eventId: string }> {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   while (true) {
     yield await emitter.waitForEvent();
   }

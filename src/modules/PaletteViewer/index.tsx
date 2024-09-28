@@ -11,9 +11,10 @@ interface Props extends DefaultProps {
   readonly getColor: () => Okhsv;
 }
 
-export const PaletteViewer: React.FC<Props> = observer(PaletteViewer_);
+const Main: React.FC<Props> = observer(PaletteViewer);
 
-function PaletteViewer_({ getColor, className }: Props) {
+export default Main;
+function PaletteViewer({ getColor, className }: Props) {
   // we don't need useMemo here because props are stable
   const palettes = computed(() => createPalettes(getColor()));
   // prevent reconciliation on every update
@@ -54,7 +55,6 @@ function PaletteViewer_({ getColor, className }: Props) {
 
 const styles = {
   palette: css`
-    --label: Palette;
     background: none;
     box-shadow: none;
     display: flex;
@@ -63,7 +63,6 @@ const styles = {
     gap: 0.5em;
   `,
   root: css`
-    --label: PaletteViewer;
     background: none;
     display: flex;
     flex: 1;
@@ -76,7 +75,6 @@ const styles = {
     borderRadius: theme.shape.borderRadius.toString() + 'px',
   }),
   swatch: css`
-    --label: Swatch;
     align-items: center;
     color: white;
     display: flex;

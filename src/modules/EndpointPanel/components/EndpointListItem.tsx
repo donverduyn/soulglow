@@ -10,14 +10,14 @@ import { TextField } from 'common/components/TextField';
 import { useReturn } from 'common/hooks/useReturn';
 import { useRuntimeSync } from 'common/hooks/useRuntimeFn';
 import type { Publishable } from 'common/utils/event';
-import { AppRuntime } from 'modules/App/context';
+import { AppRuntime, AppTags } from 'modules/App';
+// TODO: do not import models from different modules
 import type { Endpoint } from 'modules/App/models/endpoint/endpoint';
 import {
   updateEndpointRequested,
   removeEndpointRequested,
   selectEndpointRequested,
 } from 'modules/App/models/endpoint/events';
-import AppTokens from 'modules/App/tokens';
 
 interface Props extends Publishable {
   readonly endpoint: Endpoint;
@@ -53,7 +53,7 @@ function EndpointListItem_(props: Props) {
 
 //
 const useGetters = ({ endpoint }: Props) => {
-  const store = useRuntimeSync(AppRuntime, AppTokens.EndpointStore);
+  const store = useRuntimeSync(AppRuntime, AppTags.EndpointStore);
   //
   const checked = React.useMemo(
     () => computed(() => store.selectedId.get() === endpoint.id),
@@ -92,13 +92,11 @@ const useHandlers = ({ endpoint, publish }: Props) => {
 //
 const styles = {
   root: css`
-    --label: EndpointListItem;
     display: flex;
     flex-direction: row;
     gap: 1em;
   `,
   textField: css`
-    --label: TextField;
     flex: 1;
   `,
 };

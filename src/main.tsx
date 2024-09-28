@@ -1,18 +1,23 @@
-// import { unstable_ClassNameGenerator as ClassNameGenerator } from '@mui/material/className';
 import * as React from 'react';
 import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
 import { configure } from 'mobx';
-import ReactDOM from 'react-dom/client';
-import { client } from './__generated/api';
-import { App } from './modules/App/App.tsx';
 import './index.css';
 import './config/console.ts';
+import ReactDOM from 'react-dom/client';
+import { client } from './__generated/api';
+import App from './modules/App';
 
-//* this causes performance issues
-// ClassNameGenerator.configure((componentName) =>
-//   process.env.NODE_ENV === 'production' ? uuid().split('-')[0] : componentName
+// const getComponentName = moize((componentName: string) =>
+//   process.env.NODE_ENV === 'production' ? 'css' : componentName
 // );
+
+//ClassNameGenerator.configure(getComponentName);
+// //* this causes performance issues
+
+// TODO: only in development
+// @ts-expect-error not defined
+globalThis.EMOTION_RUNTIME_AUTO_LABEL = true;
 
 client.setConfig({
   baseUrl: '/api',

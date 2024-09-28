@@ -13,14 +13,11 @@ import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
 import { useReturn } from 'common/hooks/useReturn';
 import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
 import { fromLayer } from 'common/utils/context';
+// TODO: do not import models from different modules
 import type { Device } from 'modules/App/models/device/Device';
 import { OnOffSwitch } from './components/OnOffSwitch';
-import {
-  MODE_ITEMS,
-  LightMode,
-  LightBulbRuntime,
-  ApiThrottler,
-} from './context';
+import { MODE_ITEMS, LightMode, LightBulbRuntime } from './context';
+import * as Tags from './tags';
 
 interface LightBulbState {
   bulb_mode: `${LightMode}`;
@@ -56,13 +53,11 @@ const colorInputs = [
   { key: 'hue', label: 'hue', props: { max: 360 } },
 ] as const;
 
-export const LightBulb = pipe(
-  observer(LightBulb_),
-  WithRuntime(LightBulbRuntime)
-);
+const Main = pipe(observer(LightBulb), WithRuntime(LightBulbRuntime));
+export default Main;
 
 //TODO: think about default props and how to set them
-function LightBulb_({ className, getStyle, onChange = identity }: Props) {
+function LightBulb({ className, getStyle, onChange = identity }: Props) {
   const { bulb, inputs } = useLightBulbComponent(onChange);
 
   return (
@@ -118,7 +113,7 @@ const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
 
   // TODO: convert to event and use runtime to handle the event
   const handle = useRuntimeFn(LightBulbRuntime, (body: Partial<Device>) =>
-    fromLayer(ApiThrottler, (queue) => queue.offer(body))
+    fromLayer(Tags.ApiThrottler, (queue) => queue.offer(body))
   );
 
   // TODO: think about how to model a lightbulb such that we can manage state in the form of an entity store, using the same patterns as endpoint.
@@ -154,20 +149,17 @@ const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
 
 const styles = {
   form: css`
-    --label: Form;
     display: flex;
     flex-direction: column;
     gap: 1em;
   `,
   input: css`
-    --label: SliderInput;
     align-items: center;
     display: flex;
     flex-direction: row;
     gap: 1em;
   `,
   root: css`
-    --label: LightBulb;
     align-items: center;
     background: var(--background, #fff);
     border-radius: 12px;

@@ -3,18 +3,25 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, css } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { formatRgb, type Okhsv } from 'culori';
-import { pipe } from 'effect';
+import { identity, pipe } from 'effect';
 import { observable } from 'mobx';
 import { Observer } from 'mobx-react-lite';
+import { applyMiddleware, legacy_createStore } from 'redux';
+import * as ReduxSaga from 'redux-saga';
 import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { Stack } from 'common/components/Stack';
-import { Toggle } from 'common/components/Toggle';
 import { useMobx } from 'common/hooks/useMobx';
-import { AppRuntime } from 'modules/App/context';
-import { EndpointPanel } from 'modules/EndpointPanel/EndpointPanel';
-import { LightBulb } from 'modules/LightBulb/LightBulb';
-import { PaletteViewer } from 'modules/PaletteViewer/PaletteViewer';
+import { AppRuntime } from 'modules/App';
+import EndpointPanel from 'modules/EndpointPanel';
+import LightBulb from 'modules/LightBulb/main';
+import PaletteViewer from 'modules/PaletteViewer';
 import { darkTheme } from '../../theme';
+import { EndpointVisibilitySwitch } from './components/EndpointVisibilitySwitch';
+
+// TODO: move this to a layer
+const sagaMiddleware = ReduxSaga.default();
+const store = legacy_createStore(identity, applyMiddleware(sagaMiddleware));
+// sagaMiddleware.run(rootSaga);
 
 const baseColor: Okhsv = {
   h: 0,
@@ -23,7 +30,8 @@ const baseColor: Okhsv = {
   v: 0,
 };
 
-export const App = pipe(AppComponent, WithRuntime(AppRuntime));
+export const Main = pipe(AppComponent, WithRuntime(AppRuntime));
+export default Main;
 
 function AppComponent() {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
@@ -38,9 +46,8 @@ function AppComponent() {
     <ThemeProvider theme={prefersDarkMode ? darkTheme : darkTheme}>
       <CssBaseline />
       <Stack css={appStyles.root}>
-        <Toggle
+        <EndpointVisibilitySwitch
           getValue={panel.lazyGet('isVisible')}
-          name='endpoint_panel_toggle'
           onChange={panel.set('isVisible')}
         />
         <Observer

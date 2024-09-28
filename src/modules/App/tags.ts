@@ -14,7 +14,4 @@ class EndpointStore extends Context.Tag('@App/EndpointStore2')<
   Simplify<EntityStore<Endpoint> & WithSelected<Endpoint>>
 >() {}
 
-export default {
-  EndpointStore,
-  EventBus,
-};
+export { EndpointStore, EventBus };

@@ -70,7 +70,6 @@ export const Select = observer(function Select<TValue>(
 
 const selectStyles = {
   root: css`
-    --label: Select;
     margin: 0 0 1em;
     text-align: left;
   `,

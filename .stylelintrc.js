@@ -19,11 +19,17 @@ export default {
         ignore: ['stylelint-commands', 'after-comment'],
       },
     ],
+    'declaration-empty-line-before': ['never'],
     'no-descending-specificity': null,
     'no-duplicate-selectors': true,
-    "declaration-empty-line-before": ["never"],
     'order/order': ['custom-properties', 'declarations', 'rules', 'at-rules'],
     'order/properties-alphabetical-order': true,
+    'property-no-unknown': [
+      true,
+      {
+        ignoreProperties: ['label'],
+      },
+    ],
     'rule-empty-line-before': [
       'always-multi-line',
       {
@@ -45,19 +51,19 @@ export default {
         ignorePseudoElements: ['global'],
       },
     ],
-    'value-keyword-case': [
-      'lower',
-      {
-        ignoreProperties: ['font-family', '--label'],
-      },
-    ],
     'selector-type-no-unknown': [
       true,
       {
         ignoreTypes: ['from', '/^Mui/'], // Ignoring MUI-specific types
       },
     ],
-    'unit-no-unknown': [true, { severity: 'error'}],
+    'unit-no-unknown': [true, { severity: 'error' }],
+    'value-keyword-case': [
+      'lower',
+      {
+        ignoreProperties: ['font-family', 'label'],
+      },
+    ],
   },
   syntax: 'scss',
 };
