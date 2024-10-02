@@ -28,10 +28,10 @@ yarn dev
 - On MacOS, chromium will not steal focus and you can close the window with `Cmd + C`, ending the terminal process, which closes the window too.
 
 ### Visiting the dev server outside of the container
-The dev server is running on port 4173 and is statically forwarded to the host machine. To visit the dev server on the host, launch the dev server, minimize puppeteer chromium, open a browser and navigate to http://localhost:4173. If you want to make the dev server available to other devices on the network, configure your firewall to allow incoming connections on port 4173. Remote debugging is not supported outside of the container.
+The dev server is running on port 4173 and is statically forwarded to the host machine. To visit the dev server on the host, launch the dev server, open a browser and navigate to http://localhost:4173. If you want to make the dev server available to other devices on the network, configure your firewall to allow incoming connections on port 4173. Remote debugging is not supported outside of the container.
 
 ### Debugging
-To debug the server, make sure it is running and run "Attach to Chrome" in the debug tab of vscode. The debugger will attach to the browser and you can set breakpoints in the code.
+To debug the client, run "Attach to Chrome" in the debug tab of vscode. The debugger will attach to the x11 forwarded chromium instance and set breakpoints in the code in vscode.
 
 ### Inspect dependency tree
 To inspect the dependency tree run the dev server and visit the /__inspect link provided in the terminal.

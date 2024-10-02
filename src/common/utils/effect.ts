@@ -15,9 +15,8 @@ export const browserLogger = Logger.replace(
 
 // Common runtime utils
 
-export const getRunFork = Effect.runtime().pipe(
-  Effect.andThen(Runtime.runFork)
-);
+export const getRunFork = <T = never>() =>
+  Effect.runtime<T>().pipe(Effect.andThen(Runtime.runFork));
 
 // Common stream operators
 

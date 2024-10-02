@@ -3,25 +3,20 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, css } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { formatRgb, type Okhsv } from 'culori';
-import { identity, pipe } from 'effect';
+import { Console, Effect, pipe } from 'effect';
 import { observable } from 'mobx';
 import { Observer } from 'mobx-react-lite';
-import { applyMiddleware, legacy_createStore } from 'redux';
-import * as ReduxSaga from 'redux-saga';
 import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { Stack } from 'common/components/Stack';
 import { useMobx } from 'common/hooks/useMobx';
+import { useRuntime } from 'common/hooks/useRuntimeFn';
 import { AppRuntime } from 'modules/App/context';
 import EndpointPanel from 'modules/EndpointPanel/main';
 import LightBulb from 'modules/LightBulb/main';
 import PaletteViewer from 'modules/PaletteViewer/main';
 import { darkTheme } from '../../theme';
 import { EndpointVisibilitySwitch } from './components/EndpointVisibilitySwitch';
-
-// TODO: move this to a layer
-const sagaMiddleware = ReduxSaga.default();
-const store = legacy_createStore(identity, applyMiddleware(sagaMiddleware));
-// sagaMiddleware.run(rootSaga);
+import * as Tags from './tags';
 
 const baseColor: Okhsv = {
   h: 0,
@@ -38,6 +33,11 @@ function AppComponent() {
   const state = useMobx(() => ({ color: baseColor }), {
     color: observable.ref,
   });
+
+  useRuntime(
+    AppRuntime,
+    Effect.andThen(Tags.EventBus, (bus) => bus.register(Console.log))
+  );
 
   // TODO: When this toggles one of the entity stores does not become unobserved. the next cycle it is unobserved. This keeps alternating. Find out why.
   const panel = useMobx(() => ({ isVisible: true }));

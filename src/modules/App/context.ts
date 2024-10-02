@@ -45,7 +45,7 @@ export const AppRuntime = pipe(
   Layer.scoped(
     AppTags.EndpointStore,
     Effect.gen(function* () {
-      const runFork = yield* getRunFork;
+      const runFork = yield* getRunFork();
 
       const createEndpointStore = pipe(
         createEntityStore<Endpoint>,
@@ -57,7 +57,6 @@ export const AppRuntime = pipe(
         Stream.fromPubSub(
           yield* Effect.andThen(AppTags.EventBus, (bus) => bus.bus)
         ),
-        Stream.tap(Effect.logInfo),
         Stream.map(processEvents(store)),
         Stream.runDrain
       );

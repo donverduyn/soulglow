@@ -103,9 +103,7 @@ const noRuntimeMessage = `No runtime available.
 type UpcastSubType<T, U> = U extends T ? U : never;
 
 export const useRuntime = <A, E, RContext, REffect>(
-  context:
-    | RuntimeContext<RContext>
-    | React.ContextType<RuntimeContext<RContext>>,
+  context: RContext | RuntimeContext<RContext>,
   effect: Effect.Effect<A, E, UpcastSubType<RContext, REffect>>,
   deps: React.DependencyList = []
 ) => {

@@ -23,7 +23,7 @@
     },
     "window.autoDetectColorScheme": true,
     "workbench.preferredDarkColorTheme": "Default Dark Modern",
-    "workbench.preferredLightColorTheme": "Default Light Modern",
+    "workbench.preferredLightColorTheme": "Default Dark Modern",
     "typescript.tsserver.experimental.useVsCodeWatcher": true,
     "typescript.tsserver.experimental.enableProjectDiagnostics": false,
     // "terminal.integrated.shellIntegration.suggestEnabled": true,
