@@ -91,8 +91,15 @@ export default defineConfig(({ mode }) => ({
           '@culori': ['culori'],
           '@effect': ['effect'],
           '@emotion': ['@emotion/react', '@emotion/styled'],
+          '@mantine': [
+            '@mantine/charts',
+            '@mantine/hooks',
+            '@mantine/core',
+            '@mantine/form',
+            '@mantine/modals',
+            '@mantine/notifications',
+          ],
           '@mobx': ['mobx', 'mobx-react-lite', 'mobx-utils'],
-          '@mantine': ['@mantine/charts', '@mantine/hooks', '@mantine/core', '@mantine/form', '@mantine/modals', '@mantine/notifications'],
           '@mui': ['@mui/material', '@mui/icons-material'],
           '@react': ['react', 'react-dom'],
           '@utils': ['moize', 'uuid', '@hey-api/client-fetch'],
@@ -172,7 +179,7 @@ export default defineConfig(({ mode }) => ({
         lintCommand:
           mode === 'test'
             ? // exclude tsx files for eslint during test for now
-              "eslint 'test/**/*.ts' 'src/**/*.test.ts'"
+              "eslint 'tests/**/*.ts' 'src/**/*.test.ts'"
             : 'eslint ./**/*.{js,cjs,ts,tsx}',
         useFlatConfig: false,
       },

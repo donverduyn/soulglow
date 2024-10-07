@@ -40,12 +40,12 @@
       "server/*": ["server/*"],
       // somehow needed for useTRPC.test.ts
       // seems that it relies on tsconfig.json, not tsconfig.node.json
-      "test/*": ["test/*"],
+      "tests/*": ["tests/*"],
     },
   },
   // vite.config.ts and scripts should not be included here
   // seems to be a problem with vscode ts
-  "include": ["src", "vite.config.ts", "pwa.config.ts", "scripts"],
+  "include": ["src", "vite.config.ts", "pwa.config.ts", "scripts", "tests"],
   "exclude": ["node_modules", "**/node_modules/*"],
   // "references": [{ "path": "./tsconfig.node.json" }]
 }

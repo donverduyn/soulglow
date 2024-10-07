@@ -42,7 +42,7 @@ module.exports = {
         '*.config.ts',
         'vite.config.ts',
         './src/**/*.test.ts?(x)',
-        './test/**/*.ts',
+        './tests/**/*.ts?(x)',
         './scripts/**/*.ts',
         './server/**/*.ts',
       ],
@@ -67,7 +67,7 @@ module.exports = {
     },
     {
       // all TypeScript files
-      files: ['*.ts', '*.tsx'],
+      files: ['*.ts', '*.test.ts', '*.tsx'],
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       extends: [
         'plugin:@typescript-eslint/strict-type-checked',
@@ -126,8 +126,8 @@ module.exports = {
     {
       // all test files
       files: [
-        './test/**/*.ts',
-        './test/**/*.tsx',
+        './tests/**/*.ts',
+        './tests/**/*.tsx',
         './src/**/*.test.ts',
         './src/**/*.test.tsx',
       ],

@@ -1,7 +1,7 @@
 import { pipe, Layer, Context, PubSub, Effect, Stream, Fiber } from 'effect';
 import * as Mobx from 'mobx';
 import { createRuntimeContext } from 'common/utils/context';
-import { browserLogger, getRunFork } from 'common/utils/effect';
+import { browserLogger } from 'common/utils/effect';
 import { createEntityStore, withSelected } from 'common/utils/entity';
 import type { EventType } from 'common/utils/event';
 import { createEndpoint, type Endpoint } from '../../models/endpoint/model';
@@ -45,8 +45,6 @@ export const AppRuntime = pipe(
   Layer.scoped(
     AppTags.EndpointStore,
     Effect.gen(function* () {
-      const runFork = yield* getRunFork();
-
       const createEndpointStore = pipe(
         createEntityStore<Endpoint>,
         withSelected
@@ -61,7 +59,7 @@ export const AppRuntime = pipe(
         Stream.runDrain
       );
 
-      const consumerFiber = runFork(consumer);
+      const consumerFiber = yield* Effect.forkScoped(consumer);
       yield* Effect.addFinalizer(() => Fiber.interrupt(consumerFiber));
 
       // TODO: consider using persistent storage instead of recreating the first endpoint every time. we should persist both the entitystore and the actor on unmount. Also consider if we want to apply these changes through events, as this would solve the problem before anything is persisted.

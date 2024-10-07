@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { AppRouter } from 'server/server';
-import { createMockServer } from 'test/utils/mock-server';
+import { createMockServer } from 'tests/utils/mock-server';
 import { useTRPC } from './useTRPC';
 
 describe('tRPC client', () => {

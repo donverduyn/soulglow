@@ -14,10 +14,10 @@ It allows any downstream components to access the runtime using the context.
 // TODO: think about assigning a method to the function, to obtain the provided react context objects in the hoc as an array, for testing purposes. We can separate the hoc from the pipe function and export the method as a named export.
 
 export const WithRuntime =
-  <TTarget extends RuntimeContext<any>>(
-    Context: TTarget,
+  <TTarget,>(
+    Context: RuntimeContext<TTarget>,
     getSource?: (utils: {
-      from: <TContext, TEffect extends Effect.Effect<any, any, any>>(
+      from: <TContext, TEffect extends Effect.Effect<any, any, TTarget>>(
         context: RuntimeContext<TContext>,
         linkEffect: (
           runtime: ManagedRuntime.ManagedRuntime<TContext, never>
@@ -38,7 +38,7 @@ export const WithRuntime =
       to: <TContext, TEffect extends Effect.Effect<any, any, any>>(
         context: RuntimeContext<TContext>,
         attachEffect: (
-          runtime: ManagedRuntime.ManagedRuntime<GetContextType<TTarget>, never>
+          runtime: ManagedRuntime.ManagedRuntime<TTarget, never>
         ) => TEffect
       ) => void;
     }) => void
@@ -47,7 +47,7 @@ export const WithRuntime =
     //
     const Wrapped: React.FC<P> = (props) => {
       const { layer } = Context as unknown as {
-        layer: Layer.Layer<GetContextType<TTarget>>;
+        layer: Layer.Layer<TTarget>;
       };
 
       const targetRuntime = useRuntimeFactory(layer);
@@ -60,9 +60,9 @@ export const WithRuntime =
           from: (context, linkEffect) => {
             // eslint-disable-next-line react-hooks/rules-of-hooks
             const runtime = React.useContext(context);
-            if (Layer.isLayer(runtime)) throw new Error('No runtime found.');
+            if (runtime === undefined) throw new Error('No runtime found.');
 
-            const effect = linkEffect(runtime!);
+            const effect = linkEffect(runtime);
             // eslint-disable-next-line react-hooks/rules-of-hooks
             useRuntime(targetRuntime, effect, [targetRuntime]);
           },
@@ -70,8 +70,8 @@ export const WithRuntime =
           propsOf: (context, injectEffect) => {
             // eslint-disable-next-line react-hooks/rules-of-hooks
             const runtime = React.useContext(context);
-            if (Layer.isLayer(runtime)) throw new Error('No runtime found.');
-            const result = injectEffect(runtime!);
+            if (runtime === undefined) throw new Error('No runtime found.');
+            const result = injectEffect(runtime);
             Object.assign(extraProps, result);
             return result;
           },
@@ -79,6 +79,7 @@ export const WithRuntime =
           to: (context, attachEffect) => {
             // eslint-disable-next-line react-hooks/rules-of-hooks
             const runtime = React.useContext(context);
+            if (runtime === undefined) throw new Error('No runtime found.');
             // eslint-disable-next-line react-hooks/rules-of-hooks
             useRuntime(context, attachEffect(targetRuntime), [runtime]);
           },

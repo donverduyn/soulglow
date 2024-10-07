@@ -1,5 +1,14 @@
 import * as React from 'react';
-import { Effect, pipe, Fiber, FiberId, Layer, Stream } from 'effect';
+import {
+  Effect,
+  pipe,
+  Fiber,
+  FiberId,
+  Stream,
+  Console,
+  Queue,
+  type ManagedRuntime,
+} from 'effect';
 import type { IsUnknown } from 'type-fest';
 import { v4 as uuidv4 } from 'uuid';
 import type { RuntimeContext } from 'common/utils/context';
@@ -33,6 +42,8 @@ export function useRuntimeFn<A, E, R, T>(
   //         Stream.runDrain
   //       );
   //     }),
+  //   finalDeps
+  // );
 
   //   queue.pipe(
   //     Effect.andThen(Stream.fromQueue),
@@ -102,22 +113,21 @@ const noRuntimeMessage = `No runtime available.
 
 type UpcastSubType<T, U> = U extends T ? U : never;
 
-export const useRuntime = <A, E, RContext, REffect>(
-  context: RContext | RuntimeContext<RContext>,
+export const useRuntime = <A, E, REffect, RContext>(
+  context:
+    | ManagedRuntime.ManagedRuntime<RContext, never>
+    | RuntimeContext<RContext>,
   effect: Effect.Effect<A, E, UpcastSubType<RContext, REffect>>,
   deps: React.DependencyList = []
 ) => {
-  let runtime = context as NonNullable<
-    React.ContextType<RuntimeContext<RContext>>
-  >;
-
+  let runtime = context as React.ContextType<RuntimeContext<RContext>>;
   if (isReactContext<RuntimeContext<RContext>>(context)) {
-    runtime = React.useContext(context)!;
-    if (Layer.isLayer(runtime)) throw new Error(noRuntimeMessage);
+    runtime = React.useContext(context);
+    if (runtime === undefined) throw new Error(noRuntimeMessage);
   }
 
   React.useEffect(() => {
-    const F = runtime.runFork(effect);
+    const F = runtime!.runFork(effect);
     return () => Effect.runSync(F.pipe(Fiber.interruptAsFork(FiberId.none)));
   }, [runtime, ...deps]);
 };
@@ -133,8 +143,8 @@ export const useRuntimeSync = <A, E, R>(
   deps: React.DependencyList = []
 ) => {
   const runtime = React.useContext(context);
-  if (Layer.isLayer(runtime)) throw new Error(noRuntimeMessage);
-  return React.useMemo(() => runtime!.runSync(effect), [...deps, runtime]);
+  if (runtime === undefined) throw new Error(noRuntimeMessage);
+  return React.useMemo(() => runtime.runSync(effect), [...deps, runtime]);
 };
 
 /* 
