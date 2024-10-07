@@ -67,7 +67,7 @@ module.exports = {
     },
     {
       // all TypeScript files
-      files: ['*.ts', '*.test.ts', '*.tsx'],
+      files: ['*.ts', '*.test.ts', '*.tsx', '*.test.tsx'],
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       extends: [
         'plugin:@typescript-eslint/strict-type-checked',
@@ -137,6 +137,11 @@ module.exports = {
         'vitest/max-nested-describe': ['error', { max: 3 }],
         'vitest/no-hooks': 'off',
       },
+    },
+    {
+      // all story files
+      extends: ['plugin:storybook/recommended'],
+      files: ['./src/**/*.stories.ts?(x)'],
     },
     {
       // generated TS files

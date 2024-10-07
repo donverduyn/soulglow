@@ -67,3 +67,5 @@ yarn-error.log*
 /.vite-inspect
 /.analyzer
 
+
+*storybook.log

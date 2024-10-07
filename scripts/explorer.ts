@@ -83,6 +83,7 @@ const createView = () => {
     root: new Folder(null, 'root'),
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const dispose = autorun(() => {
     const view = transformFolder(state.root);
     state.folderView = view;
