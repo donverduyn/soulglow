@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { Effect, Layer, ManagedRuntime } from 'effect';
 import { useRuntime } from 'common/hooks/useRuntimeFn';
-import { type GetContextType, type RuntimeContext } from 'common/utils/context';
+import { type RuntimeContext } from 'common/utils/context';
 
 /*
 This HOC creates a runtime for the context and provides it to the component.

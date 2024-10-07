@@ -5,6 +5,7 @@ interface State {
   readonly b: 'completed' | 'pending';
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const program = Effect.gen(function* () {
   const stateRef = yield* TRef.make<State>({
     a: 'pending',

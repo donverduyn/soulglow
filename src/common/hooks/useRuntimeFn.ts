@@ -5,8 +5,6 @@ import {
   Fiber,
   FiberId,
   Stream,
-  Console,
-  Queue,
   type ManagedRuntime,
 } from 'effect';
 import type { IsUnknown } from 'type-fest';
