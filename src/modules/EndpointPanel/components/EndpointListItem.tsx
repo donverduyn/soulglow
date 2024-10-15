@@ -1,12 +1,12 @@
 import * as React from 'react';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { css } from '@mui/material/styles';
+import { css } from '@emotion/react';
 import { computed } from 'mobx';
 import { observer } from 'mobx-react-lite';
+import { MdOutlineDelete } from 'react-icons/md';
 import { IconButton } from 'common/components/IconButton';
 import { Radio } from 'common/components/Radio';
 import { Stack } from 'common/components/Stack';
-import { TextField } from 'common/components/TextField';
+import { TextInput } from 'common/components/TextInput';
 import { useReturn } from 'common/hooks/useReturn';
 import { useRuntimeSync } from 'common/hooks/useRuntimeFn';
 import type { Publishable } from 'common/utils/event';
@@ -23,33 +23,39 @@ interface Props extends Publishable {
   readonly endpoint: Endpoint;
 }
 
-export const EndpointListItem = observer(EndpointListItem_);
-
-function EndpointListItem_(props: Props) {
+export const EndpointListItem = observer(function EndpointListItem(
+  props: Props
+) {
   const { getChecked, getUrl } = useGetters(props);
   const { updateFn, removeFn, selectFn } = useHandlers(props);
 
   return (
-    <Stack css={styles.root}>
+    <Stack
+      component='li'
+      css={styles.root}
+    >
       <Radio
         getValue={getChecked}
         name={`select_${props.endpoint.id}`}
         onChange={selectFn}
       />
-      <TextField
+      <TextInput
         css={styles.textField}
         getValue={getUrl}
         onChange={updateFn}
       />
       <IconButton
         aria-label='delete'
+        css={styles.button}
         onClick={removeFn}
+        size='xl'
+        variant='subtle'
       >
-        <DeleteIcon />
+        <MdOutlineDelete size={28} />
       </IconButton>
     </Stack>
   );
-}
+});
 
 //
 const useGetters = ({ endpoint }: Props) => {
@@ -89,12 +95,23 @@ const useHandlers = ({ endpoint, publish }: Props) => {
   return useReturn({ removeFn, selectFn, updateFn });
 };
 
-//
+// TODO: organize these styles better and colocate to components/theme
 const styles = {
+  button: css`
+    border-radius: 50%;
+    transform: scale(1.1);
+    transition: transform 100ms ease-in-out;
+
+    &:active {
+      background: var(--mantine-color-dark-5);
+      transform: scale(1.2);
+    }
+  `,
   root: css`
+    align-items: center;
     display: flex;
     flex-direction: row;
-    gap: 1em;
+    gap: 1rem;
   `,
   textField: css`
     flex: 1;

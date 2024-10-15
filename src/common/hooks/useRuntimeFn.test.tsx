@@ -1,21 +1,13 @@
 import * as React from 'react';
-import {
-  act,
-  screen,
-  render,
-  waitFor,
-  fireEvent,
-  cleanup,
-} from '@testing-library/react';
+import { render, waitFor, fireEvent, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Effect, Layer } from 'effect';
-import { beforeEach, describe, expect, it } from 'vitest';
 import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { createRuntimeContext } from 'common/utils/context';
 import { useRuntimeFn } from './useRuntimeFn';
 
 describe('useRuntimeFn', () => {
-  beforeEach(cleanup);
+  afterEach(cleanup);
   it('should call the effect once', async () => {
     expect.assertions(1);
 
@@ -42,12 +34,9 @@ describe('useRuntimeFn', () => {
       );
     });
 
-    render(<Component />);
+    const screen = render(<Component />);
     const button = screen.getByText(/click me/i);
-
-    act(() => {
-      fireEvent.click(button);
-    });
+    fireEvent.click(button);
 
     await waitFor(() => {
       const value = screen.getByText('test');

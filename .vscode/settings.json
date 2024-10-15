@@ -1,55 +1,76 @@
 {
-    "editor.fontFamily": "'Monaspace Neon', monospace",
-    "editor.fontSize": 12,
-    "editor.fontWeight": "400",
-    "editor.fontLigatures": "'calt', 'liga', 'dlig', 'ss01', 'ss02', 'ss03', 'ss04', 'ss05', 'ss06', 'ss07', 'ss08'",
-    "editor.codeActionsOnSave": {
-        "source.addMissingImports": "explicit",
-        "source.fixAll.eslint": "explicit",
-        "source.fixAll.stylelint": "explicit"
+  "editor.fontFamily": "'Monaspace Neon', monospace",
+  "editor.fontSize": 12,
+  "editor.fontWeight": "400",
+  "editor.fontLigatures": "'calt', 'liga', 'dlig', 'ss01', 'ss02', 'ss03', 'ss04', 'ss05', 'ss06', 'ss07', 'ss08'",
+  "editor.codeActionsOnSave": {
+    "source.addMissingImports": "explicit",
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.stylelint": "explicit"
+  },
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+  "workbench.editorAssociations": {
+    "*.md": "vscode.markdown.preview.editor",
+  },
+  "github-actions.workflows.pinned.workflows": [
+    "./.github/workflows/*.yml",
+    ".github/workflows/ci.yml"
+  ],
+  "files.exclude": {
+    "**/.swc": true,
+    "**/.cache": true,
+  },
+  "window.autoDetectColorScheme": true,
+  "workbench.preferredDarkColorTheme": "Default Dark Modern",
+  "workbench.preferredLightColorTheme": "Default Dark Modern",
+  "typescript.tsserver.experimental.useVsCodeWatcher": true,
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+  // "terminal.integrated.shellIntegration.suggestEnabled": true,
+  "auto-run-command.rules": [
+    {
+      "command": "workbench.action.terminal.new",
+      "condition": [
+        "isRunningInContainer"
+      ]
     },
-    "eslint.workingDirectories": [
-        {"mode": "auto"}
-    ],
-    "workbench.editorAssociations": {   
-        "*.md": "vscode.markdown.preview.editor",
-    },
-    "github-actions.workflows.pinned.workflows": [
-        "./.github/workflows/*.yml",
-        ".github/workflows/ci.yml"
-    ],
-    "files.exclude": {
-        "**/.swc": true
-    },
-    "window.autoDetectColorScheme": true,
-    "workbench.preferredDarkColorTheme": "Default Dark Modern",
-    "workbench.preferredLightColorTheme": "Default Dark Modern",
-    "typescript.tsserver.experimental.useVsCodeWatcher": true,
-    "typescript.tsserver.experimental.enableProjectDiagnostics": false,
-    // "terminal.integrated.shellIntegration.suggestEnabled": true,
-    "auto-run-command.rules": [
-        {
-            "command": "workbench.action.terminal.new",
-            "condition": ["isRunningInContainer"]
-        },
-    ],
-    "javascript.preferGoToSourceDefinition": true,
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "typescript.tsc.autoDetect": "off",
-    "files.watcherExclude": {
-        "./src/__generated": true,
-    },
-    "css.validate": false,
-    "stylelint.validate": ["css", "typescript", "typescriptreact"],
-    "search.exclude": {
-        "**/.git": true,
-        "**/node_modules": true,
-        "**/.analyzer": true,
-        "yarn.lock": true,
-    },
-    "typescript.preferences.autoImportSpecifierExcludeRegexes": [
-        ""
-    ],
-    "editor.wordWrap": "wordWrapColumn",
-    "editor.wordWrapColumn": 90
+  ],
+  "javascript.preferGoToSourceDefinition": true,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.tsc.autoDetect": "off",
+  "files.watcherExclude": {
+    "./src/__generated": true,
+  },
+  "css.validate": false,
+  "stylelint.validate": [
+    "css",
+    "typescript",
+    "typescriptreact"
+  ],
+  "search.exclude": {
+    "**/.git": true,
+    "**/node_modules": true,
+    "**/.analyzer": true,
+    "yarn.lock": true,
+  },
+  "typescript.preferences.autoImportSpecifierExcludeRegexes": [
+    ""
+  ],
+  "editor.wordWrap": "wordWrapColumn",
+  "editor.wordWrapColumn": 90,
+  "cssVariables.lookupFiles": [
+    "**/*.css",
+    "**/*.scss",
+    "**/*.sass",
+    "**/*.less",
+    "node_modules/@mantine/core/styles.css"
+  ],
+  "typescript.preferences.importModuleSpecifierEnding": "index",
+  
 }

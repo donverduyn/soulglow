@@ -1,8 +1,8 @@
 import React from 'react';
-import { css } from '@mui/material/styles';
+import { css } from '@emotion/react';
 import { Stack } from 'common/components/Stack';
+import { Text } from 'common/components/Text';
 import { Toggle } from 'common/components/Toggle';
-import { Typography } from 'common/components/Typography';
 
 interface Props extends DefaultProps {
   readonly getValue: () => boolean;
@@ -16,16 +16,16 @@ export const OnOffSwitch: React.FC<Props> = ({
 }) => {
   return (
     <Stack
-      className={className}
+      className={className ?? ''}
       css={styles.root}
     >
-      <Typography>Off</Typography>
+      <Text>Off</Text>
       <Toggle
         getValue={getValue}
         name='on_off_switch'
         onChange={onChange}
       />
-      <Typography>On</Typography>
+      <Text>On</Text>
     </Stack>
   );
 };

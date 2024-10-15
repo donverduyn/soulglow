@@ -1,52 +1,46 @@
 import * as React from 'react';
-import type { PropsOf } from '@emotion/react';
-import { default as MuiSlider } from '@mui/material/Slider';
-import { css } from '@mui/material/styles';
+import { css } from '@emotion/react';
+import { Slider as MantineSlider, SliderProps } from '@mantine/core';
 import { observer } from 'mobx-react-lite';
 
-interface Props<T> extends DefaultProps {
-  readonly getValue: () => T;
+interface Props extends Omit<SliderProps, 'onChange'> {
+  readonly getValue: () => number;
   readonly max?: number;
   readonly min?: number;
-  readonly onChange: (value: T) => void;
+  readonly onChange: (value: number) => void;
   readonly track?: false | 'normal';
 }
 
-export const Slider = observer(function Slider<T extends number>(
-  props: Props<T>
-) {
+export const Slider = observer(function Slider(props: Props) {
   const { className, min, max, track, getValue, onChange, ...rest } = props;
-  const slotProps = React.useRef<PropsOf<typeof MuiSlider>['slotProps']>({
-    track: { style: { border: 0 } },
-  });
 
-  const handleChange = React.useCallback<
-    (e: Event, v: number | number[]) => void
-  >((_, v) => onChange(v as T), [onChange]);
+  const handleChange = React.useCallback(
+    (value: number) => onChange(value),
+    [onChange]
+  );
 
   // TODO: find out why event handlers are attached on every hover, over the movable part of the slider. See devtools perf monitor.
   return (
-    <MuiSlider
+    <MantineSlider
       className={className!}
-      css={sliderStyles.root}
+      css={styles.root}
+      label={null}
       max={max ?? 255}
       min={min ?? 0}
       onChange={handleChange}
-      slotProps={slotProps.current!}
       step={0.1}
-      track={track ?? 'normal'}
       value={getValue()}
-      valueLabelDisplay='off'
       {...rest}
     />
   );
 });
 
-const sliderStyles = {
+const styles = {
   root: css`
     --slider-color: var(--color, inherit);
     color: var(--slider-color);
+    flex: 1;
     height: 8px;
-    margin: 0 0.5em;
+    margin: 0 0.5rem;
   `,
 };

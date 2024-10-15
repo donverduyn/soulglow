@@ -1,26 +1,30 @@
 import * as React from 'react';
 import { css } from '@emotion/react';
+import { List as MantineList, ListProps } from '@mantine/core';
 import { observer } from 'mobx-react-lite';
 
-interface Props {
+interface Props extends ListProps {
   readonly children?: React.ReactNode;
   readonly render?: () => React.ReactNode;
 }
 
 export const List: React.FC<Props> = observer(function List(props) {
-  const { children, render } = props;
+  const { children, render, ...rest } = props;
   return (
-    <ul css={listStyles.root}>{render ? render() : (children ?? null)}</ul>
+    <MantineList
+      css={styles.root}
+      {...rest}
+    >
+      {render ? render() : (children ?? null)}
+    </MantineList>
   );
 });
 
-const listStyles = {
+const styles = {
   root: css`
     display: flex;
     flex-direction: column;
     gap: inherit;
     list-style-type: none;
-    margin: 0;
-    padding: 0;
   `,
 };

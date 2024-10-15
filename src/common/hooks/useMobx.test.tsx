@@ -1,9 +1,8 @@
 // import * as React from 'react';
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, cleanup, render } from '@testing-library/react';
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useMobx } from './useMobx';
 
 describe('useMobx', () => {
@@ -13,10 +12,11 @@ describe('useMobx', () => {
   afterEach(() => {
     vi.runOnlyPendingTimers();
     vi.useRealTimers();
+    cleanup();
   });
 
   it('should auto bind and update reactively with observer', async () => {
-    expect.hasAssertions();
+    expect.assertions(2);
 
     const initialValue = 5;
     const useCount = (count: number) =>
@@ -37,13 +37,13 @@ describe('useMobx', () => {
       return <p>{counter.count}</p>;
     });
 
-    render(<TestComponent />);
-    const before = await screen.findByRole('paragraph');
+    const screen = render(<TestComponent />);
+    const before = screen.getByRole('paragraph');
     expect(parseInt(before.innerHTML)).toBe(initialValue + 1);
 
     // wait for the second increase
-    await React.act(() => vi.runAllTimers());
-    const after = await screen.findByRole('paragraph');
+    await act(() => vi.runAllTimers());
+    const after = screen.getByRole('paragraph');
     expect(parseInt(after.innerHTML)).toBe(initialValue + 2);
   });
 });

@@ -106,3 +106,22 @@ index 1fa4fb8..4788fcb 100644
          type: "string"
        }
      },
+diff --git a/node_modules/vite-plugin-checker/dist/esm/logger.js b/node_modules/vite-plugin-checker/dist/esm/logger.js
+index 06bfe1b..a371d17 100644
+--- a/node_modules/vite-plugin-checker/dist/esm/logger.js
++++ b/node_modules/vite-plugin-checker/dist/esm/logger.js
+@@ -235,9 +235,13 @@ function normalizeStylelintDiagnostic(diagnostic) {
+         return null;
+     }
+     const loc = lineColLocToBabelLoc(d);
++    let cssSource = ''
++    if (diagnostic._postcssResult && 'css' in diagnostic._postcssResult) {
++      cssSource = diagnostic._postcssResult.css
++    }
+     const codeFrame = createFrame(
+       // @ts-ignore
+-      diagnostic._postcssResult.css ?? "",
++      cssSource,
+       loc
+     );
+     return {

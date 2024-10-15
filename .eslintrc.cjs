@@ -6,23 +6,29 @@ module.exports = {
     'plugin:import/recommended',
     'plugin:eslint-comments/recommended',
   ],
-  ignorePatterns: ['node_modules', 'dist', 'dev-dist', '!.stylelintrc.js'],
+  ignorePatterns: [
+    'node_modules',
+    'dist',
+    'dev-dist',
+    '!**/.*',
+    '!**/.*/**/.*',
+  ],
   overrides: [
     {
-      files: ['./**/*.js', './**/*.cjs', './**/*.mjs'],
+      files: ['./**/*.{js,cjs,mjs}'],
       // config files are assumed to be running in node
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       env: { node: true },
     },
     // browser environment
     {
-      excludedFiles: ['*.test.ts', '*.test.tsx'],
-      files: ['./src/**/*.ts', './src/**/*.tsx'],
+      excludedFiles: ['./src/**/*.test.{ts,tsx}', './src/**/*.test-d.ts'],
+      files: ['./src/**/*.{ts,tsx}', './.*/**/*.tsx', './types/app/**/*.ts'],
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       env: { browser: true },
       parserOptions: {
         ecmaVersion: 'latest',
-        project: ['./tsconfig.json'],
+        project: ['./tsconfig.app.json'],
         sourceType: 'module',
         tsconfigRootDir: __dirname,
       },
@@ -30,7 +36,7 @@ module.exports = {
         'import/resolver': {
           typescript: {
             alwaysTryTypes: true,
-            project: ['./tsconfig.json'],
+            project: ['./tsconfig.app.json'],
           },
         },
       },
@@ -39,19 +45,21 @@ module.exports = {
     // node environment
     {
       files: [
-        '*.config.ts',
-        'vite.config.ts',
+        './*.ts',
+        './.*/**/*.ts',
         './src/**/*.test.ts?(x)',
         './tests/**/*.ts?(x)',
         './scripts/**/*.ts',
         './server/**/*.ts',
+        './types/node/**/*.ts',
+        './src/*.test-d.ts',
       ],
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       env: { node: true },
       parserOptions: {
         ecmaVersion: 'latest',
         // include tsconfig.json for importing types from server
-        project: ['tsconfig.json', './tsconfig.node.json'],
+        project: ['./tsconfig.node.json'],
         sourceType: 'module',
         tsconfigRootDir: __dirname,
       },
@@ -60,14 +68,14 @@ module.exports = {
           node: true,
           typescript: {
             alwaysTryTypes: true,
-            project: ['tsconfig.json', './tsconfig.node.json'],
+            project: ['./tsconfig.node.json'],
           },
         },
       },
     },
     {
       // all TypeScript files
-      files: ['*.ts', '*.test.ts', '*.tsx', '*.test.tsx'],
+      files: ['./**/*.{ts,tsx}'],
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       extends: [
         'plugin:@typescript-eslint/strict-type-checked',
@@ -75,6 +83,8 @@ module.exports = {
       ],
       plugins: ['@typescript-eslint', 'typescript-sort-keys'],
       rules: {
+        // TODO: profile performance impact
+        // 'import/namespace': 'off',
         '@typescript-eslint/ban-ts-comment': [
           'warn',
           {
@@ -125,12 +135,7 @@ module.exports = {
     },
     {
       // all test files
-      files: [
-        './tests/**/*.ts',
-        './tests/**/*.tsx',
-        './src/**/*.test.ts',
-        './src/**/*.test.tsx',
-      ],
+      files: ['./tests/**/*.{ts,tsx}', './src/**/*.test.{ts,tsx}'],
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       extends: ['plugin:vitest/legacy-all'],
       rules: {
@@ -141,7 +146,7 @@ module.exports = {
     {
       // all story files
       extends: ['plugin:storybook/recommended'],
-      files: ['./src/**/*.stories.ts?(x)'],
+      files: ['./src/**/*.stories.{ts,tsx}'],
     },
     {
       // generated TS files
@@ -164,7 +169,7 @@ module.exports = {
       },
     },
     {
-      files: ['*.tsx'],
+      files: ['./**/*.tsx'],
       // all React files
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       extends: [
@@ -185,7 +190,7 @@ module.exports = {
         'no-restricted-imports': [
           'error',
           {
-            patterns: ['@mui/*/*/*'],
+            patterns: [],
           },
         ],
         'react-hooks/exhaustive-deps': 'warn',
@@ -218,7 +223,7 @@ module.exports = {
         'react/jsx-handler-names': 'off',
         'react/jsx-indent': ['warn', 2],
         'react/jsx-indent-props': ['warn', 2],
-        'react/jsx-max-depth': ['warn', { max: 3 }],
+        'react/jsx-max-depth': ['warn', { max: 4 }],
         'react/jsx-max-props-per-line': [
           'warn',
           { maximum: { multi: 1, single: 3 } },
@@ -248,6 +253,7 @@ module.exports = {
           },
         ],
         'react/jsx-wrap-multilines': 'off',
+        'react/no-multi-comp': ['warn', { ignoreStateless: true }],
         'react/no-unknown-property': ['error', { ignore: ['css'] }],
         'react/no-unused-prop-types': 'warn',
         'react/prop-types': 'off',

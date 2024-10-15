@@ -5,16 +5,31 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Attach to Chrome",
+          "type": "node",
+          "request": "launch",
+          "name": "Debug Current Test File",
+          "autoAttachChildProcesses": true,
+          "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+          "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
+          "args": ["run", "${relativeFile}"],
+          "smartStep": true,
+          "console": "integratedTerminal"
+        },
+        {
+            "name": "Debug App in Chromium",
             "port": 9222,
             "request": "attach",
             "type": "chrome",
             "url": "http://localhost:4173",
             "webRoot": "${workspaceFolder}/src",
+            "resolveSourceMapLocations": [
+              "${workspaceFolder}/**",
+              "!**/node_modules/**"
+            ],
             "preLaunchTask": "launch-vite-debug",
         },
         {
-            "name": "Launch Node",
+            "name": "Run Current File (Node.js)",
             "type": "node",
             "request": "launch",
             "program": "${file}",

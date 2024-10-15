@@ -22,6 +22,7 @@ export default {
     'declaration-empty-line-before': ['never'],
     'no-descending-specificity': null,
     'no-duplicate-selectors': true,
+    'no-empty-source': null,
     'order/order': ['custom-properties', 'declarations', 'rules', 'at-rules'],
     'order/properties-alphabetical-order': true,
     'property-no-unknown': [
@@ -38,10 +39,9 @@ export default {
       },
     ],
     'selector-class-pattern': [
-      '^(Mui.*|[a-z0-9_-]+)$',
+      '^([a-zA-Z0-9_-]+)$',
       {
-        message:
-          'Selector should be written in lowercase with hyphens (except MUI classes)',
+        message: 'Selector should not contain special characters.',
         resolveNestedSelectors: true,
       },
     ],
@@ -54,7 +54,8 @@ export default {
     'selector-type-no-unknown': [
       true,
       {
-        ignoreTypes: ['from', '/^Mui/'], // Ignoring MUI-specific types
+        // TODO: use prefix from config
+        ignoreTypes: ['from', '/^app/'],
       },
     ],
     'unit-no-unknown': [true, { severity: 'error' }],

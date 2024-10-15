@@ -1,4 +1,4 @@
-import type { Okhsv } from 'culori';
+import type { Okhsv } from 'culori/fn';
 
 function adjustHue(val: number) {
   if (val < 0) val += Math.ceil(-val / 360) * 360;

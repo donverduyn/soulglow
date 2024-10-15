@@ -1,51 +1,7 @@
 {
-  "compilerOptions": {
-    "target": "ES2020",
-    // "useDefineForClassFields": true,
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "allowSyntheticDefaultImports": true,
-    "exactOptionalPropertyTypes": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "noErrorTruncation": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "@emotion/react",
-
-    "plugins": [
-      {
-        "name": "@styled/typescript-styled-plugin",
-        "lint": {
-          "validProperties": ["label"]
-        }
-      }
-    ],
-    /* Linting */
-    "strict": true,
-    /* Paths */
-    "typeRoots": ["./node_modules/@types", "./src/types"],
-    "baseUrl": ".",
-    "paths": {
-      "*": ["src/*"],
-      // useTRPC.ts uses types from server alias
-      "server/*": ["server/*"],
-      // somehow needed for useTRPC.test.ts
-      // seems that it relies on tsconfig.json, not tsconfig.node.json
-      "tests/*": ["tests/*"],
-    },
-  },
-  // vite.config.ts and scripts should not be included here
-  // seems to be a problem with vscode ts
-  "include": ["src", "vite.config.ts", "pwa.config.ts", "scripts", "tests"],
-  "exclude": ["node_modules", "**/node_modules/*"],
-  // "references": [{ "path": "./tsconfig.node.json" }]
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
 }

@@ -1,12 +1,13 @@
 import * as React from 'react';
-import { css } from '@mui/material/styles';
+import { css } from '@emotion/react';
 import { Effect, pipe, Queue, type Context } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'common/components/Button';
 import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { List } from 'common/components/List';
-import { Paper } from 'common/components/Paper';
+import { Stack } from 'common/components/Stack';
 import { useReturn } from 'common/hooks/useReturn';
+import { useTranslation } from 'common/hooks/useTranslation';
 import type { EventType, Publishable } from 'common/utils/event';
 import { addEndpointRequested } from 'models/endpoint/events';
 import { createEndpoint } from 'models/endpoint/model';
@@ -21,6 +22,10 @@ interface InnerProps extends Publishable {
   readonly store: Context.Tag.Service<typeof AppTags.EndpointStore>;
 }
 interface OuterProps {}
+
+export interface Translations {
+  addEndpointLabel: string;
+}
 
 const Main = pipe(
   observer(EndpointPanel as (props: OuterProps) => React.JSX.Element),
@@ -55,8 +60,8 @@ export default Main;
 function EndpointPanel(props: Props) {
   const { publish, store } = props;
   const { addEndpoint } = useHandlers(props);
+  const { text } = useTranslation<Translations>();
 
-  //
   const renderList = React.useCallback(
     () =>
       store.list.get().map((endpoint) => (
@@ -70,15 +75,17 @@ function EndpointPanel(props: Props) {
   );
 
   return (
-    <Paper css={styles.root}>
+    <Stack css={styles.root}>
       <List render={renderList} />
       <Button
         css={styles.addButton}
         onClick={addEndpoint}
       >
-        Add endpoint
+        {text('addEndpointLabel', {
+          defaultValue: 'Add Endpoint',
+        })}
       </Button>
-    </Paper>
+    </Stack>
   );
 }
 
@@ -100,7 +107,7 @@ const styles = {
   root: css`
     display: flex;
     flex-direction: column;
-    gap: 1em;
+    gap: 1rem;
     padding: 0;
   `,
 };

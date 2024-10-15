@@ -1,3 +1,5 @@
+// eslint-disable-next-line eslint-comments/disable-enable-pair
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { pipe, Layer, Context, PubSub, Effect, Stream, Fiber } from 'effect';
 import * as Mobx from 'mobx';
 import { createRuntimeContext } from 'common/utils/context';

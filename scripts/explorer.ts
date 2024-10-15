@@ -72,7 +72,7 @@ const stringTransformer = createTransformer(
   }
 );
 
-const createView = () => {
+export const createView = () => {
   type State = {
     folderView: FolderView | null;
     root: Folder;
@@ -106,6 +106,3 @@ function createFolders(parent: Folder, recursion: number) {
     if (recursion > 1) createFolders(folder, recursion - 1);
   }
 }
-
-// @ts-expect-error window property access
-window.state = createView();

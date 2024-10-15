@@ -31,6 +31,12 @@ RUN apt-get update && apt-get install -y curl gnupg \
 #     && cd ./packages/react-devtools-extensions \
 #     && yarn build:chrome
 
+RUN git clone https://github.com/mantinedev/mantine /tmp/mantine \
+    && cd /tmp/mantine \
+    && yarn install \
+    && ./node_modules/.bin/storybook build \
+    && mv ./storybook-static /tmp/mantine-storybook
+
 # Step 3: Create the final image
 FROM mcr.microsoft.com/devcontainers/base:bullseye
 
@@ -45,7 +51,7 @@ RUN apt-get update \
     fonts-freefont-ttf \
     fonts-recommended \
     fonts-firacode \
-    dbus \ 
+    dbus \
     dbus-x11 \
     chromium \
     alsa-utils \ 
@@ -114,6 +120,11 @@ RUN mkdir -p /tmp/runtime-vscode \
 
 # Copy built React DevTools from the builder stage
 # COPY --from=builder /tmp/react/packages/react-devtools-extensions/chrome/build /tmp/react-devtools-extensions
+
+COPY --from=builder /tmp/mantine-storybook /tmp/mantine-storybook
+# Create empty JSON files
+RUN echo '{}' > /tmp/mantine-storybook/metadata.json \
+  && echo '{}' > /tmp/mantine-storybook/stories.json
 
 # Add Node binaries to PATH
 ENV PATH=./node_modules/.bin:$PATH

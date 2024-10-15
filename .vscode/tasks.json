@@ -27,7 +27,7 @@
       {
         "label": "wait-for-port",
         "type": "shell",
-        "command": "NODE_NO_WARNINGS=1 tsx -e \"import { waitForPort } from './scripts/browser'; waitForPort(9222, '127.0.0.1');\"",
+        "command": "NODE_NO_WARNINGS=1 wait-on tcp:9222",
         "problemMatcher": [],
         "isBackground": true
       },

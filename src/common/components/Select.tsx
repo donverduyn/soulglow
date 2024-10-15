@@ -1,88 +1,119 @@
-import React from 'react';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import MuiSelect from '@mui/material/Select';
-import type { SelectChangeEvent } from '@mui/material/Select';
-import { css } from '@mui/material/styles';
-import { Observer, observer } from 'mobx-react-lite';
-import moize from 'moize';
-import { unwrap } from 'common/utils/unwrap';
+import { useState } from 'react';
+import * as React from 'react';
+import { css } from '@emotion/react';
+import { Combobox, Input, InputBase, useCombobox } from '@mantine/core';
+import { observer } from 'mobx-react-lite';
+import { useReaction } from 'common/hooks/useMobx';
+import { prefix } from 'config/constants';
 
 type Item<TValue> = { id: string; label: string; value: TValue };
 
-interface SelectProps<TValue> extends DefaultProps {
-  readonly getValue: (() => TValue) | TValue;
+interface Props<TValue extends string> extends DefaultProps {
+  readonly getValue: () => TValue;
   readonly items: Item<TValue>[];
   readonly label: string;
   readonly name: string;
   readonly onChange: (value: TValue) => void;
-  readonly renderItem?: (item: Item<TValue>) => React.ReactElement;
 }
 
-export const Select = observer(function Select<TValue>(
-  props: SelectProps<TValue>
+export const Select = observer(function Select<TValue extends string>(
+  props: Props<TValue>
 ) {
-  const { className, label, getValue, onChange, items, renderItem, name } =
-    props;
+  const { className, label, getValue, onChange, items } = props;
+  const [optimistic, setOptimistic] = useState<string | null>(getValue);
 
-  const safeRender = renderItem ?? renderDefaultSelectItem;
-  const handleChange = React.useCallback<
-    (event: SelectChangeEvent<TValue>) => void
-  >((e) => onChange(e.target.value as TValue), [onChange]);
+  const rightSection = React.useMemo(() => <Combobox.Chevron />, []);
+  const combobox = useCombobox({
+    onDropdownClose: () => combobox.resetSelectedOption(),
+  });
 
-  const inputProps = React.useMemo(() => ({ id: name }), [name]);
-  const menuProps = React.useMemo(
-    () => ({
-      slotProps: {
-        paper: {
-          elevation: 16,
-          sx: {
-            borderTopLeftRadius: 0,
-            borderTopRightRadius: 0,
-            transform: 'translate(0, -0.5px) !important',
-          },
-        },
-      },
-    }),
-    []
+  useReaction(getValue, (value) => {
+    if (value !== optimistic) setOptimistic(value);
+  });
+
+  const handleClick = React.useCallback(() => {
+    combobox.toggleDropdown();
+  }, [combobox]);
+
+  const handleSubmit = React.useCallback(
+    (val: string) => {
+      setOptimistic(val);
+      onChange(val as TValue);
+      combobox.closeDropdown();
+    },
+    [combobox, onChange]
   );
 
   return (
-    <FormControl
-      className={className!}
-      css={selectStyles.root}
-      variant='filled'
+    <Combobox
+      offset={0}
+      onOptionSubmit={handleSubmit}
+      store={combobox}
+      withinPortal={false}
     >
-      <InputLabel htmlFor={name}>{label}</InputLabel>
-      <MuiSelect
-        inputProps={inputProps}
-        MenuProps={menuProps}
-        name={name}
-        onChange={handleChange}
-        value={unwrap(getValue)}
-      >
-        {items.map(safeRender)}
-      </MuiSelect>
-    </FormControl>
+      <Combobox.Target>
+        <InputBase
+          pointer
+          className={className ?? ''}
+          component='button'
+          css={styles.root}
+          label={label}
+          onClick={handleClick}
+          rightSection={rightSection}
+          rightSectionPointerEvents='none'
+          size='md'
+          type='button'
+          //   variant='filled'
+        >
+          {optimistic ?? <Input.Placeholder>Pick value</Input.Placeholder>}
+        </InputBase>
+      </Combobox.Target>
+      <Combobox.Dropdown css={styles.dropdown}>
+        <Combobox.Options>{items.map(renderOption)}</Combobox.Options>
+      </Combobox.Dropdown>
+    </Combobox>
   );
 });
 
-const selectStyles = {
-  root: css`
-    margin: 0 0 1em;
-    text-align: left;
-  `,
+const renderOption = (item: Item<string>) => {
+  return (
+    <Combobox.Option
+      key={item.id}
+      value={item.value}
+    >
+      {item.label}
+    </Combobox.Option>
+  );
 };
 
-const renderDefaultSelectItem = <T,>(item: Item<T>) => {
-  const render = moize(() => <span>{item.label}</span>);
-  return (
-    <MenuItem
-      key={item.id}
-      value={String(item.value)}
-    >
-      <Observer render={render} />
-    </MenuItem>
-  );
+const styles = {
+  dropdown: css`
+    border-color: light-dark(
+      var(--mantine-color-gray-4),
+      var(--mantine-color-dark-4)
+    );
+    border-top: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  `,
+  root: css`
+    /* --input-padding-y: 1.33rem; */
+    .${prefix}-InputBase-input {
+      align-items: center;
+      border-width: 3px;
+      display: flex;
+    }
+
+    .${prefix}-InputBase-label {
+      color: var(--mantine-color-white);
+      font-size: var(--mantine-font-size-sm);
+      font-variant: small-caps;
+      text-transform: lowercase;
+    }
+
+    &[data-expanded] {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  `,
 };

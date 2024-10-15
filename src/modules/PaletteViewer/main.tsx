@@ -1,8 +1,15 @@
 import * as React from 'react';
-import { css, type Theme } from '@mui/material/styles';
-import { formatHex, type Okhsv } from 'culori';
+import { css } from '@emotion/react';
+import {
+  convertOkhsvToOklab,
+  convertOklabToRgb,
+  serializeHex,
+  type Okhsv,
+} from 'culori/fn';
+import { flow } from 'effect';
 import { computed, untracked } from 'mobx';
 import { observer } from 'mobx-react-lite';
+import { Group } from 'common/components/Group';
 import { Paper } from 'common/components/Paper';
 import { Stack } from 'common/components/Stack';
 import { createPalettes } from 'common/utils/color';
@@ -12,6 +19,8 @@ interface Props extends DefaultProps {
 }
 
 const Main: React.FC<Props> = observer(PaletteViewer);
+// TODO: consider importing from utils
+const formatHex = flow(convertOkhsvToOklab, convertOklabToRgb, serializeHex);
 
 export default Main;
 function PaletteViewer({ getColor, className }: Props) {
@@ -20,21 +29,19 @@ function PaletteViewer({ getColor, className }: Props) {
   // prevent reconciliation on every update
   const entries = Object.entries(untracked(() => palettes.get()));
   return (
-    <Paper
-      className={className}
+    <Stack
+      className={className ?? ''}
       css={styles.root}
-      getStyle={styles.rootSx}
     >
       {entries.map(([key, palette]) => (
-        <Stack
+        <Group
           key={key}
           css={styles.palette}
         >
           {palette.map((_, i) => {
             const color = computed(() => formatHex(palettes.get()[key][i]));
-
             return (
-              <Stack
+              <Paper
                 key={key.concat(i.toString())}
                 css={styles.swatch}
                 //* color cannot be stable across renders
@@ -47,41 +54,25 @@ function PaletteViewer({ getColor, className }: Props) {
               />
             );
           })}
-        </Stack>
+        </Group>
       ))}
-    </Paper>
+    </Stack>
   );
 }
 
 const styles = {
   palette: css`
-    background: none;
-    box-shadow: none;
-    display: flex;
-    flex: 1;
-    flex-direction: row;
-    gap: 0.5em;
+    label: Palette;
   `,
   root: css`
-    background: none;
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    gap: 0.5em;
-    overflow: hidden;
+    border-radius: var(--mantine-radius-md);
   `,
-  //TODO: currently cannot return pseudo selectors from getStyle a la `&:hover`, this would be nice so that we can safely borrow the sx name from MUI
-  rootSx: (theme: Theme) => ({
-    borderRadius: theme.shape.borderRadius.toString() + 'px',
-  }),
   swatch: css`
-    align-items: center;
-    color: white;
-    display: flex;
+    color: var(--mantine-color-white);
     flex: 1;
-    flex-direction: row;
-    justify-content: center;
+    label: Swatch;
     padding: 0.25em;
+    text-align: center;
     transition: background-color 0.17s ease;
   `,
 };

@@ -165,8 +165,8 @@ export const useDeepObserve = <T, U>(
 export const useReaction = <T>(
   fn: () => T,
   effect: (value: T, prev: T) => void,
-  deps: unknown[] = [],
-  options: IReactionOptions<T, false> = { delay: 100 }
+  options: IReactionOptions<T, false> = { delay: 0 },
+  deps: unknown[] = []
 ) => {
   React.useEffect(() => reaction(fn, effect, options), deps);
 };

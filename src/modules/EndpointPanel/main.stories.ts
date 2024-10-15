@@ -3,14 +3,16 @@ import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { AppRuntime } from 'modules/App/context';
 import EndpointPanel from './main';
 
+// TODO: import tags to type test implementation against them
+// TODO: we need to think about how we want to spy on effectful deps
 const Component = WithRuntime(AppRuntime)(EndpointPanel);
 
 const meta = {
   argTypes: {},
   component: Component,
-  parameters: { layout: 'top' },
+  parameters: { layout: 'centered' },
+  play: async () => Promise.resolve(),
   title: '@EndpointPanel/Main',
-  // args: { publish: fn() },
 } satisfies Meta<typeof Component>;
 
 export default meta;

@@ -1,27 +1,31 @@
 import * as React from 'react';
-import MuiButton from '@mui/material/Button';
-import { css } from '@mui/material/styles';
-
-interface Props extends DefaultProps {
-  readonly children: React.ReactNode;
+import { css } from '@emotion/react';
+import { Button as MantineButton, type ButtonProps } from '@mantine/core';
+interface Props extends ButtonProps {
   readonly onClick?: () => void;
 }
 
-export const Button: React.FC<Props> = ({ className, children, onClick }) => {
+export const Button: React.FC<Props> = ({
+  className,
+  children,
+  onClick,
+  ...rest
+}) => {
   return (
-    <MuiButton
+    <MantineButton
       className={className!}
-      css={buttonStyles.root}
+      color='gray.0'
+      css={styles.root}
       onClick={onClick}
-      variant='contained'
+      size='md'
+      variant='filled'
+      {...rest}
     >
       {children}
-    </MuiButton>
+    </MantineButton>
   );
 };
 
-const buttonStyles = {
-  root: css`
-    /* background: red; */
-  `,
+const styles = {
+  root: css``,
 };

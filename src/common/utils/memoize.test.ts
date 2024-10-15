@@ -1,9 +1,8 @@
-import { describe, expect, it } from 'vitest';
 import { memoize } from './memoize';
 
 describe('memoize', () => {
   it('should memoize the result', () => {
-    expect.hasAssertions();
+    expect.assertions(1);
 
     const memoizedFn = memoize((obj: Record<string, unknown>) =>
       Object.assign({}, obj)
@@ -16,7 +15,7 @@ describe('memoize', () => {
     expect(first).toStrictEqual(second);
   });
   it('should memoize the result of a promise', async () => {
-    expect.hasAssertions();
+    expect.assertions(1);
 
     const memoizedFn = memoize(async (obj: Record<string, unknown>) =>
       Promise.resolve(obj)

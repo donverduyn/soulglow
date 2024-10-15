@@ -1,4 +1,4 @@
-import type { Okhsv } from 'culori';
+import type { Okhsv } from 'culori/fn';
 import { Effect, pipe, type Context } from 'effect';
 import type { Device } from 'models/device/model';
 import * as Tags from '../tags';

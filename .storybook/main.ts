@@ -1,26 +1,44 @@
-import type { StorybookConfig } from '@storybook/react-vite';
-
 import { join, dirname } from 'path';
+import type { StorybookConfig } from '@storybook/react-vite';
+import type { UserConfig } from 'vite';
+import VitePluginRestart from './../.vite/plugins/vite-plugin-restart';
+import { noCacheHeaders } from './../.vite/utils/cache';
 
-/**
- * This function is used to resolve the absolute path of a package.
- * It is needed in projects that use Yarn PnP or are set up within a monorepo.
- */
-function getAbsolutePath(value: string): any {
+function getAbsolutePath(value: string): string {
   return dirname(require.resolve(join(value, 'package.json')));
 }
 const config: StorybookConfig = {
-  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
   addons: [
-    getAbsolutePath('@storybook/addon-onboarding'),
     getAbsolutePath('@storybook/addon-links'),
     getAbsolutePath('@storybook/addon-essentials'),
     getAbsolutePath('@storybook/addon-interactions'),
-    getAbsolutePath('storybook-addon-mantine'),
+    getAbsolutePath('@storybook/addon-a11y'),
+    getAbsolutePath('storybook-dark-mode'),
   ],
   framework: {
     name: getAbsolutePath('@storybook/react-vite'),
-    options: {},
+    options: { builder: { viteConfigPath: './vite.config.ts' } },
+  },
+  refs: {
+    mantine: {
+      expanded: false,
+      title: 'Mantine',
+      url: 'http://localhost:6005', // Optional, true by default
+    },
+  },
+  staticDirs: ['../public'],
+  stories: ['../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
+  viteFinal: async (config) => {
+    const { mergeConfig } = await import('vite');
+    return mergeConfig(config, {
+      plugins: [
+        VitePluginRestart({
+          reload: ['./public/**/*'],
+          restart: ['.storybook/**/*'],
+        }),
+      ],
+      server: { headers: noCacheHeaders },
+    } satisfies UserConfig);
   },
 };
 export default config;

@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import { freeze } from './freeze';
 
 // Helper function to check if an object is recursively frozen
@@ -20,14 +19,14 @@ function isDeepFrozen<T extends Record<string, unknown> | unknown[]>(
 
 describe('freeze', () => {
   it('should freeze an object', () => {
-    expect.hasAssertions();
+    expect.assertions(1);
     const object = { nested: { prop: 'value' }, prop: 'value' };
     freeze(object);
 
     expect(isDeepFrozen(object)).toBeTruthy();
   });
   it('should freeze an array', () => {
-    expect.hasAssertions();
+    expect.assertions(1);
     const array = [{ prop: 'value' }, { prop: 'value' }];
     freeze(array);
 

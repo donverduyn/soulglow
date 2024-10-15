@@ -18,12 +18,21 @@ jobs:
       with:
         node-version: '20'
         cache: 'yarn'
+    
+      # TODO: invalidate periodically and on changes to yarn.lock
+    - name: Cache Eslint dependencies
+      uses: actions/cache@v3
+      with: 
+        path: ~/.cache/eslint
+        key: ${{ runner.os }}-eslint-${{ hashFiles('**/.eslintrc.cjs') }}
+        restore-keys: |
+          ${{ runner.os }}-eslint-
 
     - name: Install dependencies
       run: yarn install --frozen-lockfile
 
-    # - name: Lint
-    #   run: yarn lint
+    - name: Lint
+      run: yarn lint:ci
 
     - name: Test
       run: yarn test

@@ -1,4 +1,4 @@
-import { css } from '@mui/material/styles';
+import { css } from '@emotion/react';
 import { Stack } from 'common/components/Stack';
 import { Toggle } from 'common/components/Toggle';
 
@@ -22,5 +22,5 @@ export const EndpointVisibilitySwitch: React.FC<Props> = ({
 
 // this allows emotion to use the component name
 const styles = {
-  root: css(),
+  root: css``,
 };

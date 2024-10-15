@@ -1,85 +1,18 @@
 import react from '@vitejs/plugin-react-swc';
 import dayjs from 'dayjs';
-import { createProxyMiddleware } from 'http-proxy-middleware';
-import moize from 'moize';
 import postcssPresetEnv from 'postcss-preset-env';
 import { visualizer } from 'rollup-plugin-visualizer';
-import { Plugin, ViteDevServer } from 'vite';
 import { checker } from 'vite-plugin-checker';
 import inspect from 'vite-plugin-inspect';
 import { VitePWA } from 'vite-plugin-pwa';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
-import { createBrowser } from './scripts/browser';
-
-export const noCacheHeaders = {
-  'Cache-Control': 'no-cache, no-store, must-revalidate',
-  Expires: '0',
-  Pragma: 'no-cache',
-};
-
-const dynamicProxyPlugin = (): Plugin => {
-  const getProxy = moize((endpoint: string) =>
-    createProxyMiddleware({
-      changeOrigin: true,
-      pathRewrite: { [`^/api`]: endpoint },
-      target: endpoint,
-    })
-  );
-
-  return {
-    configureServer(server) {
-      // console.log('Dynamic Proxy Plugin', server);
-      // TODO: find out why this is not working, since the last time upgrading the packages
-      server.middlewares.use('/api', (req, res, next) => {
-        const endpoint = req.headers.endpoint as string;
-        if (!endpoint) {
-          return res.writeHead(400).end('Endpoint is required in headers');
-        }
-
-        const proxy = getProxy(endpoint);
-        void proxy(req, res, next);
-      });
-    },
-    name: 'dynamic-proxy',
-  };
-};
-
-const browser = (mode: string): Plugin => {
-  let launched = false;
-
-  const openPage = (server: ViteDevServer) => {
-    if (process.env.INTERNAL_CHROMIUM)
-      void createBrowser(
-        { devtools: mode === 'development' },
-        async (page, browser) => {
-          const a = server.httpServer?.address();
-          const port = (typeof a === 'string' ? a : a?.port) ?? '4173';
-          const postfix = mode === 'test' ? '/__vitest__/#/' : '';
-          const url = `http://localhost:${port.toString()}${postfix}`;
-
-          await page.goto(url);
-          server.httpServer?.on('close', () => {
-            void browser.close();
-          });
-        }
-      );
-  };
-
-  return {
-    configureServer(server) {
-      server.httpServer?.on('listening', () => {
-        if (!launched) {
-          openPage(server);
-          launched = true;
-        }
-      });
-    },
-    name: 'puppeteer',
-  };
-};
+import { browser } from './.vite/plugins/vite-plugin-browser';
+import { dynamicProxyPlugin } from './.vite/plugins/vite-plugin-dynamic-proxy';
+import { noCacheHeaders } from './.vite/utils/cache';
 
 // https://vitejs.dev/config/
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error vite version mismatch
 export default defineConfig(({ mode }) => ({
   build: {
@@ -88,7 +21,7 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: {
-          '@culori': ['culori'],
+          '@culori': ['culori/fn'],
           '@effect': ['effect'],
           '@emotion': ['@emotion/react', '@emotion/styled'],
           '@mantine': [
@@ -100,7 +33,6 @@ export default defineConfig(({ mode }) => ({
             '@mantine/notifications',
           ],
           '@mobx': ['mobx', 'mobx-react-lite', 'mobx-utils'],
-          '@mui': ['@mui/material', '@mui/icons-material'],
           '@react': ['react', 'react-dom'],
           '@utils': ['moize', 'uuid', '@hey-api/client-fetch'],
         },
@@ -121,26 +53,7 @@ export default defineConfig(({ mode }) => ({
     tsconfigPaths(),
     react({
       jsxImportSource: '@emotion/react',
-      plugins: [
-        [
-          '@swc/plugin-emotion',
-          {
-            importMap: {
-              '@mui/material/styles': {
-                css: {
-                  canonicalImport: ['@emotion/react', 'css'],
-                  styledBaseImport: ['@mui/material/styles', 'css'],
-                },
-                styled: {
-                  canonicalImport: ['@emotion/styled', 'default'],
-                  styledBaseImport: ['@mui/material/styles', 'styled'],
-                },
-              },
-            },
-            sourceMap: true,
-          },
-        ],
-      ],
+      plugins: [['@swc/plugin-emotion', { sourceMap: true }]],
     }),
     VitePWA({
       devOptions: {
@@ -151,10 +64,9 @@ export default defineConfig(({ mode }) => ({
       },
       filename: 'worker.ts',
       injectManifest: {
-        // globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
         globPatterns: [
           '**/*.{js,css,html,svg,png,ico}',
-          'fonts/*.{woff,woff2,ttf,otf}', // Add fonts to be cached
+          'fonts/*.{woff,woff2,ttf,otf}',
         ],
       },
       injectRegister: 'script-defer',
@@ -179,8 +91,8 @@ export default defineConfig(({ mode }) => ({
         lintCommand:
           mode === 'test'
             ? // exclude tsx files for eslint during test for now
-              "eslint 'tests/**/*.ts' 'src/**/*.test.ts'"
-            : 'eslint ./**/*.{js,cjs,ts,tsx}',
+              "eslint 'tests/**/*.ts' 'src/**/*.test.ts' --cache --cache-location node_modules/.cache/.eslintcache"
+            : 'eslint ./**/*.{js,cjs,ts,tsx} --cache --cache-location node_modules/.cache/.eslintcache',
         useFlatConfig: false,
       },
       overlay: {
@@ -196,9 +108,11 @@ export default defineConfig(({ mode }) => ({
               lintCommand: 'stylelint "src/**/*.{css,tsx}"',
             }
           : false,
-      terminal: false,
+      terminal: mode === 'development',
       typescript:
-        process.env.CI === 'true' ? false : { tsconfigPath: './tsconfig.json' },
+        process.env.CI === 'true'
+          ? false
+          : { tsconfigPath: './tsconfig.app.json' },
     }),
     visualizer({
       brotliSize: true,
@@ -217,9 +131,7 @@ export default defineConfig(({ mode }) => ({
     port: 4173,
     proxy: {
       '/api': {
-        // The base URL of your API
         changeOrigin: true,
-        // Needed for virtual hosted sites
         rewrite: (path) => path.replace(/^\/api/, ''),
         target: 'http://192.168.0.153:80',
       },
@@ -230,31 +142,28 @@ export default defineConfig(({ mode }) => ({
     headers: noCacheHeaders,
     hmr: { overlay: true },
     host: '127.0.0.1',
-    // open: process.env.INTERNAL_CHROMIUM ? false : true,
     port: 4173,
-    proxy: {
-      // '/api': {
-      //   // The base URL of youhr API
-      //   changeOrigin: true,
-      //   // Needed for virtual hosted sites
-      //   rewrite: (path) => path.replace(/^\/api/, ''),
-      //   target: 'http://192.168.0.153:80',
-      // },
+    watch: {
+      ignored: ['!**/node_modules/your-package-name/**'],
     },
   },
   test: {
+    coverage: { provider: 'v8', reporter: 'html' },
+    css: false,
     environment: 'happy-dom',
+    globals: true,
+    open: false,
+    setupFiles: ['./tests/setup.ts'],
     // resolveSnapshotPath: (testPath, snapshotExtension) =>
     //   testPath.replace(/\.test\.(ts|tsx)$/, `.snap${snapshotExtension}`),
-    // for testing types!
-    // typecheck: {
-    //   checker: 'tsc',
-    //   tsconfig: './tsconfig.json',
-    //   enabled: true,
-    // },
+    typecheck: {
+      checker: 'tsc',
+      enabled: false, // this is already handled by the linter
+      // enabled: process.env.CI === 'true',
+      include: ['./tests/**/*.{ts,tsx}'],
+      tsconfig: './tsconfig.node.json',
+    },
     // reporters: ['html'],
-    globals: true,
     // logHeapUsage: true,
-    open: false,
   },
 }));
