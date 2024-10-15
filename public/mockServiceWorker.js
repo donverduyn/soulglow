@@ -1,3 +1,4 @@
+// eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable no-undef */
 
 /**
@@ -281,5 +282,3 @@ async function respondWithMock(response) {
 
   return mockedResponse;
 }
-
-/* eslint-enable no-undef */
