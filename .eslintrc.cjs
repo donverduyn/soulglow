@@ -16,7 +16,7 @@ module.exports = {
   overrides: [
     {
       files: ['./**/*.{js,cjs,mjs}'],
-      exclude: ['./public/mockServiceWorker.js'],
+      excludedFiles: ['./public/mockServiceWorker.js'],
       // config files are assumed to be running in node
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       env: { node: true },
