@@ -1,12 +1,11 @@
-// eslint-disable-next-line eslint-comments/disable-enable-pair
-/* eslint-disable no-undef */
-
 /**
  * Mock Service Worker.
  * @see https://github.com/mswjs/msw
  * - Please do NOT modify this file.
  * - Please do NOT serve this file on production.
  */
+
+// TODO: enable eslint for this file. somehow CI breaks but locally not.
 
 const PACKAGE_VERSION = '2.4.11';
 const INTEGRITY_CHECKSUM = '26357c79639bfa20d64c0efca2a87423';

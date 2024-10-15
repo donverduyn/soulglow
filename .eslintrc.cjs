@@ -12,11 +12,11 @@ module.exports = {
     'dev-dist',
     '!**/.*',
     '!**/.*/**/.*',
+    'public/mockServiceWorker.js',
   ],
   overrides: [
     {
       files: ['./**/*.{js,cjs,mjs}'],
-      excludedFiles: ['./public/mockServiceWorker.js'],
       // config files are assumed to be running in node
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       env: { node: true },
