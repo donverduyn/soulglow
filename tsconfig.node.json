@@ -5,6 +5,7 @@
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
+    // "composite": true,
     "esModuleInterop": true,
     "noErrorTruncation": true,
     "allowImportingTsExtensions": true,
@@ -60,5 +61,6 @@
     // because we import components in tests
     "./types/app/**/*",
     "./public/**/*",
+    "./.devcontainer/**/*",
   ],
 }

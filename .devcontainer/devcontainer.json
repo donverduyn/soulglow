@@ -47,7 +47,7 @@
 	
 	"postCreateCommand": {
 		"yarn": "yarn install",
-    "playwright": "yarn playwright install --with-deps"
+    // "playwright": "yarn playwright install --with-deps"
 	},
 	"postStartCommand": {
 		// "gpu": "sudo chown root:video /dev/dri/renderD128 && sudo usermod -aG video $USER"

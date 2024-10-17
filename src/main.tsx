@@ -14,6 +14,7 @@ import { client } from './__generated/api';
 import App from './modules/App/main';
 import '@mantine/core/styles.css';
 import './index.css';
+import './font.css';
 
 const i18n = initializeI18N();
 client.setConfig({ baseUrl: '/api' });

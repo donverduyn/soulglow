@@ -31,9 +31,12 @@ RUN apt-get update && apt-get install -y curl gnupg \
 #     && cd ./packages/react-devtools-extensions \
 #     && yarn build:chrome
 
+COPY ./codemods /tmp/codemods
 RUN git clone https://github.com/mantinedev/mantine /tmp/mantine \
     && cd /tmp/mantine \
     && yarn install \
+    && yarn dlx jscodeshift -t /tmp/codemods/previewHead.ts ./.storybook/main.ts --parser=ts \
+    && cat ./.storybook/main.ts \
     && ./node_modules/.bin/storybook build \
     && mv ./storybook-static /tmp/mantine-storybook
 
@@ -125,6 +128,8 @@ COPY --from=builder /tmp/mantine-storybook /tmp/mantine-storybook
 # Create empty JSON files
 RUN echo '{}' > /tmp/mantine-storybook/metadata.json \
   && echo '{}' > /tmp/mantine-storybook/stories.json
+
+RUN yarn dlx playwright install --with-deps
 
 # Add Node binaries to PATH
 ENV PATH=./node_modules/.bin:$PATH

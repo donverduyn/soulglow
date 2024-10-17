@@ -91,7 +91,7 @@ export default defineConfig(({ mode }) => ({
         lintCommand:
           mode === 'test'
             ? // exclude tsx files for eslint during test for now
-              "eslint 'tests/**/*.ts' 'src/**/*.test.ts' --cache --cache-location ./.cache/.eslintcache"
+              "eslint './tests/**/*.ts' './src/**/*.test.ts' --cache --cache-location ./.cache/.eslintcache"
             : 'eslint ./**/*.{js,cjs,ts,tsx} --cache --cache-location ./.cache/eslint/.eslintcache',
         useFlatConfig: false,
       },

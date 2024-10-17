@@ -17,7 +17,7 @@ describe('endpointPanel', () => {
   it('should have the translations available', () => {
     expect.assertions(1);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    let isAvailable: TranslationAvailable<Translations>;
+    const isAvailable: TranslationAvailable<Translations> = true;
     expectTypeOf<typeof isAvailable>().toEqualTypeOf<true>();
   });
   it('should add an endpoint to the list when the "Add Endpoint" button is clicked', async () => {

@@ -15,17 +15,19 @@ const config: StorybookConfig = {
     getAbsolutePath('@storybook/addon-a11y'),
     getAbsolutePath('storybook-dark-mode'),
   ],
+  core: { disableWhatsNewNotifications: true },
   framework: {
     name: getAbsolutePath('@storybook/react-vite'),
     options: { builder: { viteConfigPath: './vite.config.ts' } },
   },
-  refs: {
+  refs: () => ({
     mantine: {
-      expanded: false,
+      expanded: true,
+      sourceUrl: 'https://github.com/mantinedev/mantine',
       title: 'Mantine',
-      url: 'http://localhost:6005', // Optional, true by default
+      url: 'http://localhost:6005',
     },
-  },
+  }),
   staticDirs: ['../public'],
   stories: ['../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
   viteFinal: async (config) => {

@@ -12,6 +12,7 @@ module.exports = {
     'dev-dist',
     '!**/.*',
     '!**/.*/**/.*',
+    // TODO: find out why CI is failing with this (not happening locally)
     'public/mockServiceWorker.js',
   ],
   overrides: [
@@ -54,6 +55,7 @@ module.exports = {
         './server/**/*.ts',
         './types/node/**/*.ts',
         './src/*.test-d.ts',
+        './.devcontainer/**/*.{ts,tsx}',
       ],
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       env: { node: true },

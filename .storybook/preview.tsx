@@ -1,6 +1,7 @@
 import * as React from 'react';
 import createCache from '@emotion/cache';
 import type { Decorator, Preview } from '@storybook/react';
+import { themes, type ThemeVars } from '@storybook/theming';
 import { initialize, mswLoader } from 'msw-storybook-addon';
 import { I18nextProvider } from 'react-i18next';
 import { ThemeProvider } from 'common/providers/ThemeProvider';
@@ -11,6 +12,9 @@ import { initializeI18N } from '../src/i18n';
 import { ColorSchemeWrapper } from './components/ColorSchemeWrapper';
 import '@mantine/core/styles.css';
 import 'index.css';
+import 'font.css';
+// import { addons } from "@storybook/addons";
+// import { UPDATE_GLOBALS, STORY_ARGS_UPDATED } from "@storybook/core-events";
 
 const i18n = initializeI18N();
 // Initialize MSW
@@ -59,6 +63,7 @@ const preview: Preview = {
   loaders: [mswLoader],
   parameters: {
     backgrounds: {
+      disable: true,
       values: [
         { name: 'Dark', value: '#333' },
         { name: 'Light', value: '#F7F9F2' },
@@ -70,6 +75,18 @@ const preview: Preview = {
         color: /(background|color)$/i,
         date: /Date$/i,
       },
+    },
+    darkMode: {
+      dark: {
+        ...themes.dark,
+        appBg: '#1b1c1d',
+        fontBase: 'Proxima Nova',
+      } satisfies ThemeVars,
+      light: {
+        ...themes.normal,
+        // appBg: 'red',
+        fontBase: 'Proxima Nova',
+      } satisfies ThemeVars,
     },
   },
 };

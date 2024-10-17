@@ -11,13 +11,19 @@ type Foo = Simplify<typeof AppTags>;
 // TODO: we need to think about how we want to spy on effectful deps
 const Component = WithRuntime(AppRuntime)(EndpointPanel);
 
-const meta = {
-  argTypes: {},
+const meta: Meta<typeof Component> = {
+  argTypes: {
+    colorTheme: {
+      control: { type: 'radio' },
+      defaultValue: 'Light',
+      options: ['Light', 'Dark'],
+    },
+  },
   component: Component,
   parameters: { layout: 'centered' },
   play: async () => Promise.resolve(),
   title: '@EndpointPanel/Main',
-} satisfies Meta<typeof Component>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;

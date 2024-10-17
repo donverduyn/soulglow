@@ -1,4 +1,37 @@
 <style type="text/css">
+  @font-face {
+    font-display: swap;
+    font-family: 'Proxima Nova';
+    font-style: normal;
+    font-weight: 700;
+    src: url('/fonts/ProximaNova-Bold.woff2') format('woff2'),
+        url('/fonts/ProximaNova-Bold.woff') format('woff');
+  }
+
+  @font-face {
+    font-display: swap;
+    font-family: 'Proxima Nova';
+    font-style: normal;
+    font-weight: 500;
+    src: url('/fonts/ProximaNova-Regular.woff2') format('woff2'),
+        url('/fonts/ProximaNova-Regular.woff') format('woff');
+  }
+
+  body.with-addons .sb-bar button[title="Vision simulator"],
+  body.with-addons .sb-bar button[title="Enable measure"],
+  body.with-addons .sb-bar button[title="Internationalization locale"],
+  body.with-addons .sb-bar button[title="Apply a grid to the preview"],
+  body.with-addons .sb-bar button[title="Apply outlines to the preview"] {
+    display: inline-flex;
+  }
+
+  body .sb-bar button[title="Vision simulator"],
+  body .sb-bar button[title="Enable measure"],
+  body .sb-bar button[title="Internationalization locale"],
+  body .sb-bar button[title="Apply a grid to the preview"],
+  body .sb-bar button[title="Apply outlines to the preview"] {
+    display: none;
+  }
   button[title='Shortcuts']::before,
   button[title='Shortcuts']::after,
   #list-item-whats-new,
@@ -30,9 +63,9 @@
   div.sb-bar + div > div:first-child > div:first-child {
     background: inherit;
   }
-  @media (min-width: 600px) {
+  /* @media (min-width: 600px) {
     body.dark .container {
       background: #1b1c1d;
     }
-  }
+  } */
 </style>
