@@ -14,7 +14,7 @@
     "lint:tsc": "tsc -p tsconfig.json",
     "lint:stylelint": "stylelint 'src/**/*.{css,tsx}'",
     "lint": "tsx -e \"import { lint } from './scripts/lint'; lint(['yarn lint:tsc', 'yarn lint:eslint','yarn lint:stylelint']);\"",
-    "lint:ci": "tsx -e \"import { lint } from './scripts/lint'; lint(['yarn lint:tsc:app', 'yarn lint:tsc:node', 'yarn lint:eslint --cache-strategy content','yarn lint:stylelint']);\"",
+    "lint:ci": "tsx -e \"import { lint } from './scripts/lint'; lint(['yarn lint:tsc', 'yarn lint:eslint --cache-strategy content','yarn lint:stylelint']);\"",
     "lint:fix": "yarn lint:eslint --fix && yarn lint:stylelint --fix",
     "preview": "yarn build && tsx -e \"import { viewStatic } from './scripts/browser'; viewStatic('./dist');\"",
     "test": "vitest --ui --no-isolate --pool=threads --silent",
