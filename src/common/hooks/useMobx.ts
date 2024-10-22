@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 import { identity } from 'effect';
 import { Call, O, S } from 'hotscript';
 import {
@@ -26,23 +26,40 @@ import moize from 'moize';
 // );
 
 // console.log(isObservable(ref), isObservableProp(ref, 'target'));
+export type LazyGetFn<TType> = <
+  P extends Call<O.AllPaths, TType>,
+  V extends Call<O.Get<P>, TType>,
+  R,
+>(
+  path: P,
+  map?: (value: V) => R
+) => () => R;
+
+export type SetFn<TType> = <
+  P extends Call<O.AllPaths, TType>,
+  S extends Call<O.Get<P>, TType>,
+  V,
+>(
+  path: P,
+  map?: (value: V, state: S) => S
+) => (value: V) => void;
+
+// split a dot separated path into its constituents,
+// and type it as a tuple of literals.
+const getKeys = <TPath extends string>(path: TPath) => [
+  ...(path.split('.') as Call<S.Split<'.'>, typeof path> & string[]),
+];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const useMobx = <T extends Record<string, any>>(
   initialize: () => T,
   annotations?: AnnotationsMap<T, never>
 ) =>
-  useState(() => {
+  React.useState(() => {
     const obs = observable(initialize(), annotations, {
       autoBind: true,
       proxy: false,
     });
-
-    // split a dot separated path into its constituents,
-    // and type it as a tuple of literals.
-    const getKeys = <TPath extends string>(path: TPath) => [
-      ...(path.split('.') as Call<S.Split<'.'>, typeof path> & string[]),
-    ];
 
     // given an observable object and array of path constituents,
     // get the parent of the target.
@@ -64,15 +81,6 @@ export const useMobx = <T extends Record<string, any>>(
       return target as TParent;
     };
 
-    type LazyGetFn<TType> = <
-      P extends Call<O.AllPaths, TType>,
-      V extends Call<O.Get<P>, TType>,
-      R,
-    >(
-      path: P,
-      map?: (value: V) => R
-    ) => () => R;
-
     const lazyGet: LazyGetFn<T> = moize(
       (path, map = identity) => {
         // by using map from the closure, V8 will only preparse it on re-renders,
@@ -87,15 +95,6 @@ export const useMobx = <T extends Record<string, any>>(
       },
       { isSerialized: true }
     );
-
-    type SetFn<TType> = <
-      P extends Call<O.AllPaths, TType>,
-      S extends Call<O.Get<P>, TType>,
-      V,
-    >(
-      path: P,
-      map?: (value: V, state: S) => S
-    ) => (value: V) => void;
 
     const set: SetFn<T> = moize(
       // we currently don't typecheck without the map function

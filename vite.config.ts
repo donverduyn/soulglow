@@ -7,9 +7,9 @@ import inspect from 'vite-plugin-inspect';
 import { VitePWA } from 'vite-plugin-pwa';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
+import { noCacheHeaders } from './.vite/config/header';
 import { browser } from './.vite/plugins/vite-plugin-browser';
 import { dynamicProxyPlugin } from './.vite/plugins/vite-plugin-dynamic-proxy';
-import { noCacheHeaders } from './.vite/utils/cache';
 
 // https://vitejs.dev/config/
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -110,9 +110,7 @@ export default defineConfig(({ mode }) => ({
           : false,
       terminal: mode === 'development',
       typescript:
-        process.env.CI === 'true'
-          ? false
-          : { tsconfigPath: './tsconfig.app.json' },
+        process.env.CI === 'true' ? false : { tsconfigPath: './tsconfig.json' },
     }),
     visualizer({
       brotliSize: true,
@@ -143,9 +141,9 @@ export default defineConfig(({ mode }) => ({
     hmr: { overlay: true },
     host: '127.0.0.1',
     port: 4173,
-    watch: {
-      ignored: ['!**/node_modules/your-package-name/**'],
-    },
+    // watch: {
+    //   ignored: ['!**/node_modules/your-package-name/**'],
+    // },
   },
   test: {
     coverage: { provider: 'v8', reporter: 'html' },
@@ -161,7 +159,7 @@ export default defineConfig(({ mode }) => ({
       enabled: false, // this is already handled by the linter
       // enabled: process.env.CI === 'true',
       include: ['./tests/**/*.{ts,tsx}'],
-      tsconfig: './tsconfig.node.json',
+      tsconfig: './tsconfig.test.json',
     },
     // reporters: ['html'],
     // logHeapUsage: true,

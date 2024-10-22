@@ -1,0 +1,26 @@
+{/* src/GettingStarted.mdx */}
+import { Meta } from '@storybook/addon-docs';
+
+<Meta title='Get Started' />
+
+# Get Started
+
+Welcome on board! This guide will help you get started and connect you to all the essential resources you need. This repository is follows common conventions and patterns, with a few twists and tweaks to make it more enjoyable to work with.
+
+### Installation
+
+Please follow the installation instructions in the [README](/README.md). If you have any questions, feel free to reach out. The installation should be OOBE, as long as you use vscode. We haven't tested the setup on other IDEs, but if you like to contribute, we are happy to help you get started.
+
+## Overview
+
+Every module adheres to the following structure:
+
+- **components** - any child component strictly related to the module.
+  They should only import from /common/components and /common/utils. We try to be strict about this and generalize promptly if we see a pattern.
+- **hooks** - any custom hooks that are used in the module. Note that we usually use a hook as a view model in the same component file. For larger components, this might be a separate file, but prefer abstracting away the details, not colocate them.
+- **main.tsx** - the main component of the module. This should be a functional component that uses hooks and components from the components folder. It should import from the module itself and not from /common, but weigh the cost of indirection. We want to embody the semantic power of jsx, to keep everything transparent.
+- **context.ts** - any context that is used in the module. Note that we use Effect-TS, because it offers a more powerful abstraction on top of React context, The exports of this file are part of the module its public api, to allow for parent-child DI.
+- **tags.ts** - any injection tokens that are used across the module. Note that we use the type information of these tags to reconstruct the requirements for a runtime under test. Exports from this file are also imported by other modules.
+
+### Storybook and Testing
+

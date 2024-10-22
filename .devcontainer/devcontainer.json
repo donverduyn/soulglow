@@ -103,7 +103,8 @@
 				"YoavBls.pretty-ts-errors",
 				"Gruntfuggly.todo-tree",
 				"vunguyentuan.vscode-css-variables",
-				"vitest.explorer"
+				"vitest.explorer",
+				"unifiedjs.vscode-mdx"
 			]
 		}
 	}

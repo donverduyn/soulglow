@@ -1,5 +1,5 @@
 // import * as React from 'react';
-import React from 'react';
+import * as React from 'react';
 import { act, cleanup, render } from '@testing-library/react';
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';

@@ -21,7 +21,7 @@ interface Props extends OuterProps, InnerProps {}
 interface InnerProps extends Publishable {
   readonly store: Context.Tag.Service<typeof AppTags.EndpointStore>;
 }
-interface OuterProps {}
+export interface OuterProps {}
 
 export interface Translations {
   addEndpointLabel: string;

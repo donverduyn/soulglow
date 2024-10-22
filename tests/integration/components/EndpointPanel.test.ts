@@ -38,7 +38,7 @@ describe('endpointPanel', () => {
 
     await waitFor(() => {
       const listItems = screen.getAllByRole('listitem');
-      expect(listItems).toHaveLength(2);
+      expect(listItems).toHaveLength(4);
     });
   });
 });

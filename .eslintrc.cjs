@@ -12,8 +12,6 @@ module.exports = {
     'dev-dist',
     '!**/.*',
     '!**/.*/**/.*',
-    // TODO: find out why CI is failing with this (not happening locally)
-    'public/mockServiceWorker.js',
   ],
   overrides: [
     {
@@ -24,13 +22,26 @@ module.exports = {
     },
     // browser environment
     {
+      extends: ['plugin:react/recommended', 'plugin:mdx/recommended'],
+      files: ['*.mdx'],
+      plugins: ['react'],
+      settings: {
+        'import/extensions': ['.mdx'],
+        'import/parsers': {
+          'eslint-mdx': ['.mdx'],
+        },
+        'mdx/code-blocks': true,
+        // 'mdx/language-mapper': {},
+      },
+    },
+    {
       excludedFiles: ['./src/**/*.test.{ts,tsx}', './src/**/*.test-d.ts'],
       files: ['./src/**/*.{ts,tsx}', './.*/**/*.tsx', './types/app/**/*.ts'],
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       env: { browser: true },
       parserOptions: {
         ecmaVersion: 'latest',
-        project: ['./tsconfig.app.json'],
+        projectService: true,
         sourceType: 'module',
         tsconfigRootDir: __dirname,
       },
@@ -43,26 +54,53 @@ module.exports = {
         },
       },
     },
-
+    // test environment
+    {
+      files: [
+        './tests/**/*.{ts,tsx}',
+        './src/**/*.test.{ts,tsx}',
+        './src/*.test-d.ts',
+      ],
+      // eslint-disable-next-line sort-keys-fix/sort-keys-fix
+      env: { node: true },
+      parserOptions: {
+        ecmaVersion: 'latest',
+        projectService: true,
+        sourceType: 'module',
+        tsconfigRootDir: __dirname,
+      },
+      settings: {
+        'import/resolver': {
+          node: true,
+          typescript: {
+            alwaysTryTypes: true,
+            project: ['./tsconfig.test.json'],
+          },
+        },
+      },
+      // eslint-disable-next-line sort-keys-fix/sort-keys-fix
+      extends: ['plugin:vitest/legacy-all'],
+      rules: {
+        'vitest/max-nested-describe': ['error', { max: 3 }],
+        'vitest/no-hooks': 'off',
+      },
+    },
     // node environment
     {
       files: [
         './*.ts',
         './.*/**/*.ts',
-        './src/**/*.test.ts?(x)',
-        './tests/**/*.ts?(x)',
         './scripts/**/*.ts',
         './server/**/*.ts',
         './types/node/**/*.ts',
-        './src/*.test-d.ts',
         './.devcontainer/**/*.{ts,tsx}',
       ],
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       env: { node: true },
       parserOptions: {
         ecmaVersion: 'latest',
-        // include tsconfig.json for importing types from server
-        project: ['./tsconfig.node.json'],
+        // include tsconfig.app.json for importing types from server
+        projectService: true,
         sourceType: 'module',
         tsconfigRootDir: __dirname,
       },
@@ -134,16 +172,6 @@ module.exports = {
         'prefer-spread': 'off',
         'typescript-sort-keys/interface': 'warn',
         'typescript-sort-keys/string-enum': 'warn',
-      },
-    },
-    {
-      // all test files
-      files: ['./tests/**/*.{ts,tsx}', './src/**/*.test.{ts,tsx}'],
-      // eslint-disable-next-line sort-keys-fix/sort-keys-fix
-      extends: ['plugin:vitest/legacy-all'],
-      rules: {
-        'vitest/max-nested-describe': ['error', { max: 3 }],
-        'vitest/no-hooks': 'off',
       },
     },
     {

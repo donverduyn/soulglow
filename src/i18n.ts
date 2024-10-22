@@ -8,8 +8,10 @@ import type { default as DataTypeNL } from './../public/locales/nl/translation.j
 
 type Locales = [typeof DataTypeEN, typeof DataTypeNL];
 
+type Extends<T, U> = U extends T ? T : never;
+
 interface ContainsFn<T> extends Fn {
-  return: IsNever<Exclude<keyof T, keyof this['arg0']>>;
+  return: IsNever<Extends<T, keyof this['arg0']>>;
 }
 
 export type TranslationAvailable<T> = Pipe<

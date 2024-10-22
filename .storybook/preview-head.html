@@ -2,6 +2,12 @@
 <link rel="preload" href="/fonts/ProximaNova-Semibold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
 
 <style>
+  body.dark {
+    background: #1B1C1D;
+  }
+  body.light {
+    background: #fff;
+  }
   .sb-preparing-story,
   .sb-preparing-docs {
     background: inherit;
@@ -22,6 +28,15 @@
   }
   .sb-errordisplay h1::before {
     background: #c45353;
+  }
+  .sb-previewBlock, .sb-argstableBlock {
+    display: none;
+  }
+  .docs-story > div:first-child > div:first-child {
+    width: stretch;
+  }
+  html[data-mantine-color-scheme="dark"] .docblock-argstable-body .rejt-value-node:hover > .rejt-value {
+    background: #2a2c2e;
   }
 </style>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />

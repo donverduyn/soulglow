@@ -35,8 +35,9 @@ COPY ./codemods /tmp/codemods
 RUN git clone https://github.com/mantinedev/mantine /tmp/mantine \
     && cd /tmp/mantine \
     && yarn install \
-    && yarn dlx jscodeshift -t /tmp/codemods/previewHead.ts ./.storybook/main.ts --parser=ts \
-    && cat ./.storybook/main.ts \
+    && yarn dlx jscodeshift -t /tmp/codemods/preview-head.ts ./.storybook/main.ts --parser=ts \
+    && yarn dlx jscodeshift -t /tmp/codemods/parameters-docs.ts ./.storybook/preview.tsx --parser=tsx \
+    && cat ./.storybook/preview.tsx \
     && ./node_modules/.bin/storybook build \
     && mv ./storybook-static /tmp/mantine-storybook
 
@@ -129,7 +130,7 @@ COPY --from=builder /tmp/mantine-storybook /tmp/mantine-storybook
 RUN echo '{}' > /tmp/mantine-storybook/metadata.json \
   && echo '{}' > /tmp/mantine-storybook/stories.json
 
-RUN yarn dlx playwright install --with-deps
+# RUN yarn dlx playwright install --with-deps
 
 # Add Node binaries to PATH
 ENV PATH=./node_modules/.bin:$PATH

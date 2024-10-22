@@ -1,62 +1,40 @@
 {
+  "extends": "./tsconfig.options.json",
   "compilerOptions": {
     "target": "ES2020",
-    // "useDefineForClassFields": true,
+    "moduleResolution": "bundler",
     "lib": [
       "ESNext",
       "DOM",
       "DOM.Iterable"
     ],
     "module": "ESNext",
-    "skipLibCheck": true,
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "allowSyntheticDefaultImports": true,
-    "exactOptionalPropertyTypes": true,
-    "noErrorTruncation": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "@emotion/react",
-    "plugins": [
-      {
-        "name": "@styled/typescript-styled-plugin",
-        "lint": {
-          "validProperties": [
-            "label"
-          ]
-        }
-      }
-    ],
-    /* Linting */
-    "strict": true,
-    "baseUrl": ".",
-    "paths": {
-      "*": [
-        "src/*",
-        "./types/*"
-      ],
-      "server/*": [
-        "./server/*"
-      ],
-    },
+    "composite": true,
+    "outDir": "dist/app",
+    "emitDeclarationOnly": true,
   },
   "include": [
     "./src/**/*",
     // we currently have no separate tsconfig for storybook etc.
     "./.*/**/*.tsx",
     // so we can borrow the server types
-    "./server/**/*",
+    // "./server/**/*",
     "./types/app/**/*",
     "./public/**/*",
+    "./public/**/*.json",
   ],
   "exclude": [
     "**/node_modules",
-    "./server/**/*",
-    "./src/**/*.test.ts",
-    "./src/**/*.test.tsx",
+    "dist/**/*",
+    // "./server/**/*",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/.*/**/*.test.ts",
+    "**/.*/**/*.test.tsx",
   ],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
 }

@@ -72,5 +72,4 @@
     "node_modules/@mantine/core/styles.css"
   ],
   "typescript.preferences.importModuleSpecifierEnding": "index",
-  
 }

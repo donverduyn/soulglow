@@ -1,7 +1,16 @@
 import * as React from 'react';
 import createCache from '@emotion/cache';
+import {
+  Title,
+  Subtitle,
+  Description,
+  Primary,
+  Controls,
+  Stories,
+  ColorPalette,
+} from '@storybook/blocks';
 import type { Decorator, Preview } from '@storybook/react';
-import { themes, type ThemeVars } from '@storybook/theming';
+import { themes, type ThemeVars, ensure } from '@storybook/theming';
 import { initialize, mswLoader } from 'msw-storybook-addon';
 import { I18nextProvider } from 'react-i18next';
 import { ThemeProvider } from 'common/providers/ThemeProvider';
@@ -10,15 +19,20 @@ import { getEmotionCacheConfig } from 'config/emotion';
 import { theme } from 'config/theme';
 import { initializeI18N } from '../src/i18n';
 import { ColorSchemeWrapper } from './components/ColorSchemeWrapper';
+import { DocsContainer } from './components/DocsContainer';
 import '@mantine/core/styles.css';
 import 'index.css';
 import 'font.css';
+
 // import { addons } from "@storybook/addons";
 // import { UPDATE_GLOBALS, STORY_ARGS_UPDATED } from "@storybook/core-events";
 
 const i18n = initializeI18N();
-// Initialize MSW
-initialize({ quiet: true });
+if (import.meta.env.DEV) {
+  // initialize MSW only in development
+  initialize({ quiet: true });
+}
+
 const emotionCache = createCache(getEmotionCacheConfig(prefix));
 
 const decorators: Decorator[] = [
@@ -57,18 +71,17 @@ const preview: Preview = {
       },
     },
   },
-  // initialGlobals: {
-  //   backgrounds: {},
-  // },
-  loaders: [mswLoader],
+  initialGlobals: {
+    backgrounds: { value: 'light' },
+  },
+  loaders: import.meta.env.DEV ? [mswLoader] : [],
   parameters: {
     backgrounds: {
-      disable: true,
-      values: [
-        { name: 'Dark', value: '#333' },
-        { name: 'Light', value: '#F7F9F2' },
-        { name: 'Hotpink', value: 'hotpink' },
-      ],
+      options: {
+        dark: { name: 'Dark', value: '#333' },
+        hotpink: { name: 'Hotpink', value: 'hotpink' },
+        light: { name: 'Light', value: '#F7F9F2' },
+      },
     },
     controls: {
       matchers: {
@@ -80,6 +93,7 @@ const preview: Preview = {
       dark: {
         ...themes.dark,
         appBg: '#1b1c1d',
+
         fontBase: 'Proxima Nova',
       } satisfies ThemeVars,
       light: {
@@ -87,6 +101,41 @@ const preview: Preview = {
         // appBg: 'red',
         fontBase: 'Proxima Nova',
       } satisfies ThemeVars,
+    },
+    docs: {
+      // source: {
+      //   dark: false,
+      // },
+      canvas: {
+        sourceState: 'shown',
+      },
+
+      container: DocsContainer,
+      page: function Page() {
+        return (
+          <>
+            <Title />
+            <Subtitle />
+            <Description />
+            <Primary />
+            <Controls />
+            <ColorPalette />
+            <Stories />
+          </>
+        );
+      },
+      source: { dark: false, state: 'open' },
+      theme: Object.assign(
+        ensure({ ...themes.dark, fontBase: 'Proxima Nova' }),
+        {
+          typography: { fonts: { weight: { regular: 600 } } },
+        }
+      ),
+      toc: {
+        disable: false,
+        headingSelector: 'h2, h3',
+        // ignoreSelector: '.docs-story h2, .docs-story h3',
+      },
     },
   },
 };

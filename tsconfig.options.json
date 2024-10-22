@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "noErrorTruncation": true,
+    "allowImportingTsExtensions": true,
+    "allowSyntheticDefaultImports": true,
+    "exactOptionalPropertyTypes": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "@emotion/react",
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "*": ["./src/*", "./types/*"],
+      "server/*": ["./server/*"],
+      "tests/*": ["./tests/*"],
+      "scripts/*": ["./scripts/*"],
+      // "mobx": ["node_modules/mobx/"]
+    },
+    "plugins": [
+      {
+        "name": "@styled/typescript-styled-plugin",
+        "lint": {
+          "validProperties": [
+            "label"
+          ]
+        }
+      }
+    ],
+  },
+}

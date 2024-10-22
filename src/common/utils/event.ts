@@ -6,7 +6,7 @@ interface TimeRelatable {
   timestamp: number;
 }
 
-interface EventMetadata extends Locatable, Partial<TimeRelatable> {}
+export interface EventMetadata extends Locatable, Partial<TimeRelatable> {}
 
 export interface Publishable<R = unknown> {
   readonly publish: (value: EventType<unknown>) => R;

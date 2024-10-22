@@ -4,7 +4,7 @@ import {
   httpBatchLink,
 } from '@trpc/client';
 import { memoize } from 'common/utils/memoize';
-import { AppRouter } from 'server/server';
+import type { AppRouter } from 'server/server';
 
 export const useTRPC = memoize(({ url }: HTTPBatchLinkOptions) =>
   createTRPCProxyClient<AppRouter>({

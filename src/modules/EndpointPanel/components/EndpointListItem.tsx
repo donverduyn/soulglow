@@ -19,10 +19,15 @@ import type { Endpoint } from 'models/endpoint/model';
 import { AppRuntime } from 'modules/App/context';
 import * as AppTags from 'modules/App/tags';
 
-interface Props extends Publishable {
+export interface Props extends Publishable {
   readonly endpoint: Endpoint;
 }
 
+/**
+ * This component is responsible for rendering a single endpoint item in the list.
+ * It normalizes the behavior of the input across OSes and browsers.
+ * It also provides a way to select, update, and remove the endpoint.
+ */
 export const EndpointListItem = observer(function EndpointListItem(
   props: Props
 ) {

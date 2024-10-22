@@ -8,9 +8,31 @@
 #root {
   display: contents;
 }
+/* TODO: find a way to keep the storybook classes in preview-head.htmls */
+body.dark:has(> div#storybook-docs[hidden="true"]) {
+  background: var(--mantine-color-body);
+}
+
+body.light:has(> div#storybook-docs[hidden="true"]) {
+  background: var(--mantine-color-body);;
+}
+
+html[data-mantine-color-scheme="dark"] .docs-story,
+html[data-mantine-color-scheme="dark"] body {
+  --mantine-color-body: #242424;
+}
+
+html[data-mantine-color-scheme="light"] .docs-story,
+html[data-mantine-color-scheme="light"] body {
+  --mantine-color-body: #fff;
+}
+
+.docs-story {
+  background-color: var(--mantine-color-body);
+}
 
 body {
-  font-weight: 700;
+  font-weight: 600;
   min-height: 100vh;
   min-width: 320px;
   overscroll-behavior-y: none;
