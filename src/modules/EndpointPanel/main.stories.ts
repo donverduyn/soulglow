@@ -10,8 +10,7 @@ type Foo = Simplify<typeof AppTags>;
 
 // TODO: import tags to type test implementation against them
 // TODO: we need to think about how we want to spy on effectful deps
-const 
-Component = WithRuntime(AppRuntime)(EndpointPanel);
+const Component = WithRuntime(AppRuntime)(EndpointPanel);
 
 const meta: Meta<typeof Component> = {
   argTypes: {
