@@ -194,10 +194,5 @@
   ],
   "engines": {
     "node": ">=18.12.0"
-  },
-  "msw": {
-    "workerDirectory": [
-      "public"
-    ]
   }
 }
