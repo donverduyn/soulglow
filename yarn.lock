@@ -1361,10 +1361,10 @@
   resolved "https://registry.yarnpkg.com/@effect-rx/rx/-/rx-0.34.2.tgz#c98b2e6c035dd6dc601fcff0e808b1e7ab779f9a"
   integrity sha512-S5c3y58CN8f8QUcVOXsBBAn6guQ4lHoGZZ/mJjvCbgmRYJKgKnTW9LOg6mh1HgjtEafBAfL7i7k9yKOqKEnGpQ==
 
-"@effect/platform@^0.68.6":
-  version "0.68.6"
-  resolved "https://registry.yarnpkg.com/@effect/platform/-/platform-0.68.6.tgz#9da2298b7334a8c7bad057a31056b8168a6ae20c"
-  integrity sha512-0dLbgfZGxMQqxGX7hFCkpqI9N0vFXf0e5bLdplvjpEskB/VrFQXkz0j+aopztHwXJkG/4pp1HHLNLK3ZcU5FXQ==
+"@effect/platform@^0.69.5":
+  version "0.69.5"
+  resolved "https://registry.yarnpkg.com/@effect/platform/-/platform-0.69.5.tgz#34367262e37ecfc5331dd914b03ea92411d3f678"
+  integrity sha512-1CLhrXbZPyqRdtbZQc4dOzTXLnJEwwhF9BBEQoMK5aGBpp7sCtzOyF/MPbFNTVaK+7jO338YsOiY6sMX2ao3Mg==
   dependencies:
     find-my-way-ts "^0.1.5"
     multipasta "^0.2.5"
@@ -3158,17 +3158,17 @@
   dependencies:
     "@swc/counter" "^0.1.3"
 
-"@tabler/icons-react@3.18":
-  version "3.18.0"
-  resolved "https://registry.yarnpkg.com/@tabler/icons-react/-/icons-react-3.18.0.tgz#fdc2423900321f4864ade19112abd2dd4b825755"
-  integrity sha512-2gGMWJe67T7q6Sgb+4r/OsAjbq6hH30D6D2l02kOnl9kAauSsp/u6Gx1zteQ/GiwqRYSTEIhYMOhOV4LLa8rAw==
+"@tabler/icons-react@3.20.0":
+  version "3.20.0"
+  resolved "https://registry.yarnpkg.com/@tabler/icons-react/-/icons-react-3.20.0.tgz#302b918056eda15055e3ef150c783d6741793f50"
+  integrity sha512-a47oaL48bb5Cx/WUVfg/NZrsWwFExrcDQO8thUZ7S6h/OQYFu7sm4E5pZsmUtGCjikB3lRzjtmMD+C4s7mr9yw==
   dependencies:
-    "@tabler/icons" "3.18.0"
+    "@tabler/icons" "3.20.0"
 
-"@tabler/icons@3.18.0":
-  version "3.18.0"
-  resolved "https://registry.yarnpkg.com/@tabler/icons/-/icons-3.18.0.tgz#9531d3ec7541facd584a22fb695bd65b896484a0"
-  integrity sha512-zLuwTs/xjQSsGh1X5Pt6qytvM8r6lFpWo5aAiDgnX2ekrOshNs4d87PcJEkP3555gaKy0ZftgckxPzedrN00fQ==
+"@tabler/icons@3.20.0":
+  version "3.20.0"
+  resolved "https://registry.yarnpkg.com/@tabler/icons/-/icons-3.20.0.tgz#51149c8c7f006ea55f86f3ad3613b20965069444"
+  integrity sha512-nXSeUzsCOxX/Of+kdUVQfxL9bG+ck8XCWNf9dGSpE+nhVexRwk/4HiDQDxFDysfT7vfgSut6GXnrZsU5M5dSlA==
 
 "@testing-library/dom@10.4.0", "@testing-library/dom@^10.2.0":
   version "10.4.0"
@@ -3600,7 +3600,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@^22.0.0", "@types/node@^22.5.5", "@types/node@^22.7.7":
+"@types/node@*", "@types/node@^22.0.0", "@types/node@^22.5.5":
   version "22.7.8"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-22.7.8.tgz#a1dbf0dc5f71bdd2642fc89caef65d58747ce825"
   integrity sha512-a922jJy31vqR5sk+kAdIENJjHblqcZ4RmERviFsER4WJcEONqxKcjNOlk0q7OUfrF5sddT+vng070cdfMlrPLg==
@@ -3611,6 +3611,13 @@
   version "20.16.14"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.16.14.tgz#67eeca19cd821f516ee7da2f2e72d319f47e6a4d"
   integrity sha512-vtgGzjxLF7QT88qRHtXMzCWpAAmwonE7fwgVjFtXosUva2oSpnIEc3gNO9P7uIfOxKnii2f79/xtOnfreYtDaA==
+  dependencies:
+    undici-types "~6.19.2"
+
+"@types/node@^22.7.9":
+  version "22.7.9"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.7.9.tgz#2bf2797b5e84702d8262ea2cf843c3c3c880d0e9"
+  integrity sha512-jrTfRC7FM6nChvU7X2KqcrgquofrWLFDeYC1hKfwNWomVvrn7JIksqf344WN2X/y8xrgqBd2dJATZV4GbatBfg==
   dependencies:
     undici-types "~6.19.2"
 
@@ -3641,10 +3648,18 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@^16.8.0 || ^17.0.0 || ^18.0.0", "@types/react@^18.3.11":
+"@types/react@*", "@types/react@^16.8.0 || ^17.0.0 || ^18.0.0":
   version "18.3.11"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.3.11.tgz#9d530601ff843ee0d7030d4227ea4360236bd537"
   integrity sha512-r6QZ069rFTjrEYgFdOck1gK7FLVsgJE7tTz0pQBczlBNUhBNk0MQH4UbnFSwjpQLMkLzgqvBBa+qGpLje16eTQ==
+  dependencies:
+    "@types/prop-types" "*"
+    csstype "^3.0.2"
+
+"@types/react@^18.3.12":
+  version "18.3.12"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.3.12.tgz#99419f182ccd69151813b7ee24b792fe08774f60"
+  integrity sha512-D2wOSq/d6Agt28q7rSI3jhU7G6aiuzljDGZ2hTZHIkrTLUI+AF3WMeKkEZ9nN2fkBAlcktT6vcZjDFiIhMYEQw==
   dependencies:
     "@types/prop-types" "*"
     csstype "^3.0.2"
@@ -5832,10 +5847,10 @@ ee-first@1.1.1:
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
 
-effect@^3.9.2:
-  version "3.10.0"
-  resolved "https://registry.yarnpkg.com/effect/-/effect-3.10.0.tgz#306e725260fd4f3cf2e31134f4696ce0d4aa8328"
-  integrity sha512-J9rsJBXNHZxklJTbHriY8D9wIHhmvXDamExW4pPZ2kPNZ+XRfstXeHBqpXAIK+B42ASVbuDswAXyup5WHWK6jg==
+effect@^3.10.1:
+  version "3.10.1"
+  resolved "https://registry.yarnpkg.com/effect/-/effect-3.10.1.tgz#525a94cce03ab6adbf59dc8b85353bdd518e9402"
+  integrity sha512-Ny0I3WvGykUnlgmQVkNVbkXHE/pPTWVwmnYfpVZYyLlpe53LVyWViY9+a/7iS/Rqml0xUwJoXx5HK6ksK09Y2Q==
   dependencies:
     fast-check "^3.21.0"
 
@@ -13845,10 +13860,21 @@ vite-tsconfig-paths@^5.0.1:
     globrex "^0.1.2"
     tsconfck "^3.0.3"
 
-vite@^5.0.0, vite@^5.4.9:
+vite@^5.0.0:
   version "5.4.9"
   resolved "https://registry.yarnpkg.com/vite/-/vite-5.4.9.tgz#215c80cbebfd09ccbb9ceb8c0621391c9abdc19c"
   integrity sha512-20OVpJHh0PAM0oSOELa5GaZNWeDjcAvQjGXy2Uyr+Tp+/D2/Hdz6NLgpJLsarPTA2QJ6v8mX2P1ZfbsSKvdMkg==
+  dependencies:
+    esbuild "^0.21.3"
+    postcss "^8.4.43"
+    rollup "^4.20.0"
+  optionalDependencies:
+    fsevents "~2.3.3"
+
+vite@^5.4.10:
+  version "5.4.10"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-5.4.10.tgz#d358a7bd8beda6cf0f3b7a450a8c7693a4f80c18"
+  integrity sha512-1hvaPshuPUtxeQ0hsVH3Mud0ZanOLwVTneA1EgbAM5LhaZEqyPWGRQ7BtaMvUrTDeEaC8pxtj6a6jku3x4z6SQ==
   dependencies:
     esbuild "^0.21.3"
     postcss "^8.4.43"

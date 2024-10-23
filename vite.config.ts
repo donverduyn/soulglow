@@ -135,7 +135,14 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-  resolve: { alias: {}, extensions: ['.js', '.ts', '.tsx'] },
+  resolve: {
+    alias: {
+      // TODO: Remove this alias once the issue is fixed
+      // https://github.com/tabler/tabler-icons/issues/1233
+      '@tabler/icons-react': '@tabler/icons-react/dist/esm/icons/index.mjs',
+    },
+    extensions: ['.js', '.ts', '.tsx'],
+  },
   server: {
     headers: noCacheHeaders,
     hmr: { overlay: true },
