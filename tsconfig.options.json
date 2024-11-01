@@ -16,7 +16,7 @@
       "server/*": ["./server/*"],
       "tests/*": ["./tests/*"],
       "scripts/*": ["./scripts/*"],
-      // "mobx": ["node_modules/mobx/"]
+      ".storybook/*": ["./.storybook/*"],
     },
     "plugins": [
       {

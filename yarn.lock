@@ -2366,7 +2366,7 @@
   resolved "https://registry.yarnpkg.com/@mantine/store/-/store-7.13.3.tgz#802a9ded1e0445cde7ea78bab76e61c83ee393e8"
   integrity sha512-95nAgH6APhak1OwP2W3ogdWBiWkIDhDSbQEm2G9LTJLIJxzWSm1mLe5uDWluVEPZW2XFx137McuJb58i1A+QhQ==
 
-"@mdx-js/react@^3.0.0":
+"@mdx-js/react@^3.0.0", "@mdx-js/react@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@mdx-js/react/-/react-3.1.0.tgz#c4522e335b3897b9a845db1dbdd2f966ae8fb0ed"
   integrity sha512-QjHtSaoameoalGnKDT3FoIl4+9RwyTmo9ZJGBdLOks/YOiWHoRDI3PUwEzOE7kEmGcV3AFcp9K6dYu9rEuKLAQ==
@@ -2740,7 +2740,7 @@
     lodash "^4.17.21"
     ts-dedent "^2.0.0"
 
-"@storybook/addon-docs@8.3.6":
+"@storybook/addon-docs@8.3.6", "@storybook/addon-docs@^8.3.6":
   version "8.3.6"
   resolved "https://registry.yarnpkg.com/@storybook/addon-docs/-/addon-docs-8.3.6.tgz#b03ad160475b7920ef03833bd2674ea62f872d23"
   integrity sha512-31Rk1TOhDIzGM2wNCUIB1xKuWtArW0D2Puua9warEXlQ3FtvwmxnPrwbIzw6ufYZDWPwl9phDYTcRh8WqZIoGg==

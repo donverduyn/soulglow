@@ -1,16 +1,31 @@
 import type { PropsOf } from '@emotion/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent, expect } from '@storybook/test';
-import { WithRuntime } from 'common/components/hoc/withRuntime';
+import { RuntimeDecorator } from '.storybook/decorators/RuntimeDecorator';
+import { ThemeDecorator } from '.storybook/decorators/ThemeDecorator';
 import { createEndpoint } from 'models/endpoint/model';
 import { AppRuntime } from 'modules/App/context';
 import { EndpointListItem } from './EndpointListItem';
 
-const Component = WithRuntime(AppRuntime)(EndpointListItem);
-
 const meta: Meta<typeof EndpointListItem> = {
   component: EndpointListItem,
+  decorators: [RuntimeDecorator(AppRuntime)],
   parameters: {
+    docs: {
+      // page: function Page() {
+      //   return (
+      //     <>
+      //       <Title />
+      //       <Subtitle />
+      //       <Description />
+      //       <Primary />
+      //       <Controls />
+      //       <ColorPalette />
+      //       <Stories />
+      //     </>
+      //   );
+      // },
+    },
     layout: 'centered',
   },
   tags: ['autodocs'],
@@ -20,44 +35,36 @@ const meta: Meta<typeof EndpointListItem> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const Template = (args: PropsOf<typeof Component>) => <Component {...args} />;
+const Template = (args: PropsOf<typeof EndpointListItem>) => (
+  <EndpointListItem {...args} />
+);
 
-export const Default: Story = {
+export const Dark: Story = {
   args: { endpoint: createEndpoint() },
+  decorators: [ThemeDecorator({ forceColorScheme: 'dark' })],
+  globals: { backgrounds: { value: 'dark' } },
+  parameters: { docs: { canvas: { sourceState: 'hidden' } } },
   render: Template,
 };
 
-export const Inactive: Story = {
-  args: {
-    endpoint: createEndpoint(),
-  },
-  globals: {
-    backgrounds: { value: 'light' },
-  },
+export const Light: Story = {
+  args: { endpoint: createEndpoint() },
+  decorators: [ThemeDecorator({ forceColorScheme: 'light' })],
+  globals: { backgrounds: { value: 'light' } },
+  // TODO: set this on the stories docblock level
+  parameters: { docs: { canvas: { sourceState: 'hidden' } } },
   render: Template,
 };
 
-export const ErrorState: Story = {
-  args: {
-    endpoint: createEndpoint(),
-  },
-  globals: {
-    backgrounds: { value: 'hotpink' },
-  },
-  // parameters: {
-  //   backgrounds: {
-  //     disable: true,
-  //     default: 'twitter',
-  //     values: [
-  //       { name: 'twitter', value: '#00aced' },
-  //       { name: 'facebook', value: '#3b5998' },
-  //     ],
-  //   },
-  // },
+export const HotPink: Story = {
+  args: { endpoint: createEndpoint() },
+  decorators: [ThemeDecorator({ forceColorScheme: 'dark' })],
+  globals: { backgrounds: { value: 'hotpink' } },
+  parameters: { docs: { canvas: { sourceState: 'hidden' } } },
   render: Template,
 };
 
-Default.play = async ({ canvasElement }) => {
+Light.play = async ({ canvasElement }) => {
   const canvas = within(canvasElement);
   const button = canvas.getByText('Add Endpoint');
   await userEvent.click(button);

@@ -1,5 +1,4 @@
 import * as React from 'react';
-import createCache from '@emotion/cache';
 import {
   Title,
   Subtitle,
@@ -7,53 +6,23 @@ import {
   Primary,
   Controls,
   Stories,
-  ColorPalette,
 } from '@storybook/blocks';
 import type { Decorator, Preview } from '@storybook/react';
 import { themes, type ThemeVars, ensure } from '@storybook/theming';
 import { initialize, mswLoader } from 'msw-storybook-addon';
-import { I18nextProvider } from 'react-i18next';
-import { ThemeProvider } from 'common/providers/ThemeProvider';
-import { prefix } from 'config/constants';
-import { getEmotionCacheConfig } from 'config/emotion';
-import { theme } from 'config/theme';
-import { initializeI18N } from '../src/i18n';
-import { ColorSchemeWrapper } from './components/ColorSchemeWrapper';
 import { DocsContainer } from './components/DocsContainer';
 import '@mantine/core/styles.css';
 import 'index.css';
 import 'font.css';
+import { ColorSchemeDecorator } from './decorators/ColorSchemeDecorator';
+import { I18nDecorator } from './decorators/I18nDecorator';
 
-// import { addons } from "@storybook/addons";
-// import { UPDATE_GLOBALS, STORY_ARGS_UPDATED } from "@storybook/core-events";
-
-const i18n = initializeI18N();
 if (import.meta.env.DEV) {
   // initialize MSW only in development
   initialize({ quiet: true });
 }
 
-const emotionCache = createCache(getEmotionCacheConfig(prefix));
-
-const decorators: Decorator[] = [
-  (render) => <ColorSchemeWrapper>{render()}</ColorSchemeWrapper>,
-  (render) => (
-    <ThemeProvider
-      emotionCache={emotionCache}
-      prefix={prefix}
-      theme={theme}
-    >
-      {render()}
-    </ThemeProvider>
-  ),
-  (render, context) => {
-    const { locale } = context.globals as { locale: string };
-    React.useEffect(() => {
-      void i18n.changeLanguage(locale);
-    }, [locale]);
-    return <I18nextProvider i18n={i18n}>{render()}</I18nextProvider>;
-  },
-];
+export const decorators: Decorator[] = [ColorSchemeDecorator, I18nDecorator];
 
 const preview: Preview = {
   decorators,
@@ -78,9 +47,9 @@ const preview: Preview = {
   parameters: {
     backgrounds: {
       options: {
-        dark: { name: 'Dark', value: '#333' },
+        dark: { name: 'Dark', value: '#2b2b2b' },
         hotpink: { name: 'Hotpink', value: 'hotpink' },
-        light: { name: 'Light', value: '#F7F9F2' },
+        light: { name: 'Light', value: '#fff' },
       },
     },
     controls: {
@@ -93,7 +62,7 @@ const preview: Preview = {
       dark: {
         ...themes.dark,
         appBg: '#1b1c1d',
-
+        // appBorderRadius: 20,
         fontBase: 'Proxima Nova',
       } satisfies ThemeVars,
       light: {
@@ -107,7 +76,7 @@ const preview: Preview = {
       //   dark: false,
       // },
       canvas: {
-        sourceState: 'shown',
+        // sourceState: 'shown',
       },
 
       container: DocsContainer,
@@ -119,21 +88,15 @@ const preview: Preview = {
             <Description />
             <Primary />
             <Controls />
-            <ColorPalette />
             <Stories />
           </>
         );
       },
       source: { dark: false, state: 'open' },
-      theme: Object.assign(
-        ensure({ ...themes.dark, fontBase: 'Proxima Nova' }),
-        {
-          typography: { fonts: { weight: { regular: 600 } } },
-        }
-      ),
+      theme: ensure({ ...themes.dark, fontBase: 'Proxima Nova' }),
       toc: {
         disable: false,
-        headingSelector: 'h2, h3',
+        // headingSelector: 'h2, h3',
         // ignoreSelector: '.docs-story h2, .docs-story h3',
       },
     },

@@ -2,7 +2,7 @@ import { join, dirname } from 'path';
 import type { StorybookConfig } from '@storybook/react-vite';
 import remarkGfm from 'remark-gfm';
 import type { UserConfig } from 'vite';
-import { noCacheHeaders } from '../.vite/config/header';
+import { noCacheHeaders } from './../.vite/config/header';
 import VitePluginRestart from './../.vite/plugins/vite-plugin-restart';
 
 function getAbsolutePath(value: string): string {

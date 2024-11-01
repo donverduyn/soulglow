@@ -1,5 +1,5 @@
 import { Plugin, ViteDevServer } from 'vite';
-import { createBrowser } from './../../scripts/browser';
+import { createBrowser } from '../../scripts/browser';
 
 export const browser = (mode: string): Plugin => {
   let launched = false;

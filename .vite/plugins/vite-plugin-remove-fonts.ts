@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { Plugin } from 'vite';
 
 function removeExtraFontsPlugin(): Plugin {
@@ -25,7 +25,7 @@ function removeExtraFontsPlugin(): Plugin {
         '.otf',
       ];
 
-      console.log('Removing extra font files outside the fonts folder...');
+      // console.log('Removing extra font files outside the fonts folder...');
 
       /**
        * Recursively traverse the directory and remove font files that are outside the fonts folder.
@@ -46,7 +46,7 @@ function removeExtraFontsPlugin(): Plugin {
             if (fontExtensions.includes(path.extname(file))) {
               // If the file is outside the 'fonts' folder, remove it
               if (!fullPath.startsWith(fontsFolder)) {
-                console.log(`Removing font file: ${fullPath}`);
+                // console.log(`Removing font file: ${fullPath}`);
                 fs.unlinkSync(fullPath);
               }
             }

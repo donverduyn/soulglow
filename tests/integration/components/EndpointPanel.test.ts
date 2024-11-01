@@ -2,15 +2,15 @@ import { composeStories, setProjectAnnotations } from '@storybook/react';
 import { fireEvent, waitFor, cleanup, screen } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { v4 as uuid } from 'uuid';
+import previewAnnotations from '.storybook/preview';
 import type { TranslationAvailable } from 'i18n';
 import type { Translations } from 'modules/EndpointPanel/main';
 import * as stories from 'modules/EndpointPanel/main.stories';
-import previewAnnotations from './../../../.storybook/preview';
 import '@testing-library/jest-dom';
 
 describe('endpointPanel', () => {
   const annotations = setProjectAnnotations([previewAnnotations]);
-  const { Primary } = composeStories(stories, annotations);
+  const { Main } = composeStories(stories, annotations);
 
   beforeAll(annotations.beforeAll);
   afterEach(cleanup);
@@ -28,7 +28,7 @@ describe('endpointPanel', () => {
     const fetchTranslation = http.get('/locales/en/translation.json', () =>
       HttpResponse.json<Translations>({ addEndpointLabel })
     );
-    await Primary.run({
+    await Main.run({
       globals: { locale: 'en' },
       parameters: { msw: { handlers: [fetchTranslation] } },
     });

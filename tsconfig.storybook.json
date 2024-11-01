@@ -4,25 +4,21 @@
     "target": "ES2022",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "outDir": "dist/test",
+    "outDir": "dist/storybook",
     "moduleResolution": "Bundler",
     "emitDeclarationOnly": true,
     "composite": true,
-    "types": [
-      "node",
-      "vitest/globals",
-    ],
+    "types": ["node", "vite/client"],
   },
   "exclude": [
     "**/node_modules/**/*",
     "dist/**/*",
   ],
   "include": [
-    "./src/**/*.test.ts",
-    "./src/**/*.test.tsx",
-    "**/.*/**/*.test.ts",
-    "**/.*/**/*.test.tsx",
-    "./tests/**/*",
+    "./src/**/*.stories.ts",
+    "./src/**/*.stories.tsx",
+    "**/.storybook/**/*",
+    "./stories/**/*",
   ],
   "references": [
     {
@@ -30,9 +26,6 @@
     },
     {
       "path": "./tsconfig.node.json"
-    },
-    {
-      "path": "./tsconfig.storybook.json"
     }
   ]
 }

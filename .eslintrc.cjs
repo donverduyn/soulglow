@@ -30,12 +30,23 @@ module.exports = {
         'import/parsers': {
           'eslint-mdx': ['.mdx'],
         },
+        'import/resolver': {
+          typescript: {
+            alwaysTryTypes: true,
+            project: ['./tsconfig.app.json'],
+          },
+        },
         'mdx/code-blocks': true,
+        react: { version: 'detect' },
         // 'mdx/language-mapper': {},
       },
     },
     {
-      excludedFiles: ['./src/**/*.test.{ts,tsx}', './src/**/*.test-d.ts'],
+      excludedFiles: [
+        './src/**/*.test.{ts,tsx}',
+        './src/**/*.test-d.ts',
+        './src/**/*.stories.{ts,tsx}',
+      ],
       files: ['./src/**/*.{ts,tsx}', './.*/**/*.tsx', './types/app/**/*.ts'],
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       env: { browser: true },
@@ -89,6 +100,7 @@ module.exports = {
     {
       files: [
         './*.ts',
+        // Maybe remove this if not needed
         './.*/**/*.ts',
         './scripts/**/*.ts',
         './server/**/*.ts',
@@ -110,6 +122,36 @@ module.exports = {
           typescript: {
             alwaysTryTypes: true,
             project: ['./tsconfig.node.json'],
+          },
+        },
+      },
+    },
+    {
+      env: { browser: true },
+      // all story files
+      extends: ['plugin:storybook/recommended'],
+      files: [
+        './src/**/*.stories.{ts,tsx}',
+        './.storybook/**/*.{ts,tsx}',
+        './stories/**/*.{ts,tsx}',
+      ],
+      parserOptions: {
+        ecmaVersion: 'latest',
+        projectService: true,
+        sourceType: 'module',
+        tsconfigRootDir: __dirname,
+      },
+      rules: {
+        'storybook/no-uninstalled-addons': [
+          'error',
+          { packageJsonLocation: __dirname + '/package.json' },
+        ],
+      },
+      settings: {
+        'import/resolver': {
+          typescript: {
+            alwaysTryTypes: true,
+            project: ['./tsconfig.storybook.json'],
           },
         },
       },
@@ -173,11 +215,6 @@ module.exports = {
         'typescript-sort-keys/interface': 'warn',
         'typescript-sort-keys/string-enum': 'warn',
       },
-    },
-    {
-      // all story files
-      extends: ['plugin:storybook/recommended'],
-      files: ['./src/**/*.stories.{ts,tsx}'],
     },
     {
       // generated TS files

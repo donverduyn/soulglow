@@ -8,6 +8,12 @@
   body.light {
     background: #fff;
   }
+  /* :root .sb-show-main {
+    background: inherit !important;
+  } */
+  .sb-show-main {
+    transition: none !important; /* !important needed to counter inline style */
+  }
   .sb-preparing-story,
   .sb-preparing-docs {
     background: inherit;
@@ -19,24 +25,61 @@
   }
   .sb-errordisplay_main {
     background: rgb(255 0 0 / 8%);
-    color: #c45353;
-    border-color: #c45353;
+    color: #cc6747;
+    border-color: #cc6747;
     min-height: fit-content;
   }
   .sb-errordisplay p, .sb-errordisplay ol, .sb-errordisplay h1 {
     font-family: inherit;
   }
   .sb-errordisplay h1::before {
-    background: #c45353;
+    background: #cc6747;
   }
   .sb-previewBlock, .sb-argstableBlock {
     display: none;
   }
   .docs-story > div:first-child > div:first-child {
-    width: stretch;
+    width: -webkit-fill-available;
   }
-  html[data-mantine-color-scheme="dark"] .docblock-argstable-body .rejt-value-node:hover > .rejt-value {
+  :root .docblock-argstable-body .rejt-value-node > .rejt-value {
+    font-size: 0.9em;
+  }
+  body.dark .docblock-argstable-body .rejt-value-node:hover > .rejt-value {
     background: #2a2c2e;
+  }
+  :where(p:not(.sb-anchor, .sb-unstyled, .sb-unstyled p)),
+  :where(li:not(.sb-anchor, .sb-unstyled, .sb-unstyled li)) {
+    font-size: initial;
+  }
+  :root .sbdocs-content {
+    flex-grow: 1;
+    width: 0;
+  }
+  .sbdocs-content:not(.sb-unstyled) p,
+  .sbdocs-content:not(.sb-unstyled) ul,
+  .sbdocs-content:not(.sb-unstyled) li,
+  .sbdocs-content:not(.sb-unstyled) div,
+  .sbdocs-content:not(.sb-unstyled) table,
+  .sbdocs-content:not(.sb-unstyled) span {
+    font-size: inherit;
+    line-height: inherit;
+    font-weight: inherit;
+  }
+  .sbdocs-content:not(.sb-unstyled) button {
+    font-size: 0.9rem;
+    line-height: 1.5rem;
+  }
+  .sbdocs-content ul {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75em;
+  }
+  :root .sb-bar svg {
+    width: 1rem;
+    height: 1rem;
+  }
+  :root .prismjs {
+    font-size: 0.9rem;
   }
 </style>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />

@@ -9,7 +9,7 @@ import { isDevelopment, prefix } from 'config/constants';
 import { getEmotionCacheConfig } from 'config/emotion.js';
 import { mobxConfig } from 'config/mobx.js';
 import { theme } from 'config/theme';
-import { initializeI18N } from '../src/i18n';
+import { initializeI18N } from 'i18n';
 import { client } from './__generated/api';
 import App from './modules/App/main';
 import '@mantine/core/styles.css';

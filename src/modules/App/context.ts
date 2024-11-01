@@ -6,7 +6,7 @@ import { createRuntimeContext } from 'common/utils/context';
 import { browserLogger } from 'common/utils/effect';
 import { createEntityStore, withSelected } from 'common/utils/entity';
 import type { EventType } from 'common/utils/event';
-import { createEndpoint, type Endpoint } from '../../models/endpoint/model';
+import { createEndpoint, type Endpoint } from 'models/endpoint/model';
 import { EventBusService } from './services/EventBusService';
 import * as AppTags from './tags';
 

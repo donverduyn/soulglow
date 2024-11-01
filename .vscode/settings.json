@@ -42,8 +42,9 @@
     },
   ],
   "javascript.preferGoToSourceDefinition": true,
-  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.tsdk": "./node_modules/typescript/lib",
   "typescript.tsc.autoDetect": "off",
+  "typescript.experimental.expandableHover": true,
   "files.watcherExclude": {
     "./src/__generated": true,
   },

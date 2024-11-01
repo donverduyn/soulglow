@@ -15,22 +15,21 @@
   },
   "include": [
     "./src/**/*",
-    // we currently have no separate tsconfig for storybook etc.
-    "./.*/**/*.tsx",
-    // so we can borrow the server types
-    // "./server/**/*",
     "./types/app/**/*",
     "./public/**/*",
     "./public/**/*.json",
   ],
   "exclude": [
-    "**/node_modules",
+    "**/node_modules/**/*",
     "dist/**/*",
-    // "./server/**/*",
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/.*/**/*.test.ts",
     "**/.*/**/*.test.tsx",
+    "./src/**/*.stories.ts",
+    "./src/**/*.stories.tsx",
+    "**/.storybook/**/*",
+    "./stories/**/*",
   ],
   "references": [
     {

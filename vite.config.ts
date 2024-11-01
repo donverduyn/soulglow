@@ -39,6 +39,7 @@ export default defineConfig(({ mode }) => ({
       },
     },
     sourcemap: false,
+    watch: false,
   },
   css: {
     devSourcemap: true,
@@ -85,33 +86,37 @@ export default defineConfig(({ mode }) => ({
       srcDir: 'src',
       strategies: 'injectManifest',
     }),
-    checker({
-      eslint: {
-        dev: { logLevel: ['error', 'warning'] },
-        lintCommand:
-          mode === 'test'
-            ? // exclude tsx files for eslint during test for now
-              "eslint './tests/**/*.ts' './src/**/*.test.ts' --cache --cache-location ./.cache/.eslintcache"
-            : 'eslint ./**/*.{js,cjs,ts,tsx} --cache --cache-location ./.cache/eslint/.eslintcache',
-        useFlatConfig: false,
-      },
-      overlay: {
-        badgeStyle: 'background-color: white; font-size: 0.75em; color: black;',
-        initialIsOpen: false,
-        panelStyle: 'height: 100%; background-color: #232125;',
-      },
-      root: process.cwd(),
-      stylelint:
-        mode !== 'test'
-          ? {
-              dev: { logLevel: ['error', 'warning'] },
-              lintCommand: 'stylelint "src/**/*.{css,tsx}"',
-            }
-          : false,
-      terminal: mode === 'development',
-      typescript:
-        process.env.CI === 'true' ? false : { tsconfigPath: './tsconfig.json' },
-    }),
+    mode !== 'production' &&
+      checker({
+        eslint: {
+          dev: { logLevel: ['error', 'warning'] },
+          lintCommand:
+            mode === 'test'
+              ? // exclude tsx files for eslint during test for now
+                "eslint './tests/**/*.ts' './src/**/*.test.ts'"
+              : 'eslint ./**/*.{js,cjs,ts,tsx,mdx}',
+          useFlatConfig: false,
+        },
+        overlay: {
+          badgeStyle:
+            'background-color: white; font-size: 0.75em; color: black;',
+          initialIsOpen: false,
+          panelStyle: 'height: 100%; background-color: #232125;',
+        },
+        root: process.cwd(),
+        stylelint:
+          mode !== 'test'
+            ? {
+                dev: { logLevel: ['error', 'warning'] },
+                lintCommand: 'stylelint "src/**/*.{css,tsx}"',
+              }
+            : false,
+        terminal: mode === 'development',
+        typescript:
+          process.env.CI === 'true'
+            ? false
+            : { buildMode: true, tsconfigPath: './tsconfig.app.json' },
+      }),
     visualizer({
       brotliSize: true,
       filename: `./.analyzer/analysis_${dayjs().format('DDMMYYYY_HHmmss')}.html`,
@@ -137,6 +142,8 @@ export default defineConfig(({ mode }) => ({
   },
   resolve: {
     alias: {
+      // TODO: find out why this won't work
+      // '.vite': path.resolve(__dirname, '.vite'),
       // TODO: Remove this alias once the issue is fixed
       // https://github.com/tabler/tabler-icons/issues/1233
       '@tabler/icons-react': '@tabler/icons-react/dist/esm/icons/index.mjs',

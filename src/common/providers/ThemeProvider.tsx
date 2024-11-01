@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { CacheProvider, type EmotionCache } from '@emotion/react';
+import { CacheProvider, type EmotionCache, type PropsOf } from '@emotion/react';
 import {
   DEFAULT_THEME,
   MantineProvider,
@@ -7,7 +7,7 @@ import {
 } from '@mantine/core';
 import { emotionTransform, MantineEmotionProvider } from '@mantine/emotion';
 
-interface Props {
+interface Props extends PropsOf<typeof MantineProvider> {
   readonly children: React.ReactNode;
   readonly defaultColorScheme?: 'light' | 'dark';
   readonly emotionCache: EmotionCache;
@@ -21,6 +21,7 @@ export const ThemeProvider: React.FC<Props> = ({
   emotionCache,
   prefix = 'mantine',
   theme = DEFAULT_THEME,
+  ...props
 }) => (
   <CacheProvider value={emotionCache}>
     <MantineEmotionProvider>
@@ -29,6 +30,7 @@ export const ThemeProvider: React.FC<Props> = ({
         defaultColorScheme={defaultColorScheme}
         stylesTransform={emotionTransform}
         theme={theme}
+        {...props}
       >
         {children}
       </MantineProvider>

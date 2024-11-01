@@ -14,16 +14,16 @@ body.dark:has(> div#storybook-docs[hidden="true"]) {
 }
 
 body.light:has(> div#storybook-docs[hidden="true"]) {
-  background: var(--mantine-color-body);;
+  background: var(--mantine-color-body);
 }
 
-html[data-mantine-color-scheme="dark"] .docs-story,
-html[data-mantine-color-scheme="dark"] body {
+*[data-mantine-color-scheme="dark"] .docs-story,
+*[data-mantine-color-scheme="dark"] body {
   --mantine-color-body: #242424;
 }
 
-html[data-mantine-color-scheme="light"] .docs-story,
-html[data-mantine-color-scheme="light"] body {
+*[data-mantine-color-scheme="light"] .docs-story,
+*[data-mantine-color-scheme="light"] body {
   --mantine-color-body: #fff;
 }
 

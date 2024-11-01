@@ -80,10 +80,10 @@ export const theme = createTheme({
   /* eslint-disable sort-keys-fix/sort-keys-fix */
   fontSizes: {
     xs: rem(12),
-    sm: rem(16),
-    md: rem(20),
-    lg: rem(24),
-    xl: rem(28),
+    sm: rem(14),
+    md: rem(18),
+    lg: rem(20),
+    xl: rem(24),
   },
   spacing: {
     xs: rem(4),
@@ -100,14 +100,14 @@ export const theme = createTheme({
   headings: {
     fontFamily: 'Proxima Nova, sans-serif',
     fontWeight: '800',
-    // sizes: {
-    //   h1: { fontSize: rem(32), lineHeight: rem(40) },
-    //   h2: { fontSize: rem(24), lineHeight: rem(32) },
-    //   h3: { fontSize: rem(20), lineHeight: rem(28) },
-    //   h4: { fontSize: rem(18), lineHeight: rem(24) },
-    //   h5: { fontSize: rem(16), lineHeight: rem(24) },
-    //   h6: { fontSize: rem(14), lineHeight: rem(20) },
-    // },
+    sizes: {
+      h1: { fontSize: rem(32), lineHeight: rem(40) },
+      h2: { fontSize: rem(24), lineHeight: rem(32) },
+      h3: { fontSize: rem(20), lineHeight: rem(28) },
+      h4: { fontSize: rem(18), lineHeight: rem(24) },
+      h5: { fontSize: rem(16), lineHeight: rem(24) },
+      h6: { fontSize: rem(14), lineHeight: rem(20) },
+    },
     textWrap: 'wrap',
   },
   luminanceThreshold: 0.5,
