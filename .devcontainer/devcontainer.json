@@ -104,7 +104,11 @@
 				"Gruntfuggly.todo-tree",
 				"vunguyentuan.vscode-css-variables",
 				"vitest.explorer",
-				"unifiedjs.vscode-mdx"
+				"unifiedjs.vscode-mdx",
+				"redhat.vscode-yaml",
+				"GitHub.vscode-pull-request-github",
+				"GitHub.copilot-chat",
+				"GitHub.copilot"
 			]
 		}
 	}

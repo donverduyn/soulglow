@@ -14,10 +14,10 @@
     "emitDeclarationOnly": true,
   },
   "include": [
-    "./src/**/*",
-    "./types/app/**/*",
-    "./public/**/*",
-    "./public/**/*.json",
+    "src/**/*",
+    "types/app/**/*",
+    "public/**/*",
+    "public/**/*.json", "docs/Colors.mdx", "docs/GetStarted.mdx", "docs/Typography.mdx",
   ],
   "exclude": [
     "**/node_modules/**/*",

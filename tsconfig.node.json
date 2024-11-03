@@ -20,10 +20,10 @@
   ],
   "include": [
     "**/.*/**/*.ts",
-    "./*.ts", 
-    "./scripts/**/*",
-    "./server/**/*",
-    "./types/node/**/*",
-    "./.devcontainer/**/*",
+    "*.ts", 
+    "scripts/**/*",
+    "server/**/*",
+    "types/node/**/*",
+    ".devcontainer/**/*",
   ],
 }

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { MDXProvider } from '@mdx-js/react';
 import {
   DocsContainer as BaseContainer,
   DocsContainerProps,
@@ -34,28 +35,14 @@ export const DocsContainer: React.FC<
   }, [channel]);
 
   return (
-    //     <MDXProvider
-    //       components={
-    //         {
-    //           h1: Title.withProps({ order: 1 }),
-    //           h2: Title.withProps({ order: 2 }),
-    //           h3: Title.withProps({ order: 3 }),
-    //           h4: Title.withProps({ order: 4 }),
-    //           h5: Title.withProps({ order: 5 }),
-    //           h6: Title.withProps({ order: 6 }),
-    //           li: List.Item,
-    //           p: Text.withProps({ size: 'sm' }),
-    //           span: Text.withProps({ size: 'sm' }),
-    //           ul: List,
-    //         } as Record<string, React.ComponentType>
-    //       }
-    //     >
-    <BaseContainer
-      context={context}
-      theme={theme}
-    >
-      {children}
-    </BaseContainer>
-    //     </MDXProvider>
+    // we can change the headers here
+    <MDXProvider>
+      <BaseContainer
+        context={context}
+        theme={theme}
+      >
+        {children}
+      </BaseContainer>
+    </MDXProvider>
   );
 };

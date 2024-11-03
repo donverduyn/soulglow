@@ -14,9 +14,9 @@ import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { useMobx } from 'common/hooks/useMobx';
 import { useRuntime } from 'common/hooks/useRuntimeFn';
 import { AppRuntime } from 'modules/App/context';
-import EndpointPanel from 'modules/EndpointPanel/main';
-import LightBulb from 'modules/LightBulb/main';
-import PaletteViewer from 'modules/PaletteViewer/main';
+import EndpointPanel from 'modules/EndpointPanel/EndpointPanel';
+import LightBulb from 'modules/LightBulb/LightBulb';
+import PaletteViewer from 'modules/PaletteViewer/PaletteViewer';
 import { EndpointVisibilitySwitch } from './components/EndpointVisibilitySwitch';
 import * as Tags from './tags';
 

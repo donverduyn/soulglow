@@ -56,7 +56,11 @@ const config: StorybookConfig = {
     }
   },
   staticDirs: ['../public'],
-  stories: ['../src/**/*.stories.@(js|jsx|mjs|ts|tsx)', '../src/**/*.mdx'],
+  stories: [
+    '../src/**/*.stories.@(ts|tsx)',
+    '../stories/**/*.@(ts|tsx)',
+    '../**/*.mdx',
+  ],
   viteFinal: async (config) => {
     const { mergeConfig } = await import('vite');
     const { viteStaticCopy } = await import('vite-plugin-static-copy');

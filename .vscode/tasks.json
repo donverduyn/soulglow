@@ -2,6 +2,12 @@
     "version": "2.0.0",
     "tasks": [
       {
+        "label": "Restart TS Server",
+        "type": "shell",
+        "command": "code --command 'typescript.restartTsServer'",
+        "problemMatcher": []
+      },
+      {
         "label": "vite-debug",
         "type": "npm",
         "script": "debug", 

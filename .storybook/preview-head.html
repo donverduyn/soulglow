@@ -41,8 +41,59 @@
   .docs-story > div:first-child > div:first-child {
     width: -webkit-fill-available;
   }
+  /* :root .docblock-argstable-body .rejt-value-node > .rejt-value {
+    font-size: 0.9rem;
+  } */
   :root .docblock-argstable-body .rejt-value-node > .rejt-value {
-    font-size: 0.9em;
+    font-size: 0.9rem;
+    margin-left: 0.25rem;
+    word-break: break-word;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding: 0 0.25em;
+    min-width: 5rem;
+    max-width: 15rem;
+    width: 0;
+    flex-basis: content;
+  }
+  :root .docblock-argstable-body .rejt-value-node > .rejt-minus-menu {
+    flex-shrink: 0;
+  }
+  :root .docblock-argstable .docblock-argstable-body .rejt-tree ul {
+    gap: 0;
+    line-height: initial;
+  }
+  :root .docblock-argstable .docblock-argstable-body .rejt-name {
+    white-space: nowrap;
+  }
+  :root .docblock-argstable .docblock-argstable-body .rejt-tree,
+  :root .docblock-argstable .docblock-argstable-body td > div:first-child,
+  :root .docblock-argstable .docblock-argstable-body .rejt-object-node {
+    flex-grow: 1;
+  }
+  :root .docblock-argstable .docblock-argstable-body .rejt-tree li {
+    font-size: initial;
+    display: inline-flex;
+    align-items: center;
+  }
+  :root .docblock-argstable .docblock-argstable-body tr td,
+  :root .docblock-argstable .docblock-argstable-head tr th {
+    width: inherit;
+  }
+  :root .docblock-argstable .docblock-argstable-body .rejt-edit-form {
+    width: 0;
+    flex: 1 1 auto;
+    margin-left: 0.25rem;
+  }
+  :root .docblock-argstable .docblock-argstable-body .rejt-add-value-node input {
+    font-size: 0.9rem;
+  }
+  :root .docblock-argstable .docblock-argstable-body .rejt-edit-form * { 
+    width: 100%;
+    outline: 0;
+    padding: 0;
+    font-size: 0.9rem;
   }
   body.dark .docblock-argstable-body .rejt-value-node:hover > .rejt-value {
     background: #2a2c2e;
@@ -56,8 +107,10 @@
     width: 0;
   }
   .sbdocs-content:not(.sb-unstyled) p,
-  .sbdocs-content:not(.sb-unstyled) ul,
-  .sbdocs-content:not(.sb-unstyled) li,
+  .sbdocs-content:not(.sb-unstyled) li {
+    font-size: 1.1rem;
+    line-height: inherit;
+  }
   .sbdocs-content:not(.sb-unstyled) div,
   .sbdocs-content:not(.sb-unstyled) table,
   .sbdocs-content:not(.sb-unstyled) span {
@@ -74,10 +127,19 @@
       flex-direction: column;
       gap: 0.75em;
   }
-  :root .sb-bar svg {
+  .sbdocs-content h1 a,
+  .sbdocs-content h2 a,
+  .sbdocs-content h3 a,
+  .sbdocs-content h4 a,
+  .sbdocs-content h5 a,
+  .sbdocs-content h6 a {
+    float: right;
+    line-height: inherit;
+  }
+  /* :root .sb-bar svg {
     width: 1rem;
     height: 1rem;
-  }
+  } */
   :root .prismjs {
     font-size: 0.9rem;
   }

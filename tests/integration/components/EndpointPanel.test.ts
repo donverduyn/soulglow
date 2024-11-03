@@ -4,13 +4,13 @@ import { http, HttpResponse } from 'msw';
 import { v4 as uuid } from 'uuid';
 import previewAnnotations from '.storybook/preview';
 import type { TranslationAvailable } from 'i18n';
-import type { Translations } from 'modules/EndpointPanel/main';
-import * as stories from 'modules/EndpointPanel/main.stories';
+import type { Translations } from 'modules/EndpointPanel/EndpointPanel';
+import * as stories from 'modules/EndpointPanel/EndpointPanel.stories';
 import '@testing-library/jest-dom';
 
 describe('endpointPanel', () => {
   const annotations = setProjectAnnotations([previewAnnotations]);
-  const { Main } = composeStories(stories, annotations);
+  const { Default } = composeStories(stories, annotations);
 
   beforeAll(annotations.beforeAll);
   afterEach(cleanup);
@@ -28,7 +28,7 @@ describe('endpointPanel', () => {
     const fetchTranslation = http.get('/locales/en/translation.json', () =>
       HttpResponse.json<Translations>({ addEndpointLabel })
     );
-    await Main.run({
+    await Default.run({
       globals: { locale: 'en' },
       parameters: { msw: { handlers: [fetchTranslation] } },
     });

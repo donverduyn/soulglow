@@ -18,11 +18,11 @@
     "dist/**/*",
   ],
   "include": [
-    "./src/**/*.test.ts",
-    "./src/**/*.test.tsx",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
     "**/.*/**/*.test.ts",
     "**/.*/**/*.test.tsx",
-    "./tests/**/*",
+    "tests/**/*",
   ],
   "references": [
     {

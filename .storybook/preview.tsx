@@ -72,13 +72,9 @@ const preview: Preview = {
       } satisfies ThemeVars,
     },
     docs: {
-      // source: {
-      //   dark: false,
-      // },
       canvas: {
         // sourceState: 'shown',
       },
-
       container: DocsContainer,
       page: function Page() {
         return (
@@ -88,17 +84,13 @@ const preview: Preview = {
             <Description />
             <Primary />
             <Controls />
-            <Stories />
+            <Stories includePrimary={false} />
           </>
         );
       },
-      source: { dark: false, state: 'open' },
+      source: { state: 'open' },
       theme: ensure({ ...themes.dark, fontBase: 'Proxima Nova' }),
-      toc: {
-        disable: false,
-        // headingSelector: 'h2, h3',
-        // ignoreSelector: '.docs-story h2, .docs-story h3',
-      },
+      toc: { disable: false },
     },
   },
 };
