@@ -15,7 +15,8 @@ const GroupTemplate = (props: React.ComponentProps<typeof Group>) => {
       {items.map((item) => (
         <Paper
           key={item}
-          bg='gray.4'
+          bg='dark.1'
+          c='dark.9'
           p='md'
           radius={0}
         >

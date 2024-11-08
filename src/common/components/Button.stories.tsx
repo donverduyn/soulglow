@@ -39,7 +39,7 @@ export const Default: Story = {
       options: variants,
     },
   },
-  args: { children: 'Default Button', variant: 'outline' },
+  args: { children: 'Default Button', variant: 'outline', color: 'gray' },
   decorators: [
     ColorSchemeDecorator,
     ThemeDecorator({ defaultColorScheme: 'dark' }),

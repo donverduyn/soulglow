@@ -44,10 +44,6 @@ const preview: Preview = {
     backgrounds: { value: 'light' },
   },
   loaders: import.meta.env.DEV ? [mswLoader] : [],
-  argTypes: {
-    // Hide all props starting with "on"
-    '^on.*': { table: { disable: true } },
-  },
   parameters: {
     backgrounds: {
       options: {
