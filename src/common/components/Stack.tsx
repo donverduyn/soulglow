@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { css } from '@emotion/react';
+// import { css } from '@emotion/react';
 import {
   createPolymorphicComponent,
   Stack as MantineStack,
@@ -27,7 +27,7 @@ export const Stack = createPolymorphicComponent<'div', Props>(
         <MantineStack
           ref={ref}
           className={className ?? ''}
-          css={styles.root}
+          // css={styles.root}
           style={getStyle()}
           {...rest}
         >
@@ -39,6 +39,6 @@ export const Stack = createPolymorphicComponent<'div', Props>(
   )
 );
 
-const styles = {
-  root: css``,
-};
+// const styles = {
+//   root: css``,
+// };

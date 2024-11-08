@@ -1,5 +1,5 @@
 import React from 'react';
-import { css } from '@emotion/react';
+// import { css } from '@emotion/react';
 import { Stack } from 'common/components/Stack';
 import { Text } from 'common/components/Text';
 import { Toggle } from 'common/components/Toggle';
@@ -17,7 +17,7 @@ export const OnOffSwitch: React.FC<Props> = ({
   return (
     <Stack
       className={className ?? ''}
-      css={styles.root}
+      // css={styles.root}
     >
       <Text>Off</Text>
       <Toggle
@@ -30,11 +30,11 @@ export const OnOffSwitch: React.FC<Props> = ({
   );
 };
 
-const styles = {
-  root: css`
-    align-items: center;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-  `,
-};
+// const styles = {
+//   root: css`
+//     align-items: center;
+//     display: flex;
+//     flex-direction: row;
+//     justify-content: center;
+//   `,
+// };

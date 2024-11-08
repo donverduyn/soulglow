@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent, expect } from '@storybook/test';
-import { MantineSchemeDecorator } from '.storybook/decorators/MantineSchemeDecorator';
+import { ColorSchemeDecorator } from '.storybook/decorators/ColorSchemeDecorator';
 import { RuntimeDecorator } from '.storybook/decorators/RuntimeDecorator';
 import { ThemeDecorator } from '.storybook/decorators/ThemeDecorator';
 import { createEndpoint } from 'models/endpoint/model';
 import { AppRuntime } from 'modules/App/context';
-import { EndpointListItem } from './EndpointListItem';
+import EndpointListItem from './EndpointListItem';
 
 const meta: Meta<typeof EndpointListItem> = {
   component: EndpointListItem,
@@ -21,7 +21,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: { endpoint: createEndpoint() },
   decorators: [
-    MantineSchemeDecorator,
+    ColorSchemeDecorator,
     ThemeDecorator({ defaultColorScheme: 'dark' }),
   ],
   globals: { backgrounds: { disabled: true } },

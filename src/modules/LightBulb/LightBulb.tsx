@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { css } from '@emotion/react';
+// import { css } from '@emotion/react';
 import type { Okhsv } from 'culori/fn';
 import { identity, pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
@@ -64,10 +64,12 @@ function LightBulb({ className, getStyle, onChange = identity }: Props) {
   return (
     <Paper
       className={className ?? ''}
-      css={styles.root}
+      // css={styles.root}
       getStyle={getStyle}
     >
-      <Stack css={styles.form}>
+      <Stack 
+        // css={styles.form}
+      >
         <OnOffSwitch
           getValue={bulb.lazyGet('status', (value) =>
             value === State.ON ? true : false
@@ -147,18 +149,18 @@ const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
   return useReturn({ bulb, inputs });
 };
 
-const styles = {
-  form: css`
-    gap: 1.33rem;
-    label: Form;
-  `,
-  root: css`
-    label: LightBulb;
-    padding: 24px;
-    transition: background-color 0.17s ease;
-  `,
-  slider: css`
-    flex-grow: 1;
-    label: Slider;
-  `,
-};
+// const styles = {
+//   form: css`
+//     gap: 1.33rem;
+//     label: Form;
+//   `,
+//   root: css`
+//     label: LightBulb;
+//     padding: 24px;
+//     transition: background-color 0.17s ease;
+//   `,
+//   slider: css`
+//     flex-grow: 1;
+//     label: Slider;
+//   `,
+// };

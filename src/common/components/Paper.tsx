@@ -19,7 +19,7 @@ export const Paper: React.FC<Props> = observer(function Paper(props) {
   return (
     <MantinePaper
       className={className ?? ''}
-      css={styles.root}
+      // css={styles.root}
       style={getStyle ? getStyle(theme) : undefined}
       {...rest}
     >
@@ -28,6 +28,6 @@ export const Paper: React.FC<Props> = observer(function Paper(props) {
   );
 });
 
-const styles = {
-  root: css``,
-};
+// const styles = {
+//   root: css``,
+// };

@@ -11,7 +11,9 @@ export const EndpointVisibilitySwitch: React.FC<Props> = ({
   getValue,
   onChange,
 }) => (
-  <Stack css={styles.root}>
+  <Stack 
+    // css={styles.root}
+  >
     <Toggle
       getValue={getValue}
       name='endpoint_visibility'
@@ -21,6 +23,6 @@ export const EndpointVisibilitySwitch: React.FC<Props> = ({
 );
 
 // this allows emotion to use the component name
-const styles = {
-  root: css``,
-};
+// const styles = {
+//   root: css``,
+// };

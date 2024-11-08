@@ -19,16 +19,20 @@ body.light:has(> div#storybook-docs[hidden="true"]) {
 
 *[data-mantine-color-scheme="dark"] .docs-story,
 *[data-mantine-color-scheme="dark"] body {
-  --mantine-color-body: #242424;
+  /* --mantine-color-body: #242424; */
 }
 
 *[data-mantine-color-scheme="light"] .docs-story,
 *[data-mantine-color-scheme="light"] body {
-  --mantine-color-body: #fff;
+  /* --mantine-color-body: #fff; */
 }
 
 .docs-story {
   background-color: var(--mantine-color-body);
+  color: var(--mantine-color-text);
+  font-family: var(--mantine-font-family);
+  font-size: var(--mantine-font-size-md);
+  line-height: var(--mantine-line-height);
 }
 
 body {

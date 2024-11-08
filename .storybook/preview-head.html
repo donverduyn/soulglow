@@ -8,9 +8,6 @@
   body.light {
     background: #fff;
   }
-  /* :root .sb-show-main {
-    background: inherit !important;
-  } */
   .sb-show-main {
     transition: none !important; /* !important needed to counter inline style */
   }
@@ -41,9 +38,6 @@
   .docs-story > div:first-child > div:first-child {
     width: -webkit-fill-available;
   }
-  /* :root .docblock-argstable-body .rejt-value-node > .rejt-value {
-    font-size: 0.9rem;
-  } */
   :root .docblock-argstable-body .rejt-value-node > .rejt-value {
     font-size: 0.9rem;
     margin-left: 0.25rem;
@@ -118,10 +112,10 @@
     line-height: inherit;
     font-weight: inherit;
   }
-  .sbdocs-content:not(.sb-unstyled) button {
+  /* .sbdocs-content:not(.sb-unstyled) button {
     font-size: 0.9rem;
     line-height: 1.5rem;
-  }
+  } */
   .sbdocs-content ul {
       display: flex;
       flex-direction: column;
@@ -136,12 +130,24 @@
     float: right;
     line-height: inherit;
   }
-  /* :root .sb-bar svg {
-    width: 1rem;
-    height: 1rem;
-  } */
   :root .prismjs {
     font-size: 0.9rem;
+  }
+  #storybook-root {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+  }
+  #storybook-root > *:last-child {
+    /* flex-grow: 1; */
+  }
+  .sb-story > div {
+    display: flex;
+    /* flex: 1;
+    justify-content: center; */
+  }
+  .sb-story > div > *:last-child {
+    display: inline-flex;
   }
 </style>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />

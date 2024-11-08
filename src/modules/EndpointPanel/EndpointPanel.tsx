@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { css } from '@emotion/react';
+// import { css } from '@emotion/react';
 import { Effect, pipe, Queue, type Context } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'common/components/Button';
@@ -13,7 +13,7 @@ import { addEndpointRequested } from 'models/endpoint/events';
 import { createEndpoint } from 'models/endpoint/model';
 import { AppRuntime } from 'modules/App/context';
 import * as AppTags from 'modules/App/tags';
-import { EndpointListItem } from './components/EndpointListItem';
+import EndpointListItem from './components/EndpointListItem';
 import { EndpointPanelRuntime } from './context';
 import * as Tags from './tags';
 
@@ -75,10 +75,12 @@ function EndpointPanel(props: Props) {
   );
 
   return (
-    <Stack css={styles.root}>
+    <Stack 
+      // css={styles.root}
+    >
       <List render={renderList} />
       <Button
-        css={styles.addButton}
+        // css={styles.addButton}
         onClick={addEndpoint}
       >
         {text('addEndpointLabel', {
@@ -100,14 +102,14 @@ function useHandlers({ publish }: Props) {
 
 // TODO: use classname generator for label based on environment, because they will show up unminified in production. We still want to use labels because sometimes an extra component creates too much indirection?
 
-const styles = {
-  addButton: css`
-    label: AddButton;
-  `,
-  root: css`
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding: 0;
-  `,
-};
+// const styles = {
+//   addButton: css`
+//     label: AddButton;
+//   `,
+//   root: css`
+//     display: flex;
+//     flex-direction: column;
+//     gap: 1rem;
+//     padding: 0;
+//   `,
+// };

@@ -47,7 +47,9 @@ function AppComponent() {
   const panel = useMobx(() => ({ isVisible: true }));
 
   return (
-    <Container css={appStyles.root}>
+    <Container 
+      // css={appStyles.root}
+    >
       <EndpointVisibilitySwitch
         getValue={panel.lazyGet('isVisible')}
         onChange={panel.set('isVisible')}
@@ -69,14 +71,14 @@ function AppComponent() {
   );
 }
 
-const appStyles = {
-  root: css`
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    gap: 1rem;
-    max-height: 100vh;
-    padding: 1rem;
-    width: 35rem;
-  `,
-};
+// const appStyles = {
+//   root: css`
+//     display: flex;
+//     flex: 1;
+//     flex-direction: column;
+//     gap: 1rem;
+//     max-height: 100vh;
+//     padding: 1rem;
+//     width: 35rem;
+//   `,
+// };

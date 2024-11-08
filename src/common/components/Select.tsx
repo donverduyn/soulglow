@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import * as React from 'react';
-import { css } from '@emotion/react';
+// import { css } from '@emotion/react';
 import { Combobox, Input, InputBase, useCombobox } from '@mantine/core';
 import { observer } from 'mobx-react-lite';
 import { useReaction } from 'common/hooks/useMobx';
@@ -56,7 +56,7 @@ export const Select = observer(function Select<TValue extends string>(
           pointer
           className={className ?? ''}
           component='button'
-          css={styles.root}
+          // css={styles.root}
           label={label}
           onClick={handleClick}
           rightSection={rightSection}
@@ -68,7 +68,9 @@ export const Select = observer(function Select<TValue extends string>(
           {optimistic ?? <Input.Placeholder>Pick value</Input.Placeholder>}
         </InputBase>
       </Combobox.Target>
-      <Combobox.Dropdown css={styles.dropdown}>
+      <Combobox.Dropdown 
+        // css={styles.dropdown}
+      >
         <Combobox.Options>{items.map(renderOption)}</Combobox.Options>
       </Combobox.Dropdown>
     </Combobox>
@@ -86,34 +88,34 @@ const renderOption = (item: Item<string>) => {
   );
 };
 
-const styles = {
-  dropdown: css`
-    border-color: light-dark(
-      var(--mantine-color-gray-4),
-      var(--mantine-color-dark-4)
-    );
-    border-top: 0;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-  `,
-  root: css`
-    /* --input-padding-y: 1.33rem; */
-    .${prefix}-InputBase-input {
-      align-items: center;
-      border-width: 3px;
-      display: flex;
-    }
+// const styles = {
+//   dropdown: css`
+//     border-color: light-dark(
+//       var(--mantine-color-gray-4),
+//       var(--mantine-color-dark-4)
+//     );
+//     border-top: 0;
+//     border-top-left-radius: 0;
+//     border-top-right-radius: 0;
+//   `,
+//   root: css`
+//     /* --input-padding-y: 1.33rem; */
+//     .${prefix}-InputBase-input {
+//       align-items: center;
+//       border-width: 3px;
+//       display: flex;
+//     }
 
-    .${prefix}-InputBase-label {
-      color: var(--mantine-color-white);
-      font-size: var(--mantine-font-size-sm);
-      font-variant: small-caps;
-      text-transform: lowercase;
-    }
+//     .${prefix}-InputBase-label {
+//       color: var(--mantine-color-white);
+//       font-size: var(--mantine-font-size-sm);
+//       font-variant: small-caps;
+//       text-transform: lowercase;
+//     }
 
-    &[data-expanded] {
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
-    }
-  `,
-};
+//     &[data-expanded] {
+//       border-bottom-left-radius: 0;
+//       border-bottom-right-radius: 0;
+//     }
+//   `,
+// };

@@ -14,15 +14,15 @@ import { DocsContainer } from './components/DocsContainer';
 import '@mantine/core/styles.css';
 import 'index.css';
 import 'font.css';
-import { ColorSchemeDecorator } from './decorators/ColorSchemeDecorator';
 import { I18nDecorator } from './decorators/I18nDecorator';
+import { SbColorSchemeDecorator } from './decorators/SbColorSchemeDecorator';
 
 if (import.meta.env.DEV) {
   // initialize MSW only in development
   initialize({ quiet: true });
 }
 
-export const decorators: Decorator[] = [ColorSchemeDecorator, I18nDecorator];
+export const decorators: Decorator[] = [SbColorSchemeDecorator, I18nDecorator];
 
 const preview: Preview = {
   decorators,
@@ -44,6 +44,10 @@ const preview: Preview = {
     backgrounds: { value: 'light' },
   },
   loaders: import.meta.env.DEV ? [mswLoader] : [],
+  argTypes: {
+    // Hide all props starting with "on"
+    '^on.*': { table: { disable: true } },
+  },
   parameters: {
     backgrounds: {
       options: {

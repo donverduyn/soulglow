@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { css } from '@emotion/react';
+// import { css } from '@emotion/react';
 import {
   TextInput as MantineTextInput,
   type TextInputProps,
@@ -78,7 +78,7 @@ export const TextInput: React.FC<Props> = observer(function TextField(props) {
       autoComplete='off'
       autoCorrect='off'
       className={className ?? ''}
-      css={styles.root}
+      // css={styles.root}
       onChange={handleInputChange}
       onKeyDown={handleKeyDown}
       size='md'
@@ -111,18 +111,18 @@ function getCursorAndValue(e: {
   return { end, start, value };
 }
 
-const styles = {
-  input: css`
-    &:hover {
-      background: inherit;
-    }
-  `,
-  root: css`
-    --input-padding-y: 1.33rem;
+// const styles = {
+//   input: css`
+//     &:hover {
+//       background: inherit;
+//     }
+//   `,
+//   root: css`
+//     --input-padding-y: 1.33rem;
 
-    .${prefix}-TextInput-input {
-      background-color: transparent;
-      border-width: 3px;
-    }
-  `,
-};
+//     .${prefix}-TextInput-input {
+//       background-color: transparent;
+//       border-width: 3px;
+//     }
+//   `,
+// };

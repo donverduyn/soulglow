@@ -84,6 +84,10 @@ const config: StorybookConfig = {
                 dest: '',
                 src: './node_modules/msw/lib/mockServiceWorker.js',
               },
+              // {
+              //   dest: 'styles',
+              //   src: './node_modules/@mantine/core/styles.css',
+              // },
             ],
           }),
         process.env.NODE_ENV === 'development' &&

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { css } from '@emotion/react';
+// import { css } from '@emotion/react';
 import { Slider as MantineSlider, SliderProps } from '@mantine/core';
 import { observer } from 'mobx-react-lite';
 
@@ -23,7 +23,7 @@ export const Slider = observer(function Slider(props: Props) {
   return (
     <MantineSlider
       className={className!}
-      css={styles.root}
+      // css={styles.root}
       label={null}
       max={max ?? 255}
       min={min ?? 0}
@@ -35,12 +35,12 @@ export const Slider = observer(function Slider(props: Props) {
   );
 });
 
-const styles = {
-  root: css`
-    --slider-color: var(--color, inherit);
-    color: var(--slider-color);
-    flex: 1;
-    height: 8px;
-    margin: 0 0.5rem;
-  `,
-};
+// const styles = {
+//   root: css`
+//     --slider-color: var(--color, inherit);
+//     color: var(--slider-color);
+//     flex: 1;
+//     height: 8px;
+//     margin: 0 0.5rem;
+//   `,
+// };

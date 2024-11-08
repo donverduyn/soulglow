@@ -43,9 +43,6 @@
   body > #root > div:first-child > div:first-child {
     display: none;
   }
-  /* .sidebar-subheading button {
-      font-size: 0.75rem;
-  } */
   :root a, :root button:not(.sidebar-subheading *), :root input, :root select, :root textarea {
     font-size: initial;
     line-height: initial;
@@ -60,23 +57,25 @@
     border-color: hsl(0deg 0% 50% / 15%);
   }
   /* tooltip, assuming nothing else gets inserted after the runtime. */
-  body.dark link + div > div:first-child > div:first-child a:hover {
+  body.dark > div:last-child > div:first-child > div:first-child a {
     background: #2a2c2e;
     color: #798186;
   }
-  body.dark link + div > div:first-child > button {
+  body.dark > div:last-child > div:first-child > div:first-child a span {
+    color: rgb(201, 205, 207);
+  }
+  body.dark > div:last-child > div:first-child > div:first-child a:hover {
+    background: #2a2c2e8c;
+  }
+  body.dark > div:last-child > div:first-child > button {
     background: #2a2c2e;
   }
-  body.dark link + div > div:first-child > button:hover {
-    background: #1b1c1d;
+  body.dark > div:last-child > div:first-child > button:hover {
+    background: #2a2c2e8c;
   }
   div.sb-bar + div > div:first-child > div:first-child {
     background: inherit;
   }
-  /* :root .sb-bar svg {
-    width: 1rem;
-    height: 1rem;
-  } */
   :root body.dark .docblock-argstable-body .rejt-value-node:hover > .rejt-value {
     background: #2a2c2e !important;
   }

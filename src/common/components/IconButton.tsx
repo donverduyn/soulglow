@@ -1,4 +1,4 @@
-import { css } from '@emotion/react';
+// import { css } from '@emotion/react';
 import { ActionIcon, ActionIconProps, type ElementProps } from '@mantine/core';
 
 interface Props
@@ -8,12 +8,12 @@ interface Props
 export const IconButton: React.FC<Props> = (props) => {
   return (
     <ActionIcon
-      css={styles.root}
+      // css={styles.root}
       {...props}
     />
   );
 };
 
-const styles = {
-  root: css``,
-};
+// const styles = {
+//   root: css``,
+// };

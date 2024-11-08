@@ -1,7 +1,60 @@
-import { createTheme, rem } from '@mantine/core';
+import {
+  createTheme,
+  rem,
+  // colorsTuple
+} from '@mantine/core';
+
+// const variantColorResolver: VariantColorsResolver = (input) => {
+//   const defaultResolvedColors = defaultVariantColorsResolver(input);
+//   const parsedColor = parseThemeColor({
+//     color: input.color || input.theme.primaryColor,
+//     theme: input.theme,
+//     colorScheme: 'light'
+//   });
+
+// console.log(input, defaultResolvedColors, parsedColor);
+
+// const isDarkMode = true;
+// const colors = {
+//   background: isDarkMode ? input.theme.white : input.theme.black,
+//   borderColor: isDarkMode ? input.theme.white : input.theme.black,
+//   textColor: isDarkMode ? input.theme.black : input.theme.white,
+// };
+
+// if (input.variant === 'filled') {
+//   return {
+//     background: colors.background,
+//     border: 'none',
+//     color: colors.textColor,
+//     hover: 'black',
+//   };
+// }
+
+// if (input.variant === 'outline') {
+//   return {
+//     background: 'transparent',
+//     border: `1px solid ${colors.borderColor}`,
+//     color: colors.textColor,
+//     hover: 'black',
+//   };
+// }
+
+// if (input.variant === 'light') {
+//   return {
+//     background: 'transparent',
+//     border: 'none',
+//     color: colors.textColor,
+//     hover: 'black',
+//   };
+// }
+
+// Fallback for other variants
+//   return defaultVariantColorsResolver(input);
+// };
 
 export const theme = createTheme({
   colors: {
+    // crimson: colorsTuple('crimson'),
     // dark: [
     //   '#1e1e1e',
     //   '#333',
@@ -77,6 +130,7 @@ export const theme = createTheme({
   },
   defaultRadius: 'md',
   fontFamily: 'Proxima Nova, sans-serif',
+  // variantColorResolver,
   /* eslint-disable sort-keys-fix/sort-keys-fix */
   fontSizes: {
     xs: rem(12),
@@ -112,6 +166,6 @@ export const theme = createTheme({
   },
   luminanceThreshold: 0.5,
   primaryColor: 'gray',
-  primaryShade: 5,
+  primaryShade: { dark: 5, light: 7 },
   white: '#fff',
 });

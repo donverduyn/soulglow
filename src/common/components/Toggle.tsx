@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { css } from '@emotion/react';
+// import { css } from '@emotion/react';
 import { Switch, type SwitchProps } from '@mantine/core';
 import { observer } from 'mobx-react-lite';
 
@@ -21,7 +21,7 @@ export const Toggle: React.FC<Props> = observer(function Toggle(props) {
       checked={getValue()}
       className={className!}
       color='dark.1'
-      css={styles.root}
+      // css={styles.root}
       name={name}
       onChange={handleChange}
       size='sm'
@@ -30,6 +30,6 @@ export const Toggle: React.FC<Props> = observer(function Toggle(props) {
   );
 });
 
-const styles = {
-  root: css``,
-};
+// const styles = {
+//   root: css``,
+// };

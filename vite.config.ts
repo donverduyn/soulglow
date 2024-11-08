@@ -53,7 +53,7 @@ export default defineConfig(({ mode }) => ({
     dynamicProxyPlugin(),
     tsconfigPaths(),
     react({
-      jsxImportSource: '@emotion/react',
+      // jsxImportSource: '@emotion/react',
       plugins: [['@swc/plugin-emotion', { sourceMap: true }]],
     }),
     VitePWA({

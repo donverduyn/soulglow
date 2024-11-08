@@ -1,4 +1,4 @@
-import { css } from '@emotion/react';
+// import { css } from '@emotion/react';
 import { Group as MantineGroup, GroupProps } from '@mantine/core';
 import { observer } from 'mobx-react-lite';
 
@@ -8,7 +8,7 @@ export const Group: React.FC<Props> = observer(function Group(props) {
   const { children, ...rest } = props;
   return (
     <MantineGroup
-      css={styles.root}
+      // css={styles.root}
       {...rest}
     >
       {children}
@@ -16,6 +16,6 @@ export const Group: React.FC<Props> = observer(function Group(props) {
   );
 });
 
-const styles = {
-  root: css``,
-};
+// const styles = {
+//   root: css``,
+// };

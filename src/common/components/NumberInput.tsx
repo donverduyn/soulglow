@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { css } from '@emotion/react';
+// import { css } from '@emotion/react';
 import {
   NumberInput as MantineNumberInput,
   NumberInputProps,
@@ -30,7 +30,7 @@ export const NumberInput: React.FC<Props> = observer(
 
     return (
       <MantineNumberInput
-        css={styles.root}
+        // css={styles.root}
         max={360}
         min={0}
         onBlur={handleBlur}
@@ -43,18 +43,18 @@ export const NumberInput: React.FC<Props> = observer(
   }
 );
 
-const styles = {
-  root: css`
-    /* --input-padding-y: 1.33rem; */
+// const styles = {
+//   root: css`
+//     /* --input-padding-y: 1.33rem; */
 
-    .${prefix}-NumberInput-input {
-      background: transparent;
-      border-width: 3px;
-    }
+//     .${prefix}-NumberInput-input {
+//       background: transparent;
+//       border-width: 3px;
+//     }
 
-    .${prefix}-NumberInput-control {
-      background: transparent;
-      border: 0;
-    }
-  `,
-};
+//     .${prefix}-NumberInput-control {
+//       background: transparent;
+//       border: 0;
+//     }
+//   `,
+// };

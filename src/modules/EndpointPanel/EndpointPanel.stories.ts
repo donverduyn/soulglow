@@ -6,12 +6,12 @@ import { ColorSchemeDecorator } from '.storybook/decorators/ColorSchemeDecorator
 import { RuntimeDecorator } from '.storybook/decorators/RuntimeDecorator';
 import { ThemeDecorator } from '.storybook/decorators/ThemeDecorator';
 import { AppRuntime } from 'modules/App/context';
+import EndpointListItem from './components/EndpointListItem';
 import EndpointPanel from './EndpointPanel';
 // type Foo = Simplify<typeof AppTags>;
 
 // TODO: import tags to type test implementation against them
 // TODO: we need to think about how we want to spy on effectful deps
-// const Component = WithRuntime(AppRuntime)(EndpointPanel);
 
 const meta: Meta<typeof EndpointPanel> = {
   argTypes: {
@@ -23,17 +23,9 @@ const meta: Meta<typeof EndpointPanel> = {
   },
   component: EndpointPanel,
   decorators: [RuntimeDecorator(AppRuntime)],
-  // subcomponents: { EndpointListItem },
-  parameters: {
-    layout: 'centered',
-  },
-
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const button = canvas.getByText('Add Endpoint');
-    await userEvent.click(button);
-    await userEvent.click(button);
-    await expect(button).toBeInTheDocument();
+  parameters: { layout: 'centered' },
+  subcomponents: {
+    EndpointListItem: EndpointListItem as React.ComponentType<unknown>,
   },
   tags: ['autodocs'],
   title: '@EndpointPanel/EndpointPanel',
@@ -49,4 +41,11 @@ export const Default: Story = {
     ThemeDecorator({ defaultColorScheme: 'dark' }),
   ],
   globals: { backgrounds: { disabled: true } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const button = canvas.getByText('Add Endpoint');
+    await userEvent.click(button);
+    await userEvent.click(button);
+    await expect(button).toBeInTheDocument();
+  },
 };

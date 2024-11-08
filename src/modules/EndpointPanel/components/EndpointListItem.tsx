@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { css } from '@emotion/react';
+// import { css } from '@emotion/react';
 import { computed } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { MdOutlineDelete } from 'react-icons/md';
@@ -28,16 +28,14 @@ export interface Props extends Publishable {
  * It normalizes the behavior of the input across OSes and browsers.
  * It also provides a way to select, update, and remove the endpoint.
  */
-export const EndpointListItem = observer(function EndpointListItem(
-  props: Props
-) {
+const Main = observer(function EndpointListItem(props: Props) {
   const { getChecked, getUrl } = useGetters(props);
   const { updateFn, removeFn, selectFn } = useHandlers(props);
 
   return (
     <Stack
       component='li'
-      css={styles.root}
+      // css={styles.root}
     >
       <Radio
         getValue={getChecked}
@@ -45,13 +43,13 @@ export const EndpointListItem = observer(function EndpointListItem(
         onChange={selectFn}
       />
       <TextInput
-        css={styles.textField}
+        // css={styles.textField}
         getValue={getUrl}
         onChange={updateFn}
       />
       <IconButton
         aria-label='delete'
-        css={styles.button}
+        // css={styles.button}
         onClick={removeFn}
         size='xl'
         variant='subtle'
@@ -61,6 +59,8 @@ export const EndpointListItem = observer(function EndpointListItem(
     </Stack>
   );
 });
+
+export default Main;
 
 //
 const useGetters = ({ endpoint }: Props) => {
@@ -101,24 +101,24 @@ const useHandlers = ({ endpoint, publish }: Props) => {
 };
 
 // TODO: organize these styles better and colocate to components/theme
-const styles = {
-  button: css`
-    border-radius: 50%;
-    transform: scale(1.1);
-    transition: transform 100ms ease-in-out;
+// const styles = {
+//   button: css`
+//     border-radius: 50%;
+//     transform: scale(1.1);
+//     transition: transform 100ms ease-in-out;
 
-    &:active {
-      background: var(--mantine-color-dark-5);
-      transform: scale(1.2);
-    }
-  `,
-  root: css`
-    align-items: center;
-    display: flex;
-    flex-direction: row;
-    gap: 1rem;
-  `,
-  textField: css`
-    flex: 1;
-  `,
-};
+//     &:active {
+//       background: var(--mantine-color-dark-5);
+//       transform: scale(1.2);
+//     }
+//   `,
+//   root: css`
+//     align-items: center;
+//     display: flex;
+//     flex-direction: row;
+//     gap: 1rem;
+//   `,
+//   textField: css`
+//     flex: 1;
+//   `,
+// };

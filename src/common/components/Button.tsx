@@ -5,6 +5,13 @@ interface Props extends ButtonProps {
   readonly onClick?: () => void;
 }
 
+/**
+ * This is the canonical button component for the application.
+ * The public API supports both variants and different sizes,
+ * as well as disabled and other states.
+ * Only Variants Light and Variants Dark have fixed themes.
+ * Use storybook theme to visualize the others.
+ */
 export const Button: React.FC<Props> = ({
   className,
   children,
@@ -14,10 +21,9 @@ export const Button: React.FC<Props> = ({
   return (
     <MantineButton
       className={className!}
-      color='gray.0'
-      css={styles.root}
       onClick={onClick}
       size='md'
+      styles={styles}
       variant='filled'
       {...rest}
     >
@@ -27,5 +33,7 @@ export const Button: React.FC<Props> = ({
 };
 
 const styles = {
-  root: css``,
+  label: css`
+    /* background: red !important; */
+  `,
 };

@@ -88,8 +88,6 @@ export const WithRuntime =
 
       return (
         <Context.Provider value={targetRuntime}>
-          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-          {/* @ts-expect-error EmotionJSX pragma related */}
           <Component
             {...props}
             {...extraProps}

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import createCache from '@emotion/cache';
 import type { PropsOf } from '@emotion/react';
+import { mergeThemeOverrides, type MantineThemeOverride } from '@mantine/core';
 import type { Decorator } from '@storybook/react';
 import { ThemeProvider } from 'common/providers/ThemeProvider';
 import { prefix } from 'config/constants';
@@ -12,23 +13,35 @@ import { theme as mantineTheme } from 'config/theme';
 const emotionCache = createCache(getEmotionCacheConfig(prefix));
 
 export const ThemeDecorator = (
-  props: Partial<PropsOf<typeof ThemeProvider>> = {}
+  props: Partial<PropsOf<typeof ThemeProvider>> & {
+    theme?: Partial<MantineThemeOverride>;
+  } = {}
 ) => {
-  const ThemeDecorator: Decorator = (Story, { canvasElement }) => {
-    const getRootElement = React.useCallback(
-      () => canvasElement,
-      [canvasElement]
-    );
+  const ThemeDecorator: Decorator = (Story, { id, viewMode }) => {
+    const Children = React.memo(Story);
+    if (viewMode === 'docs') {
+      document.documentElement.removeAttribute('data-mantine-color-scheme');
+    }
+    const element =
+      document.getElementById(`anchor--${id}`) ?? document.documentElement;
+    const getRootElement = React.useCallback(() => element, [element]);
+
     return (
       <ThemeProvider
-        cssVariablesSelector={`#${canvasElement.id}`}
         emotionCache={emotionCache}
         getRootElement={getRootElement}
         prefix={prefix}
-        theme={mantineTheme}
+        cssVariablesSelector={
+          element === document.documentElement ? ':root' : `#anchor--${id}`
+        }
+        theme={
+          props.theme
+            ? mergeThemeOverrides(props.theme, mantineTheme)
+            : mantineTheme
+        }
         {...props}
       >
-        <Story />
+        <Children />
       </ThemeProvider>
     );
   };

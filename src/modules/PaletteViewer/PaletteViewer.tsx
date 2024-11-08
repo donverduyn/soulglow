@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { css } from '@emotion/react';
+// import { css } from '@emotion/react';
 import {
   convertOkhsvToOklab,
   convertOklabToRgb,
@@ -31,19 +31,19 @@ function PaletteViewer({ getColor, className }: Props) {
   return (
     <Stack
       className={className ?? ''}
-      css={styles.root}
+      // css={styles.root}
     >
       {entries.map(([key, palette]) => (
         <Group
           key={key}
-          css={styles.palette}
+          // css={styles.palette}
         >
           {palette.map((_, i) => {
             const color = computed(() => formatHex(palettes.get()[key][i]));
             return (
               <Paper
                 key={key.concat(i.toString())}
-                css={styles.swatch}
+                // css={styles.swatch}
                 //* color cannot be stable across renders
                 // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop
                 render={() => color.get()}
@@ -60,19 +60,19 @@ function PaletteViewer({ getColor, className }: Props) {
   );
 }
 
-const styles = {
-  palette: css`
-    label: Palette;
-  `,
-  root: css`
-    border-radius: var(--mantine-radius-md);
-  `,
-  swatch: css`
-    color: var(--mantine-color-white);
-    flex: 1;
-    label: Swatch;
-    padding: 0.25em;
-    text-align: center;
-    transition: background-color 0.17s ease;
-  `,
-};
+// const styles = {
+//   palette: css`
+//     label: Palette;
+//   `,
+//   root: css`
+//     border-radius: var(--mantine-radius-md);
+//   `,
+//   swatch: css`
+//     color: var(--mantine-color-white);
+//     flex: 1;
+//     label: Swatch;
+//     padding: 0.25em;
+//     text-align: center;
+//     transition: background-color 0.17s ease;
+//   `,
+// };
