@@ -1,11 +1,10 @@
 import * as React from 'react';
-// import { css } from '@emotion/react';
 import {
   NumberInput as MantineNumberInput,
   NumberInputProps,
 } from '@mantine/core';
+import { useEventListener } from '@mantine/hooks';
 import { observer } from 'mobx-react-lite';
-import { prefix } from 'config/constants';
 
 interface Props extends Omit<NumberInputProps, 'onChange'> {
   readonly getValue: () => number;
@@ -28,13 +27,28 @@ export const NumberInput: React.FC<Props> = observer(
       [onChange, getValue]
     );
 
+    const onChangeHandler = React.useCallback(
+      (value: number | string) => {
+        onChange(Number(value));
+      },
+      [onChange]
+    );
+
+    const onWheelHandler = React.useCallback((event: WheelEvent) => {
+      if (document.activeElement === event.target) {
+        event.stopPropagation();
+      }
+    }, []);
+
+    const ref = useEventListener('wheel', onWheelHandler);
+
     return (
       <MantineNumberInput
-        // css={styles.root}
+        ref={ref}
         max={360}
         min={0}
         onBlur={handleBlur}
-        onWheel={handleWheel}
+        onChange={onChangeHandler}
         size='md'
         value={getValue()}
         {...rest}
@@ -42,19 +56,3 @@ export const NumberInput: React.FC<Props> = observer(
     );
   }
 );
-
-// const styles = {
-//   root: css`
-//     /* --input-padding-y: 1.33rem; */
-
-//     .${prefix}-NumberInput-input {
-//       background: transparent;
-//       border-width: 3px;
-//     }
-
-//     .${prefix}-NumberInput-control {
-//       background: transparent;
-//       border: 0;
-//     }
-//   `,
-// };

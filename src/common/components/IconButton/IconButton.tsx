@@ -6,14 +6,5 @@ interface Props
     ElementProps<'button', keyof ActionIconProps> {}
 
 export const IconButton: React.FC<Props> = (props) => {
-  return (
-    <ActionIcon
-      // css={styles.root}
-      {...props}
-    />
-  );
+  return <ActionIcon {...props} />;
 };
-
-// const styles = {
-//   root: css``,
-// };

@@ -1,0 +1,6 @@
+.List {
+  display: flex;
+  flex-direction: column;
+  gap: inherit;
+  list-style-type: none;
+}

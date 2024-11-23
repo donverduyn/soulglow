@@ -24,20 +24,20 @@ export const Default: Story = {
     ColorSchemeDecorator,
     ThemeDecorator({ defaultColorScheme: 'dark' }),
   ],
-  globals: { backgrounds: { disabled: true } },
+  // globals: { backgrounds: { disabled: true } },
   // parameters: { docs: { canvas: { sourceState: 'shown' } } },
 };
 
 export const Dark: Story = {
   args: { endpoint: createEndpoint() },
   decorators: [ThemeDecorator({ forceColorScheme: 'dark' })],
-  globals: { backgrounds: { value: 'dark' } },
+  // globals: { backgrounds: { value: 'dark' } },
 };
 
 export const Light: Story = {
   args: { endpoint: createEndpoint() },
   decorators: [ThemeDecorator({ forceColorScheme: 'light' })],
-  globals: { backgrounds: { value: 'light' } },
+  // globals: { backgrounds: { value: 'light' } },
 };
 
 export const HotPink: Story = {

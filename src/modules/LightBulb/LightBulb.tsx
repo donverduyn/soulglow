@@ -1,16 +1,16 @@
 import * as React from 'react';
-// import { css } from '@emotion/react';
+import cy from 'clsx';
 import type { Okhsv } from 'culori/fn';
 import { identity, pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { State } from '__generated/api';
-import { Group } from 'common/components/Group';
+import { Group } from 'common/components/Group/Group';
 import { WithRuntime as WithRuntime } from 'common/components/hoc/withRuntime';
-import { NumberInput } from 'common/components/NumberInput';
-import { Paper } from 'common/components/Paper';
-import { Select } from 'common/components/Select';
-import { Slider } from 'common/components/Slider';
-import { Stack } from 'common/components/Stack';
+import { NumberInput } from 'common/components/NumberInput/NumberInput';
+import { Paper } from 'common/components/Paper/Paper';
+import { Select } from 'common/components/Select/Select';
+import { Slider } from 'common/components/Slider/Slider';
+import { Stack } from 'common/components/Stack/Stack';
 import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
 import { useReturn } from 'common/hooks/useReturn';
 import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
@@ -18,6 +18,7 @@ import { fromLayer } from 'common/utils/context';
 import type { Device } from 'models/device/model';
 import { OnOffSwitch } from './components/OnOffSwitch';
 import { MODE_ITEMS, LightMode, LightBulbRuntime } from './context';
+import styles from './LightBulb.module.css';
 import * as Tags from './tags';
 
 interface LightBulbState {
@@ -63,13 +64,10 @@ function LightBulb({ className, getStyle, onChange = identity }: Props) {
 
   return (
     <Paper
-      className={className ?? ''}
-      // css={styles.root}
+      className={cy(className, styles.LightBulb)}
       getStyle={getStyle}
     >
-      <Stack 
-        // css={styles.form}
-      >
+      <Stack>
         <OnOffSwitch
           getValue={bulb.lazyGet('status', (value) =>
             value === State.ON ? true : false
@@ -89,7 +87,7 @@ function LightBulb({ className, getStyle, onChange = identity }: Props) {
           <Group key={input.label}>
             <Slider
               aria-label={input.label}
-              // css={styles.slider}
+              className={styles.Slider}
               getValue={bulb.lazyGet(input.key)}
               max={255}
               onChange={bulb.set(input.key)}
@@ -148,19 +146,3 @@ const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
 
   return useReturn({ bulb, inputs });
 };
-
-// const styles = {
-//   form: css`
-//     gap: 1.33rem;
-//     label: Form;
-//   `,
-//   root: css`
-//     label: LightBulb;
-//     padding: 24px;
-//     transition: background-color 0.17s ease;
-//   `,
-//   slider: css`
-//     flex-grow: 1;
-//     label: Slider;
-//   `,
-// };

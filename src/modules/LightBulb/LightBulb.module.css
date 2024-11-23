@@ -1,0 +1,13 @@
+
+.LightBulb {
+  padding: 24px;
+  transition: background-color 0.17s ease;
+}
+
+.Form {
+  gap: 1.33rem;
+}
+
+.Slider {
+  flex-grow: 1;
+}

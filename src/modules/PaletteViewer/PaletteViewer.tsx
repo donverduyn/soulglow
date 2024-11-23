@@ -1,5 +1,5 @@
 import * as React from 'react';
-// import { css } from '@emotion/react';
+import cy from 'clsx';
 import {
   convertOkhsvToOklab,
   convertOklabToRgb,
@@ -9,10 +9,11 @@ import {
 import { flow } from 'effect';
 import { computed, untracked } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { Group } from 'common/components/Group';
-import { Paper } from 'common/components/Paper';
-import { Stack } from 'common/components/Stack';
+import { Group } from 'common/components/Group/Group';
+import { Paper } from 'common/components/Paper/Paper';
+import { Stack } from 'common/components/Stack/Stack';
 import { createPalettes } from 'common/utils/color';
+import styles from './PaletteViewer.module.css';
 
 interface Props extends DefaultProps {
   readonly getColor: () => Okhsv;
@@ -29,21 +30,18 @@ function PaletteViewer({ getColor, className }: Props) {
   // prevent reconciliation on every update
   const entries = Object.entries(untracked(() => palettes.get()));
   return (
-    <Stack
-      className={className ?? ''}
-      // css={styles.root}
-    >
+    <Stack className={cy(className, styles.PaletteViewer)}>
       {entries.map(([key, palette]) => (
         <Group
           key={key}
-          // css={styles.palette}
+          className={styles.Palette}
         >
           {palette.map((_, i) => {
             const color = computed(() => formatHex(palettes.get()[key][i]));
             return (
               <Paper
                 key={key.concat(i.toString())}
-                // css={styles.swatch}
+                className={styles.Swatch}
                 //* color cannot be stable across renders
                 // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop
                 render={() => color.get()}
@@ -59,20 +57,3 @@ function PaletteViewer({ getColor, className }: Props) {
     </Stack>
   );
 }
-
-// const styles = {
-//   palette: css`
-//     label: Palette;
-//   `,
-//   root: css`
-//     border-radius: var(--mantine-radius-md);
-//   `,
-//   swatch: css`
-//     color: var(--mantine-color-white);
-//     flex: 1;
-//     label: Swatch;
-//     padding: 0.25em;
-//     text-align: center;
-//     transition: background-color 0.17s ease;
-//   `,
-// };

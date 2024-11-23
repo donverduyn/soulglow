@@ -71,6 +71,7 @@ module.exports = {
         './tests/**/*.{ts,tsx}',
         './src/**/*.test.{ts,tsx}',
         './src/*.test-d.ts',
+        'postcss.config.cjs',
       ],
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       env: { node: true },

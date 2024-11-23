@@ -1,8 +1,7 @@
 import React from 'react';
-// import { css } from '@emotion/react';
-import { Stack } from 'common/components/Stack';
-import { Text } from 'common/components/Text';
-import { Toggle } from 'common/components/Toggle';
+import { Stack } from 'common/components/Stack/Stack';
+import { Text } from 'common/components/Text/Text';
+import { Toggle } from 'common/components/Toggle/Toggle';
 
 interface Props extends DefaultProps {
   readonly getValue: () => boolean;

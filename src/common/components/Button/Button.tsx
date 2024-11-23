@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { css } from '@emotion/react';
 import { Button as MantineButton, type ButtonProps } from '@mantine/core';
 interface Props extends ButtonProps {
   readonly onClick?: () => void;
@@ -20,20 +19,14 @@ export const Button: React.FC<Props> = ({
 }) => {
   return (
     <MantineButton
+      // unstyled
       className={className!}
       onClick={onClick}
       size='md'
-      styles={styles}
       variant='filled'
       {...rest}
     >
       {children}
     </MantineButton>
   );
-};
-
-const styles = {
-  label: css`
-    /* background: red !important; */
-  `,
 };

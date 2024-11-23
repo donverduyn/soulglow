@@ -25,7 +25,7 @@
     "reset": "yarn clean && rm -rf node_modules /home/vscode/.cache",
     "ci:local": "act -P ubuntu-latest=-self-hosted -j build --cache-server-addr 127.0.0.1",
     "dep:stats": "npx --yes tsx -e \"import { view } from './scripts/dep-stats'; view('./package.json');\"",
-    "sb": "concurrently -k --raw 'wait-on tcp:6005 && BROWSER=none storybook dev -p 6006 --quiet' 'http-server /tmp/mantine-storybook -p 6005 --cors --silent'",
+    "sb": "BROWSER=none storybook dev -p 6006 --quiet",
     "sb:build": "storybook build",
     "sb:test": "test-storybook -c .storybook"
   },
@@ -48,6 +48,7 @@
     "@tabler/icons-react": "3.20.0",
     "@trpc/client": "^10.45.2",
     "@trpc/server": "^10.45.2",
+    "clsx": "^2.1.1",
     "culori": "^4.0.1",
     "dayjs": "^1.11.11",
     "effect": "^3.10.1",

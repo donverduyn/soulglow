@@ -40,7 +40,7 @@ export const Default: Story = {
     ColorSchemeDecorator,
     ThemeDecorator({ defaultColorScheme: 'dark' }),
   ],
-  globals: { backgrounds: { disabled: true } },
+  // globals: { backgrounds: { disabled: true } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const button = canvas.getByText('Add Endpoint');

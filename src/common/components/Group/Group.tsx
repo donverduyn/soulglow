@@ -6,16 +6,5 @@ interface Props extends GroupProps {}
 
 export const Group: React.FC<Props> = observer(function Group(props) {
   const { children, ...rest } = props;
-  return (
-    <MantineGroup
-      // css={styles.root}
-      {...rest}
-    >
-      {children}
-    </MantineGroup>
-  );
+  return <MantineGroup {...rest}>{children}</MantineGroup>;
 });
-
-// const styles = {
-//   root: css``,
-// };

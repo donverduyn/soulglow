@@ -1,0 +1,7 @@
+.Slider {
+  --slider-color: var(--color, inherit);
+  color: var(--slider-color);
+  flex: 1;
+  height: 8px;
+  margin: 0 0.5rem;
+}

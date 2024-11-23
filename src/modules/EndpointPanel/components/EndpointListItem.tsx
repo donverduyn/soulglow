@@ -1,12 +1,11 @@
 import * as React from 'react';
-// import { css } from '@emotion/react';
 import { computed } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { MdOutlineDelete } from 'react-icons/md';
-import { IconButton } from 'common/components/IconButton';
-import { Radio } from 'common/components/Radio';
-import { Stack } from 'common/components/Stack';
-import { TextInput } from 'common/components/TextInput';
+import { IconButton } from 'common/components/IconButton/IconButton';
+import { Radio } from 'common/components/Radio/Radio';
+import { Stack } from 'common/components/Stack/Stack';
+import { TextInput } from 'common/components/TextInput/TextInput';
 import { useReturn } from 'common/hooks/useReturn';
 import { useRuntimeSync } from 'common/hooks/useRuntimeFn';
 import type { Publishable } from 'common/utils/event';
@@ -18,6 +17,7 @@ import {
 import type { Endpoint } from 'models/endpoint/model';
 import { AppRuntime } from 'modules/App/context';
 import * as AppTags from 'modules/App/tags';
+import styles from './EndpointListItem.module.css';
 
 export interface Props extends Publishable {
   readonly endpoint: Endpoint;
@@ -31,11 +31,15 @@ export interface Props extends Publishable {
 const Main = observer(function EndpointListItem(props: Props) {
   const { getChecked, getUrl } = useGetters(props);
   const { updateFn, removeFn, selectFn } = useHandlers(props);
+  const classNames = React.useMemo(
+    () => ({ root: styles.EndpointListItem }),
+    []
+  );
 
   return (
     <Stack
+      classNames={classNames}
       component='li'
-      // css={styles.root}
     >
       <Radio
         getValue={getChecked}
@@ -43,13 +47,13 @@ const Main = observer(function EndpointListItem(props: Props) {
         onChange={selectFn}
       />
       <TextInput
-        // css={styles.textField}
+        className={styles.TextField}
         getValue={getUrl}
         onChange={updateFn}
       />
       <IconButton
         aria-label='delete'
-        // css={styles.button}
+        className={styles.Button}
         onClick={removeFn}
         size='xl'
         variant='subtle'
@@ -99,26 +103,3 @@ const useHandlers = ({ endpoint, publish }: Props) => {
   );
   return useReturn({ removeFn, selectFn, updateFn });
 };
-
-// TODO: organize these styles better and colocate to components/theme
-// const styles = {
-//   button: css`
-//     border-radius: 50%;
-//     transform: scale(1.1);
-//     transition: transform 100ms ease-in-out;
-
-//     &:active {
-//       background: var(--mantine-color-dark-5);
-//       transform: scale(1.2);
-//     }
-//   `,
-//   root: css`
-//     align-items: center;
-//     display: flex;
-//     flex-direction: row;
-//     gap: 1rem;
-//   `,
-//   textField: css`
-//     flex: 1;
-//   `,
-// };

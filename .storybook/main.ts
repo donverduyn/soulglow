@@ -48,7 +48,7 @@ const config: StorybookConfig = {
           expanded: true,
           sourceUrl: 'https://github.com/mantinedev/mantine',
           title: 'Mantine',
-          url: 'http://localhost:6005',
+          url: 'http://localhost:6006/refs/mantine',
         },
       };
     } else {
@@ -84,6 +84,10 @@ const config: StorybookConfig = {
                 dest: '',
                 src: './node_modules/msw/lib/mockServiceWorker.js',
               },
+              {
+                dest: 'refs/mantine',
+                src: '/tmp/mantine-storybook/**/*'
+              }
               // {
               //   dest: 'styles',
               //   src: './node_modules/@mantine/core/styles.css',

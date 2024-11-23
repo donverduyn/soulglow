@@ -1,7 +1,8 @@
 import * as React from 'react';
-// import { css } from '@emotion/react';
 import { Slider as MantineSlider, SliderProps } from '@mantine/core';
+import cy from 'clsx';
 import { observer } from 'mobx-react-lite';
+import styles from './Slider.module.css';
 
 interface Props extends Omit<SliderProps, 'onChange'> {
   readonly getValue: () => number;
@@ -22,8 +23,7 @@ export const Slider = observer(function Slider(props: Props) {
   // TODO: find out why event handlers are attached on every hover, over the movable part of the slider. See devtools perf monitor.
   return (
     <MantineSlider
-      className={className!}
-      // css={styles.root}
+      className={cy(className, styles.Slider)}
       label={null}
       max={max ?? 255}
       min={min ?? 0}
@@ -34,13 +34,3 @@ export const Slider = observer(function Slider(props: Props) {
     />
   );
 });
-
-// const styles = {
-//   root: css`
-//     --slider-color: var(--color, inherit);
-//     color: var(--slider-color);
-//     flex: 1;
-//     height: 8px;
-//     margin: 0 0.5rem;
-//   `,
-// };

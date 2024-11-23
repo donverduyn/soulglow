@@ -1,0 +1,13 @@
+.NumberInput {
+  /* --input-padding-y: 1.33rem; */
+
+  & .app-NumberInput-input {
+    background: transparent;
+    border-width: 3px;
+  }
+
+  & .app-NumberInput-control {
+    background: transparent;
+    border: 0;
+  }
+}

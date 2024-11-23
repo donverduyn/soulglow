@@ -2,10 +2,10 @@ import * as React from 'react';
 // import { css } from '@emotion/react';
 import { Effect, pipe, Queue, type Context } from 'effect';
 import { observer } from 'mobx-react-lite';
-import { Button } from 'common/components/Button';
+import { Button } from 'common/components/Button/Button';
 import { WithRuntime } from 'common/components/hoc/withRuntime';
-import { List } from 'common/components/List';
-import { Stack } from 'common/components/Stack';
+import { List } from 'common/components/List/List';
+import { Stack } from 'common/components/Stack/Stack';
 import { useReturn } from 'common/hooks/useReturn';
 import { useTranslation } from 'common/hooks/useTranslation';
 import type { EventType, Publishable } from 'common/utils/event';
@@ -15,6 +15,7 @@ import { AppRuntime } from 'modules/App/context';
 import * as AppTags from 'modules/App/tags';
 import EndpointListItem from './components/EndpointListItem';
 import { EndpointPanelRuntime } from './context';
+import styles from './EndpointPanel.module.css';
 import * as Tags from './tags';
 
 interface Props extends OuterProps, InnerProps {}
@@ -75,14 +76,9 @@ function EndpointPanel(props: Props) {
   );
 
   return (
-    <Stack 
-      // css={styles.root}
-    >
+    <Stack className={styles.EndpointPanel}>
       <List render={renderList} />
-      <Button
-        // css={styles.addButton}
-        onClick={addEndpoint}
-      >
+      <Button onClick={addEndpoint}>
         {text('addEndpointLabel', {
           defaultValue: 'Add Endpoint',
         })}
@@ -99,17 +95,3 @@ function useHandlers({ publish }: Props) {
 
   return useReturn({ addEndpoint });
 }
-
-// TODO: use classname generator for label based on environment, because they will show up unminified in production. We still want to use labels because sometimes an extra component creates too much indirection?
-
-// const styles = {
-//   addButton: css`
-//     label: AddButton;
-//   `,
-//   root: css`
-//     display: flex;
-//     flex-direction: column;
-//     gap: 1rem;
-//     padding: 0;
-//   `,
-// };

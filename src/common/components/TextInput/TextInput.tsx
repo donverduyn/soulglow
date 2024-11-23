@@ -1,18 +1,24 @@
 import * as React from 'react';
-// import { css } from '@emotion/react';
 import {
   TextInput as MantineTextInput,
   type TextInputProps,
 } from '@mantine/core';
+import cy from 'clsx';
 import { observer } from 'mobx-react-lite';
 import { useReaction } from 'common/hooks/useMobx';
-import { prefix } from 'config/constants';
+import styles from './TextInput.module.css';
+import type { IObservableValue } from 'mobx';
 
 interface Props extends Omit<TextInputProps, 'onChange'> {
   readonly getValue: () => string;
   readonly onChange: (value: string) => void;
 }
 
+/**
+ * This is a variant of a vanilla text input,
+ * which is designed to late defererence Mobx proxies in getValue.
+ * Currently it only supports Mobx proxies from being returned by getValue.
+ */
 export const TextInput: React.FC<Props> = observer(function TextField(props) {
   const { className, getValue, onChange, ...rest } = props;
   const value = getValue();
@@ -77,8 +83,7 @@ export const TextInput: React.FC<Props> = observer(function TextField(props) {
       ref={inputRef}
       autoComplete='off'
       autoCorrect='off'
-      className={className ?? ''}
-      // css={styles.root}
+      className={cy(className, styles.TextInput)}
       onChange={handleInputChange}
       onKeyDown={handleKeyDown}
       size='md'
@@ -110,19 +115,3 @@ function getCursorAndValue(e: {
   const end = e.currentTarget.selectionEnd || 0;
   return { end, start, value };
 }
-
-// const styles = {
-//   input: css`
-//     &:hover {
-//       background: inherit;
-//     }
-//   `,
-//   root: css`
-//     --input-padding-y: 1.33rem;
-
-//     .${prefix}-TextInput-input {
-//       background-color: transparent;
-//       border-width: 3px;
-//     }
-//   `,
-// };

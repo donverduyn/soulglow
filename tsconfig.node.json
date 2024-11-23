@@ -8,6 +8,7 @@
     "composite": true,
     "outDir": "dist/node",
     "emitDeclarationOnly": true,
+    "allowJs": true,
     "types": ["node"],
   },
   "exclude": [
@@ -24,6 +25,7 @@
     "scripts/**/*",
     "server/**/*",
     "types/node/**/*",
-    ".devcontainer/**/*",
+    ".devcontainer/**/*", 
+    "postcss.config.cjs",
   ],
 }

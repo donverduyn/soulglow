@@ -10,8 +10,8 @@ import {
 import type { Decorator, Preview } from '@storybook/react';
 import { themes, type ThemeVars, ensure } from '@storybook/theming';
 import { initialize, mswLoader } from 'msw-storybook-addon';
+import '@mantine/core/styles.layer.css';
 import { DocsContainer } from './components/DocsContainer';
-import '@mantine/core/styles.css';
 import 'index.css';
 import 'font.css';
 import { I18nDecorator } from './decorators/I18nDecorator';
@@ -19,7 +19,7 @@ import { SbColorSchemeDecorator } from './decorators/SbColorSchemeDecorator';
 
 if (import.meta.env.DEV) {
   // initialize MSW only in development
-  initialize({ quiet: true });
+  initialize({ quiet: true, onUnhandledRequest: 'bypass' });
 }
 
 export const decorators: Decorator[] = [SbColorSchemeDecorator, I18nDecorator];

@@ -39,12 +39,11 @@ export const Default: Story = {
       options: variants,
     },
   },
-  args: { children: 'Default Button', variant: 'outline', color: 'gray' },
+  args: { children: 'Default Button', color: 'gray', variant: 'outline' },
   decorators: [
     ColorSchemeDecorator,
     ThemeDecorator({ defaultColorScheme: 'dark' }),
   ],
-  // globals: { backgrounds: { disabled: true } },
 };
 
 const VariantsTemplate = (props: PropsOf<typeof Button>) => {
@@ -74,14 +73,12 @@ export const VariantsDark: Story = {
       forceColorScheme: 'dark',
     }),
   ],
-  // globals: { backgrounds: { value: 'dark' } },
   render: VariantsTemplate,
 };
 
 export const VariantsLight: Story = {
   args: {},
   decorators: [ThemeDecorator({ forceColorScheme: 'light' })],
-  // globals: { backgrounds: { value: 'light' } },
   render: VariantsTemplate,
 };
 

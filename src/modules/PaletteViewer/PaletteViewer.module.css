@@ -1,0 +1,15 @@
+
+.PaletteViewer {
+  border-radius: var(--mantine-radius-md);
+}
+
+/* stylelint-disable-next-line block-no-empty */
+.Palette {}
+
+.Swatch {
+  color: var(--mantine-color-white);
+  flex: 1;
+  padding: 0.25em;
+  text-align: center;
+  transition: background-color 0.17s ease;
+}

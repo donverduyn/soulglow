@@ -1,0 +1,28 @@
+/* Dropdown styles */
+.dropdown {
+  border-color: light-dark(
+    var(--mantine-color-gray-4),
+    var(--mantine-color-dark-4)
+  );
+  border-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.input {
+  align-items: center;
+  border-width: 3px;
+  display: flex;
+}
+
+.label {
+  color: var(--mantine-color-white);
+  font-size: var(--mantine-font-size-sm);
+  font-variant: small-caps;
+  text-transform: lowercase;
+}
+
+.root[data-expanded] {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}

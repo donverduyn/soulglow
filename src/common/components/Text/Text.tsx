@@ -1,4 +1,3 @@
-// import { css } from '@emotion/react';
 import { Text as MantineText, type TextProps } from '@mantine/core';
 
 interface Props extends TextProps {
@@ -14,7 +13,6 @@ export const Text: React.FC<Props> = ({
   return (
     <MantineText
       className={className!}
-      // css={styles.root}
       variant={variant ?? 'body1'}
       {...rest}
     >
@@ -22,7 +20,3 @@ export const Text: React.FC<Props> = ({
     </MantineText>
   );
 };
-
-// const styles = {
-//   root: css``,
-// };

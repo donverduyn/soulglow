@@ -1,4 +1,3 @@
-import { css } from '@emotion/react';
 import {
   Paper as MantinePaper,
   PaperProps,
@@ -19,7 +18,6 @@ export const Paper: React.FC<Props> = observer(function Paper(props) {
   return (
     <MantinePaper
       className={className ?? ''}
-      // css={styles.root}
       style={getStyle ? getStyle(theme) : undefined}
       {...rest}
     >
@@ -27,7 +25,3 @@ export const Paper: React.FC<Props> = observer(function Paper(props) {
     </MantinePaper>
   );
 });
-
-// const styles = {
-//   root: css``,
-// };

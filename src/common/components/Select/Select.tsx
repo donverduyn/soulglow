@@ -2,9 +2,10 @@ import { useState } from 'react';
 import * as React from 'react';
 // import { css } from '@emotion/react';
 import { Combobox, Input, InputBase, useCombobox } from '@mantine/core';
+import cy from 'clsx';
 import { observer } from 'mobx-react-lite';
 import { useReaction } from 'common/hooks/useMobx';
-import { prefix } from 'config/constants';
+import styles from './Select.module.css';
 
 type Item<TValue> = { id: string; label: string; value: TValue };
 
@@ -55,8 +56,8 @@ export const Select = observer(function Select<TValue extends string>(
         <InputBase
           pointer
           className={className ?? ''}
+          classNames={styles}
           component='button'
-          // css={styles.root}
           label={label}
           onClick={handleClick}
           rightSection={rightSection}
@@ -68,9 +69,7 @@ export const Select = observer(function Select<TValue extends string>(
           {optimistic ?? <Input.Placeholder>Pick value</Input.Placeholder>}
         </InputBase>
       </Combobox.Target>
-      <Combobox.Dropdown 
-        // css={styles.dropdown}
-      >
+      <Combobox.Dropdown className={cy(styles.dropdown)}>
         <Combobox.Options>{items.map(renderOption)}</Combobox.Options>
       </Combobox.Dropdown>
     </Combobox>

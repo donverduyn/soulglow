@@ -1,6 +1,5 @@
-import { css } from '@emotion/react';
-import { Stack } from 'common/components/Stack';
-import { Toggle } from 'common/components/Toggle';
+import { Stack } from 'common/components/Stack/Stack';
+import { Toggle } from 'common/components/Toggle/Toggle';
 
 interface Props {
   getValue: () => boolean;
@@ -11,9 +10,7 @@ export const EndpointVisibilitySwitch: React.FC<Props> = ({
   getValue,
   onChange,
 }) => (
-  <Stack 
-    // css={styles.root}
-  >
+  <Stack>
     <Toggle
       getValue={getValue}
       name='endpoint_visibility'
@@ -21,8 +18,3 @@ export const EndpointVisibilitySwitch: React.FC<Props> = ({
     />
   </Stack>
 );
-
-// this allows emotion to use the component name
-// const styles = {
-//   root: css``,
-// };

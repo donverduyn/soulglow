@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { css } from '@emotion/react';
 import {
   type Okhsv,
   serializeRgb,
@@ -9,7 +8,7 @@ import {
 import { Console, Effect, flow, pipe } from 'effect';
 import { observable } from 'mobx';
 import { Observer } from 'mobx-react-lite';
-import { Container } from 'common/components/Container';
+import { Container } from 'common/components/Container/Container';
 import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { useMobx } from 'common/hooks/useMobx';
 import { useRuntime } from 'common/hooks/useRuntimeFn';
@@ -17,6 +16,7 @@ import { AppRuntime } from 'modules/App/context';
 import EndpointPanel from 'modules/EndpointPanel/EndpointPanel';
 import LightBulb from 'modules/LightBulb/LightBulb';
 import PaletteViewer from 'modules/PaletteViewer/PaletteViewer';
+import styles from './App.module.css';
 import { EndpointVisibilitySwitch } from './components/EndpointVisibilitySwitch';
 import * as Tags from './tags';
 
@@ -47,9 +47,7 @@ function AppComponent() {
   const panel = useMobx(() => ({ isVisible: true }));
 
   return (
-    <Container 
-      // css={appStyles.root}
-    >
+    <Container className={styles.App}>
       <EndpointVisibilitySwitch
         getValue={panel.lazyGet('isVisible')}
         onChange={panel.set('isVisible')}
@@ -70,15 +68,3 @@ function AppComponent() {
     </Container>
   );
 }
-
-// const appStyles = {
-//   root: css`
-//     display: flex;
-//     flex: 1;
-//     flex-direction: column;
-//     gap: 1rem;
-//     max-height: 100vh;
-//     padding: 1rem;
-//     width: 35rem;
-//   `,
-// };

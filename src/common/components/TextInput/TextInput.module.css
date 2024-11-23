@@ -1,0 +1,9 @@
+
+.TextInput {
+  --input-padding-y: 1.33rem;
+}
+
+.input {
+  background-color: transparent;
+  border-width: 3px;
+}
