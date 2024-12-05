@@ -19,12 +19,12 @@ export const ThemeProvider: React.FC<Props> = ({
   theme = DEFAULT_THEME,
   ...props
 }) => (
-    <MantineProvider
-      classNamesPrefix={prefix}
-      defaultColorScheme={defaultColorScheme}
-      theme={theme}
-      {...props}
-    >
-      {children}
-    </MantineProvider>
+  <MantineProvider
+    classNamesPrefix={prefix}
+    defaultColorScheme={defaultColorScheme}
+    theme={theme}
+    {...props}
+  >
+    {children}
+  </MantineProvider>
 );

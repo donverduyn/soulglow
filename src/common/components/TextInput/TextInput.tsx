@@ -7,7 +7,6 @@ import cy from 'clsx';
 import { observer } from 'mobx-react-lite';
 import { useReaction } from 'common/hooks/useMobx';
 import styles from './TextInput.module.css';
-import type { IObservableValue } from 'mobx';
 
 interface Props extends Omit<TextInputProps, 'onChange'> {
   readonly getValue: () => string;

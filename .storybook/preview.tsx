@@ -19,7 +19,7 @@ import { SbColorSchemeDecorator } from './decorators/SbColorSchemeDecorator';
 
 if (import.meta.env.DEV) {
   // initialize MSW only in development
-  initialize({ quiet: true, onUnhandledRequest: 'bypass' });
+  initialize({ onUnhandledRequest: 'bypass', quiet: true });
 }
 
 export const decorators: Decorator[] = [SbColorSchemeDecorator, I18nDecorator];

@@ -86,8 +86,8 @@ const config: StorybookConfig = {
               },
               {
                 dest: 'refs/mantine',
-                src: '/tmp/mantine-storybook/**/*'
-              }
+                src: '/tmp/mantine-storybook/**/*',
+              },
               // {
               //   dest: 'styles',
               //   src: './node_modules/@mantine/core/styles.css',

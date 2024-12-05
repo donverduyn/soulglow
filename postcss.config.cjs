@@ -1,10 +1,10 @@
-const postcssClassWildcardPrefix = require('./.postcss/plugins/postcss-class-wildcard-prefix');
-const { prefix } = require('./src/config/constants');
+// const postcssClassWildcardPrefix = require('./.postcss/plugins/postcss-class-wildcard-prefix');
+// const { prefix } = require('./src/config/constants');
 
-const postcssWildcardPrefix = postcssClassWildcardPrefix.default({
-  placeholder: 'prefix--',
-  replacement: prefix,
-}).postcssPlugin;
+// const postcssWildcardPrefix = postcssClassWildcardPrefix.default({
+//   placeholder: 'prefix--',
+//   replacement: prefix,
+// }).postcssPlugin;
 
 module.exports = {
   plugins: {

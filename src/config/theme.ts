@@ -168,5 +168,4 @@ export const theme = createTheme({
   primaryColor: 'gray',
   primaryShade: { dark: 5, light: 7 },
   white: '#fff',
-  
 });

@@ -11,7 +11,7 @@ interface Props extends ListProps {
 
 /**
  * This component supports a render prop to allow late dereferenced Mobx proxies.
- * Whenever a list its contents changes this way, 
+ * Whenever a list its contents changes this way,
  * it only causes the list to rerender, not the parent component.
  */
 

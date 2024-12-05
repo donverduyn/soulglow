@@ -1,7 +1,7 @@
 import * as React from 'react';
 import cy from 'clsx';
 import type { Okhsv } from 'culori/fn';
-import { identity, pipe } from 'effect';
+import { identity, pipe, Queue } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { State } from '__generated/api';
 import { Group } from 'common/components/Group/Group';
@@ -113,7 +113,7 @@ const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
 
   // TODO: convert to event and use runtime to handle the event
   const handle = useRuntimeFn(LightBulbRuntime, (body: Partial<Device>) =>
-    fromLayer(Tags.ApiThrottler, (queue) => queue.offer(body))
+    fromLayer(Tags.ApiThrottler, Queue.offer(body))
   );
 
   // TODO: think about how to model a lightbulb such that we can manage state in the form of an entity store, using the same patterns as endpoint.

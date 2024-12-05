@@ -15,17 +15,17 @@ interface Props extends Omit<NumberInputProps, 'onChange'> {
 export const NumberInput: React.FC<Props> = observer(
   ({ onBlur, getValue, onChange, ...rest }) => {
     const handleBlur = React.useCallback(() => onBlur && onBlur(), [onBlur]);
-    const handleWheel = React.useCallback<
-      React.WheelEventHandler<HTMLInputElement>
-    >(
-      (event) => {
-        if (!event.deltaY) return;
-        const adjustment = event.deltaY < 0 ? 0.1 : -0.1;
-        onChange(Number((Number(getValue()) + adjustment).toFixed(1)));
-        // event.preventDefault();
-      },
-      [onChange, getValue]
-    );
+    // const handleWheel = React.useCallback<
+    //   React.WheelEventHandler<HTMLInputElement>
+    // >(
+    //   (event) => {
+    //     if (!event.deltaY) return;
+    //     const adjustment = event.deltaY < 0 ? 0.1 : -0.1;
+    //     onChange(Number((Number(getValue()) + adjustment).toFixed(1)));
+    //     // event.preventDefault();
+    //   },
+    //   [onChange, getValue]
+    // );
 
     const onChangeHandler = React.useCallback(
       (value: number | string) => {

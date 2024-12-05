@@ -4,18 +4,9 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent, expect, fn } from '@storybook/test';
 import { ColorSchemeDecorator } from '.storybook/decorators/ColorSchemeDecorator';
 import { ThemeDecorator } from '.storybook/decorators/ThemeDecorator';
+import { variants } from '.storybook/utils/variants';
 import { capitalize } from 'common/utils/string';
 import { Button } from './Button';
-
-const variants = [
-  'filled',
-  // 'gradient',
-  'light',
-  'outline',
-  'white',
-  'subtle',
-  'transparent',
-];
 
 const meta: Meta<typeof Button> = {
   argTypes: {
