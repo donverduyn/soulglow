@@ -21,21 +21,34 @@ export const generate = async (
         lint: 'eslint',
         path: outputDir,
       },
-      schemas: {
-        export: true,
-        type: 'json',
-      },
-      services: {
-        asClass: true,
-        export: true,
-        name: '{{name}}Service',
-      },
-      types: {
-        dates: true,
-        enums: 'typescript',
-        export: true,
-        name: 'preserve',
-      },
+
+      plugins: [
+        {
+          enums: 'typescript',
+          identifierCase: 'preserve',
+          name: '@hey-api/typescript',
+        },
+        {
+          asClass: true,
+          name: '@hey-api/sdk',
+          serviceNameBuilder: '{{name}}Service',
+        },
+      ],
+      // schemas: {
+      //   export: true,
+      //   type: 'json',
+      // },
+      // services: {
+      //   asClass: true,
+      //   export: true,
+      //   name: '{{name}}Service',
+      // },
+      // types: {
+      //   dates: true,
+      //   enums: 'typescript',
+      //   export: true,
+      //   name: 'preserve',
+      // },
     });
 
     console.log('Client generation completed successfully.');

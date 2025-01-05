@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           '@culori': ['culori/fn'],
           '@effect': ['effect'],
-          '@emotion': ['@emotion/react', '@emotion/styled'],
+          // '@emotion': ['@emotion/react', '@emotion/styled'],
           '@mantine': [
             '@mantine/charts',
             '@mantine/hooks',
@@ -54,7 +54,7 @@ export default defineConfig(({ mode }) => ({
     tsconfigPaths(),
     react({
       // jsxImportSource: '@emotion/react',
-      plugins: [['@swc/plugin-emotion', { sourceMap: true }]],
+      // plugins: [['@swc/plugin-emotion', { sourceMap: true }]],
     }),
     VitePWA({
       devOptions: {

@@ -14,8 +14,8 @@ export function isReactContext2<T>(
 export const isReactContext = <T>(variable: unknown): variable is T => {
   return (
     isPlainObject(variable) &&
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error $$typeof is a private property
+    // // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // // @ts-expect-error $$typeof is a private property
     variable.$$typeof === React.createContext(null).$$typeof
   );
 };

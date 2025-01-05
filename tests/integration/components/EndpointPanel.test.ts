@@ -1,7 +1,6 @@
 import { composeStories, setProjectAnnotations } from '@storybook/react';
 import { fireEvent, waitFor, cleanup, screen } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
-import { v4 as uuid } from 'uuid';
 import previewAnnotations from '.storybook/preview';
 import type { TranslationAvailable } from 'i18n';
 import type { Translations } from 'modules/EndpointPanel/EndpointPanel';

@@ -26,7 +26,7 @@ export const createEntityStore = <T extends Identifiable>() => {
     get: (id) => store.get(id) ?? null,
     id: uuid(),
     // TODO: find out why eslint cannot resolve mobx types
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    // // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     indexOf: (id: string) => Array.from(store.keys()).indexOf(id),
     list: Mobx.computed(() => Array.from(store.values() as unknown as T[])),
     remove: Mobx.action((id) => store.delete(id)),

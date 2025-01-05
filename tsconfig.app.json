@@ -17,7 +17,7 @@
     "src/**/*",
     "types/app/**/*",
     "public/**/*",
-    "public/**/*.json", "docs/Colors.mdx", "docs/GetStarted.mdx", "docs/Typography.mdx",
+    "public/**/*.json"
   ],
   "exclude": [
     "**/node_modules/**/*",

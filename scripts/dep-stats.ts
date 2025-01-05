@@ -23,7 +23,7 @@ const NPM_API_BASE_URL = 'https://api.npmjs.org/downloads/point';
 
 export const view = (path: string = PACKAGE_JSON_PATH) => {
   const App = pipe(path, logStats, Effect.runPromise);
-  // eslint-disable-next-line @typescript-eslint/use-unknown-in-catch-callback-variable
+  // // eslint-disable-next-line @typescript-eslint/use-unknown-in-catch-callback-variable
   App.catch(Console.error);
 };
 
