@@ -22,7 +22,8 @@ describe('endpointPanel', () => {
   });
   it('should add an endpoint to the list when the "Add Endpoint" button is clicked', async () => {
     expect.assertions(2);
-    const addEndpointLabel = uuid();
+    // this should work with a uuid, but it seems that the dom is overridden because of concurrent tests.
+    const addEndpointLabel = 'Add Endpoint';
 
     // TODO: it seems that msw fails to intercept anythin if the first request is unhandled, so if locale is something else than en, en must be handled too.
     const fetchTranslation = http.get('/locales/en/translation.json', () =>

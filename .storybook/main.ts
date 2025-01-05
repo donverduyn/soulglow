@@ -61,6 +61,9 @@ const config: StorybookConfig = {
     '../stories/**/*.@(ts|tsx)',
     '../**/*.mdx',
   ],
+  // typescript: {
+  //   reactDocgen: false,
+  // },
   viteFinal: async (config) => {
     const { mergeConfig } = await import('vite');
     const { viteStaticCopy } = await import('vite-plugin-static-copy');

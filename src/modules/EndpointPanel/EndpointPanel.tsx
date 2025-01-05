@@ -41,7 +41,7 @@ const Main = pipe(
       store: runSync(AppTags.EndpointStore),
     })) satisfies InnerProps;
 
-    // TODO: The problem is that if multiple sagas read and write to the store, they can cause a race condition, so we have to queue actions in a channel inside a saga at the top level, which is in control of writing to and reading from the store. It dispatches actions that are listened to by the sagas downstream, so they can apply business logic based on up to date state from the store. Because we have per entity sagas and each saga has to both handle mutate actions as well as read actions, it is kind of logical to consider this conceptually around models. This means that even though any work is delegated back downstream, everything that is done at the top is module agnostic (modules are not associated with entities, but they rely on them to provide functionality). It is to say, that besides this separation and how modules combine different entities, modules also combine actions from different modules to show certain behavior.
+    // TODO: Use request/response to avoid stale reads, before dispatching actions
 
     from(AppRuntime, ({ runSync }) =>
       Effect.map(Tags.Foo, (_) => runSync(AppTags.EndpointStore))
