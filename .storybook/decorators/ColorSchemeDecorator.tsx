@@ -1,36 +1,38 @@
 import * as React from 'react';
 import { useMantineColorScheme } from '@mantine/core';
-import { addons } from '@storybook/preview-api';
 import { Decorator } from '@storybook/react';
-import { DARK_MODE_EVENT_NAME } from 'storybook-dark-mode';
+import { flow } from 'effect';
+import { useDarkModeEvent, getScheme } from '.storybook/hooks/useDarkModeEvent';
+import { memoize } from 'common/utils/memoize';
 
-interface Props {
-  readonly children: React.ReactNode;
-}
-
-const channel = addons.getChannel();
-const Component: React.FC<Props> = ({ children }) => {
-  const { setColorScheme } = useMantineColorScheme();
-  const handleColorScheme = React.useCallback(
-    (value: boolean) => setColorScheme(value ? 'dark' : 'light'),
-    [setColorScheme]
-  );
-
-  React.useEffect(() => {
-    channel.on(DARK_MODE_EVENT_NAME, handleColorScheme);
-    return () => channel.off(DARK_MODE_EVENT_NAME, handleColorScheme);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [channel, handleColorScheme]);
-
-  // eslint-disable-next-line react/jsx-no-useless-fragment
-  return <>{children}</>;
-};
+/*
+ * Adds an html attribute to the html tag named "mantine-data-color-scheme",
+ * with the value "dark" or "light" based on the value of the dark mode event,
+ * which is toggled by the user.
+ */
 
 export const ColorSchemeDecorator: Decorator = (Story) => {
   const Children = React.memo(Story);
-  return (
-    <Component>
-      <Children />
-    </Component>
-  );
+  const { setColorScheme } = useMantineColorScheme();
+
+  // the actual place where its set depends on the story and ThemeDecorator
+  useDarkModeEvent(flow(getScheme, setColorScheme));
+  return <Children />;
+};
+
+/*
+ * Adds a class to the body tag named "dark" or "light",
+ * based on the value of the dark mode event, which is toggled by the user.
+ */
+
+const setBodyColorScheme = memoize(
+  (document: Document) => (isDark: boolean) => {
+    document.body.classList.toggle('dark', isDark);
+    document.body.classList.toggle('light', !isDark);
+  }
+);
+
+export const BodyClassColorSchemeDecorator: Decorator = (Story) => {
+  useDarkModeEvent(setBodyColorScheme(document));
+  return <Story />;
 };

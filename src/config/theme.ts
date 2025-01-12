@@ -165,7 +165,7 @@ export const theme = createTheme({
     textWrap: 'wrap',
   },
   luminanceThreshold: 0.5,
-  primaryColor: 'gray',
+  primaryColor: 'indigo',
   primaryShade: { dark: 5, light: 7 },
   white: '#fff',
 });

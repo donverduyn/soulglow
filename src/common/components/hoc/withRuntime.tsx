@@ -1,9 +1,6 @@
-// eslint-disable-next-line eslint-comments/disable-enable-pair
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import * as React from 'react';
-import { Effect, Layer, ManagedRuntime } from 'effect';
-import { useRuntime } from 'common/hooks/useRuntimeFn';
+import { Layer, ManagedRuntime } from 'effect';
+import type { Simplify } from 'type-fest';
 import { type RuntimeContext } from 'common/utils/context';
 
 /*
@@ -14,88 +11,32 @@ It allows any downstream components to access the runtime using the context.
 // TODO: think about assigning a method to the function, to obtain the provided react context objects in the hoc as an array, for testing purposes. We can separate the hoc from the pipe function and export the method as a named export.
 
 export const WithRuntime =
-  <TTarget,>(
+  <TTarget, TProps extends Record<string, unknown>>(
     Context: RuntimeContext<TTarget>,
-    getSource?: (utils: {
-      from: <TContext, TEffect extends Effect.Effect<any, any, TTarget>>(
-        context: RuntimeContext<TContext>,
-        linkEffect: (
-          runtime: ManagedRuntime.ManagedRuntime<TContext, never>
-        ) => TEffect
-      ) => void;
-
-      propsOf: <
-        TContext,
-        TFactory extends (
-          runtime: ManagedRuntime.ManagedRuntime<TContext, never>
-        ) => TResult,
-        TResult,
-      >(
-        context: RuntimeContext<TContext>,
-        injectEffect: TFactory
-      ) => TResult;
-
-      to: <TContext, TEffect extends Effect.Effect<any, any, any>>(
-        context: RuntimeContext<TContext>,
-        attachEffect: (
-          runtime: ManagedRuntime.ManagedRuntime<TTarget, never>
-        ) => TEffect
-      ) => void;
-    }) => void
+    getSource?: (
+      runtime: ManagedRuntime.ManagedRuntime<TTarget, never>
+    ) => TProps
   ) =>
   <P,>(Component: React.FC<P>) => {
     //
-    const Wrapped: React.FC<P> = (props) => {
+    const Wrapped: React.FC<Simplify<Omit<P, keyof TProps>>> = (props) => {
       const { layer } = Context as unknown as {
         layer: Layer.Layer<TTarget>;
       };
 
-      const targetRuntime = useRuntimeFactory(layer);
-      const extraProps: Record<string, any> = {};
-
-      if (getSource) {
-        getSource({
-          //* getSource never changes over the lifetime of the component, so it is safe to break the rules of hooks here.
-
-          from: (context, linkEffect) => {
-            // eslint-disable-next-line react-hooks/rules-of-hooks
-            const runtime = React.useContext(context);
-            if (runtime === undefined) throw new Error('No runtime found.');
-
-            const effect = linkEffect(runtime);
-            // eslint-disable-next-line react-hooks/rules-of-hooks
-            useRuntime(targetRuntime, effect, [targetRuntime]);
-          },
-
-          propsOf: (context, injectEffect) => {
-            // eslint-disable-next-line react-hooks/rules-of-hooks
-            const runtime = React.useContext(context);
-            if (runtime === undefined) throw new Error('No runtime found.');
-            const result = injectEffect(runtime);
-            Object.assign(extraProps, result);
-            return result;
-          },
-
-          to: (context, attachEffect) => {
-            // eslint-disable-next-line react-hooks/rules-of-hooks
-            const runtime = React.useContext(context);
-            if (runtime === undefined) throw new Error('No runtime found.');
-            // eslint-disable-next-line react-hooks/rules-of-hooks
-            useRuntime(context, attachEffect(targetRuntime), [runtime]);
-          },
-        });
-      }
+      const runtime = useRuntimeFactory(layer);
+      const mergedProps = getSource
+        ? { ...getSource(runtime), ...props }
+        : props;
 
       return (
-        <Context.Provider value={targetRuntime}>
-          <Component
-            {...props}
-            {...extraProps}
-          />
+        <Context.Provider value={runtime}>
+          <Component {...(mergedProps as React.JSX.IntrinsicAttributes & P)} />
         </Context.Provider>
       );
     };
-    Wrapped.displayName = `WithRuntime`;
+    Wrapped.displayName = `WithRuntime(${Component.displayName || Component.name || 'Component'})`;
+
     return Wrapped;
   };
 

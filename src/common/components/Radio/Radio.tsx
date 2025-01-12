@@ -15,7 +15,7 @@ export const Radio: React.FC<Props> = observer(function Radio(props) {
     <MantineRadio
       checked={getValue()}
       classNames={styles}
-      color='grey.0'
+      // color='grey.0'
       name={name}
       onChange={onChange}
       size='md'

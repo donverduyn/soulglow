@@ -96,6 +96,9 @@
   :where(li:not(.sb-anchor, .sb-unstyled, .sb-unstyled li)) {
     font-size: initial;
   }
+  body.dark .sbdocs-content #panel-tab-content {
+    color: rgb(201, 205, 207);
+  }
   :root .sbdocs-content {
     flex-grow: 1;
     width: 0;
@@ -130,6 +133,7 @@
     float: right;
     line-height: inherit;
   }
+
   :root .prismjs {
     font-size: 0.9rem;
   }
@@ -148,7 +152,15 @@
   }
   .sb-story > div > div:last-child {
     display: inline-flex;
-    flex: 1;
+    /* flex: 1; */
   }
+  .docblock-colorpalette div:last-child:has(> div[title]) {
+    display: flex;
+    gap: 0.5rem;
+  }
+  /* .docblock-colorpalette div[title] {
+    row-gap: 0.5rem;
+    display: flex;
+  } */
 </style>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />

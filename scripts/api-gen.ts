@@ -1,21 +1,15 @@
-import * as fs from 'fs';
 import { createClient } from '@hey-api/openapi-ts';
-import { load } from 'js-yaml';
 
 export const generate = async (
   yamlFilePath: string = './openapi.yml',
   outputDir: string = './src/__generated/api'
 ) => {
   try {
-    // Read YAML file and parse it
-    const yamlContent = fs.readFileSync(yamlFilePath, 'utf8');
-    const jsonSpec = load(yamlContent) as Record<string, unknown>;
-
     // Generate TypeScript client
     await createClient({
       client: '@hey-api/client-fetch',
       // debug: true,
-      input: jsonSpec,
+      input: yamlFilePath,
       output: {
         format: 'prettier',
         lint: 'eslint',
@@ -37,17 +31,6 @@ export const generate = async (
       // schemas: {
       //   export: true,
       //   type: 'json',
-      // },
-      // services: {
-      //   asClass: true,
-      //   export: true,
-      //   name: '{{name}}Service',
-      // },
-      // types: {
-      //   dates: true,
-      //   enums: 'typescript',
-      //   export: true,
-      //   name: 'preserve',
       // },
     });
 

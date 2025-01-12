@@ -31,6 +31,7 @@ export const initializeI18N = () => {
       backend: { loadPath: '/locales/{{lng}}/{{ns}}.json' },
       fallbackLng: 'en',
       // lng: 'nl',
+      // initAsync: false,
       interpolation: { escapeValue: true },
       // preload: ['en', 'nl'],
       react: { useSuspense: false },

@@ -1,7 +1,7 @@
 import * as Mobx from 'mobx';
 import { v4 as uuid } from 'uuid';
 
-export interface EntityStore<T extends Identifiable> {
+export interface Crudable<T extends Identifiable> {
   add: (entity: T) => void;
   count: Mobx.IComputedValue<number>;
   get: (id: string) => T | null;
@@ -20,7 +20,7 @@ export const createEntityStore = <T extends Identifiable>() => {
     proxy: false,
   });
 
-  const api: EntityStore<T> = {
+  const api: Crudable<T> = {
     add: Mobx.action((entity) => store.set(entity.id, entity)),
     count: Mobx.computed(() => store.size),
     get: (id) => store.get(id) ?? null,
@@ -49,19 +49,19 @@ export const createEntityStore = <T extends Identifiable>() => {
 
 // We infer the previous type as U through the parameter of merge. By intersecting with the inferred generic, we can compose any additional added properties. TypeScript automaticallly deduplicates the overlapping properties from Entitystore<T> which is part of the inferred generic U.
 
-export type WithPrevious<T> = T & {
+export type Mergable<T> = T & {
   merge: (other: T) => void;
 };
 
 export const withSelected = <T extends Identifiable, U>(
-  createStore: () => EntityStore<T> & WithPrevious<U>
+  createStore: () => Crudable<T> & Mergable<U>
 ) => {
   return () => {
     const { merge, ...store } = createStore();
     const id = Mobx.observable.box<string | null>(null);
 
     const api = {
-      ...(store as EntityStore<T> & U),
+      ...(store as Crudable<T> & U),
       selectById: Mobx.action((value: string) => id.set(value)),
       selectedId: Mobx.computed(() => id.get()),
       selectedItem: Mobx.computed(() => store.get(id.get() ?? '')),
@@ -76,21 +76,24 @@ export const withSelected = <T extends Identifiable, U>(
   };
 };
 
-export type WithSelected<T> = {
+// TODO: selectable state should be state related to the user entity itself.
+// TODO: users and entities are assumed to have many to many relationships and keep references to each other.
+
+export type Selectable<T> = {
   selectById: (id: string) => void;
   selectedId: Mobx.IComputedValue<string | null>;
   selectedItem: Mobx.IComputedValue<T | null>;
 };
 
 export const withFiltered = <T extends Identifiable, U>(
-  createStore: () => EntityStore<T> & WithPrevious<U>
+  createStore: () => Crudable<T> & Mergable<U>
 ) => {
   return () => {
     const { merge, ...store } = createStore();
     const filter = Mobx.observable.box<string | null>(null);
 
     const api = {
-      ...(store as EntityStore<T> & U),
+      ...(store as Crudable<T> & U),
       filter: Mobx.computed(() => filter.get()),
       filteredItems: Mobx.computed(() => {
         const value = filter.get();
@@ -110,7 +113,7 @@ export const withFiltered = <T extends Identifiable, U>(
   };
 };
 
-export type WithFiltered<T> = {
+export type Filterable<T> = {
   filter: Mobx.IComputedValue<string | null>;
   filteredItems: Mobx.IComputedValue<T[]>;
   setFilter: (value: string) => void;

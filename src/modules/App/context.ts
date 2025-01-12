@@ -77,7 +77,7 @@ export const AppRuntime = pipe(
       AppTags.EventBus,
       pipe(
         PubSub.unbounded<EventType<unknown>>({
-          replay: Number.POSITIVE_INFINITY,
+          // replay: Number.POSITIVE_INFINITY,
         }),
         Effect.andThen((bus) => {
           return new EventBusService(bus);

@@ -3,6 +3,7 @@ import { within, userEvent, expect } from '@storybook/test';
 import { ColorSchemeDecorator } from '.storybook/decorators/ColorSchemeDecorator';
 import { RuntimeDecorator } from '.storybook/decorators/RuntimeDecorator';
 import { ThemeDecorator } from '.storybook/decorators/ThemeDecorator';
+import { theme } from 'config/theme';
 import { createEndpoint } from 'models/endpoint/model';
 import { AppRuntime } from 'modules/App/context';
 import EndpointListItem from './EndpointListItem';
@@ -30,19 +31,19 @@ export const Default: Story = {
 
 export const Dark: Story = {
   args: { endpoint: createEndpoint() },
-  decorators: [ThemeDecorator({ forceColorScheme: 'dark' })],
+  decorators: [ThemeDecorator({ forceColorScheme: 'dark', theme })],
   // globals: { backgrounds: { value: 'dark' } },
 };
 
 export const Light: Story = {
   args: { endpoint: createEndpoint() },
-  decorators: [ThemeDecorator({ forceColorScheme: 'light' })],
+  decorators: [ThemeDecorator({ forceColorScheme: 'light', theme })],
   // globals: { backgrounds: { value: 'light' } },
 };
 
 export const HotPink: Story = {
   args: { endpoint: createEndpoint() },
-  decorators: [ThemeDecorator({ forceColorScheme: 'dark' })],
+  decorators: [ThemeDecorator({ forceColorScheme: 'dark', theme })],
   globals: { backgrounds: { value: 'hotpink' } },
 };
 

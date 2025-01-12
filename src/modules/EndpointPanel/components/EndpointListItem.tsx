@@ -23,18 +23,18 @@ export interface Props extends Publishable {
   readonly endpoint: Endpoint;
 }
 
+const classNames = {
+  root: styles.EndpointListItem,
+};
+
 /**
  * This component is responsible for rendering a single endpoint item in the list.
  * It normalizes the behavior of the input across OSes and browsers.
  * It also provides a way to select, update, and remove the endpoint.
  */
 const Main = observer(function EndpointListItem(props: Props) {
-  const { getChecked, getUrl } = useGetters(props);
-  const { updateFn, removeFn, selectFn } = useHandlers(props);
-  const classNames = React.useMemo(
-    () => ({ root: styles.EndpointListItem }),
-    []
-  );
+  const { getChecked, getUrl, updateFn, removeFn, selectFn } =
+    useEndpointListItem(props);
 
   return (
     <Stack
@@ -66,6 +66,12 @@ const Main = observer(function EndpointListItem(props: Props) {
 
 export default Main;
 
+const useEndpointListItem = (props: Props) => {
+  const getters = useGetters(props);
+  const handlers = useHandlers(props);
+  return useReturn({ ...getters, ...handlers });
+};
+
 //
 const useGetters = ({ endpoint }: Props) => {
   const store = useRuntimeSync(AppRuntime, AppTags.EndpointStore);
@@ -91,8 +97,6 @@ const useHandlers = ({ endpoint, publish }: Props) => {
 
   const updateFn = React.useCallback(
     (value: string) =>
-      // TODO: find out why updates are blocked when holding down keys. Only happens when characters are added, not when removed. Might have to do with how the updated value is passed to the store.
-
       void publish(updateEndpointRequested({ id: endpoint.id, url: value })),
     [publish, endpoint]
   );

@@ -1,14 +1,20 @@
 import * as React from 'react';
-// import { css } from '@emotion/react';
-import { Effect, pipe, Queue, type Context } from 'effect';
+import { Effect, Queue, flow } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'common/components/Button/Button';
 import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { List } from 'common/components/List/List';
 import { Stack } from 'common/components/Stack/Stack';
 import { useReturn } from 'common/hooks/useReturn';
+import {
+  useRuntime,
+  useRuntimeFn,
+  useRuntimeSync,
+} from 'common/hooks/useRuntimeFn';
 import { useTranslation } from 'common/hooks/useTranslation';
+import type { RuntimeType } from 'common/utils/context';
 import type { EventType, Publishable } from 'common/utils/event';
+import { memoize } from 'common/utils/memoize';
 import { addEndpointRequested } from 'models/endpoint/events';
 import { createEndpoint } from 'models/endpoint/model';
 import { AppRuntime } from 'modules/App/context';
@@ -19,60 +25,58 @@ import styles from './EndpointPanel.module.css';
 import * as Tags from './tags';
 
 interface Props extends OuterProps, InnerProps {}
-interface InnerProps extends Publishable {
-  readonly store: Context.Tag.Service<typeof AppTags.EndpointStore>;
+interface InnerProps extends Publishable {}
+export interface OuterProps {
+  readonly foo: string;
 }
-export interface OuterProps {}
 
 export interface Translations {
   addEndpointLabel: string;
 }
 
-const Main = pipe(
-  observer(EndpointPanel as (props: OuterProps) => React.JSX.Element),
-  WithRuntime(EndpointPanelRuntime, ({ propsOf, to, from }) => {
-    //
-    // TODO: consider using decorator composition, but we have to think how to type "to", because it depends on the first argument to WithRuntime.
+const registerInboundQueue = memoize(
+  (runtime: RuntimeType<typeof EndpointPanelRuntime>) =>
+    Effect.gen(function* () {
+      const bus = yield* AppTags.EventBus;
+      yield* bus.register((event) =>
+        runtime.runFork(Effect.andThen(Tags.InboundQueue, Queue.offer(event)))
+      );
+    })
+);
 
-    propsOf(AppRuntime, ({ runFork, runSync }) => ({
-      publish(msg: EventType<unknown>) {
-        runFork(Effect.andThen(AppTags.EventBus, (bus) => bus.publish(msg)));
-      },
-      store: runSync(AppTags.EndpointStore),
-    })) satisfies InnerProps;
+const publishToBus = (msg: EventType<unknown>) =>
+  Effect.andThen(AppTags.EventBus, (bus) => bus.publish(msg));
 
+//
+const Component = flow(
+  observer<Props>,
+  WithRuntime(EndpointPanelRuntime, (runtime) => {
     // TODO: Use request/response to avoid stale reads, before dispatching actions
+    useRuntime(AppRuntime, registerInboundQueue(runtime), [runtime]);
 
-    from(AppRuntime, ({ runSync }) =>
-      Effect.map(Tags.Foo, (_) => runSync(AppTags.EndpointStore))
-    );
-
-    to(AppRuntime, ({ runFork }) =>
-      Effect.andThen(AppTags.EventBus, (bus) =>
-        bus.register((event) =>
-          runFork(Effect.andThen(Tags.InboundQueue, Queue.offer(event)))
-        )
-      )
-    );
+    const publish = useRuntimeFn(AppRuntime, publishToBus, [runtime]);
+    return useReturn({ publish }) satisfies InnerProps;
   })
 );
 
-export default Main;
-function EndpointPanel(props: Props) {
-  const { publish, store } = props;
-  const { addEndpoint } = useHandlers(props);
+/**
+ * This is the main component for the EndpointPanel module.
+ * It displays a list of endpoints and allows the user to add new endpoints.
+ */
+const EndpointPanel = Component(function EndpointPanel(props: Props) {
+  const { addEndpoint, endpoints } = useEndpointPanel(props);
   const { text } = useTranslation<Translations>();
 
   const renderList = React.useCallback(
     () =>
-      store.list.get().map((endpoint) => (
+      endpoints.map((endpoint) => (
         <EndpointListItem
           key={endpoint.id}
           endpoint={endpoint}
-          publish={publish}
+          publish={props.publish}
         />
       )),
-    [store, publish]
+    [endpoints, props.publish]
   );
 
   return (
@@ -80,18 +84,24 @@ function EndpointPanel(props: Props) {
       <List render={renderList} />
       <Button onClick={addEndpoint}>
         {text('addEndpointLabel', {
-          defaultValue: 'Add Endpoint',
+          defaultValue: '',
         })}
       </Button>
     </Stack>
   );
-}
+});
 
-function useHandlers({ publish }: Props) {
+export default EndpointPanel;
+
+function useEndpointPanel({ publish }: Props) {
+  // TODO: use normalized cache for entity collections and create mobx entity stores inside view models.
+  const store = useRuntimeSync(AppRuntime, AppTags.EndpointStore);
+  const endpoints = store.list.get();
+
   const addEndpoint = React.useCallback(
     () => publish(addEndpointRequested(createEndpoint())),
     [publish]
   );
 
-  return useReturn({ addEndpoint });
+  return useReturn({ addEndpoint, endpoints, publish });
 }

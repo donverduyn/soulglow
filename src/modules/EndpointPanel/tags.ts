@@ -1,4 +1,4 @@
-import { Context, type Queue } from 'effect';
+import { Context, type Effect, type Queue } from 'effect';
 import type { EventType } from 'common/utils/event';
 
 const PREFIX = '@EndpointPanel';
@@ -10,4 +10,9 @@ class InboundQueue extends Context.Tag(`${PREFIX}/InboundQueue`)<
 
 class Foo extends Context.Tag(`${PREFIX}/Foo`)<Foo, string>() {}
 
-export { InboundQueue, Foo };
+class Foobar extends Context.Tag(`${PREFIX}/Bar`)<
+  Foobar,
+  Effect.Effect<string, never, Foo>
+>() {}
+
+export { InboundQueue, Foo, Foobar };

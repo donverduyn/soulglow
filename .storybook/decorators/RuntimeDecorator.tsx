@@ -16,6 +16,6 @@ export const RuntimeDecorator = <
   function RuntimeDecorator(Story) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const enhance = React.useCallback(moize(WithRuntime(runtime)), []);
-    const Component = enhance(Story);
+    const Component = enhance(React.memo(Story));
     return <Component />;
   };

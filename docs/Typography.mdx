@@ -1,6 +1,7 @@
 {/* Typography.mdx */}
 
-import { Meta, Typeset } from '@storybook/blocks';
+import { Meta } from '@storybook/blocks';
+import { Typeset } from '.storybook/docblocks/Typeset';
 
 <Meta title='Typography' />
 
@@ -17,7 +18,7 @@ export const typography = {
     s3: 16,
   },
   type: {
-    primary: '"Nunito Sans", "Helvetica Neue", Helvetica, Arial, sans-serif',
+    primary: '"Proxima Nova", "Helvetica Neue", Helvetica, Arial, sans-serif',
   },
   weight: {
     black: '900',
@@ -32,9 +33,7 @@ export const SampleText =
 
 # Typography
 
-**Font:** Nunito Sans
-
-**Weights:** 400(regular), 700(bold), 800(extrabold), 900(black)
+**Font:** Proxima Nova, **Weights:** 400(regular), 700(bold), 800(extrabold), 900(black)
 
 <Typeset
   fontSizes={[

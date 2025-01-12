@@ -34,6 +34,7 @@ const config: StorybookConfig = {
     backgroundsStoryGlobals: true,
     viewportStoryGlobals: true,
   },
+  logLevel: 'debug',
   framework: {
     name: getAbsolutePath('@storybook/react-vite'),
     options: {
@@ -48,7 +49,7 @@ const config: StorybookConfig = {
           expanded: true,
           sourceUrl: 'https://github.com/mantinedev/mantine',
           title: 'Mantine',
-          url: 'http://localhost:6006/refs/mantine',
+          url: `http://localhost:6006/refs/mantine`,
         },
       };
     } else {
@@ -61,9 +62,10 @@ const config: StorybookConfig = {
     '../stories/**/*.@(ts|tsx)',
     '../**/*.mdx',
   ],
-  // typescript: {
-  //   reactDocgen: false,
-  // },
+  typescript: {
+    // reactDocgen: false,
+    reactDocgen: 'react-docgen',
+  },
   viteFinal: async (config) => {
     const { mergeConfig } = await import('vite');
     const { viteStaticCopy } = await import('vite-plugin-static-copy');

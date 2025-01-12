@@ -18,15 +18,5 @@
       "scripts/*": ["./scripts/*"],
       ".storybook/*": ["./.storybook/*"],
     },
-    "plugins": [
-      {
-        "name": "@styled/typescript-styled-plugin",
-        "lint": {
-          "validProperties": [
-            "label"
-          ]
-        }
-      }
-    ],
   },
 }

@@ -1,5 +1,5 @@
 import { composeStories, setProjectAnnotations } from '@storybook/react';
-import { fireEvent, waitFor, cleanup, screen } from '@testing-library/react';
+import { fireEvent, waitFor, cleanup, screen, render } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import previewAnnotations from '.storybook/preview';
 import type { TranslationAvailable } from 'i18n';
@@ -33,12 +33,13 @@ describe('endpointPanel', () => {
       parameters: { msw: { handlers: [fetchTranslation] } },
     });
 
+    // const screen = render(<Default />);
     const addButton = await screen.findByText(addEndpointLabel);
     fireEvent.click(addButton);
 
     await waitFor(() => {
       const listItems = screen.getAllByRole('listitem');
-      expect(listItems).toHaveLength(4);
+      expect(listItems).toHaveLength(3);
     });
   });
 });

@@ -1,4 +1,3 @@
-import { PropsOf } from '@emotion/react';
 import { Flex } from '@mantine/core';
 import type { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent, expect, fn } from '@storybook/test';
@@ -37,7 +36,7 @@ export const Default: Story = {
   ],
 };
 
-const VariantsTemplate = (props: PropsOf<typeof Button>) => {
+const VariantsTemplate = (props: React.ComponentProps<typeof Button>) => {
   return (
     <Flex
       gap='sm'
@@ -74,7 +73,8 @@ export const VariantsLight: Story = {
 };
 
 const createVariantsStory = (
-  args: PropsOf<typeof Button> & Partial<Parameters<typeof ThemeDecorator>[0]>
+  args: React.ComponentProps<typeof Button> &
+    Partial<Parameters<typeof ThemeDecorator>[0]>
 ): Story => ({
   args,
   decorators: [
@@ -114,7 +114,7 @@ export const VariantsDisabled: Story = {
 };
 
 const sizes = ['xs', 'sm', 'md', 'lg', 'xl'];
-const SizesTemplate = (props: PropsOf<typeof Button>) => (
+const SizesTemplate = (props: React.ComponentProps<typeof Button>) => (
   <Flex
     align='baseline'
     gap='sm'
@@ -133,7 +133,9 @@ const SizesTemplate = (props: PropsOf<typeof Button>) => (
   </Flex>
 );
 
-const createSizesStory = (args: PropsOf<typeof Button>): Story => ({
+const createSizesStory = (
+  args: React.ComponentProps<typeof Button>
+): Story => ({
   argTypes: {
     variant: {
       control: { type: 'select' },

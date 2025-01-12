@@ -7,6 +7,8 @@ import {
   Controls,
   Stories,
 } from '@storybook/blocks';
+import { DOCS_PREPARED } from '@storybook/core-events';
+import { addons } from '@storybook/preview-api';
 import type { Decorator, Preview } from '@storybook/react';
 import { themes, type ThemeVars, ensure } from '@storybook/theming';
 import { initialize, mswLoader } from 'msw-storybook-addon';
@@ -14,15 +16,28 @@ import '@mantine/core/styles.layer.css';
 import { DocsContainer } from './components/DocsContainer';
 import 'index.css';
 import 'font.css';
+import { BodyClassColorSchemeDecorator } from './decorators/ColorSchemeDecorator';
 import { I18nDecorator } from './decorators/I18nDecorator';
-import { SbColorSchemeDecorator } from './decorators/SbColorSchemeDecorator';
 
 if (import.meta.env.DEV) {
   // initialize MSW only in development
-  initialize({ onUnhandledRequest: 'bypass', quiet: true });
+  initialize({ });
 }
 
-export const decorators: Decorator[] = [SbColorSchemeDecorator, I18nDecorator];
+export const decorators: Decorator[] = [
+  BodyClassColorSchemeDecorator,
+  I18nDecorator,
+];
+
+const channel = addons.getChannel();
+
+channel.on(DOCS_PREPARED, (payload) => {
+  console.log('DOCS_PREPARED', payload);
+});
+
+// channel.on(DOCS_PREPARED, (payload) => {
+//   console.log('DOCS_PREPARED', payload);
+// });
 
 const preview: Preview = {
   decorators,
@@ -41,7 +56,7 @@ const preview: Preview = {
     },
   },
   initialGlobals: {
-    backgrounds: { value: 'light' },
+    backgrounds: { value: undefined },
   },
   loaders: import.meta.env.DEV ? [mswLoader] : [],
   parameters: {
@@ -89,8 +104,23 @@ const preview: Preview = {
         );
       },
       source: { state: 'open' },
+      // story: { inline: false },
       theme: ensure({ ...themes.dark, fontBase: 'Proxima Nova' }),
       toc: { disable: false },
+    },
+    options: {
+      storySort: {
+        order: [
+          '*',
+          'Common',
+          // 'Intro',
+          // 'Pages',
+          // ['Home', 'Login', 'Admin'],
+          // 'Components',
+          // '*',
+          // 'WIP',
+        ],
+      },
     },
   },
 };

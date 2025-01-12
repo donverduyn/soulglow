@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { RuntimeContext } from 'common/utils/context';
 import { isReactContext } from 'common/utils/react';
 
-//* It is important to note that the runtime of the host component should always be provided to the dependency array, if runtimes higher up the tree are accessed using useRuntimeFn, useRuntime or useRuntimeSync. This is automatically done by WithRuntime its attachTo utility function and might be something to recommend, because this creates a good overview of how the component interacts with external runtimes.
+//* It is important to note that the runtime of the host component should always be provided to the dependency array, if runtimes higher up the tree are accessed using useRuntimeFn, useRuntime or useRuntimeSync.
 
 /*
 This hook returns a function that can be called to trigger an effect.
@@ -30,30 +30,6 @@ export function useRuntimeFn<A, E, R, T>(
   const finalDeps = [runtime, ...deps];
 
   const emitter = React.useMemo(() => new EventEmitter<T, A>(), finalDeps);
-  // const queue = React.useMemo(() => Queue.unbounded<{ data: T }>(), finalDeps);
-  // const effect0 = React.useMemo(
-  //   () =>
-  //     Effect.gen(function* () {
-  //       const q = yield* queue;
-  //       return Stream.fromQueue(q).pipe(
-  //         Stream.tap(Console.log),
-  //         Stream.runDrain
-  //       );
-  //     }),
-  //   finalDeps
-  // );
-
-  //   queue.pipe(
-  //     Effect.andThen(Stream.fromQueue),
-  //     Effect.andThen(
-  //       Stream.mapEffect(({ data }) => (Effect.isEffect(fn) ? fn : fn(data)))
-  //     ),
-  //     Effect.fork,
-  //     Effect.andThen(Stream.tap(Console.log)),
-  //     Stream.runDrain
-  //   ),
-  //   finalDeps
-  // );
   const effect = React.useMemo(
     () =>
       pipe(
@@ -69,31 +45,9 @@ export function useRuntimeFn<A, E, R, T>(
     finalDeps
   );
 
-  // useRuntime(
-  //   context,
-  //   Effect.gen(function* () {
-  //     const q = yield* Queue.take(yield* queue);
-  //     console.log(q);
-  //   }).pipe(Effect.forever),
-  // queue.pipe(
-  //   Effect.andThen(Queue.take),
-  //   Effect.tap(() => Console.log('take')),
-  //   Effect.forever
-  // ),
-  //   finalDeps
-  // );
-
-  useRuntime(context, effect, deps);
-
-  // const emitFn = React.useCallback(
-  //   (data: T) =>
-  //     runtime!.runPromise(queue.pipe(Effect.andThen(Queue.offer({ data })))),
-  //   [runtime]
-  // );
-
-  // return emitFn as IsUnknown<T> extends true
-  //   ? () => Promise<A>
-  //   : (value: T) => Promise<A>;
+  // emitter is added to deps, because it is unstable on fast refresh.
+  // We cannot pass fn directly as a dep, because it would recreate a stream on every rerender when it's accidentally unstable (with inline declared effects)
+  useRuntime(context, effect, [emitter, ...deps]);
 
   return emitter.emit as IsUnknown<T> extends true
     ? () => Promise<A>
@@ -149,8 +103,6 @@ export const useRuntimeSync = <A, E, R>(
 This is converting push based events to a pull based stream, 
 where the consumer has control through the provided effect.
 */
-
-// TODO: consider if we can use Stream.buffer instead of EventEmitter.
 
 class EventEmitter<T, A> {
   private listeners: Array<(data: T, eventId: string) => void> = [];

@@ -8,6 +8,11 @@
     "moduleResolution": "Bundler",
     "emitDeclarationOnly": true,
     "composite": true,
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
     "types": ["node", "vite/client"],
   },
   "exclude": [
@@ -15,10 +20,12 @@
     "dist/**/*",
   ],
   "include": [
+    "src/common/**/*",
     "src/**/*.stories.ts",
     "src/**/*.stories.tsx",
     "**/.storybook/**/*",
     "stories/**/*",
+    "**/*.mdx"
   ],
   "references": [
     {

@@ -48,6 +48,9 @@ export default defineConfig(({ mode }) => ({
   esbuild: {
     drop: ['console', 'debugger'],
   },
+  experimental: {
+    hmrPartialAccept: true,
+  },
   plugins: [
     mode !== 'production' && process.env.CI !== 'true' && browser(mode),
     dynamicProxyPlugin(),
@@ -125,7 +128,7 @@ export default defineConfig(({ mode }) => ({
       template: 'treemap',
       title: 'Vite Visualizer',
     }),
-    inspect(),
+    inspect({}),
   ],
   preview: {
     headers: noCacheHeaders,
