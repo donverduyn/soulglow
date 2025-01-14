@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { type MantineThemeOverride } from '@mantine/core';
 import type { Decorator } from '@storybook/react';
 import { ThemeProvider } from 'common/providers/ThemeProvider';
 import { prefix } from 'config/constants';

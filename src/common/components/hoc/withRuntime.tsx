@@ -10,16 +10,23 @@ It allows any downstream components to access the runtime using the context.
 
 // TODO: think about assigning a method to the function, to obtain the provided react context objects in the hoc as an array, for testing purposes. We can separate the hoc from the pipe function and export the method as a named export.
 
-export const WithRuntime =
-  <TTarget, TProps extends Record<string, unknown>>(
-    Context: RuntimeContext<TTarget>,
-    getSource?: (
-      runtime: ManagedRuntime.ManagedRuntime<TTarget, never>
-    ) => TProps
-  ) =>
-  <P,>(Component: React.FC<P>) => {
-    //
-    const Wrapped: React.FC<Simplify<Omit<P, keyof TProps>>> = (props) => {
+export function WithRuntime<TTarget, TProps extends Record<string, unknown>>(
+  Context: RuntimeContext<TTarget>,
+  getSource: (runtime: ManagedRuntime.ManagedRuntime<TTarget, never>) => TProps
+): <P>(Component: React.FC<P>) => React.FC<Simplify<Omit<P, keyof TProps>>>;
+
+export function WithRuntime<TTarget>(
+  Context: RuntimeContext<TTarget>,
+  getSource?: (runtime: ManagedRuntime.ManagedRuntime<TTarget, never>) => void
+): <P>(Component: React.FC<P>) => React.FC<Simplify<P>>;
+
+//
+export function WithRuntime<TTarget, TProps extends Record<string, unknown>>(
+  Context: RuntimeContext<TTarget>,
+  getSource?: (runtime: ManagedRuntime.ManagedRuntime<TTarget, never>) => TProps
+) {
+  return <P,>(Component: React.FC<P>) => {
+    const Wrapped: React.FC<P> = (props) => {
       const { layer } = Context as unknown as {
         layer: Layer.Layer<TTarget>;
       };
@@ -39,6 +46,7 @@ export const WithRuntime =
 
     return Wrapped;
   };
+}
 
 /*
 This hook creates a runtime and disposes it when the component is unmounted.

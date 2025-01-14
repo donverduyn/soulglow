@@ -1,6 +1,5 @@
-
 {/* Colors.mdx */}
-
+{/* eslint-disable sort-keys-fix/sort-keys-fix */}
 import { Meta, ColorPalette, ColorItem } from '@storybook/blocks';
 import { theme } from 'config/theme';
 
@@ -13,7 +12,6 @@ import { theme } from 'config/theme';
     title='theme.color.indigo'
     subtitle='Some of the greys'
     colors={{
-      /** eslint-disable sort-keys-fix/sort-keys-fix */
       Zero: theme.colors.indigo[0],
       One: theme.colors.indigo[1],
       Two: theme.colors.indigo[2],
@@ -64,3 +62,4 @@ import { theme } from 'config/theme';
     colors={['linear-gradient(65deg,white,black)']}
   />
 </ColorPalette>
+{/* eslint-enable sort-keys-fix/sort-keys-fix */}

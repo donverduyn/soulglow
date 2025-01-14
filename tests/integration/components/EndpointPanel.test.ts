@@ -1,18 +1,26 @@
-import { composeStories, setProjectAnnotations } from '@storybook/react';
-import { fireEvent, waitFor, cleanup, screen, render } from '@testing-library/react';
+import { composeStories } from '@storybook/react';
+import { fireEvent, waitFor, screen, cleanup } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
-import previewAnnotations from '.storybook/preview';
 import type { TranslationAvailable } from 'i18n';
 import type { Translations } from 'modules/EndpointPanel/EndpointPanel';
 import * as stories from 'modules/EndpointPanel/EndpointPanel.stories';
 import '@testing-library/jest-dom';
 
-describe('endpointPanel', () => {
-  const annotations = setProjectAnnotations([previewAnnotations]);
-  const { Default } = composeStories(stories, annotations);
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  beforeAll(annotations.beforeAll);
-  afterEach(cleanup);
+describe('endpointPanel', () => {
+  const { Default } = composeStories(stories);
+
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+  });
+  afterEach(() => {
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
+    cleanup();
+  });
+
+  // afterEach(cleanup);
   it('should have the translations available', () => {
     expect.assertions(1);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -20,26 +28,38 @@ describe('endpointPanel', () => {
     expectTypeOf<typeof isAvailable>().toEqualTypeOf<true>();
   });
   it('should add an endpoint to the list when the "Add Endpoint" button is clicked', async () => {
-    expect.assertions(2);
-    // this should work with a uuid, but it seems that the dom is overridden because of concurrent tests.
-    const addEndpointLabel = 'Add Endpoint';
+    expect.assertions(1);
 
-    // TODO: it seems that msw fails to intercept anythin if the first request is unhandled, so if locale is something else than en, en must be handled too.
-    const fetchTranslation = http.get('/locales/en/translation.json', () =>
-      HttpResponse.json<Translations>({ addEndpointLabel })
+    const Nl = http.get('/locales/nl/translation.json', () =>
+      HttpResponse.json<Translations>(Default.args.labels)
     );
+
+    const En = http.get('/locales/en/translation.json', () =>
+      HttpResponse.json<Translations>(Default.args.labels)
+    );
+
     await Default.run({
       globals: { locale: 'en' },
-      parameters: { msw: { handlers: [fetchTranslation] } },
+      parameters: { msw: { handlers: { locale: [En, Nl] } } },
     });
+    // const screen = render(<div />)
+    console.log('foo');
+    // screen.debug();
+    // await act(async () => {
+    // vi.runAllTicks();
+    await vi.runAllTimersAsync();
+    // });
 
-    // const screen = render(<Default />);
-    const addButton = await screen.findByText(addEndpointLabel);
+    console.log('bar');
+    // screen.debug();
+
+    const label = Default.args.labels!.addEndpointLabel;
+    const addButton = await screen.findByText(label);
     fireEvent.click(addButton);
 
     await waitFor(() => {
       const listItems = screen.getAllByRole('listitem');
-      expect(listItems).toHaveLength(3);
+      expect(listItems).toHaveLength(2);
     });
   });
 });

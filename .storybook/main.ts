@@ -34,7 +34,6 @@ const config: StorybookConfig = {
     backgroundsStoryGlobals: true,
     viewportStoryGlobals: true,
   },
-  logLevel: 'debug',
   framework: {
     name: getAbsolutePath('@storybook/react-vite'),
     options: {
@@ -42,6 +41,7 @@ const config: StorybookConfig = {
       strictMode: true,
     },
   },
+  logLevel: 'debug',
   refs: (_, { configType }) => {
     if (configType === 'DEVELOPMENT') {
       return {

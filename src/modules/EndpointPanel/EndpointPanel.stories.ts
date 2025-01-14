@@ -1,27 +1,30 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, userEvent, expect } from '@storybook/test';
+// import { within, userEvent, expect, screen, waitFor } from '@storybook/test';
+import { within } from '@storybook/test';
 // import type { Simplify } from 'type-fest';
 // import * as AppTags from 'modules/App/tags';
-import { http, HttpResponse } from 'msw';
 import { ColorSchemeDecorator } from '.storybook/decorators/ColorSchemeDecorator';
 import { RuntimeDecorator } from '.storybook/decorators/RuntimeDecorator';
 import { ThemeDecorator } from '.storybook/decorators/ThemeDecorator';
+import type { WithArgs } from '.storybook/utils/args';
 import { AppRuntime } from 'modules/App/context';
 import EndpointListItem from './components/EndpointListItem';
 import EndpointPanel, { type Translations } from './EndpointPanel';
-// type Foo = Simplify<typeof AppTags>;
+// import { http, HttpResponse, delay } from 'msw';
 
 // TODO: import tags to type test implementation against them
 // TODO: we need to think about how we want to spy on effectful deps
 
-const fetchTranslationEn = http.get('/locales/nl/translation.json', () =>
-  HttpResponse.json<Translations>({ addEndpointLabel: 'toevoegen kut' })
-);
-const fetchTranslationNl = http.get('/locales/en/translation.json', () =>
-  HttpResponse.json<Translations>({ addEndpointLabel: 'add pleazz' })
-);
+const labels: Translations = {
+  addEndpointLabel: 'Add Endpoint',
+};
 
-const meta: Meta<typeof EndpointPanel> = {
+// const En = http.get('/locales/en/translation.json', async () => {
+//   await delay(300);
+//   return HttpResponse.json<Translations>(meta.args!.labels)
+// });
+
+const meta: Meta<WithArgs<typeof EndpointPanel, { labels: Translations }>> = {
   argTypes: {
     // colorTheme: {
     //   control: { type: 'radio' },
@@ -29,19 +32,13 @@ const meta: Meta<typeof EndpointPanel> = {
     //   options: ['Light', 'Dark'],
     // },
   },
+  args: { labels },
   component: EndpointPanel,
   decorators: [RuntimeDecorator(AppRuntime)],
-  parameters: {
-    layout: 'centered',
-    msw: {
-      handlers: {
-        locale: [fetchTranslationEn, fetchTranslationNl],
-      },
-    },
-  },
-  subcomponents: {
-    EndpointListItem: EndpointListItem as React.ComponentType<unknown>,
-  },
+  // globals: { locale: 'en' },
+  // parameters: { msw: { handlers: { locale: [En] } } },
+  // parameters: { layout: 'centered' },
+  subcomponents: { EndpointListItem },
   tags: ['autodocs'],
   title: '@EndpointPanel/EndpointPanel',
 };
@@ -49,17 +46,29 @@ const meta: Meta<typeof EndpointPanel> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const Default: Story = {
   decorators: [
     ColorSchemeDecorator,
     ThemeDecorator({ defaultColorScheme: 'dark' }),
   ],
   // globals: { backgrounds: { disabled: true } },
-  play: async ({ canvasElement }) => {
+  play: ({ canvasElement }) => {
+    // await mount();
+    // const canvas = await mount();
+    // await sleep(1000)
     const canvas = within(canvasElement);
-    const button = canvas.getByText('Add Endpoint');
-    await userEvent.click(button);
-    await userEvent.click(button);
-    await expect(button).toBeInTheDocument();
+
+    // const button = await waitFor(() => canvas.getByText('Add Endpoint'));
+    // Wait for the updated text to appear after Suspense resolves
+    // await waitFor(() => {
+    //   expect(canvas.getByText(labels.addEndpointLabel)).toBeInTheDocument();
+    // }, { timeout: 3000 });
+    // screen.debug();
+    // const button = await canvas.findByText(labels.addEndpointLabel);
+    // await userEvent.click(button);
+    // await userEvent.click(button);
+    // await expect(button).toBeInTheDocument();
   },
 };

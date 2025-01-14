@@ -24,20 +24,17 @@ const withColorScheme = <P extends Record<string, any>>(
 
 const Component = withColorScheme(SbTypeset);
 
-const getAnchor = (document: Document, cls: string) => () =>
-  document.getElementsByClassName(cls)[0] as HTMLElement;
+// const getAnchor = (document: Document, cls: string) => () =>
+//   document.getElementsByClassName(cls)[0] as HTMLElement;
 
 const getVariablesSelector = (cls: string) => `.${cls}`;
 
 export const Typeset: typeof SbTypeset = (props) => {
   return (
     <ThemeProvider
-      prefix={prefix}
-      // deduplicateCssVariables={false}
-      withCssVariables={false}
-      withGlobalClasses={false}
-      withStaticClasses={false}
       cssVariablesSelector={getVariablesSelector(anchorClass)}
+      prefix={prefix}
+      // TODO: find out why --mantine-color-text and --mantine-color-body are not available when the root is changed, while it does work in ThemeDecorator
       // getRootElement={getAnchor(document, anchorClass)}
       theme={mantineTheme}
     >
@@ -46,4 +43,4 @@ export const Typeset: typeof SbTypeset = (props) => {
   );
 };
 
-// instead of coupling mantine to each docblock, we should have a higher order component or decorator component to use in the mdx files
+// TODO: instead of coupling mantine to each docblock, we should have a higher order component or decorator component to use in the mdx files

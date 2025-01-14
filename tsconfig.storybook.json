@@ -20,7 +20,7 @@
     "dist/**/*",
   ],
   "include": [
-    "src/common/**/*",
+    // "src/common/**/*",
     "src/**/*.stories.ts",
     "src/**/*.stories.tsx",
     "**/.storybook/**/*",

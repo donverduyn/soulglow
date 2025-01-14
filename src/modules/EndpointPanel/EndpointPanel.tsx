@@ -13,7 +13,7 @@ import {
 } from 'common/hooks/useRuntimeFn';
 import { useTranslation } from 'common/hooks/useTranslation';
 import type { RuntimeType } from 'common/utils/context';
-import type { EventType, Publishable } from 'common/utils/event';
+import type { EventType } from 'common/utils/event';
 import { memoize } from 'common/utils/memoize';
 import { addEndpointRequested } from 'models/endpoint/events';
 import { createEndpoint } from 'models/endpoint/model';
@@ -25,10 +25,8 @@ import styles from './EndpointPanel.module.css';
 import * as Tags from './tags';
 
 interface Props extends OuterProps, InnerProps {}
-interface InnerProps extends Publishable {}
-export interface OuterProps {
-  readonly foo: string;
-}
+interface InnerProps {}
+export interface OuterProps {}
 
 export interface Translations {
   addEndpointLabel: string;
@@ -53,9 +51,6 @@ const Component = flow(
   WithRuntime(EndpointPanelRuntime, (runtime) => {
     // TODO: Use request/response to avoid stale reads, before dispatching actions
     useRuntime(AppRuntime, registerInboundQueue(runtime), [runtime]);
-
-    const publish = useRuntimeFn(AppRuntime, publishToBus, [runtime]);
-    return useReturn({ publish }) satisfies InnerProps;
   })
 );
 
@@ -63,8 +58,8 @@ const Component = flow(
  * This is the main component for the EndpointPanel module.
  * It displays a list of endpoints and allows the user to add new endpoints.
  */
-const EndpointPanel = Component(function EndpointPanel(props: Props) {
-  const { addEndpoint, endpoints } = useEndpointPanel(props);
+const EndpointPanel = Component(function EndpointPanel() {
+  const { addEndpoint, endpoints, publish } = useEndpointPanel();
   const { text } = useTranslation<Translations>();
 
   const renderList = React.useCallback(
@@ -73,19 +68,19 @@ const EndpointPanel = Component(function EndpointPanel(props: Props) {
         <EndpointListItem
           key={endpoint.id}
           endpoint={endpoint}
-          publish={props.publish}
+          publish={publish}
         />
       )),
-    [endpoints, props.publish]
+    [endpoints, publish]
   );
 
   return (
     <Stack className={styles.EndpointPanel}>
       <List render={renderList} />
       <Button onClick={addEndpoint}>
-        {text('addEndpointLabel', {
-          defaultValue: '',
-        })}
+        <React.Suspense fallback='loading...'>
+          {text('addEndpointLabel')}
+        </React.Suspense>
       </Button>
     </Stack>
   );
@@ -93,15 +88,16 @@ const EndpointPanel = Component(function EndpointPanel(props: Props) {
 
 export default EndpointPanel;
 
-function useEndpointPanel({ publish }: Props) {
+function useEndpointPanel() {
   // TODO: use normalized cache for entity collections and create mobx entity stores inside view models.
   const store = useRuntimeSync(AppRuntime, AppTags.EndpointStore);
+  const publish = useRuntimeFn(AppRuntime, publishToBus);
+
   const endpoints = store.list.get();
 
-  const addEndpoint = React.useCallback(
-    () => publish(addEndpointRequested(createEndpoint())),
-    [publish]
-  );
+  const addEndpoint = React.useCallback(() => {
+    void publish(addEndpointRequested(createEndpoint()));
+  }, [publish]);
 
   return useReturn({ addEndpoint, endpoints, publish });
 }

@@ -7,8 +7,6 @@ import {
   Controls,
   Stories,
 } from '@storybook/blocks';
-import { DOCS_PREPARED } from '@storybook/core-events';
-import { addons } from '@storybook/preview-api';
 import type { Decorator, Preview } from '@storybook/react';
 import { themes, type ThemeVars, ensure } from '@storybook/theming';
 import { initialize, mswLoader } from 'msw-storybook-addon';
@@ -21,23 +19,13 @@ import { I18nDecorator } from './decorators/I18nDecorator';
 
 if (import.meta.env.DEV) {
   // initialize MSW only in development
-  initialize({ });
+  initialize({ onUnhandledRequest: 'bypass', quiet: true });
 }
 
 export const decorators: Decorator[] = [
-  BodyClassColorSchemeDecorator,
   I18nDecorator,
+  BodyClassColorSchemeDecorator,
 ];
-
-const channel = addons.getChannel();
-
-channel.on(DOCS_PREPARED, (payload) => {
-  console.log('DOCS_PREPARED', payload);
-});
-
-// channel.on(DOCS_PREPARED, (payload) => {
-//   console.log('DOCS_PREPARED', payload);
-// });
 
 const preview: Preview = {
   decorators,
@@ -58,6 +46,7 @@ const preview: Preview = {
   initialGlobals: {
     backgrounds: { value: undefined },
   },
+  // we only use MSW in our test environment, which is not part of the build
   loaders: import.meta.env.DEV ? [mswLoader] : [],
   parameters: {
     backgrounds: {
@@ -104,6 +93,9 @@ const preview: Preview = {
         );
       },
       source: { state: 'open' },
+      story: {
+        autoplay: true,
+      },
       // story: { inline: false },
       theme: ensure({ ...themes.dark, fontBase: 'Proxima Nova' }),
       toc: { disable: false },
