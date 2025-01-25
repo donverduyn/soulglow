@@ -1,5 +1,5 @@
 import { renderHook, type RenderOptions } from '@testing-library/react';
-import i18n from 'i18next';
+import i18next from 'i18next';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { useTranslation } from 'common/hooks/useTranslation';
 
@@ -19,16 +19,18 @@ const nl: Translations = {
 };
 
 describe('useTranslation', () => {
-  beforeAll(() => {
-    void i18n.use(initReactI18next).init({
-      fallbackLng: 'en',
-      interpolation: { escapeValue: false },
-      lng: 'en',
-      resources: {
-        en: { translation: en },
-        nl: { translation: nl },
-      },
-    });
+  const i18n = i18next.use(initReactI18next).createInstance({
+    fallbackLng: 'en',
+    interpolation: { escapeValue: false },
+    lng: 'en',
+    resources: {
+      en: { translation: en },
+      nl: { translation: nl },
+    },
+  });
+
+  beforeAll(async () => {
+    await i18n.init();
   });
 
   const Wrapper: RenderOptions['wrapper'] = ({ children }) => (

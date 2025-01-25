@@ -84,4 +84,5 @@
     "node_modules/@mantine/core/styles.css"
   ],
   "typescript.preferences.importModuleSpecifierEnding": "index",
+  "remote.autoForwardPortsFallback": 0,
 }

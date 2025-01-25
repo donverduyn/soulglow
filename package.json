@@ -17,7 +17,7 @@
     "lint:ci": "tsx -e \"import { lint } from './scripts/lint'; lint(['yarn lint:tsc', 'yarn lint:eslint --cache-strategy content','yarn lint:stylelint']);\"",
     "lint:fix": "yarn lint:eslint --fix && yarn lint:stylelint --fix",
     "preview": "yarn build --profile && tsx -e \"import { viewStatic } from './scripts/browser'; viewStatic('./dist');\"",
-    "test": "vitest --ui --no-isolate --pool=threads --silent",
+    "test": "vitest --ui --no-isolate --pool=threads",
     "test:coverage": "vitest run --coverage --silent",
     "test:e2e": "",
     "analyze": "yarn build && tsx -e \"import { viewStatic } from './scripts/browser'; viewStatic('./.analyzer');\"",

@@ -77,11 +77,7 @@ const EndpointPanel = Component(function EndpointPanel() {
   return (
     <Stack className={styles.EndpointPanel}>
       <List render={renderList} />
-      <Button onClick={addEndpoint}>
-        <React.Suspense fallback='loading...'>
-          {text('addEndpointLabel')}
-        </React.Suspense>
-      </Button>
+      <Button onClick={addEndpoint}>{text('addEndpointLabel')}</Button>
     </Stack>
   );
 });

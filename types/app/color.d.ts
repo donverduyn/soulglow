@@ -85,7 +85,7 @@ type ValidateHex<T extends string> = ParseHex<StripHash<T>>;
 type ValidateAll<T extends string> = ValidateHex<T> | ValidateRGB<T>;
 
 declare global {
-  type ValidatedColor<T extends string> = IfNever<ValidateAll<T>, 'Color', T>;
+  type ValidatedColor<T extends string> = IfNever<ValidateAll<T>, 'Error!', T>;
 }
 
-type TestValidatedColor = ValidatedColor<'rgb(255, 255, 255)'>;
+type TestValidatedColor = ValidatedColor<'#333333'>;

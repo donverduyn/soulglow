@@ -9,7 +9,7 @@ export const useTranslation = <T extends Record<any, any>>(
   const usei18n = usei18nTranslation(...args);
   const textFn = React.useCallback(
     (
-      key: (keyof T & string) | (keyof T & string)[],
+      key: keyof T & string,
       ...others: ArrayTail<Parameters<typeof usei18n.t>>
     ) => usei18n.t(key, ...others),
     [usei18n]

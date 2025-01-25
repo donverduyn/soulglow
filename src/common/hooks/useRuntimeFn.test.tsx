@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { render, waitFor, fireEvent, cleanup } from '@testing-library/react';
+import { render, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Effect, Layer } from 'effect';
 import { WithRuntime } from 'common/components/hoc/withRuntime';
@@ -7,7 +7,6 @@ import { createRuntimeContext } from 'common/utils/context';
 import { useRuntimeFn } from './useRuntimeFn';
 
 describe('useRuntimeFn', () => {
-  afterEach(cleanup);
   it('should call the effect once', async () => {
     expect.assertions(1);
 
@@ -33,7 +32,6 @@ describe('useRuntimeFn', () => {
         </div>
       );
     });
-
     const screen = render(<Component />);
     const button = screen.getByText(/click me/i);
     fireEvent.click(button);

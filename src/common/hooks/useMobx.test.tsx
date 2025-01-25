@@ -1,7 +1,7 @@
 // import * as React from 'react';
 import * as React from 'react';
 // import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
-import { act, cleanup, render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { useMobx } from './useMobx';
@@ -13,7 +13,6 @@ describe('useMobx', () => {
   afterEach(() => {
     vi.runOnlyPendingTimers();
     vi.useRealTimers();
-    cleanup();
   });
 
   it('should auto bind and update reactively with observer', async () => {

@@ -1,5 +1,5 @@
 import { setProjectAnnotations } from '@storybook/react';
-import { render } from '@testing-library/react';
+import { render, cleanup } from '@testing-library/react';
 import { getWorker } from 'msw-storybook-addon';
 import { vi } from 'vitest';
 import previewAnnotations from '.storybook/preview';
@@ -17,6 +17,9 @@ beforeAll(annotations.beforeAll);
 const worker = getWorker();
 afterEach(() => {
   worker.resetHandlers();
+  vi.restoreAllMocks();
+  vi.resetModules();
+  cleanup();
 });
 
 /* eslint-enable vitest/require-top-level-describe */

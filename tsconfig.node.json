@@ -21,11 +21,17 @@
   ],
   "include": [
     "**/.*/**/*.ts",
-    "*.ts", 
+    // "*.ts", 
     "scripts/**/*",
     "server/**/*",
     "types/node/**/*",
     ".devcontainer/**/*", 
     "postcss.config.cjs",
+    "*.config.ts"
   ],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    }
+  ]
 }

@@ -12,7 +12,7 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "*": ["./src/*", "./types/*"],
+      "*": ["./src/*", "./types/*", "./tests/types/*"],
       "server/*": ["./server/*"],
       "tests/*": ["./tests/*"],
       "scripts/*": ["./scripts/*"],

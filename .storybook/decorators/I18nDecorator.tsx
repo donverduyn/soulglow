@@ -8,7 +8,9 @@ export const I18nDecorator: Decorator = (Story, context) => {
   const [i18n] = React.useState(initializeI18N);
 
   React.useEffect(() => {
-    void i18n.changeLanguage(locale);
+    if (i18n.language !== locale && i18n.language !== 'cimode') {
+      void i18n.changeLanguage(locale);
+    }
   }, [i18n, locale]);
 
   const Children = React.memo(Story);
