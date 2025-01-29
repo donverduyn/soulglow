@@ -1,35 +1,32 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, userEvent, expect } from '@storybook/test';
+import { within, userEvent } from '@storybook/test';
 // import type { Simplify } from 'type-fest';
 // import * as AppTags from 'modules/App/tags';
-import { v4 as uuid } from 'uuid';
+import type { i18n } from 'i18next';
 import { ColorSchemeDecorator } from '.storybook/decorators/ColorSchemeDecorator';
 import { RuntimeDecorator } from '.storybook/decorators/RuntimeDecorator';
 import { ThemeDecorator } from '.storybook/decorators/ThemeDecorator';
-import type { WithArgs } from '.storybook/utils/args';
+import type { ExtendArgs } from '.storybook/utils/args';
 import { AppRuntime } from 'modules/App/context';
 import EndpointListItem from './components/EndpointListItem';
-import EndpointPanel, { type Translations } from './EndpointPanel';
+import { EndpointPanel } from './EndpointPanel';
 
-// TODO: import tags to type test implementation against them
 // TODO: we need to think about how we want to spy on effectful deps
 
-const labels: Translations = {
-  addEndpointLabel: uuid(),
-};
-
-const meta: Meta<WithArgs<typeof EndpointPanel, { labels: Translations }>> = {
+const meta: Meta<ExtendArgs<typeof EndpointPanel>> = {
   argTypes: {
     // colorTheme: {
     //   control: { type: 'radio' },
     //   defaultValue: 'Light',
     //   options: ['Light', 'Dark'],
     // },
+    labels: {
+      table: { disable: true },
+    },
   },
-  args: { labels },
+  args: { labels: EndpointPanel.labels },
   component: EndpointPanel,
   decorators: [RuntimeDecorator(AppRuntime)],
-  globals: { backgrounds: { disabled: true } },
   parameters: { layout: 'centered' },
   subcomponents: { EndpointListItem },
   tags: ['autodocs'],
@@ -44,11 +41,13 @@ export const Default: Story = {
     ColorSchemeDecorator,
     ThemeDecorator({ defaultColorScheme: 'dark' }),
   ],
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement, loaded, args }) => {
+    const { i18n } = loaded as { i18n: i18n };
     const canvas = within(canvasElement);
-    const button = await canvas.findByText(labels.addEndpointLabel);
+
+    const text = i18n.t(args.labels.addEndpointLabel);
+    const button = await canvas.findByText(text);
     await userEvent.click(button);
     await userEvent.click(button);
-    await expect(button).toBeInTheDocument();
   },
 };

@@ -7,7 +7,6 @@
     "outDir": "dist/test",
     "moduleResolution": "Bundler",
     "emitDeclarationOnly": true,
-    "composite": true,
     "types": [
       "node",
       "vitest/globals",

@@ -5,7 +5,6 @@
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "composite": true,
     "outDir": "dist/node",
     "emitDeclarationOnly": true,
     "allowJs": true,
@@ -20,18 +19,13 @@
     "**/.*/**/*.test.tsx",
   ],
   "include": [
-    "**/.*/**/*.ts",
-    // "*.ts", 
     "scripts/**/*",
     "server/**/*",
     "types/node/**/*",
     ".devcontainer/**/*", 
+    ".vite/**/*",
+    ".postcss/**/*",
+    "*.config.ts",
     "postcss.config.cjs",
-    "*.config.ts"
   ],
-  "references": [
-    {
-      "path": "./tsconfig.app.json"
-    }
-  ]
 }

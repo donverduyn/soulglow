@@ -3,6 +3,7 @@ import { useMantineColorScheme } from '@mantine/core';
 import { Decorator } from '@storybook/react';
 import { flow } from 'effect';
 import { useDarkModeEvent, getScheme } from '.storybook/hooks/useDarkModeEvent';
+import { createDecorator } from '.storybook/utils/decorator';
 import { memoize } from 'common/utils/memoize';
 
 /*
@@ -11,14 +12,13 @@ import { memoize } from 'common/utils/memoize';
  * which is toggled by the user.
  */
 
-export const ColorSchemeDecorator: Decorator = (Story) => {
-  const Children = React.memo(Story);
+export const ColorSchemeDecorator: Decorator = createDecorator((Story) => {
   const { setColorScheme } = useMantineColorScheme();
 
   // the actual place where its set depends on the story and ThemeDecorator
   useDarkModeEvent(flow(getScheme, setColorScheme));
-  return <Children />;
-};
+  return <Story />;
+});
 
 /*
  * Adds a class to the body tag named "dark" or "light",
@@ -32,7 +32,7 @@ const setBodyColorScheme = memoize(
   }
 );
 
-export const BodyClassColorSchemeDecorator: Decorator = (Story) => {
+export const BodyClassColorSchemeDecorator = createDecorator((Story) => {
   useDarkModeEvent(setBodyColorScheme(document));
   return <Story />;
-};
+});

@@ -9,7 +9,6 @@
       "DOM.Iterable"
     ],
     "module": "ESNext",
-    "composite": true,
     "outDir": "dist/app",
     "emitDeclarationOnly": true,
   },

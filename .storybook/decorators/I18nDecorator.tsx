@@ -1,11 +1,11 @@
 import * as React from 'react';
-import type { Decorator } from '@storybook/react';
+import type { i18n as i18next } from 'i18next';
 import { I18nextProvider } from 'react-i18next';
-import { initializeI18N } from 'i18n';
+import { createDecorator } from '.storybook/utils/decorator';
 
-export const I18nDecorator: Decorator = (Story, context) => {
+export const I18nDecorator = createDecorator((Story, context) => {
   const { locale } = context.globals as { locale: string };
-  const [i18n] = React.useState(initializeI18N);
+  const { i18n } = context.loaded as { i18n: i18next };
 
   React.useEffect(() => {
     if (i18n.language !== locale && i18n.language !== 'cimode') {
@@ -13,10 +13,9 @@ export const I18nDecorator: Decorator = (Story, context) => {
     }
   }, [i18n, locale]);
 
-  const Children = React.memo(Story);
   return (
     <I18nextProvider i18n={i18n}>
-      <Children />
+      <Story />
     </I18nextProvider>
   );
-};
+});

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Effect, Queue, flow } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'common/components/Button/Button';
+import { WithLabels } from 'common/components/hoc/withLabels';
 import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { List } from 'common/components/List/List';
 import { Stack } from 'common/components/Stack/Stack';
@@ -14,6 +15,7 @@ import {
 import { useTranslation } from 'common/hooks/useTranslation';
 import type { RuntimeType } from 'common/utils/context';
 import type { EventType } from 'common/utils/event';
+import { createLabels } from 'common/utils/i18n';
 import { memoize } from 'common/utils/memoize';
 import { addEndpointRequested } from 'models/endpoint/events';
 import { createEndpoint } from 'models/endpoint/model';
@@ -24,13 +26,7 @@ import { EndpointPanelRuntime } from './context';
 import styles from './EndpointPanel.module.css';
 import * as Tags from './tags';
 
-interface Props extends OuterProps, InnerProps {}
-interface InnerProps {}
-export interface OuterProps {}
-
-export interface Translations {
-  addEndpointLabel: string;
-}
+interface Props {}
 
 const registerInboundQueue = memoize(
   (runtime: RuntimeType<typeof EndpointPanelRuntime>) =>
@@ -46,21 +42,25 @@ const publishToBus = (msg: EventType<unknown>) =>
   Effect.andThen(AppTags.EventBus, (bus) => bus.publish(msg));
 
 //
+const labels = createLabels(['addEndpointLabel']);
+
 const Component = flow(
   observer<Props>,
   WithRuntime(EndpointPanelRuntime, (runtime) => {
     // TODO: Use request/response to avoid stale reads, before dispatching actions
     useRuntime(AppRuntime, registerInboundQueue(runtime), [runtime]);
-  })
+  }),
+  WithLabels(labels)
 );
 
 /**
  * This is the main component for the EndpointPanel module.
  * It displays a list of endpoints and allows the user to add new endpoints.
  */
-const EndpointPanel = Component(function EndpointPanel() {
+export const EndpointPanel = Component(function EndpointPanel() {
   const { addEndpoint, endpoints, publish } = useEndpointPanel();
-  const { text } = useTranslation<Translations>();
+  // TODO: export type from utils to get a union of labels available in every lng
+  const { text } = useTranslation<typeof labels>();
 
   const renderList = React.useCallback(
     () =>
@@ -77,12 +77,10 @@ const EndpointPanel = Component(function EndpointPanel() {
   return (
     <Stack className={styles.EndpointPanel}>
       <List render={renderList} />
-      <Button onClick={addEndpoint}>{text('addEndpointLabel')}</Button>
+      <Button onClick={addEndpoint}>{text(labels.addEndpointLabel)}</Button>
     </Stack>
   );
 });
-
-export default EndpointPanel;
 
 function useEndpointPanel() {
   // TODO: use normalized cache for entity collections and create mobx entity stores inside view models.

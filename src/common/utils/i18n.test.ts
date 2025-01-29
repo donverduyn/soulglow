@@ -1,4 +1,4 @@
-import { isTranslationAvailable } from 'i18n';
+import { isTranslationAvailable } from './i18n';
 
 describe('i18n', () => {
   it('should have the translations available', () => {

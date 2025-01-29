@@ -1,6 +1,5 @@
 import * as React from 'react';
-import type { Decorator } from '@storybook/react';
-import moize from 'moize';
+import * as Storybook from '.storybook/utils/decorator';
 import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { createRuntimeContext } from 'common/utils/context';
 
@@ -11,11 +10,11 @@ export const RuntimeDecorator = <
   R extends ReturnType<typeof createRuntimeContext<any>>,
 >(
   runtime: R
-): Decorator =>
-  // eslint-disable-next-line react/function-component-definition
-  function RuntimeDecorator(Story) {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const enhance = React.useCallback(moize(WithRuntime(runtime)), []);
-    const Component = enhance(React.memo(Story));
-    return <Component />;
-  };
+) => {
+  const Enhanced = WithRuntime(runtime)();
+  return Storybook.createDecorator((Story) => (
+    <Enhanced>
+      <Story />
+    </Enhanced>
+  ));
+};

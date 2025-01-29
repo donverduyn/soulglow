@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "skipLibCheck": true,
+    "incremental": true,
+    "composite": true,
     "noErrorTruncation": true,
     "allowImportingTsExtensions": true,
     "allowSyntheticDefaultImports": true,
@@ -13,6 +15,7 @@
     "baseUrl": ".",
     "paths": {
       "*": ["./src/*", "./types/*", "./tests/types/*"],
+      "public/*": ["./public/*"],
       "server/*": ["./server/*"],
       "tests/*": ["./tests/*"],
       "scripts/*": ["./scripts/*"],

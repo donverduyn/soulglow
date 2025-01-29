@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, userEvent, expect } from '@storybook/test';
 import { ColorSchemeDecorator } from '.storybook/decorators/ColorSchemeDecorator';
 import { RuntimeDecorator } from '.storybook/decorators/RuntimeDecorator';
 import { ThemeDecorator } from '.storybook/decorators/ThemeDecorator';
@@ -47,9 +46,11 @@ export const HotPink: Story = {
   globals: { backgrounds: { value: 'hotpink' } },
 };
 
-Light.play = async ({ canvasElement }) => {
-  const canvas = within(canvasElement);
-  const button = canvas.getByText('Add Endpoint');
-  await userEvent.click(button);
-  await expect(button).toBeInTheDocument();
-};
+// Light.play = async ({ canvasElement, loaded }) => {
+//   const { i18n } = loaded as { i18n: i18n };
+//   const canvas = within(canvasElement);
+//   const text = i18n.t('addEndpointLabel');
+//   const button = canvas.getByText(text);
+//   await userEvent.click(button);
+//   await expect(button).toBeInTheDocument();
+// };

@@ -1,8 +1,7 @@
 import { composeStories } from '@storybook/react';
 import { render } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
-import { type Locales, isTranslationAvailable } from 'i18n';
-import type { Translations } from 'modules/EndpointPanel/EndpointPanel';
+import { type Locales, isTranslationAvailable } from 'common/utils/i18n';
 import * as stories from 'modules/EndpointPanel/EndpointPanel.stories';
 
 describe('endpointPanel', () => {
@@ -10,7 +9,7 @@ describe('endpointPanel', () => {
 
   const label = Default.args.labels!.addEndpointLabel;
   const En = http.get('/locales/en/translation.json', () =>
-    HttpResponse.json<Translations>(Default.args.labels)
+    HttpResponse.json(Default.args.labels)
   );
 
   it('should have all of the translations available', () => {

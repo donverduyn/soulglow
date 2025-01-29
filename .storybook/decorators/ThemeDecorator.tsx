@@ -17,7 +17,6 @@ export const ThemeDecorator = ({
   ...props
 }: Partial<React.ComponentProps<typeof ThemeProvider>> = {}) => {
   const ThemeDecorator: Decorator = (Story, { id }) => {
-    const Children = React.memo(Story);
     return (
       <ThemeProvider
         cssVariablesSelector={getVariablesSelector(document, id)}
@@ -26,7 +25,7 @@ export const ThemeDecorator = ({
         theme={theme ?? mantineTheme}
         {...props}
       >
-        <Children />
+        <Story />
       </ThemeProvider>
     );
   };

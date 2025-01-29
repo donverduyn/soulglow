@@ -16,6 +16,7 @@ import 'index.css';
 import 'font.css';
 import { BodyClassColorSchemeDecorator } from './decorators/ColorSchemeDecorator';
 import { I18nDecorator } from './decorators/I18nDecorator';
+import { I18nLoader } from './loaders/I18nLoader';
 
 if (import.meta.env.DEV) {
   // initialize MSW only in development
@@ -47,7 +48,7 @@ const preview: Preview = {
     backgrounds: { value: undefined },
   },
   // we only use MSW in our test environment, which is not part of the build
-  loaders: import.meta.env.DEV ? [mswLoader] : [],
+  loaders: import.meta.env.DEV ? [mswLoader, I18nLoader] : [I18nLoader],
   parameters: {
     backgrounds: {
       options: {
