@@ -16,6 +16,7 @@ import { useTranslation } from 'common/hooks/useTranslation';
 import type { RuntimeType } from 'common/utils/context';
 import type { EventType } from 'common/utils/event';
 import { createLabels } from 'common/utils/i18n';
+import type { Labels, Locales } from 'common/utils/i18n';
 import { memoize } from 'common/utils/memoize';
 import { addEndpointRequested } from 'models/endpoint/events';
 import { createEndpoint } from 'models/endpoint/model';
@@ -60,7 +61,7 @@ const Component = flow(
 export const EndpointPanel = Component(function EndpointPanel() {
   const { addEndpoint, endpoints, publish } = useEndpointPanel();
   // TODO: export type from utils to get a union of labels available in every lng
-  const { text } = useTranslation<typeof labels>();
+  const { text } = useTranslation<Labels<Locales>>();
 
   const renderList = React.useCallback(
     () =>
