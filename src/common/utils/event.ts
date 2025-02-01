@@ -22,7 +22,7 @@ export const createEvent =
   (arg: T, meta?: EventMetadata) => {
     const eventMetadata = meta ?? createEventMetadata('unknown');
     return {
-      name: name as `${S}`,
+      name,
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       event: eventMetadata,
       payload: fn(arg, eventMetadata),

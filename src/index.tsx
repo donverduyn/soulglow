@@ -8,7 +8,7 @@ import { prefix } from 'config/constants';
 import { mobxConfig } from 'config/mobx.js';
 import { theme } from 'config/theme';
 import { initializeI18N } from 'i18n';
-import { client } from './__generated/api/index.ts';
+import { client } from './__generated/api';
 import '@mantine/core/styles.layer.css';
 import App from './modules/App/App.tsx';
 import './index.css';
