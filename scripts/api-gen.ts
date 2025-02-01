@@ -1,4 +1,11 @@
 import { createClient } from '@hey-api/openapi-ts';
+import yargs from 'yargs';
+
+const argv = yargs().option('watch', {
+  alias: 'w',
+  describe: 'Watch for file changes',
+  type: 'boolean',
+}).argv;
 
 export const generate = async (
   yamlFilePath: string = './openapi.yml',
@@ -9,13 +16,17 @@ export const generate = async (
     await createClient({
       client: '@hey-api/client-fetch',
       // debug: true,
+      experimentalParser: true,
       input: yamlFilePath,
+      logs: {
+        level: 'trace',
+        path: './logs',
+      },
       output: {
-        format: 'prettier',
-        lint: 'eslint',
+        // format: 'prettier',
+        // lint: 'eslint',
         path: outputDir,
       },
-
       plugins: [
         {
           enums: 'typescript',
@@ -28,6 +39,7 @@ export const generate = async (
           serviceNameBuilder: '{{name}}Service',
         },
       ],
+      watch: (await argv).watch === true,
       // schemas: {
       //   export: true,
       //   type: 'json',

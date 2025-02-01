@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "postinstall": "patch-package && yarn api:generate",
-    "api:generate": "rm -rf ./src/__generated && tsx -e \"import { generate } from './scripts/api-gen'; generate('./openapi.yml', './src/__generated/api');\"",
+    "api:generate": "rm -rf ./src/__generated && tsx -e \"import { generate } from './scripts/api-gen'; generate('./openapi.yml', './src/__generated/api');\" && eslint --fix ./src/__generated && eslint --fix ./src/__generated/api",
     "upgrade:latest": "yarn upgrade-interactive --latest --emoji; yarn postinstall",
     "dev": "vite",
     "debug": "INTERNAL_CHROMIUM=true vite --debug",
@@ -106,9 +106,9 @@
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@types/uuid": "^10.0.0",
-    "@types/ws": "^8.5.13",
-    "@typescript-eslint/eslint-plugin": "^8.19.1",
-    "@typescript-eslint/parser": "^8.19.1",
+    "@types/ws": "^8.5.14",
+    "@typescript-eslint/eslint-plugin": "^8.22.0",
+    "@typescript-eslint/parser": "^8.22.0",
     "@vite-pwa/assets-generator": "^0.2.4",
     "@vitejs/plugin-react-swc": "^3.7.2",
     "@vitest/coverage-v8": "^2.1.8",
@@ -116,7 +116,7 @@
     "axios": "^1.7.9",
     "chalk": "^5.4.1",
     "eslint": "^8.57.1",
-    "eslint-config-prettier": "^8.10.0",
+    "eslint-config-prettier": "^10.0.1",
     "eslint-import-resolver-typescript": "^3.7.0",
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-import": "^2.31.0",
@@ -166,7 +166,7 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "type-fest": "^4.33.0",
-    "typescript": "5.7.2",
+    "typescript": "5.7.3",
     "vite": "^6.0.11",
     "vite-plugin-checker": "^0.8.0",
     "vite-plugin-inspect": "^10.1.0",
@@ -180,7 +180,8 @@
     "workbox-precaching": "^7.3.0",
     "workbox-routing": "^7.3.0",
     "workbox-strategies": "^7.3.0",
-    "workbox-window": "^7.3.0"
+    "workbox-window": "^7.3.0",
+    "yargs": "^17.7.2"
   },
   "resolutions": {
     "meow": "^13.2.0"

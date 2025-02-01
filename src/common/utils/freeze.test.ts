@@ -9,6 +9,7 @@ function isDeepFrozen<T extends Record<string, unknown> | unknown[]>(
       if (typeof item === 'object' && !isDeepFrozen(item as T)) return false;
     }
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-for-in-array
     for (const key in obj) {
       if (typeof obj[key] === 'object' && !isDeepFrozen(obj[key] as T))
         return false;
