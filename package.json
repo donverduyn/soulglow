@@ -6,7 +6,7 @@
   "scripts": {
     "postinstall": "patch-package && yarn api:generate",
     "api:generate": "rm -rf ./src/__generated && tsx -e \"import { generate } from './scripts/api-gen'; generate('./openapi.yml', './src/__generated/api');\" && eslint --fix ./src/__generated && eslint --fix ./src/__generated/api",
-    "upgrade:latest": "yarn upgrade-interactive --latest --emoji; yarn postinstall",
+    "upgrade:latest": "yarn upgrade-interactive --latest --emoji && bash -c 'if [ -n \"$(git diff yarn.lock)\" ]; then yarn postinstall; fi'",
     "dev": "vite",
     "debug": "INTERNAL_CHROMIUM=true vite --debug",
     "build": "yarn clean && vite build",
@@ -45,7 +45,7 @@
     "@mantine/hooks": "^7.16.2",
     "@mantine/modals": "^7.16.2",
     "@mantine/notifications": "^7.16.2",
-    "@tabler/icons-react": "3.20.0",
+    "@tabler/icons-react": "3.29.0",
     "@trpc/client": "^10.45.2",
     "@trpc/server": "^10.45.2",
     "clsx": "^2.1.1",

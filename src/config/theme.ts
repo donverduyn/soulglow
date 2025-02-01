@@ -1,6 +1,7 @@
 import {
   createTheme,
   rem,
+  MantineThemeOverride,
   // colorsTuple
 } from '@mantine/core';
 
@@ -52,7 +53,7 @@ import {
 //   return defaultVariantColorsResolver(input);
 // };
 
-export const theme = createTheme({
+export const theme: MantineThemeOverride = createTheme({
   colors: {
     // crimson: colorsTuple('crimson'),
     // dark: [
