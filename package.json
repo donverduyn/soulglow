@@ -76,8 +76,8 @@
   "devDependencies": {
     "@emotion/eslint-plugin": "^11.11.0",
     "@faker-js/faker": "^9.4.0",
-    "@hey-api/client-fetch": "^0.6.0",
-    "@hey-api/openapi-ts": "^0.61.0",
+    "@hey-api/client-fetch": "^0.7.3",
+    "@hey-api/openapi-ts": "^0.63.2",
     "@mdx-js/react": "^3.1.0",
     "@puppeteer/browsers": "^2.7.0",
     "@storybook/addon-a11y": "^8.5.2",

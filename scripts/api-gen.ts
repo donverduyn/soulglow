@@ -14,9 +14,9 @@ export const generate = async (
   try {
     // Generate TypeScript client
     await createClient({
-      client: '@hey-api/client-fetch',
+      // client: '@hey-api/client-fetch',
       // debug: true,
-      experimentalParser: true,
+      // experimentalParser: true,
       input: yamlFilePath,
       logs: {
         level: 'trace',
@@ -28,6 +28,9 @@ export const generate = async (
         path: outputDir,
       },
       plugins: [
+        {
+          name: '@hey-api/client-fetch',
+        },
         {
           enums: 'typescript',
           identifierCase: 'preserve',

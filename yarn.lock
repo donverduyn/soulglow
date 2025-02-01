@@ -1971,10 +1971,10 @@
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
-"@hey-api/client-fetch@^0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@hey-api/client-fetch/-/client-fetch-0.6.0.tgz#50e10b29d3d08ff740061fd9fe54cc4445571a8b"
-  integrity sha512-FlhFsVeH8RxJe/nq8xUzxNbiOpe+GadxlD2pfvDyOyLdCTU4o/LRv46ZVWstaW7DgF4nxhI328chy3+AulwVXw==
+"@hey-api/client-fetch@^0.7.3":
+  version "0.7.3"
+  resolved "https://registry.yarnpkg.com/@hey-api/client-fetch/-/client-fetch-0.7.3.tgz#a0659a4a2e1ec46475fc42bc3cf3fcc7e9b1100b"
+  integrity sha512-nysIXMag9nr5ENy+47G0AYsegdT7vT6S4KLfY7NVgM6HsyZ0DrhCZvz5nP70M16x9i860SrnXhjpcuHx0g5sDQ==
 
 "@hey-api/json-schema-ref-parser@1.0.1":
   version "1.0.1"
@@ -1985,10 +1985,10 @@
     "@types/json-schema" "^7.0.15"
     js-yaml "^4.1.0"
 
-"@hey-api/openapi-ts@^0.61.0":
-  version "0.61.0"
-  resolved "https://registry.yarnpkg.com/@hey-api/openapi-ts/-/openapi-ts-0.61.0.tgz#340a032c24281dc15bb09c72b4bfa239581ed88c"
-  integrity sha512-gl1lcQFmuaMmtQuY3yn9rd/dUD9wdMW59PIv4J2g2AV9+hIKhWHn1QIdYYmQDio7eCPLvtVmj79EEu21Tu9Ahw==
+"@hey-api/openapi-ts@^0.63.2":
+  version "0.63.2"
+  resolved "https://registry.yarnpkg.com/@hey-api/openapi-ts/-/openapi-ts-0.63.2.tgz#581614abe883069040365d9c331defc4434c8288"
+  integrity sha512-HC5fR3+07P1AvDYrcZv0kbnhWogvMFot848PfpS3Gbncm47mDdO/uhNGIr2RF9CaRIvJNSJvAf1jL3XAQZ18RA==
   dependencies:
     "@hey-api/json-schema-ref-parser" "1.0.1"
     c12 "2.0.1"
