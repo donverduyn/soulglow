@@ -47,11 +47,11 @@ const labels = createLabels(['addEndpointLabel']);
 
 const Component = flow(
   observer<Props>,
+  WithLabels(labels),
   WithRuntime(EndpointPanelRuntime, (runtime) => {
     // TODO: Use request/response to avoid stale reads, before dispatching actions
     useRuntime(AppRuntime, registerInboundQueue(runtime), [runtime]);
-  }),
-  WithLabels(labels)
+  })
 );
 
 /**

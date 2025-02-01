@@ -1,4 +1,3 @@
-import type { Call, U } from 'hotscript';
 import type { Simplify } from 'type-fest';
 import type { default as DataTypeEN } from 'public/locales/en/translation.json';
 import type { default as DataTypeNL } from 'public/locales/nl/translation.json';
@@ -13,9 +12,7 @@ type CommonKeys<T extends Record<string, string>[]> = T extends [
   ? keyof First & CommonKeys<Rest>
   : keyof T[number];
 
-export type Labels<T extends Record<string, string>[]> = ExtractLabels<
-  Call<U.ToTuple, CommonKeys<T>>
->;
+export type Labels<T extends Record<string, string>[]> = CommonKeys<T>;
 
 export const isTranslationAvailable =
   <Locales extends Record<string, string>[]>() =>

@@ -1,3 +1,4 @@
+import type React from 'react';
 import type { Simplify } from 'type-fest';
 
 export type ExtendArgs<T> =

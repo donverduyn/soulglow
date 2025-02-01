@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Layer, ManagedRuntime } from 'effect';
 import type { Simplify, IsAny } from 'type-fest';
 import { type RuntimeContext } from 'common/utils/context';
+import type { ExtractMeta } from 'common/utils/react';
 
 /*
 This HOC creates a runtime for the context and provides it to the component.
@@ -25,7 +26,8 @@ export function WithRuntime<TTarget, TProps extends Record<string, unknown>>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): <C extends React.FC<any>>(
   Component?: C
-) => React.FC<Simplify<Omit<FallbackProps<C, Props>, keyof TProps>>>;
+) => React.FC<Simplify<Omit<FallbackProps<C, Props>, keyof TProps>>> &
+  Simplify<ExtractMeta<C>>;
 
 export function WithRuntime<TTarget>(
   Context: RuntimeContext<TTarget>,
@@ -33,12 +35,16 @@ export function WithRuntime<TTarget>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): <C extends React.FC<any>>(
   Component?: C
-) => React.FC<Simplify<FallbackProps<C, Props>>>;
+) => React.FC<Simplify<FallbackProps<C, Props>>> & Simplify<ExtractMeta<C>>;
 
+//
 // the goal is to have a utility that allows us to reuse the logic between the withRuntime hoc and the Runtime component that takes the runtime as a prop. Later on we might want to consider the Runtime component to be used in JSX in more scenarios, but for now it is limited to usage in storybook decorators
 
 //
-export function WithRuntime<TTarget, TProps extends Record<string, unknown>>(
+export function WithRuntime<
+  TTarget,
+  TProps extends Record<string, unknown> | undefined,
+>(
   Context: RuntimeContext<TTarget>,
   getSource?: (runtime: ManagedRuntime.ManagedRuntime<TTarget, never>) => TProps
 ) {
@@ -51,7 +57,7 @@ export function WithRuntime<TTarget, TProps extends Record<string, unknown>>(
 
       const runtime = useRuntimeFactory(layer);
       const mergedProps = getSource
-        ? { ...getSource(runtime), ...props }
+        ? Object.assign(getSource(runtime) ?? {}, props)
         : props;
 
       const children =
@@ -63,24 +69,26 @@ export function WithRuntime<TTarget, TProps extends Record<string, unknown>>(
     };
     Wrapped.displayName = `WithRuntime(${(Component && (Component.displayName || Component.name)) || 'Component'})`;
 
-    return Wrapped;
+    const meta = Component ? extractMeta(Component) : {};
+    return Object.assign(Wrapped, meta);
   };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getComponent<C extends React.FC<any> | undefined>(
+const getComponent = <C extends React.FC<any> | undefined>(
   Component: C,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mergedProps: C extends React.FC<any>
     ? React.ComponentPropsWithRef<C>
     : Record<never, never>
-) {
-  return Component ? (
-    <Component
-      {...(mergedProps as React.ComponentPropsWithRef<Exclude<C, undefined>>)}
-    />
-  ) : null;
-}
+) => (Component ? <Component {...mergedProps} /> : null);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const extractMeta = <C extends React.FC<any>>(Component: C) =>
+  Object.getOwnPropertyNames(Component).reduce(
+    (acc, key) => Object.assign(acc, { [key]: Component[key as keyof C] }),
+    {} as ExtractMeta<C>
+  );
 
 /*
 This hook creates a runtime and disposes it when the component is unmounted.
