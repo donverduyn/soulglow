@@ -85,10 +85,17 @@ const getComponent = <C extends React.FC<any> | undefined>(
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const extractMeta = <C extends React.FC<any>>(Component: C) =>
-  Object.getOwnPropertyNames(Component).reduce(
-    (acc, key) => Object.assign(acc, { [key]: Component[key as keyof C] }),
-    {} as ExtractMeta<C>
-  );
+  Object.getOwnPropertyNames(Component)
+    .filter(
+      (() => {
+        const skip = Object.getOwnPropertyNames(() => {});
+        return (key) => !skip.includes(key);
+      })()
+    )
+    .reduce(
+      (acc, key) => Object.assign(acc, { [key]: Component[key as keyof C] }),
+      {} as ExtractMeta<C>
+    );
 
 /*
 This hook creates a runtime and disposes it when the component is unmounted.
