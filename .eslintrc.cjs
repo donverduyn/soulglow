@@ -188,6 +188,12 @@ module.exports = {
             allowInterfaces: 'always',
           },
         ],
+        '@typescript-eslint/no-explicit-any': [
+          'error',
+          {
+            ignoreRestArgs: true,
+          },
+        ],
         '@typescript-eslint/no-floating-promises': [
           'warn',
           { ignoreVoid: true },

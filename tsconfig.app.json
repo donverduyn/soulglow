@@ -11,6 +11,7 @@
     "module": "ESNext",
     "outDir": "dist/app",
     "emitDeclarationOnly": true,
+    "noErrorTruncation": true,
   },
   "include": [
     "src/**/*",

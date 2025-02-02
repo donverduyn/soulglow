@@ -1,10 +1,11 @@
 import * as React from 'react';
 import cy from 'clsx';
 import type { Okhsv } from 'culori/fn';
-import { identity, pipe, Queue } from 'effect';
+import { identity, flow, Queue } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { State } from '__generated/api';
 import { Group } from 'common/components/Group/Group';
+import { WithLabels } from 'common/components/hoc/withLabels';
 import { WithRuntime as WithRuntime } from 'common/components/hoc/withRuntime';
 import { NumberInput } from 'common/components/NumberInput/NumberInput';
 import { Paper } from 'common/components/Paper/Paper';
@@ -15,7 +16,9 @@ import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
 import { useReturn } from 'common/hooks/useReturn';
 import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
 import { fromLayer } from 'common/utils/context';
-import type { Device } from 'models/device/model';
+import { createLabels } from 'common/utils/i18n';
+import { merge } from 'common/utils/object';
+import type { Device } from 'models/device/Device';
 import { OnOffSwitch } from './components/OnOffSwitch';
 import { MODE_ITEMS, LightMode, LightBulbRuntime } from './context';
 import styles from './LightBulb.module.css';
@@ -44,6 +47,12 @@ interface Props extends DefaultProps {
   readonly onChange: (value: Okhsv) => void;
 }
 
+const defaultProps: Partial<Props> = {
+  onChange: identity,
+};
+
+const labels = createLabels([]);
+
 const whiteInputs = [
   { key: 'temperature', label: 'temp', props: { max: 100, track: false } },
   { key: 'level', label: 'level' },
@@ -55,12 +64,15 @@ const colorInputs = [
   { key: 'hue', label: 'hue', props: { max: 360 } },
 ] as const;
 
-const Main = pipe(observer(LightBulb), WithRuntime(LightBulbRuntime));
-export default Main;
+const Component = flow(
+  observer<Props>,
+  WithLabels(labels),
+  WithRuntime(LightBulbRuntime)
+);
 
-//TODO: think about default props and how to set them
-function LightBulb({ className, getStyle, onChange = identity }: Props) {
-  const { bulb, inputs } = useLightBulbComponent(onChange);
+export const LightBulb = Component(function LightBulb(props) {
+  const { bulb, inputs } = useLightBulb(props);
+  const { className, getStyle } = merge(props, defaultProps);
 
   return (
     <Paper
@@ -105,9 +117,9 @@ function LightBulb({ className, getStyle, onChange = identity }: Props) {
       </Stack>
     </Paper>
   );
-}
+});
 
-const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
+const useLightBulb = (props: Props) => {
   const bulb = useMobx(() => defaultState);
   const inputs = bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
 
@@ -124,7 +136,7 @@ const useLightBulbComponent = (onChange: (value: Okhsv) => void) => {
     const saturation = 0.4 + (bulb.saturation / 100) * (1 - 0.4);
     const value = 0.6 + (bulb.level / 100) * (1 - 0.6);
 
-    onChange({
+    props.onChange({
       h: hue + hueShift,
       mode: 'okhsv',
       s: saturation,

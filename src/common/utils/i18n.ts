@@ -14,19 +14,13 @@ type CommonKeys<T extends Record<string, string>[]> = T extends [
 
 export type Labels<T extends Record<string, string>[]> = CommonKeys<T>;
 
-export const isTranslationAvailable =
-  <Locales extends Record<string, string>[]>() =>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  <Labels extends Record<any, any>>(labels: Labels) =>
-    labels as unknown as HasKey<Locales, Labels>;
-
-type HasKey<
+export type HasTranslation<
   T extends object[],
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   K extends Record<PropertyKey, any>,
 > = T extends [infer First, ...infer Rest extends object[]]
-  ? First extends K
-    ? HasKey<Rest, K>
+  ? First extends { [P in keyof K]: K[P] | string }
+    ? HasTranslation<Rest, K>
     : false
   : true;
 

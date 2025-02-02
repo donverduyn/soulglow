@@ -1,17 +1,13 @@
-import { Context } from 'effect';
-import type { Simplify } from 'type-fest';
-import type { Crudable, Selectable } from 'common/utils/entity';
-import type { Endpoint } from 'models/endpoint/model';
-import type { EventBusService } from './services/EventBusService';
+import { Context, type PubSub } from 'effect';
+import type { EventType } from 'common/utils/event';
+import type { EventBusProvider } from './effect/providers/EventBusProvider';
 
-class EventBus extends Context.Tag('@App/EventBus')<
+export class EventBus extends Context.Tag('@App/EventBus')<
   EventBus,
-  EventBusService
+  EventBusProvider
 >() {}
 
-class EndpointStore extends Context.Tag('@App/EndpointStore2')<
-  EndpointStore,
-  Simplify<Crudable<Endpoint> & Selectable<Endpoint>>
+export class EventBusPubSub extends Context.Tag('@App/EventBusPubSub')<
+  EventBusPubSub,
+  PubSub.PubSub<EventType<unknown>>
 >() {}
-
-export { EndpointStore, EventBus };

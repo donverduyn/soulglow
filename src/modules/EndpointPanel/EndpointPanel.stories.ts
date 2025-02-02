@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent } from '@storybook/test';
 // import type { Simplify } from 'type-fest';
@@ -8,7 +9,7 @@ import { RuntimeDecorator } from '.storybook/decorators/RuntimeDecorator';
 import { ThemeDecorator } from '.storybook/decorators/ThemeDecorator';
 import type { ExtendArgs } from '.storybook/utils/args';
 import { AppRuntime } from 'modules/App/context';
-import EndpointListItem from './components/EndpointListItem';
+import { EndpointListItem } from './components/EndpointListItem';
 import { EndpointPanel } from './EndpointPanel';
 
 // TODO: we need to think about how we want to spy on effectful deps
@@ -20,15 +21,13 @@ const meta: Meta<ExtendArgs<typeof EndpointPanel>> = {
     //   defaultValue: 'Light',
     //   options: ['Light', 'Dark'],
     // },
-    labels: {
-      table: { disable: true },
-    },
+    labels: { table: { disable: true } },
   },
   args: { labels: EndpointPanel.labels },
   component: EndpointPanel,
   decorators: [RuntimeDecorator(AppRuntime)],
   parameters: { layout: 'centered' },
-  subcomponents: { EndpointListItem },
+  subcomponents: { EndpointListItem } as Record<string, ComponentType<unknown>>,
   tags: ['autodocs'],
   title: '@EndpointPanel/EndpointPanel',
 };

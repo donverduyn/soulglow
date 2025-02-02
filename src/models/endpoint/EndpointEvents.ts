@@ -1,5 +1,5 @@
 import { createEvent } from 'common/utils/event';
-import type { Endpoint } from './model';
+import type { Endpoint } from './Endpoint';
 
 export const addEndpointRequested = createEvent(
   'ADD_ENDPOINT_REQUESTED',

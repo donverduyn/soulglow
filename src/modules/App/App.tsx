@@ -14,7 +14,7 @@ import { useMobx } from 'common/hooks/useMobx';
 import { useRuntime } from 'common/hooks/useRuntimeFn';
 import { AppRuntime } from 'modules/App/context';
 import { EndpointPanel } from 'modules/EndpointPanel/EndpointPanel';
-import LightBulb from 'modules/LightBulb/LightBulb';
+import { LightBulb } from 'modules/LightBulb/LightBulb';
 import PaletteViewer from 'modules/PaletteViewer/PaletteViewer';
 import styles from './App.module.css';
 import { EndpointVisibilitySwitch } from './components/EndpointVisibilitySwitch';
@@ -57,6 +57,11 @@ function AppComponent() {
           isVisible ? <EndpointPanel /> : null
         )}
       />
+      {/* <Observer
+        render={panel.lazyGet('isVisible', (isVisible) =>
+          isVisible ? <EndpointPanel /> : null
+        )}
+      /> */}
       <LightBulb
         onChange={state.set('color')}
         getStyle={state.lazyGet('color', (value) => ({

@@ -26,7 +26,7 @@ export function useRuntimeFn<A, E, R, T>(
     | Effect.Effect<A, E, NoInfer<R>>,
   deps: React.DependencyList = []
 ) {
-  const runtime = React.useContext(context);
+  const runtime = React.use(context);
   const finalDeps = [runtime, ...deps];
 
   const emitter = React.useMemo(() => new EventEmitter<T, A>(), finalDeps);
@@ -74,11 +74,12 @@ export const useRuntime = <A, E, REffect, RContext>(
 ) => {
   let runtime = context as React.ContextType<RuntimeContext<RContext>>;
   if (isReactContext<RuntimeContext<RContext>>(context)) {
-    runtime = React.useContext(context);
+    runtime = React.use(context);
     if (runtime === undefined) throw new Error(noRuntimeMessage);
   }
 
   React.useEffect(() => {
+    // console.log('useEffect useRuntime');
     const F = runtime!.runFork(effect);
     return () => Effect.runSync(F.pipe(Fiber.interruptAsFork(FiberId.none)));
   }, [runtime, ...deps]);
@@ -94,7 +95,7 @@ export const useRuntimeSync = <A, E, R>(
   effect: Effect.Effect<A, E, NoInfer<R>>,
   deps: React.DependencyList = []
 ) => {
-  const runtime = React.useContext(context);
+  const runtime = React.use(context);
   if (runtime === undefined) throw new Error(noRuntimeMessage);
   return React.useMemo(() => runtime.runSync(effect), [...deps, runtime]);
 };

@@ -2,7 +2,7 @@ import { Effect, flow } from 'effect';
 import type { UnknownException } from 'effect/Cause';
 import { RemoteType, DeviceControlService } from '__generated/api';
 import { FetchError } from 'common/utils/effect';
-import { Device } from 'models/device/model';
+import { Device } from 'models/device/Device';
 
 export class DeviceRepoImpl {
   options = { deviceId: 5, groupId: 5, remoteType: RemoteType.FUT089 };

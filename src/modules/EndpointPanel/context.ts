@@ -1,17 +1,10 @@
-import { Console, Effect, Layer, ManagedRuntime, pipe, Queue } from 'effect';
+import { Effect, Layer, ManagedRuntime, pipe, Queue } from 'effect';
 import { createRuntimeContext } from 'common/utils/context';
 import type { EventType } from 'common/utils/event';
+import { endpointStoreLayer } from './effect/layers/layers';
 import * as Tags from './tags';
 
-// type tags = [GetContextType<typeof AppRuntime>];
-
-// // eslint-disable-next-line @typescript-eslint/no-explicit-any
-// type InferServices<T extends readonly any[]> = {
-//   [K in keyof T]: T[K] extends Context.Tag.Identifier<T[K]>
-//     ? Context.Tag.Service<T[K]>
-//     : never;
-// };
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function test() {
   const layerParent = Layer.succeed(Tags.Foo, 'foo');
   const runtimeParent = ManagedRuntime.make(layerParent);
@@ -45,16 +38,17 @@ function test() {
 }
 
 export const EndpointPanelRuntime = pipe(
-  Layer.scopedDiscard(
-    Effect.gen(function* () {
-      const stream = yield* Tags.InboundQueue;
-      const item = yield* Queue.take(stream);
-      yield* Console.log('[EndpointPanel/InboundQueue]', item);
-    }).pipe(Effect.forever, Effect.forkScoped)
-  ),
+  endpointStoreLayer,
+  // Layer.scopedDiscard(
+  //   Effect.gen(function* () {
+  //     const stream = yield* Tags.InboundQueue;
+  //     const item = yield* Queue.take(stream);
+  //     yield* Console.log('[EndpointPanel/InboundQueue]', item);
+  //   }).pipe(Effect.forever, Effect.forkScoped)
+  // ),
   Layer.provideMerge(
     Layer.effect(Tags.InboundQueue, Queue.unbounded<EventType<unknown>>())
   ),
-  Layer.merge(Layer.succeed(Tags.Foo, 'foo')),
+  // Layer.merge(Layer.succeed(Tags.Foo, 'foo')),
   createRuntimeContext
 );

@@ -23,3 +23,11 @@ export const isReactContext = <T>(variable: unknown): variable is T => {
 export type ExtractMeta<T> =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   T extends React.FC<any> ? Omit<T, keyof React.FC> : never;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getDisplayName = <C extends React.FC<any> | undefined>(
+  Component: C,
+  prefix: string
+) => {
+  return `${prefix}(${(Component && (Component.displayName || Component.name)) || 'Component'})`;
+};

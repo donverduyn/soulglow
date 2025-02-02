@@ -1,18 +1,23 @@
 import { Context, type Effect, type Queue } from 'effect';
+import type { EntityStore } from 'common/utils/entity';
 import type { EventType } from 'common/utils/event';
+import type { EndpointEntity } from './effect/entities/EndpointEntity';
 
 const PREFIX = '@EndpointPanel';
 
-class InboundQueue extends Context.Tag(`${PREFIX}/InboundQueue`)<
+export class InboundQueue extends Context.Tag(`${PREFIX}/InboundQueue`)<
   InboundQueue,
   Queue.Queue<EventType<unknown>>
 >() {}
 
-class Foo extends Context.Tag(`${PREFIX}/Foo`)<Foo, string>() {}
+export class Foo extends Context.Tag(`${PREFIX}/Foo`)<Foo, string>() {}
 
-class Foobar extends Context.Tag(`${PREFIX}/Bar`)<
+export class Foobar extends Context.Tag(`${PREFIX}/Bar`)<
   Foobar,
   Effect.Effect<string, never, Foo>
 >() {}
 
-export { InboundQueue, Foo, Foobar };
+export class EndpointStore extends Context.Tag('@App/EndpointStore2')<
+  EndpointStore,
+  EntityStore<EndpointEntity>
+>() {}

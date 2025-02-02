@@ -1,5 +1,7 @@
+import path from 'path';
 import react from '@vitejs/plugin-react-swc';
 import dayjs from 'dayjs';
+import { i18nextHMRPlugin } from 'i18next-hmr/vite';
 import postcssPresetEnv from 'postcss-preset-env';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { checker } from 'vite-plugin-checker';
@@ -59,6 +61,10 @@ export default defineConfig(({ mode }) => ({
       // jsxImportSource: '@emotion/react',
       // plugins: [['@swc/plugin-emotion', { sourceMap: true }]],
     }),
+    mode === 'development' &&
+      i18nextHMRPlugin({
+        localesDir: path.resolve(__dirname, 'public/locales'),
+      }),
     VitePWA({
       devOptions: {
         enabled: false,

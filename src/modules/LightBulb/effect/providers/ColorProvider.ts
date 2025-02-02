@@ -1,7 +1,7 @@
 import type { Okhsv } from 'culori/fn';
 import { Effect, pipe, type Context } from 'effect';
-import type { Device } from 'models/device/model';
-import * as Tags from '../tags';
+import type { Device } from 'models/device/Device';
+import * as Tags from '../../tags';
 
 // this service should be responsible for updating the colors of lightbulbs,
 // It delegates with one or multiple calls to the injected repositories

@@ -2,7 +2,7 @@ import { Effect, Fiber, pipe, PubSub, Queue } from 'effect';
 import { isFiber, type RuntimeFiber } from 'effect/Fiber';
 import type { EventType } from 'common/utils/event';
 
-export class EventBusService {
+export class EventBusProvider {
   constructor(public readonly bus: PubSub.PubSub<EventType<unknown>>) {}
 
   publish = (event: EventType<unknown>) => {

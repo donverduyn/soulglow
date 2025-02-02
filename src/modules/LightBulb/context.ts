@@ -2,9 +2,9 @@ import { Effect, Layer, Queue, pipe } from 'effect';
 import { observable } from 'mobx';
 import { v4 as uuid } from 'uuid';
 import { createRuntimeContext } from 'common/utils/context';
-import { Device } from 'models/device/model';
-import { DeviceRepoImpl } from './repos/DeviceRepo';
-import { ColorServiceImpl } from './services/ColorService';
+import { Device } from 'models/device/Device';
+import { DeviceRepoImpl } from '../../models/device/DeviceRepo';
+import { ColorServiceImpl } from './effect/providers/ColorProvider';
 import * as Tags from './tags';
 
 export enum LightMode {

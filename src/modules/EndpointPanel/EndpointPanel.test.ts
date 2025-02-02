@@ -1,7 +1,7 @@
 import { composeStories } from '@storybook/react';
 import { render } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
-import { type Locales, isTranslationAvailable } from 'common/utils/i18n';
+import type { Locales, HasTranslation } from 'common/utils/i18n';
 import * as stories from 'modules/EndpointPanel/EndpointPanel.stories';
 
 describe('endpointPanel', () => {
@@ -14,9 +14,8 @@ describe('endpointPanel', () => {
 
   it('should have all of the translations available', () => {
     expect.assertions(1);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const isAvailable = isTranslationAvailable<Locales>()(Default.args.labels!);
-    expectTypeOf<typeof isAvailable>().toEqualTypeOf<true>();
+    type Labels = NonNullable<typeof Default.args.labels>;
+    expectTypeOf<HasTranslation<Locales, Labels>>().toEqualTypeOf<true>();
   });
 
   it('should render the endpoint panel', async () => {

@@ -3,9 +3,9 @@ import { ColorSchemeDecorator } from '.storybook/decorators/ColorSchemeDecorator
 import { RuntimeDecorator } from '.storybook/decorators/RuntimeDecorator';
 import { ThemeDecorator } from '.storybook/decorators/ThemeDecorator';
 import { theme } from 'config/theme';
-import { createEndpoint } from 'models/endpoint/model';
+import { createEndpoint } from 'models/endpoint/Endpoint';
 import { AppRuntime } from 'modules/App/context';
-import EndpointListItem from './EndpointListItem';
+import { EndpointListItem } from './EndpointListItem';
 
 const meta: Meta<typeof EndpointListItem> = {
   component: EndpointListItem,

@@ -1342,6 +1342,13 @@
   resolved "https://registry.yarnpkg.com/@effect-rx/rx/-/rx-0.34.7.tgz#c956dbbb233b2dca3a03d8e83b19eed3a67b93d4"
   integrity sha512-Mr32wtB8XIh2DumgfibPvZztEX7/CJ4AIh/Wh2o3ord9ZXxCQuavtc/U+AigT3ow+vpcGorM29oKLikL4PHb2g==
 
+"@effect/platform-browser@^0.54.1":
+  version "0.54.1"
+  resolved "https://registry.yarnpkg.com/@effect/platform-browser/-/platform-browser-0.54.1.tgz#9097ca60061701aabc4dbd92f1c7753ca1c26c15"
+  integrity sha512-2VKswqrAY8vhPll8EbE9Hdd7jdDcEspFHof+jNNXHHJhL8mcsSIKz76hNz3h3ZCI8lOA2u2lL/KndOYxy1qFFg==
+  dependencies:
+    multipasta "^0.2.5"
+
 "@effect/platform@^0.75.1":
   version "0.75.1"
   resolved "https://registry.yarnpkg.com/@effect/platform/-/platform-0.75.1.tgz#a7f9d00afcce92d448242929d20c583d74b2b489"
@@ -7620,6 +7627,11 @@ i18next-browser-languagedetector@^8.0.2:
   integrity sha512-shBvPmnIyZeD2VU5jVGIOWP7u9qNG3Lj7mpaiPFpbJ3LVfHZJvVzKR4v1Cb91wAOFpNw442N+LGPzHOHsten2g==
   dependencies:
     "@babel/runtime" "^7.23.2"
+
+i18next-hmr@^3.1.3:
+  version "3.1.3"
+  resolved "https://registry.yarnpkg.com/i18next-hmr/-/i18next-hmr-3.1.3.tgz#5073673849412b2b4e7d34adeb97e42898e30ade"
+  integrity sha512-zoM4B6toVk48rAMl0t9eV+ldEq9HIO9+bek8H1aGSLQZAjPSBQCUggkxdk0vQjEWSKLsssxZqZBAWS+Ow1rcsA==
 
 i18next-http-backend@^3.0.2:
   version "3.0.2"

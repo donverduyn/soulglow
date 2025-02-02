@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Layer, ManagedRuntime } from 'effect';
 import type { Simplify, IsAny } from 'type-fest';
 import { type RuntimeContext } from 'common/utils/context';
-import type { ExtractMeta } from 'common/utils/react';
+import { type ExtractMeta, getDisplayName } from 'common/utils/react';
 
 /*
 This HOC creates a runtime for the context and provides it to the component.
@@ -40,7 +40,6 @@ export function WithRuntime<TTarget>(
 //
 // the goal is to have a utility that allows us to reuse the logic between the withRuntime hoc and the Runtime component that takes the runtime as a prop. Later on we might want to consider the Runtime component to be used in JSX in more scenarios, but for now it is limited to usage in storybook decorators
 
-//
 export function WithRuntime<
   TTarget,
   TProps extends Record<string, unknown> | undefined,
@@ -61,25 +60,24 @@ export function WithRuntime<
         : props;
 
       const children =
-        getComponent(Component, mergedProps) ??
+        createElement(Component, mergedProps) ??
         (props.children as React.ReactNode) ??
         null;
 
       return <Context.Provider value={runtime}>{children}</Context.Provider>;
     };
-    Wrapped.displayName = `WithRuntime(${(Component && (Component.displayName || Component.name)) || 'Component'})`;
-
+    Wrapped.displayName = getDisplayName(Component, 'WithRuntime');
     const meta = Component ? extractMeta(Component) : {};
     return Object.assign(Wrapped, meta);
   };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getComponent = <C extends React.FC<any> | undefined>(
+const createElement = <C extends React.FC<any> | undefined>(
   Component: C,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mergedProps: C extends React.FC<any>
-    ? React.ComponentPropsWithRef<C>
+    ? React.ComponentProps<C>
     : Record<never, never>
 ) => (Component ? <Component {...mergedProps} /> : null);
 
@@ -104,22 +102,21 @@ This is both compatible with strict mode and fast refresh. 🚀
 */
 
 const useRuntimeFactory = <T,>(layer: Layer.Layer<T>) => {
-  const disposed = React.useRef(false);
+  const layerRef = React.useRef(layer);
+  const shouldCreate = React.useRef(false);
   const [runtime, setRuntime] = React.useState(() =>
     ManagedRuntime.make(layer)
   );
 
   React.useEffect(() => {
-    let current = runtime;
-    if (disposed.current) {
-      current = ManagedRuntime.make(layer);
-      setRuntime(() => current);
-      disposed.current = false;
+    if (shouldCreate.current || layerRef.current !== layer) {
+      const newRuntime = ManagedRuntime.make(layer);
+      setRuntime(() => newRuntime);
     }
 
     return () => {
-      void current.dispose();
-      disposed.current = true;
+      void runtime.dispose();
+      shouldCreate.current = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layer]);
