@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { flow } from 'effect';
+import { pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { MdOutlineDelete } from 'react-icons/md';
 import type { Simplify } from 'type-fest';
@@ -18,7 +18,7 @@ import type { EndpointEntity } from '../effect/entities/EndpointEntity';
 import styles from './EndpointListItem.module.css';
 
 export interface Props extends Publishable {
-  endpoint: EndpointEntity;
+  readonly endpoint: EndpointEntity;
 }
 
 const classNames = {
@@ -31,14 +31,14 @@ type InferProps<T> = T extends React.FC<infer P> ? P : never;
 const withSugar = <C extends React.FC<any>>(component: C) =>
   component as React.FC<Simplify<InferProps<C>>>;
 
-const Component = flow(observer<Props>, withSugar);
+export const EndpointListItem = pipe(observer(EndpointListItemView), withSugar);
 
 /**
  * This component is responsible for rendering a single endpoint item in the list.
  * It normalizes the behavior of the input across OSes and browsers.
  * It also provides a way to select, update, and remove the endpoint.
  */
-export const EndpointListItem = Component(function EndpointListItem(props) {
+export function EndpointListItemView(props: Props) {
   const { getChecked, getUrl, updateFn, removeFn, selectFn } =
     useEndpointListItem(props);
 
@@ -68,7 +68,7 @@ export const EndpointListItem = Component(function EndpointListItem(props) {
       </IconButton>
     </Stack>
   );
-});
+}
 
 const useEndpointListItem = (props: Props) => {
   const getters = useGetters(props);

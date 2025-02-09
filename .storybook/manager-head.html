@@ -80,3 +80,14 @@
     background: #2a2c2e !important;
   }
 </style>
+<script>
+  if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
+    const originalOnCommitFiberRoot = window.__REACT_DEVTOOLS_GLOBAL_HOOK__.onCommitFiberRoot;
+
+    window.__REACT_DEVTOOLS_GLOBAL_HOOK__.onCommitFiberRoot = (renderer, root, ...args) => {
+      const isStorybookManager = root.containerInfo?.id === 'root' || root.containerInfo?.id === 'storybook-docs';
+      if (isStorybookManager) return;
+      return originalOnCommitFiberRoot?.(renderer, root, ...args);
+    };
+  }
+</script>

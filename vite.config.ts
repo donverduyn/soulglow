@@ -57,10 +57,7 @@ export default defineConfig(({ mode }) => ({
     mode !== 'production' && process.env.CI !== 'true' && browser(mode),
     dynamicProxyPlugin(),
     tsconfigPaths(),
-    react({
-      // jsxImportSource: '@emotion/react',
-      // plugins: [['@swc/plugin-emotion', { sourceMap: true }]],
-    }),
+    react(),
     mode === 'development' &&
       i18nextHMRPlugin({
         localesDir: path.resolve(__dirname, 'public/locales'),

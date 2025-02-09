@@ -24,13 +24,6 @@ RUN apt-get update && apt-get install -y curl gnupg \
     && apt-get update && apt-get install -y yarn
 
 # Clone and build
-# RUN git clone https://github.com/facebook/react.git /tmp/react \
-#     && cd /tmp/react \
-#     && yarn install \
-#     && yarn build-for-devtools \
-#     && cd ./packages/react-devtools-extensions \
-#     && yarn build:chrome
-
 COPY ./codemods /tmp/codemods
 RUN git clone https://github.com/mantinedev/mantine /tmp/mantine \
     && cd /tmp/mantine \
@@ -43,7 +36,7 @@ RUN git clone https://github.com/mantinedev/mantine /tmp/mantine \
 
 # Step 3: Create the final image
 FROM mcr.microsoft.com/devcontainers/base:bullseye
-
+    
 RUN apt-get update \
     && apt-get install -y \
     xdg-utils \ 
@@ -61,60 +54,28 @@ RUN apt-get update \
     alsa-utils \ 
     pulseaudio \
     mesa-utils-extra \
-    # vulkan-tools \ 
-    # upower \ 
+    # libflite.so.1 \
+    # libflite_usenglish.so.1 \     
+    # libflite_cmu_grapheme_lang.so.1 \
+    # libflite_cmu_grapheme_lex.so.1 \
+    # libflite_cmu_indic_lang.so.1 \
+    # libflite_cmu_indic_lex.so.1 \ 
+    # libflite_cmulex.so.1 \  
+    # libflite_cmu_time_awb.so.1 \
+    # libflite_cmu_us_awb.so.1 \
+    # libflite_cmu_us_kal16.so.1 \
+    # libflite_cmu_us_kal.so.1 \
+    # libflite_cmu_us_rms.so.1 \
+    # libflite_cmu_us_slt.so.1 \
+    # libharfbuzz-icu.so.0 \
+    # libenchant-2.so.2 \
+    # libsecret-1.so.0 \
+    # libhyphen.so.0 \             
+    # libmanette-0.2.so.0 \
+    # libdw.so.1 \
+    # libgudev-1.0.so.0 \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* /var/tmp/*
-
-
-# RUN apt-get update && apt-get install -y \
-#     pkg-config \
-#     cmake \
-#     build-essential \
-#     python3 \
-#     python3-pip \
-#     python3-venv \
-#     && apt-get clean
-
-
-# # Create a virtual environment for Python packages
-# RUN python3 -m venv /opt/venv
-# RUN echo "source /opt/venv/bin/activate" | tee -a ~/.bashrc
-
-# # Extract the current 'secure_path' from sudoers, append the venv path, and patch it in /etc/sudoers.d
-# RUN CURRENT_SECURE_PATH=$(grep -Po '^Defaults\s+secure_path\s*=\s*"\K[^"]*' /etc/sudoers) \
-#     && echo "Defaults secure_path=\"/opt/venv/bin:$CURRENT_SECURE_PATH\"" | tee /etc/sudoers.d/custom_secure_path
-
-# # Ensure the sudoers file has the correct permissions
-# RUN chmod 440 /etc/sudoers.d/custom_secure_path
-
-# # Activate the virtual environment and install Meson
-# RUN /opt/venv/bin/pip install --upgrade pip --no-cache-dir pip && \
-#     /opt/venv/bin/pip install --no-cache-dir pycparser PyYAML Mako meson
-
-# # Add virtual environment to PATH to make meson available globally
-# ENV PATH="/opt/venv/bin:$PATH"
-
-# RUN echo "deb-src http://deb.debian.org/debian bookworm main" >> /etc/apt/sources.list
-# RUN apt-get update && apt-get build-dep -y mesa && apt-get build-dep -y libdrm
-
-# ENV LIBDIR=/usr/lib/aarch64-linux-gnu
-# ENV TOP=/opt
-
-# # Clone and build libdrm
-# RUN git clone https://gitlab.freedesktop.org/mesa/drm.git $TOP/drm && \
-#     cd $TOP/drm && \
-#     meson builddir --prefix=/usr --libdir=${LIBDIR} && \
-#     meson compile -C builddir && \
-#     meson install -C builddir
-
-# # # Clone and build Mesa with SVGA3D driver support
-# RUN git clone https://gitlab.freedesktop.org/mesa/mesa.git $TOP/mesa && \
-#     cd $TOP/mesa && \
-#     meson builddir -Dvulkan-drivers= -Dgallium-drivers=svga -Dglvnd=enabled -Dglvnd-vendor-name=mesa --prefix=/usr && \
-#     meson compile -C builddir && \
-#     meson install -C builddir
-    
 
 # Additional container configuration
 RUN mkdir -p /tmp/runtime-vscode \
@@ -123,14 +84,11 @@ RUN mkdir -p /tmp/runtime-vscode \
     && usermod -a -G audio,video vscode
 
 # Copy built React DevTools from the builder stage
-# COPY --from=builder /tmp/react/packages/react-devtools-extensions/chrome/build /tmp/react-devtools-extensions
-
 COPY --from=builder /tmp/mantine-storybook /tmp/mantine-storybook
+
 # Create empty JSON files
 RUN echo '{}' > /tmp/mantine-storybook/metadata.json \
   && echo '{}' > /tmp/mantine-storybook/stories.json
-
-# RUN yarn dlx playwright install --with-deps
 
 # Add Node binaries to PATH
 ENV PATH=./node_modules/.bin:$PATH

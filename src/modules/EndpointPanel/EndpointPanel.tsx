@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Effect, Queue, flow } from 'effect';
+import { Effect, Queue, pipe, Context } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'common/components/Button/Button';
 import { WithLabels } from 'common/components/hoc/withLabels';
@@ -7,11 +7,7 @@ import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { List } from 'common/components/List/List';
 import { Stack } from 'common/components/Stack/Stack';
 import { useReturn } from 'common/hooks/useReturn';
-import {
-  useRuntime,
-  useRuntimeFn,
-  useRuntimeSync,
-} from 'common/hooks/useRuntimeFn';
+import { useRuntime, useRuntimeFn } from 'common/hooks/useRuntimeFn';
 import { useTranslation } from 'common/hooks/useTranslation';
 import type { RuntimeType } from 'common/utils/context';
 import type { EventType } from 'common/utils/event';
@@ -28,7 +24,8 @@ import styles from './EndpointPanel.module.css';
 import * as Tags from './tags';
 
 interface Props {
-  publish: <R>(msg: EventType<unknown>) => Promise<R>;
+  readonly publish: <R>(msg: EventType<unknown>) => Promise<R>;
+  readonly store: Context.Tag.Service<typeof Tags.EndpointStore>;
 }
 const labels = createLabels(['addEndpointLabel']);
 
@@ -45,14 +42,16 @@ const registerInboundQueue = memoize(
 const publishToBus = (msg: EventType<unknown>) =>
   Effect.andThen(AppTags.EventBus, (bus) => bus.publish(msg));
 
-const Component = flow(
-  observer<Props>,
+export const EndpointPanel = pipe(
+  observer(EndpointPanelView),
   WithLabels(labels),
   WithRuntime(EndpointPanelRuntime, (runtime) => {
-    // TODO: Use request/response to avoid stale reads, before dispatching actions
+    const store = runtime.runSync(Tags.EndpointStore);
+
+    const publish = useRuntimeFn(AppRuntime, publishToBus);
     useRuntime(AppRuntime, registerInboundQueue(runtime), [runtime]);
-    const publish = useRuntimeFn(AppRuntime, publishToBus, [runtime]);
-    return useReturn({ publish });
+    // TODO: Use request/response to avoid stale reads, before dispatching actions
+    return useReturn({ publish, store });
   })
 );
 
@@ -60,7 +59,7 @@ const Component = flow(
  * This is the main component for the EndpointPanel module.
  * It displays a list of endpoints and allows the user to add new endpoints.
  */
-export const EndpointPanel = Component(function EndpointPanel(props) {
+export function EndpointPanelView(props: Props) {
   const { addEndpoint, endpoints, publish } = useEndpointPanel(props);
   // TODO: export type from utils to get a union of labels available in every lng
   const { text } = useTranslation<Labels<Locales>>();
@@ -80,18 +79,13 @@ export const EndpointPanel = Component(function EndpointPanel(props) {
   return (
     <Stack className={styles.EndpointPanel}>
       <List render={renderList} />
-      ddddd
       <Button onClick={addEndpoint}>{text(labels.addEndpointLabel)}</Button>
     </Stack>
   );
-});
+}
 
-function useEndpointPanel({ publish }: Props) {
+function useEndpointPanel({ store, publish }: Props) {
   // TODO: use normalized cache for entity collections and create mobx entity stores inside view models.
-  // const runtime = React.use(EndpointPanelRuntime);
-  // const rnt = React.use(AppRuntime)
-  // const publish = useRuntimeFn(AppRuntime, publishToBus, [runtime]);
-  const store = useRuntimeSync(EndpointPanelRuntime, Tags.EndpointStore);
   const endpoints = store.list;
 
   const addEndpoint = React.useCallback(() => {

@@ -57,11 +57,6 @@ function AppComponent() {
           isVisible ? <EndpointPanel /> : null
         )}
       />
-      {/* <Observer
-        render={panel.lazyGet('isVisible', (isVisible) =>
-          isVisible ? <EndpointPanel /> : null
-        )}
-      /> */}
       <LightBulb
         onChange={state.set('color')}
         getStyle={state.lazyGet('color', (value) => ({

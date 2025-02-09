@@ -260,6 +260,7 @@ module.exports = {
         ],
         'react-hooks/exhaustive-deps': 'warn',
         'react-hooks/rules-of-hooks': 'error',
+        'react-perf/jsx-no-new-function-as-prop': 'warn',
         'react-refresh/only-export-components': [
           'warn',
           { allowConstantExport: true },
@@ -320,7 +321,7 @@ module.exports = {
         'react/jsx-wrap-multilines': 'off',
         'react/no-multi-comp': ['warn', { ignoreStateless: true }],
         'react/no-unknown-property': ['error', { ignore: ['css'] }],
-        'react/no-unused-prop-types': 'warn',
+        'react/no-unused-prop-types': 'off',
         'react/prop-types': 'off',
         'react/react-in-jsx-scope': 'off',
         'react/require-default-props': 'off',

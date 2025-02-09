@@ -1,5 +1,6 @@
-import { join, dirname } from 'path';
+import path, { join, dirname } from 'node:path';
 import type { StorybookConfig } from '@storybook/react-vite';
+import { i18nextHMRPlugin } from 'i18next-hmr/vite';
 import remarkGfm from 'remark-gfm';
 import type { UserConfig } from 'vite';
 import { noCacheHeaders } from './../.vite/config/header';
@@ -24,10 +25,10 @@ const config: StorybookConfig = {
         },
       },
     },
-    getAbsolutePath('@storybook/addon-interactions'),
     getAbsolutePath('@storybook/addon-links'),
     getAbsolutePath('@storybook/addon-a11y'),
     getAbsolutePath('storybook-dark-mode'),
+    getAbsolutePath('@storybook/experimental-addon-test'),
   ],
   core: { disableWhatsNewNotifications: true },
   features: {
@@ -63,7 +64,6 @@ const config: StorybookConfig = {
     '../**/*.mdx',
   ],
   typescript: {
-    // reactDocgen: false,
     reactDocgen: 'react-docgen',
   },
   viteFinal: async (config) => {
@@ -104,8 +104,14 @@ const config: StorybookConfig = {
             reload: ['./public/**/*'],
             restart: ['.storybook/**/*'],
           }),
+        process.env.NODE_ENV === 'development' &&
+          i18nextHMRPlugin({
+            localesDir: path.resolve(__dirname, '../public/locales'),
+          }),
       ],
-      server: { headers: noCacheHeaders },
+      server: {
+        headers: noCacheHeaders,
+      },
     } satisfies UserConfig);
   },
 };

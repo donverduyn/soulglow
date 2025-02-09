@@ -1,5 +1,11 @@
-export const WithLabels =
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function WithLabels<L extends Record<any, any>, C extends React.FC<any>>(
+  labels: L
+): (Component?: C) => C & { labels: L };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function WithLabels<L extends Record<any, any>>(labels: L) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  <L extends Record<any, any>>(labels: L) =>
-    <P>(Component: React.FC<P>) =>
-      Object.assign(Component, { labels });
+  return <C extends React.FC<any>>(Component?: C) =>
+    Object.assign(Component ?? {}, { labels });
+}

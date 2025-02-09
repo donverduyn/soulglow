@@ -43,7 +43,16 @@
 	],
 	// we statically bind the dev server so external machines on the network can view it.
 	// if the firewall allows, that is.
-	"runArgs": ["--device=/dev/dri:/dev/dri", "--device=/dev/snd", "-p=0.0.0.0:4173:4173"], // "--network=minikube"],
+	"runArgs": [
+    "--device=/dev/dri:/dev/dri", 
+    "--device=/dev/snd", 
+    "-p=0.0.0.0:4173:4173",
+    // "--priviliged",
+    // "--sysctl", "fs.inotify.max_queued_events=16384",
+    // "--sysctl", "fs.inotify.max_user_instances=8192",
+    // "--sysctl", "fs.inotify.max_user_watches=524288",
+    // "--ulimit", "nofile=65536:65536"
+  ], // "--network=minikube"],
 	
 	"postCreateCommand": {
 		"yarn": "yarn install",

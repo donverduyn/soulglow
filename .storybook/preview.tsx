@@ -23,6 +23,11 @@ if (import.meta.env.DEV) {
   initialize({ onUnhandledRequest: 'bypass', quiet: true });
 }
 
+// polyfill for babel parser
+Object.assign(window, {
+  process: { env: { NODE_ENV: 'development' } },
+});
+
 export const decorators: Decorator[] = [
   I18nDecorator,
   BodyClassColorSchemeDecorator,
@@ -38,6 +43,7 @@ const preview: Preview = {
       toolbar: {
         icon: 'globe',
         items: [
+          { right: '🇺🇸', title: 'CI', value: 'cimode' },
           { right: '🇺🇸', title: 'English', value: 'en' },
           { right: '🇳🇱', title: 'Dutch', value: 'nl' },
         ],

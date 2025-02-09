@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Button as MantineButton, type ButtonProps } from '@mantine/core';
+import { observer } from 'mobx-react-lite';
 interface Props extends ButtonProps {
   readonly onClick?: () => void;
 }
@@ -11,12 +12,12 @@ interface Props extends ButtonProps {
  * Only Variants Light and Variants Dark have fixed themes.
  * Use storybook theme to visualize the others.
  */
-export const Button: React.FC<Props> = ({
+export const Button: React.FC<Props> = observer(function Button({
   className,
   children,
   onClick,
   ...rest
-}) => {
+}) {
   return (
     <MantineButton
       // unstyled
@@ -29,4 +30,4 @@ export const Button: React.FC<Props> = ({
       {children}
     </MantineButton>
   );
-};
+});
