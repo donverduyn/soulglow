@@ -1,0 +1,13 @@
+diff --git a/node_modules/vite-plugin-inspect/dist/shared/vite-plugin-inspect.CZSK4t4I.mjs b/node_modules/vite-plugin-inspect/dist/shared/vite-plugin-inspect.CZSK4t4I.mjs
+index 0430fd5..1f8bab3 100644
+--- a/node_modules/vite-plugin-inspect/dist/shared/vite-plugin-inspect.CZSK4t4I.mjs
++++ b/node_modules/vite-plugin-inspect/dist/shared/vite-plugin-inspect.CZSK4t4I.mjs
+@@ -3681,7 +3681,7 @@ function PluginInspect(options = {}) {
+   }
+   function configureServer(server) {
+     const config = server.config;
+-    Object.values(server.environments).forEach((env) => {
++    Object.values(server.environments ?? {}).forEach((env) => {
+       const envCtx = ctx.getEnvContext(env);
+       const _invalidateModule = env.moduleGraph.invalidateModule;
+       env.moduleGraph.invalidateModule = function(...args) {

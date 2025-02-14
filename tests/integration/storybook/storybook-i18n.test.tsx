@@ -15,7 +15,7 @@ describe('i18n Storybook integration', () => {
   );
 
   const TestComponent: React.FC = () => {
-    const { text } = useTranslation<Translations>();
+    const { text } = useTranslation<keyof Translations>();
     return <span>{text('test')}</span>;
   };
 

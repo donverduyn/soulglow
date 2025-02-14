@@ -3,13 +3,13 @@ import {
   Title,
   Subtitle,
   Description,
-  Primary,
   Controls,
   Stories,
 } from '@storybook/blocks';
 import type { Decorator, Preview } from '@storybook/react';
 import { themes, type ThemeVars, ensure } from '@storybook/theming';
 import { initialize, mswLoader } from 'msw-storybook-addon';
+import { Primary } from './blocks/Primary';
 import '@mantine/core/styles.layer.css';
 import { DocsContainer } from './components/DocsContainer';
 import 'index.css';

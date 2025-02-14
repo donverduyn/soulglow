@@ -26,6 +26,7 @@
     ".vite/**/*",
     ".postcss/**/*",
     "*.config.ts",
-    "postcss.config.cjs",
+    "*.workspace.ts",
+    "postcss.config.cjs", ".storybook/vitest.workspace.ts",
   ],
 }
