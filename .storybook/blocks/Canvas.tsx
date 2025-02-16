@@ -31,7 +31,7 @@ const CustomCanvas = (OriginalCanvas: typeof SbCanvas) => {
     );
 
     return code === null ? (
-      ''
+      'loading...'
     ) : (
       <OriginalCanvas
         {...props}

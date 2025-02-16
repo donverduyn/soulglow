@@ -24,6 +24,7 @@ export default mergeConfig(
     test: {
       // Enable browser mode
       browser: {
+        
         enabled: true,
         headless: true,
 
@@ -31,7 +32,7 @@ export default mergeConfig(
         // Make sure to install Playwright
         provider: 'playwright',
       },
-      setupFiles: ['./vitest.setup.ts'],
+      setupFiles: ['../tests/setup.ts'],
     },
   })
 );

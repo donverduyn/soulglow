@@ -25,7 +25,9 @@ if (import.meta.env.DEV) {
 
 // polyfill for babel parser
 Object.assign(window, {
-  process: { env: { NODE_ENV: 'development' } },
+  process: Object.assign(window.process ?? {}, {
+    env: { NODE_ENV: 'development' },
+  }),
 });
 
 export const decorators: Decorator[] = [

@@ -1,9 +1,14 @@
 import jscodeshift, { API } from 'jscodeshift';
-import { format } from 'prettier';
+import prettierPluginEstree from 'prettier/plugins/estree';
+import typescript from 'prettier/plugins/typescript';
+import { format } from 'prettier/standalone';
 import transformer from './parameters-docs';
 
 function formatCode(code: string) {
-  return format(code, { parser: 'typescript' });
+  return format(code, {
+    parser: 'typescript',
+    plugins: [typescript, prettierPluginEstree],
+  });
 }
 
 const jscodeshiftAPI: API = {
@@ -15,6 +20,7 @@ const jscodeshiftAPI: API = {
 
 describe('jscodeshift transformer', () => {
   it('should append parameters if not present', async () => {
+    expect.assertions(1);
     const inputCode = await formatCode(`
       const someVar = 'value';
     `);
@@ -39,6 +45,7 @@ describe('jscodeshift transformer', () => {
   });
 
   it('should merge parameters if already present', async () => {
+    expect.assertions(1);
     const inputCode = await formatCode(`
       export const parameters = { 
         someProp: true 
@@ -63,6 +70,7 @@ describe('jscodeshift transformer', () => {
   });
 
   it('should not overwrite existing docs property in parameters', async () => {
+    expect.assertions(1);
     const inputCode = await formatCode(`
       export const parameters = {
         docs: {

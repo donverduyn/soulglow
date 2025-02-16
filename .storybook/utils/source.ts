@@ -17,8 +17,6 @@ export const unwrapAndFixMemoJSX = async (
   storyContext: StoryContext
 ) => {
   try {
-    // if(storyContext.component)
-    // console.log('Component:', storyContext.component, code );
     if (!/<[A-Z][a-zA-Z0-9.]*/.test(code)) {
       return code;
     }
@@ -56,12 +54,10 @@ export const unwrapAndFixMemoJSX = async (
       'Component';
 
     if (!extractedJSX) {
-      console.warn('No JSX found, returning original code.');
       return fixedCode;
     }
 
-    extractedJSX = extractedJSX.replace(/^<React\.Memo/, `<${componentName}`);
-    // return extractedJSX;
+    extractedJSX = extractedJSX.replace(/^<React\.Memo/, `<${componentName}`)
     const formattedJSX = await format(extractedJSX, {
       jsxSingleQuote: true,
       parser: 'babel',
@@ -71,10 +67,8 @@ export const unwrapAndFixMemoJSX = async (
       trailingComma: 'all',
     });
 
-    console.log('Formatted JSX:\n', formattedJSX);
     return formattedJSX;
   } catch (error) {
-    console.error('Error parsing JSX:', error);
     return code;
   }
 };

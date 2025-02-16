@@ -2,7 +2,7 @@ import { composeStories } from '@storybook/react';
 import { render } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import type { Locales, HasTranslation } from 'common/utils/i18n';
-import * as stories from 'modules/EndpointPanel/EndpointPanel.stories';
+import * as stories from './EndpointPanel.stories';
 
 describe('endpointPanel', () => {
   const { Default } = composeStories(stories);
@@ -13,11 +13,10 @@ describe('endpointPanel', () => {
   );
 
   it('should have all of the translations available', () => {
-    expect.assertions(1);
+    expect.assertions(0);
     type Labels = NonNullable<typeof Default.args.labels>;
     expectTypeOf<HasTranslation<Locales, Labels>>().toEqualTypeOf<true>();
   });
-
   it('should render the endpoint panel', async () => {
     expect.assertions(1);
 
