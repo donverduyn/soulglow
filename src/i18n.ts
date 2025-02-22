@@ -10,7 +10,7 @@ export const initializeI18N = memoize(
     void i18nInstance.use(Backend).use(LanguageDetector).use(initReactI18next);
 
     void (async () => {
-      if (import.meta.env.MODE !== 'production') {
+      if (import.meta.env.MODE === 'development') {
         const { HMRPlugin } = await import('i18next-hmr/plugin');
         i18nInstance.use(new HMRPlugin({ vite: { client: true } }));
       }
