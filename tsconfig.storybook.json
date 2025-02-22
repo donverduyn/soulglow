@@ -23,7 +23,8 @@
     "src/**/*.stories.tsx",
     "**/.storybook/**/*",
     "stories/**/*",
-    "**/*.mdx"
+    "**/*.mdx",
+    "vitest.config.ts"  
   ],
   "references": [
     {

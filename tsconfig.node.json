@@ -17,6 +17,7 @@
     "**/*.test.tsx",
     "**/.*/**/*.test.ts",
     "**/.*/**/*.test.tsx",
+    "vitest.config.ts"
   ],
   "include": [
     "scripts/**/*",
@@ -27,6 +28,6 @@
     ".postcss/**/*",
     "*.config.ts",
     "*.workspace.ts",
-    "postcss.config.cjs", ".storybook/vitest.workspace.ts",
+    "postcss.config.cjs",
   ],
 }

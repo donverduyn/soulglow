@@ -24,11 +24,10 @@ if (import.meta.env.DEV) {
 }
 
 // polyfill for babel parser
-Object.assign(window, {
-  process: Object.assign(window.process ?? {}, {
-    env: { NODE_ENV: 'development' },
-  }),
-});
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+if (typeof window !== 'undefined' && !window.process) {
+  window.process = { env: {} } as typeof window.process;
+}
 
 export const decorators: Decorator[] = [
   I18nDecorator,
