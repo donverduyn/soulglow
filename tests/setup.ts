@@ -1,10 +1,10 @@
+import * as a11yAddonAnnotations from '@storybook/addon-a11y/preview';
 import { setProjectAnnotations } from '@storybook/react';
 import { render, cleanup } from '@testing-library/react';
 import { getWorker } from 'msw-storybook-addon';
 import { vi } from 'vitest';
 import previewAnnotations from '.storybook/preview';
 import '@testing-library/jest-dom/vitest';
-import * as a11yAddonAnnotations from '@storybook/addon-a11y/preview';
 
 const annotations = setProjectAnnotations([
   a11yAddonAnnotations,

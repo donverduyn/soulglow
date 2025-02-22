@@ -211,6 +211,8 @@ module.exports = {
           {
             args: 'all',
             argsIgnorePattern: '^_$',
+            caughtErrors: 'all',
+            caughtErrorsIgnorePattern: '^_',
             ignoreRestSiblings: true,
             vars: 'local',
             varsIgnorePattern: '^_$',

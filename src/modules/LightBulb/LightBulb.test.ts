@@ -26,7 +26,7 @@ describe('lightBulb Module', () => {
   });
 
   it('should brighten the light bulb', () => {
-    expect.assertions(1); 
+    expect.assertions(1);
     const lightBrightness = 100;
     expect(lightBrightness).toBe(100);
   });

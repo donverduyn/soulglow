@@ -1,12 +1,12 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+// import path from 'node:path';
+// import { fileURLToPath } from 'node:url';
 import { defineConfig, mergeConfig } from 'vitest/config';
 import viteConfig from './.storybook/vite.config';
 
-const dirname =
-  typeof __dirname !== 'undefined'
-    ? __dirname
-    : path.dirname(fileURLToPath(import.meta.url));
+// const dirname =
+//   typeof __dirname !== 'undefined'
+//     ? __dirname
+//     : path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig((configEnv) =>
   mergeConfig(

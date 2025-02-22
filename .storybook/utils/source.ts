@@ -57,7 +57,7 @@ export const unwrapAndFixMemoJSX = async (
       return fixedCode;
     }
 
-    extractedJSX = extractedJSX.replace(/^<React\.Memo/, `<${componentName}`)
+    extractedJSX = extractedJSX.replace(/^<React\.Memo/, `<${componentName}`);
     const formattedJSX = await format(extractedJSX, {
       jsxSingleQuote: true,
       parser: 'babel',
@@ -68,7 +68,7 @@ export const unwrapAndFixMemoJSX = async (
     });
 
     return formattedJSX;
-  } catch (error) {
+  } catch (_) {
     return code;
   }
 };

@@ -1,8 +1,8 @@
 import path from 'node:path';
 import react from '@vitejs/plugin-react-swc';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import { UserConfig } from 'vite';
-import { defineConfig, mergeConfig, type ViteUserConfig } from 'vitest/config';
+import tsconfigPaths from 'vite-tsconfig-paths';
+import { mergeConfig, type ViteUserConfig } from 'vitest/config';
 import removeExtraFontsPlugin from './../.vite/plugins/vite-plugin-remove-fonts';
 
 export default (config: ViteUserConfig) => {
