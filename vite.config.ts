@@ -53,7 +53,7 @@ export default defineConfig(async ({ mode }) => {
       })
     );
     devPlugins.push(inspect({}));
-    devPlugins.push(browser(mode))
+    devPlugins.push(browser(mode));
   }
   return {
     build: {
@@ -177,6 +177,11 @@ export default defineConfig(async ({ mode }) => {
       isolate: false,
       maxConcurrency: 20,
       open: false,
+      server: {
+        deps: {
+          inline: ['i18next-hmr'],
+        },
+      },
       // pool: 'vmThreads',
       // poolOptions: { threads: { singleThread: true } },
       setupFiles: ['./tests/setup.ts'],
