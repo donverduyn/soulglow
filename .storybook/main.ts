@@ -1,6 +1,5 @@
-import path, { join, dirname } from 'node:path';
+import { join, dirname } from 'node:path';
 import type { StorybookConfig } from '@storybook/react-vite';
-import { i18nextHMRPlugin } from 'i18next-hmr/vite';
 import remarkGfm from 'remark-gfm';
 import type { UserConfig } from 'vite';
 import { noCacheHeaders } from './../.vite/config/header';
@@ -69,6 +68,17 @@ const config: StorybookConfig = {
   viteFinal: async (config) => {
     const { mergeConfig } = await import('vite');
     const { viteStaticCopy } = await import('vite-plugin-static-copy');
+    const devPlugins = [];
+    if (config.mode === 'development') {
+      const { i18nextHMRPlugin } = await import('i18next-hmr/vite');
+      devPlugins.push(i18nextHMRPlugin({ localesDir: './public/locales' }));
+      devPlugins.push(
+        VitePluginRestart({
+          reload: ['./public/**/*'],
+          restart: ['.storybook/**/*'],
+        })
+      );
+    }
     return mergeConfig(config, {
       build: {
         chunkSizeWarningLimit: 1024,
@@ -99,15 +109,7 @@ const config: StorybookConfig = {
               // },
             ],
           }),
-        process.env.NODE_ENV === 'development' &&
-          VitePluginRestart({
-            reload: ['./public/**/*'],
-            restart: ['.storybook/**/*'],
-          }),
-        process.env.NODE_ENV === 'development' &&
-          i18nextHMRPlugin({
-            localesDir: path.resolve(__dirname, '../public/locales'),
-          }),
+        ...devPlugins,
       ],
       server: {
         headers: noCacheHeaders,
