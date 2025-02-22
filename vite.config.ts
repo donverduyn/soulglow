@@ -177,11 +177,7 @@ export default defineConfig(async ({ mode }) => {
       isolate: false,
       maxConcurrency: 20,
       open: false,
-      server: {
-        deps: {
-          inline: ['i18next-hmr'],
-        },
-      },
+
       // pool: 'vmThreads',
       // poolOptions: { threads: { singleThread: true } },
       setupFiles: ['./tests/setup.ts'],
