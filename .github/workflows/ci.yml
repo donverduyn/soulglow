@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.42.0  # Use the Playwright image
 
     steps:
     - uses: actions/checkout@v4
@@ -27,44 +28,14 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-eslint-
 
-    - name: Cache Playwright browsers
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/ms-playwright
-        key: ${{ runner.os }}-playwright-${{ hashFiles('yarn.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-playwright-
-
     - name: Install dependencies
       run: yarn install --frozen-lockfile
-
-    - name: Install Playwright
-      run: yarn playwright install --with-deps
 
     - name: Lint
       run: yarn lint:ci
 
     - name: Test
-      run: yarn test
+      run: yarn test  # Playwright is already installed in the container
 
     - name: Build
       run: yarn build
-
-
-    # - name: Set up Docker Buildx
-    #   uses: docker/setup-buildx-action@v1
-
-    # - name: Log in to Docker registry
-    #   uses: docker/login-action@v1
-    #   with:
-    #     registry: ghcr.io  # Change this to your registry's URL
-    #     username: ${{ secrets.REGISTRY_USERNAME }}
-    #     password: ${{ secrets.REGISTRY_PASSWORD }}
-
-    # - name: Build and push Docker image using Docker Compose
-    #   run: |
-    #     docker-compose up --build
-    #     docker-compose push
-    #   env:
-    #     DOCKER_BUILDKIT: 1
-    #     COMPOSE_DOCKER_CLI_BUILD: 1
