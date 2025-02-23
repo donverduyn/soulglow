@@ -27,8 +27,19 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-eslint-
 
+    - name: Cache Playwright browsers
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/ms-playwright
+        key: ${{ runner.os }}-playwright-${{ hashFiles('yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-playwright-
+
     - name: Install dependencies
       run: yarn install --frozen-lockfile
+
+    - name: Install Playwright
+      run: yarn playwright install --with-deps
 
     - name: Lint
       run: yarn lint:ci
@@ -38,6 +49,7 @@ jobs:
 
     - name: Build
       run: yarn build
+
 
     # - name: Set up Docker Buildx
     #   uses: docker/setup-buildx-action@v1
