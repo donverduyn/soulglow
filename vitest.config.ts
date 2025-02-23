@@ -1,25 +1,26 @@
-// import path from 'node:path';
-// import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { storybookTest } from '@storybook/experimental-addon-test/vitest-plugin';
 import { defineConfig, mergeConfig } from 'vitest/config';
 import viteConfig from './.storybook/vite.config';
 
-// const dirname =
-//   typeof __dirname !== 'undefined'
-//     ? __dirname
-//     : path.dirname(fileURLToPath(import.meta.url));
+const dirname =
+  typeof __dirname !== 'undefined'
+    ? __dirname
+    : path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig((configEnv) =>
   mergeConfig(
     viteConfig(configEnv),
     defineConfig({
       plugins: [
-        // storybookTest({
-        //   // The location of your Storybook config, main.js|ts
-        //   configDir: dirname + '/.storybook',
-        //   // This should match your package.json script to run Storybook
-        //   // The --ci flag will skip prompts and not open a browser
-        //   storybookScript: 'yarn sb --ci',
-        // }),
+        storybookTest({
+          // The location of your Storybook config, main.js|ts
+          configDir: dirname + '/.storybook',
+          // This should match your package.json script to run Storybook
+          // The --ci flag will skip prompts and not open a browser
+          storybookScript: 'yarn sb --ci',
+        }),
       ],
       test: {
         coverage: { provider: 'v8', reporter: 'html' },
@@ -44,14 +45,36 @@ export default defineConfig((configEnv) =>
           tsconfig: './tsconfig.test.json',
         },
         // Enable browser mode
-        // browser: {
-        //   enabled: true,
-        //   headless: true,
+        browser: {
+          enabled: true,
+          headless: true,
 
-        //   name: 'chromium',
-        //   // Make sure to install Playwright
-        //   provider: 'playwright',
-        // },
+          name: 'chromium',
+          // Make sure to install Playwright
+          provider: 'playwright',
+        },
+
+        // workspace: [
+        //   // matches every folder and file inside the `packages` folder
+        //   'packages/*',
+        //   {
+        //     // add "extends: true" to inherit the options from the root config
+        //     extends: true,
+        //     test: {
+        //       include: ['tests/**/*.{browser}.test.{ts,js}'],
+        //       // it is recommended to define a name when using inline configs
+        //       name: 'happy-dom',
+        //       environment: 'happy-dom',
+        //     }
+        //   },
+        //   {
+        //     test: {
+        //       include: ['tests/**/*.{node}.test.{ts,js}'],
+        //       name: 'node',
+        //       environment: 'node',
+        //     }
+        //   }
+        // ]
       },
     })
   )

@@ -1,8 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { ColorSchemeDecorator } from '.storybook/decorators/ColorSchemeDecorator';
+import { ThemeDecorator } from '.storybook/decorators/ThemeDecorator';
 import { Toggle } from './Toggle';
 
 const meta: Meta<typeof Toggle> = {
   component: Toggle,
+  decorators: [
+    ColorSchemeDecorator,
+    ThemeDecorator({ defaultColorScheme: 'light' }),
+  ],
   parameters: { layout: 'centered' },
   tags: ['autodocs'],
   title: 'Common/Toggle',
