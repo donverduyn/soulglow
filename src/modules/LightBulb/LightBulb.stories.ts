@@ -13,7 +13,10 @@ const meta: Meta<ExtendArgs<typeof LightBulb>> = {
   args: { labels: LightBulb.labels },
   component: LightBulb,
   decorators: [RuntimeDecorator(AppRuntime)],
-  parameters: { layout: 'centered' },
+  parameters: {
+    a11y: { test: 'todo' },
+    layout: 'centered',
+  },
   tags: ['autodocs'],
   title: '@LightBulb/LightBulb',
 };

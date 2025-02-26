@@ -2,7 +2,11 @@
   "extends": "./tsconfig.options.json",
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2023",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "module": "ESNext",
     "outDir": "dist/storybook",
     "moduleResolution": "Bundler",
@@ -12,7 +16,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "skipLibCheck": true,
-    "types": ["node", "vite/client"],
+    "types": [
+      "node",
+      "vite/client",
+      "@vitest/browser/matchers",
+      "@vitest/browser/providers/playwright"
+    ],
   },
   "exclude": [
     "**/node_modules/**/*",
@@ -24,7 +33,6 @@
     "**/.storybook/**/*",
     "stories/**/*",
     "**/*.mdx",
-    "vitest.config.ts"  
   ],
   "references": [
     {

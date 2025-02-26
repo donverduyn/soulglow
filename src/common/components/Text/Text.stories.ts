@@ -1,19 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { AppRuntime } from 'modules/App/context';
-import { Text } from './Text';
 import { ColorSchemeDecorator } from '.storybook/decorators/ColorSchemeDecorator';
 import { ThemeDecorator } from '.storybook/decorators/ThemeDecorator';
-
-
+import { Text } from './Text';
 
 const meta: Meta<typeof Text> = {
   component: Text,
   // decorators: [RuntimeDecorator(AppRuntime)],
-    decorators: [
-      ColorSchemeDecorator,
-      ThemeDecorator({ defaultColorScheme: 'light' }),
-    ],
-  parameters: { layout: 'centered' },
+  decorators: [
+    ColorSchemeDecorator,
+    ThemeDecorator({ defaultColorScheme: 'light' }),
+  ],
+  parameters: {
+    a11y: { test: 'todo' },
+    layout: 'centered',
+  },
   tags: ['autodocs'],
   title: 'Common/Text',
 };

@@ -8,7 +8,10 @@ import { Slider } from './Slider';
 const meta: Meta<typeof Slider> = {
   component: Slider,
   decorators: [RuntimeDecorator(AppRuntime)],
-  parameters: { layout: 'centered' },
+  parameters: {
+    a11y: { test: 'todo' },
+    layout: 'centered',
+  },
   tags: ['autodocs'],
   title: 'Common/Slider',
 };

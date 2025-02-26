@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Combobox, Input, InputBase, useCombobox } from '@mantine/core';
 import cy from 'clsx';
 import { observer } from 'mobx-react-lite';
-import { useReaction } from 'common/hooks/useMobx';
+import { useReaction } from 'common/hooks/useMobx/useMobx';
 import styles from './Select.module.css';
 
 type Item<TValue> = { id: string; label: string; value: TValue };

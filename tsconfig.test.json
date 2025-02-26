@@ -10,6 +10,7 @@
     "types": [
       "node",
       "vitest/globals",
+      "@vitest/browser/matchers",
       "@vitest/browser/providers/playwright"
     ],
   },

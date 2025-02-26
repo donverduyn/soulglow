@@ -33,7 +33,10 @@ const meta: Meta<typeof Group> = {
     ColorSchemeDecorator,
     ThemeDecorator({ defaultColorScheme: 'dark' }),
   ],
-  parameters: { layout: 'centered' },
+  parameters: {
+    a11y: { test: 'todo' },
+    layout: 'centered',
+  },
   render: GroupTemplate,
   tags: ['autodocs'],
   title: 'Common/Group',

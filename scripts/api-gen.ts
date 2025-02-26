@@ -1,11 +1,11 @@
 import { createClient } from '@hey-api/openapi-ts';
-import yargs from 'yargs';
+// import yargs from 'yargs';
 
-const argv = yargs().option('watch', {
-  alias: 'w',
-  describe: 'Watch for file changes',
-  type: 'boolean',
-}).argv;
+// const argv = yargs().option('watch', {
+//   alias: 'w',
+//   describe: 'Watch for file changes',
+//   type: 'boolean',
+// }).argv;
 
 export const generate = async (
   yamlFilePath: string = './openapi.yml',
@@ -42,7 +42,7 @@ export const generate = async (
           serviceNameBuilder: '{{name}}Service',
         },
       ],
-      watch: (await argv).watch === true,
+      watch: false, //(await argv).watch === true,
       // schemas: {
       //   export: true,
       //   type: 'json',

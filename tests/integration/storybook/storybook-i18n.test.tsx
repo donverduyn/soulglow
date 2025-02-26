@@ -3,7 +3,7 @@ import type { StoryObj } from '@storybook/react';
 import { render } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { v4 as uuid } from 'uuid';
-import { useTranslation } from 'common/hooks/useTranslation';
+import { useTranslation } from 'common/hooks/useTranslation/useTranslation';
 
 describe('i18n Storybook integration', () => {
   interface Translations {
@@ -22,6 +22,7 @@ describe('i18n Storybook integration', () => {
   it('should display the fetched translation', async () => {
     expect.assertions(1);
 
+    // @ts-expect-error since storybook 8.6
     const Default: StoryObj = { render: TestComponent };
     const Story = composeStory(Default, {});
 

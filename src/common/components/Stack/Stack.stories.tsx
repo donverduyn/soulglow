@@ -8,7 +8,10 @@ import { Stack } from './Stack';
 const meta: Meta<typeof Stack> = {
   component: Stack,
   decorators: [RuntimeDecorator(AppRuntime)],
-  parameters: { layout: 'centered' },
+  parameters: {
+    a11y: { test: 'todo' },
+    layout: 'centered',
+  },
   tags: ['autodocs'],
   title: 'Common/Stack',
 };

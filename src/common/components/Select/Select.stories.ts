@@ -8,7 +8,10 @@ import { Select } from './Select';
 const meta: Meta<typeof Select> = {
   component: Select,
   decorators: [RuntimeDecorator(AppRuntime)],
-  parameters: { layout: 'centered' },
+  parameters: {
+    a11y: { test: 'todo' },
+    layout: 'centered',
+  },
   tags: ['autodocs'],
   title: 'Common/Select',
 };

@@ -12,8 +12,8 @@ import { initialize, mswLoader } from 'msw-storybook-addon';
 import { Primary } from './blocks/Primary';
 import '@mantine/core/styles.layer.css';
 import { DocsContainer } from './components/DocsContainer';
-import 'index.css';
-import 'font.css';
+import '../src/index.css';
+import '../src/font.css';
 import { BodyClassColorSchemeDecorator } from './decorators/ColorSchemeDecorator';
 import { I18nDecorator } from './decorators/I18nDecorator';
 import { I18nLoader } from './loaders/I18nLoader';
@@ -57,6 +57,7 @@ const preview: Preview = {
   // we only use MSW in our test environment, which is not part of the build
   loaders: import.meta.env.DEV ? [mswLoader, I18nLoader] : [I18nLoader],
   parameters: {
+    a11y: { test: 'error' },
     backgrounds: {
       options: {
         dark: { name: 'Dark', value: '#2b2b2b' },

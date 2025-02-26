@@ -6,9 +6,12 @@ import { WithLabels } from 'common/components/hoc/withLabels';
 import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { List } from 'common/components/List/List';
 import { Stack } from 'common/components/Stack/Stack';
-import { useReturn } from 'common/hooks/useReturn';
-import { useRuntime, useRuntimeFn } from 'common/hooks/useRuntimeFn';
-import { useTranslation } from 'common/hooks/useTranslation';
+import { useReturn } from 'common/hooks/useReturn/useReturn';
+import {
+  useRuntime,
+  useRuntimeFn,
+} from 'common/hooks/useRuntimeFn/useRuntimeFn';
+import { useTranslation } from 'common/hooks/useTranslation/useTranslation';
 import type { RuntimeType } from 'common/utils/context';
 import type { EventType } from 'common/utils/event';
 import { createLabels } from 'common/utils/i18n';

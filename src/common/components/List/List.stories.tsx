@@ -15,7 +15,10 @@ const meta: Meta<typeof List> = {
       )),
   },
   component: List,
-  parameters: { layout: 'centered' },
+  parameters: {
+    a11y: { test: 'todo' },
+    layout: 'centered',
+  },
   tags: ['autodocs'],
   title: 'Common/List',
 };

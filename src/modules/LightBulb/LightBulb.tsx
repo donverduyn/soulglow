@@ -12,9 +12,13 @@ import { Paper } from 'common/components/Paper/Paper';
 import { Select } from 'common/components/Select/Select';
 import { Slider } from 'common/components/Slider/Slider';
 import { Stack } from 'common/components/Stack/Stack';
-import { useMobx, useDeepObserve, useAutorun } from 'common/hooks/useMobx';
-import { useReturn } from 'common/hooks/useReturn';
-import { useRuntimeFn } from 'common/hooks/useRuntimeFn';
+import {
+  useMobx,
+  useDeepObserve,
+  useAutorun,
+} from 'common/hooks/useMobx/useMobx';
+import { useReturn } from 'common/hooks/useReturn/useReturn';
+import { useRuntimeFn } from 'common/hooks/useRuntimeFn/useRuntimeFn';
 import { fromLayer } from 'common/utils/context';
 import { createLabels } from 'common/utils/i18n';
 import { merge } from 'common/utils/object';

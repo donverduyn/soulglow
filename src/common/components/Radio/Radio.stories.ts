@@ -8,7 +8,10 @@ import { Radio } from './Radio';
 const meta: Meta<typeof Radio> = {
   component: Radio,
   decorators: [RuntimeDecorator(AppRuntime)],
-  parameters: { layout: 'centered' },
+  parameters: {
+    a11y: { test: 'todo' },
+    layout: 'centered',
+  },
   tags: ['autodocs'],
   title: 'Common/Radio',
 };

@@ -1,20 +1,23 @@
 import path from 'node:path';
 import react from '@vitejs/plugin-react-swc';
-import { UserConfig } from 'vite';
+import { defineConfig, UserConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { mergeConfig, type ViteUserConfig } from 'vitest/config';
 import removeExtraFontsPlugin from './../.vite/plugins/vite-plugin-remove-fonts';
 
-export default (config: ViteUserConfig) => {
+export default defineConfig((config: ViteUserConfig) => {
   return mergeConfig(config, {
     plugins: [react(), tsconfigPaths(), removeExtraFontsPlugin()],
     // TODO: storybook refs only work using localhost, not 127.0.0.1?
     resolve: {
-      alias: {
-        // TODO: Remove this alias once the issue is fixed
-        // https://github.com/tabler/tabler-icons/issues/1233
-        '@tabler/icons-react': '@tabler/icons-react/dist/esm/icons/index.mjs',
-      },
+      alias: [
+        {
+          // TODO: Remove this alias once the issue is fixed
+          // https://github.com/tabler/tabler-icons/issues/1233
+          find: '@tabler/icons-react',
+          replacement: '@tabler/icons-react/dist/esm/icons/index.mjs',
+        },
+      ],
     },
 
     server: {
@@ -27,4 +30,4 @@ export default (config: ViteUserConfig) => {
       },
     },
   } satisfies UserConfig);
-};
+});

@@ -1,7 +1,7 @@
 import { renderHook, type RenderOptions } from '@testing-library/react';
 import i18next from 'i18next';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
-import { useTranslation } from 'common/hooks/useTranslation';
+import { useTranslation } from 'common/hooks/useTranslation/useTranslation';
 
 interface Translations {
   readonly key1: string;
@@ -39,7 +39,7 @@ describe('useTranslation', () => {
 
   it('should return the correct translation for a single key', () => {
     expect.assertions(1);
-    const hook = renderHook(() => useTranslation<Translations>(), {
+    const hook = renderHook(() => useTranslation<keyof Translations>(), {
       wrapper: Wrapper,
     });
 
@@ -50,7 +50,7 @@ describe('useTranslation', () => {
     expect.assertions(1);
     const invalidKey = 'key3';
     const validKey = 'key2';
-    const hook = renderHook(() => useTranslation<Translations>(), {
+    const hook = renderHook(() => useTranslation<keyof Translations>(), {
       wrapper: Wrapper,
     });
 
@@ -68,7 +68,7 @@ describe('useTranslation', () => {
     const arg = 'John';
 
     i18n.addResource('en', 'translation', key, `${value} ${replacer}`);
-    const hook = renderHook(() => useTranslation<{ key3: string }>(), {
+    const hook = renderHook(() => useTranslation<'key3'>(), {
       wrapper: Wrapper,
     });
 

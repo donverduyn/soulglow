@@ -59,7 +59,7 @@ const config: StorybookConfig = {
   staticDirs: ['../public'],
   stories: [
     '../src/**/*.stories.@(ts|tsx)',
-    '../stories/**/*.@(ts|tsx)',
+    // '../stories/**/*.@(ts|tsx)',
     '../**/*.mdx',
   ],
   typescript: {

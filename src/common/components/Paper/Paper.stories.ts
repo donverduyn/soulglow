@@ -11,7 +11,10 @@ import { Paper } from './Paper';
 const meta: Meta<typeof Paper> = {
   component: Paper,
   decorators: [RuntimeDecorator(AppRuntime)],
-  parameters: { layout: 'centered' },
+  parameters: {
+    a11y: { test: 'todo' },
+    layout: 'centered',
+  },
   tags: ['autodocs'],
   title: 'Common/Paper',
 };

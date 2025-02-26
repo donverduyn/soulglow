@@ -20,6 +20,6 @@
       "tests/*": ["./tests/*"],
       "scripts/*": ["./scripts/*"],
       ".storybook/*": ["./.storybook/*"],
-    },
+    }
   },
 }

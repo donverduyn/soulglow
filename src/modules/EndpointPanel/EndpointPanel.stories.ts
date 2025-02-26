@@ -30,9 +30,11 @@ const meta: Meta<ExtendArgs<typeof EndpointPanel>> = {
   component: EndpointPanelView as ComponentType<any>,
   decorators: [RuntimeDecorator(AppRuntime)],
   parameters: {
+    a11y: { test: 'todo' },
     docs: { source: { transform: unwrapAndFixMemoJSX } },
     layout: 'centered',
   },
+  // @ts-expect-error since storybook 8.6
   render: EndpointPanel,
   subcomponents: { EndpointListItemView } as Record<
     string,

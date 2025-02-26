@@ -35,7 +35,10 @@ const meta: Meta<typeof IconButton> = {
   },
   args: { onClick: fn() },
   component: IconButton,
-  parameters: { layout: 'centered' },
+  parameters: {
+    a11y: { test: 'todo' },
+    layout: 'centered',
+  },
   tags: ['autodocs'],
   title: 'Common/IconButton',
 };

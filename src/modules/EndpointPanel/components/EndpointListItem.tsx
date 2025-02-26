@@ -7,7 +7,7 @@ import { IconButton } from 'common/components/IconButton/IconButton';
 import { Radio } from 'common/components/Radio/Radio';
 import { Stack } from 'common/components/Stack/Stack';
 import { TextInput } from 'common/components/TextInput/TextInput';
-import { useReturn } from 'common/hooks/useReturn';
+import { useReturn } from 'common/hooks/useReturn/useReturn';
 import type { Publishable } from 'common/utils/event';
 import {
   updateEndpointRequested,

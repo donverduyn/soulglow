@@ -6,7 +6,10 @@ import { NumberInput } from './NumberInput';
 
 const meta: Meta<typeof NumberInput> = {
   component: NumberInput,
-  parameters: { layout: 'centered' },
+  parameters: {
+    a11y: { test: 'todo' },
+    layout: 'centered',
+  },
   tags: ['autodocs'],
   title: 'Common/NumberInput',
 };
