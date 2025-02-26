@@ -4,9 +4,9 @@ import { Context } from 'effect';
 import { Call, type Tuples } from 'hotscript';
 
 export type AnyKey = string | number | symbol;
-export type KeyType<Key, TagKey, Tag = any, TagShape = any> =
+export type KeyType<Key, TagKey extends AnyKey, Tag = any, TagShape = any> =
   | (Key extends AnyKey ? Key : never)
-  | Context.TagClass<Tag, TagKey, TagShape>;
+  | Context.TagClass<Tag, TagKey extends string ? TagKey : never, TagShape>;
 
 // Because either Key or TagKey cannot be inferred, one of them falls back to AnyKey because of the keyof T constraint. This allows either Key or TagKey to demand the most specific type in the intersection Key & TagKey, effectively keeping the literal type of the actual key.
 
