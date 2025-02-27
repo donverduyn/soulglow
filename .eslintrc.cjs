@@ -263,6 +263,7 @@ module.exports = {
         'react-hooks/exhaustive-deps': 'warn',
         'react-hooks/rules-of-hooks': 'error',
         'react-perf/jsx-no-new-function-as-prop': 'warn',
+        'react-perf/jsx-no-new-object-as-prop': 'warn',
         'react-refresh/only-export-components': [
           'warn',
           { allowConstantExport: true },

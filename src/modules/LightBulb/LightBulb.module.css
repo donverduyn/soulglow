@@ -1,7 +1,12 @@
 
 .LightBulb {
+  flex-grow: 1;
   padding: 24px;
   transition: background-color 0.17s ease;
+}
+
+.Root {
+  flex-grow: 1;
 }
 
 .Form {

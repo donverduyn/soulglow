@@ -83,7 +83,7 @@ export const LightBulb = Component(function LightBulb(props) {
       className={cy(className, styles.LightBulb)}
       getStyle={getStyle}
     >
-      <Stack>
+      <Stack classNames={{ root: styles.Root }}>
         <OnOffSwitch
           getValue={bulb.lazyGet('status', (value) =>
             value === State.ON ? true : false

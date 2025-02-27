@@ -2512,11 +2512,6 @@
   resolved "https://registry.yarnpkg.com/@storybook/manager-api/-/manager-api-8.6.0.tgz#2023a8fc83f28fca04e8fe3baf2fe5a921d05d69"
   integrity sha512-ddBibYrO3yQCdtZBqQYqfABjR9eS+llvt2NFDajfyQw+zmuNIZfw4BDGKH1WHE4wm/kXmlFFhPHXaHgAPTRPfQ==
 
-"@storybook/manager-api@^8.0.0":
-  version "8.5.6"
-  resolved "https://registry.yarnpkg.com/@storybook/manager-api/-/manager-api-8.5.6.tgz#6378913261e6f4d8114cd36a5eb0355c74455f9a"
-  integrity sha512-24Fm1LnRs1uCTMDid1Mmii0mQvmyM//IfzdtuVvzh0OSvatEKKLX+o3vdG/3/QCN1FVyq1hI9uHnkOaz6EuH4Q==
-
 "@storybook/preview-api@8.6.0":
   version "8.6.0"
   resolved "https://registry.yarnpkg.com/@storybook/preview-api/-/preview-api-8.6.0.tgz#5069c10ed6ede7314526fa26c48484000c1020ce"
@@ -11099,7 +11094,7 @@ storybook-dark-mode@^4.0.2:
     "@storybook/core-events" "^8.0.0"
     "@storybook/global" "^5.0.0"
     "@storybook/icons" "^1.2.5"
-    "@storybook/manager-api" "^8.0.0"
+    "@storybook/manager-api" "^8.6.0"
     "@storybook/theming" "^8.0.0"
     fast-deep-equal "^3.1.3"
     memoizerific "^1.11.3"
