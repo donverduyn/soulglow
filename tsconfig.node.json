@@ -28,6 +28,6 @@
     "*.base.ts",
     "*.config.ts",
     "*.workspace.ts",
-    "postcss.config.cjs", ".storybook/vite.base.ts",
+    "postcss.config.cjs",
   ],
 }

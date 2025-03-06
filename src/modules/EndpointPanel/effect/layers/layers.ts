@@ -41,7 +41,7 @@ export const endpointStoreLayer = Layer.scoped(
     // const EndpointStore = WithSelected(EntityStore<EndpointEntity>)
     const store = new EntityStore<EndpointEntity>();
     const consumer = pipe(
-      Stream.fromQueue(yield* Tags.InboundQueue),
+      Stream.fromPubSub(yield* Tags.Inbound),
       Stream.map(processEvents(store)),
       Stream.runDrain
     );

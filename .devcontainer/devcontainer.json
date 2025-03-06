@@ -41,7 +41,6 @@
 		// "source=${localEnv:HOME}/.kube,target=/tmp/.kube,type=bind,consistency=cached",
 		// "source=${localEnv:HOME}/.minikube,target=/tmp/.minikube,type=bind,consistency=cached"
 	],
-  "forwardPorts": [9443],
   // "forwardPorts": [4173, 9222, 6006, 8080, 63315],
   // "appPort": [4173, 6006, 8080, 9222, 63315],
 	// we statically bind the dev server so external machines on the network can view it.
@@ -63,7 +62,8 @@
 	
 	"postCreateCommand": {
 		"yarn": "yarn install",
-    "playwright": "yarn playwright install --with-deps"
+    "playwright": "yarn playwright install --with-deps",
+    "nvm": "bash -i -c 'nvm i 22 && nvm alias default 22 && nvm use default'"
 	},
 	"postStartCommand": {
 		// "gpu": "sudo chown root:video /dev/dri/renderD128 && sudo usermod -aG video $USER"

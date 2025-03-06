@@ -37,7 +37,7 @@ const registerInboundQueue = memoize(
     Effect.gen(function* () {
       const bus = yield* AppTags.EventBus;
       yield* bus.register((event) =>
-        runtime.runFork(Effect.andThen(Tags.InboundQueue, Queue.offer(event)))
+        runtime.runFork(Effect.andThen(Tags.Inbound, Queue.offer(event)))
       );
     })
 );

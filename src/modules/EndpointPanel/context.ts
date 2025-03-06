@@ -1,4 +1,15 @@
-import { Effect, Layer, ManagedRuntime, pipe, Queue } from 'effect';
+import {
+  Console,
+  Effect,
+  Layer,
+  ManagedRuntime,
+  pipe,
+  PubSub,
+  Queue,
+  Ref,
+  Stream,
+  SubscriptionRef,
+} from 'effect';
 import { createRuntimeContext } from 'common/utils/context';
 import type { EventType } from 'common/utils/event';
 import { endpointStoreLayer } from './effect/layers/layers';
@@ -39,16 +50,30 @@ function test() {
 
 export const EndpointPanelRuntime = pipe(
   endpointStoreLayer,
-  // Layer.scopedDiscard(
-  //   Effect.gen(function* () {
-  //     const stream = yield* Tags.InboundQueue;
-  //     const item = yield* Queue.take(stream);
-  //     yield* Console.log('[EndpointPanel/InboundQueue]', item);
-  //   }).pipe(Effect.forever, Effect.forkScoped)
-  // ),
-  Layer.provideMerge(
-    Layer.effect(Tags.InboundQueue, Queue.unbounded<EventType<unknown>>())
+  Layer.provide(
+    Layer.scopedDiscard(
+      Effect.gen(function* () {
+        const ref = yield* Tags.CountRef;
+        yield* Stream.runDrain(ref.changes.pipe(Stream.tap(Console.log)));
+      }).pipe(Effect.forkScoped)
+    )
   ),
+  Layer.provide(
+    Layer.scopedDiscard(
+      Effect.gen(function* () {
+        const count = yield* Tags.CountRef;
+        const pubsub = yield* Tags.Inbound;
+        const queue = yield* PubSub.subscribe(pubsub);
+        const item = yield* Queue.take(queue);
+        yield* Ref.update(count, (n) => n + 1);
+        yield* Console.log('[EndpointPanel/InboundQueue]', item);
+      }).pipe(Effect.forever, Effect.forkScoped)
+    )
+  ),
+  Layer.provideMerge(
+    Layer.effect(Tags.Inbound, PubSub.unbounded<EventType<unknown>>())
+  ),
+  Layer.provideMerge(Layer.effect(Tags.CountRef, SubscriptionRef.make(0))),
   // Layer.merge(Layer.succeed(Tags.Foo, 'foo')),
   createRuntimeContext
 );
