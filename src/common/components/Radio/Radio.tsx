@@ -6,7 +6,7 @@ import styles from './Radio.module.css';
 interface Props extends RadioProps {
   readonly getValue: () => boolean;
   readonly name: string;
-  readonly onChange: () => void;
+  readonly onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const Radio: React.FC<Props> = observer(function Radio(props) {

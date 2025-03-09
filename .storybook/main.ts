@@ -41,7 +41,7 @@ const config: StorybookConfig = {
       strictMode: true,
     },
   },
-  logLevel: 'debug',
+  // logLevel: 'debug',
   refs: (_, { configType }) => {
     if (configType === 'DEVELOPMENT') {
       return {

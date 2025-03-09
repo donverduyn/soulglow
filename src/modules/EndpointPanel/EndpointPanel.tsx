@@ -25,6 +25,8 @@ import { EndpointListItem } from './components/EndpointListItem';
 import { EndpointPanelRuntime } from './context';
 import styles from './EndpointPanel.module.css';
 import * as Tags from './tags';
+import type { QueryType } from 'common/utils/query';
+import type { CommandType } from 'common/utils/command';
 
 interface Props {
   readonly publish: <R>(msg: EventType<unknown>) => Promise<R>;
@@ -42,20 +44,31 @@ const registerInboundQueue = memoize(
     })
 );
 
-const publishToBus = (msg: EventType<unknown>) =>
+const publishToEventBus = (msg: EventType<unknown>) =>
   Effect.andThen(AppTags.EventBus, (bus) => bus.publish(msg));
+
+const publishToQueryBus = (msg: QueryType<unknown>) =>
+  Effect.andThen(AppTags.QueryBus, (bus) => bus.publish(msg));
+
+const publishToCommandBus = (msg: CommandType<unknown>) =>
+  Effect.andThen(AppTags.CommandBus, (bus) => bus.publish(msg));
+
 
 export const EndpointPanel = pipe(
   observer(EndpointPanelView),
   WithLabels(labels),
-  WithRuntime(EndpointPanelRuntime, (runtime) => {
+  (c) => WithRuntime(EndpointPanelRuntime, (runtime) => {
     const store = runtime.runSync(Tags.EndpointStore);
 
-    const publish = useRuntimeFn(AppRuntime, publishToBus);
+    const publishEvent = useRuntimeFn(AppRuntime, publishToEventBus);
+    const publishQuery = useRuntimeFn(AppRuntime, publishToQueryBus);
+    const publishCommand = useRuntimeFn(AppRuntime, publishToCommandBus);
+    // TODO: think about how we can reuse this. Is it possible to have class with methods and use it with useRef? if the class gets instantiated but the methods are on the prototype, we avoid instance methods being recreated between instantiations.
+    
     useRuntime(AppRuntime, registerInboundQueue(runtime), [runtime]);
     // TODO: Use request/response to avoid stale reads, before dispatching actions
-    return useReturn({ publish, store });
-  })
+    return useReturn({ publish: publishEvent, store });
+  }, c)
 );
 
 /**
@@ -97,17 +110,3 @@ function useEndpointPanel({ store, publish }: Props) {
 
   return useReturn({ addEndpoint, endpoints, publish });
 }
-
-// class Service {
-//   constructor(private text: string) {
-//     console.log(text);
-//   }
-
-//   sayText() {
-//     console.log(this.text);
-//   }
-// }
-
-// const useViewModel = () => {
-//   const service = React.useRef(new Service('foo')).current;
-// };

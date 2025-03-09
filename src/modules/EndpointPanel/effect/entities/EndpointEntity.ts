@@ -3,26 +3,26 @@ import { makeAutoObservable } from 'mobx';
 interface EndpointContract extends Identifiable, Nameable, Resolvable {}
 
 export class EndpointEntity {
-  private data: EndpointContract;
+  private endpoint: EndpointContract;
 
   constructor(data: EndpointContract) {
-    this.data = data;
+    this.endpoint = data;
     makeAutoObservable(this);
   }
 
   get id() {
-    return this.data.id;
+    return this.endpoint.id;
   }
 
   get url() {
-    return this.data.url;
+    return this.endpoint.url;
   }
 
   set url(value: string) {
-    this.data.url = value;
+    this.endpoint.url = value;
   }
 
   get calculatedField() {
-    return this.data.name.toUpperCase();
+    return this.endpoint.name.toUpperCase();
   }
 }

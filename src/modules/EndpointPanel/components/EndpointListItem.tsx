@@ -39,7 +39,7 @@ export const EndpointListItem = pipe(observer(EndpointListItemView), withSugar);
  * It also provides a way to select, update, and remove the endpoint.
  */
 export function EndpointListItemView(props: Props) {
-  const { getChecked, getUrl, updateFn, removeFn, selectFn } =
+  const { checked, url, select, update, remove } =
     useEndpointListItem(props);
 
   return (
@@ -48,21 +48,24 @@ export function EndpointListItemView(props: Props) {
       component='li'
     >
       <Radio
-        getValue={getChecked}
+        getValue={checked}
         name={`select_${props.endpoint.id}`}
-        onChange={selectFn}
+        onChange={select}
+        data-id={props.endpoint.id}
       />
       <TextInput
         className={styles.TextField}
-        getValue={getUrl}
-        onChange={updateFn}
+        getValue={url}
+        onChange={update}
+        data-id={props.endpoint.id}
       />
       <IconButton
         aria-label='delete'
         className={styles.Button}
-        onClick={removeFn}
+        onClick={remove}
         size='xl'
         variant='subtle'
+        data-id={props.endpoint.id}
       >
         <MdOutlineDelete size={28} />
       </IconButton>
@@ -70,45 +73,51 @@ export function EndpointListItemView(props: Props) {
   );
 }
 
-const useEndpointListItem = (props: Props) => {
-  const getters = useGetters(props);
-  const handlers = useHandlers(props);
-  return useReturn({ ...getters, ...handlers });
+const useEndpointListItem = ({ publish, endpoint }: Props) => {
+  const vmRef = React.useRef<EndpointListItemVM>(null as never);
+  return vmRef.current ?? (vmRef.current = new EndpointListItemVM(publish, endpoint));
 };
 
+
+// TODO: think about an abstract VM class as well as separating the methods from the properties, because the methods only rely on publish and threfore it makes more sense to share a single class instance between all list item components.
+class EndpointListItemVM {
+  private static publish: Publishable["publish"];
+
+  constructor(
+    publish: Publishable["publish"], 
+    private readonly endpoint: EndpointEntity) 
+  {
+    if (!EndpointListItemVM.publish) {
+      EndpointListItemVM.publish = publish;
+    }
+    this.url = this.url.bind(this);
+    this.checked = this.checked.bind(this);
+  }
+
+  checked() {
+    return false;
+  }
+  url() {
+    return this.endpoint.url;
+  }
+
+  public select(e: React.ChangeEvent<HTMLInputElement>) {
+    const id = e.currentTarget.dataset.id;
+    id && EndpointListItemVM.publish(selectEndpointRequested(id));
+  }
+  public update(e: React.ChangeEvent<HTMLInputElement> | React.KeyboardEvent<HTMLInputElement>, url: string) {
+    const id = e.currentTarget.dataset.id;
+    id && void EndpointListItemVM.publish(updateEndpointRequested({ id, url }));
+  }
+  public remove(e: React.MouseEvent<HTMLButtonElement>) {
+    const id = e.currentTarget.dataset.id;
+    id && void EndpointListItemVM.publish(removeEndpointRequested(id));
+  }
+}
+
+// const store = useRuntimeSync(EndpointPanelRuntime, Tags.EndpointStore);
 //
-const useGetters = ({ endpoint }: Props) => {
-  // const store = useRuntimeSync(EndpointPanelRuntime, Tags.EndpointStore);
-  //
-  // const checked = React.useMemo(
-  //   () => computed(() => store.selectedId.get() === endpoint.id),
-  //   [store, endpoint]
-  // );
-
-  // const getChecked = React.useCallback(() => checked.get(), [checked]);
-  const getChecked = React.useCallback(() => false, []);
-  const getUrl = React.useCallback(() => endpoint.url, [endpoint]);
-  return useReturn({ getChecked, getUrl });
-};
-
-// TODO: think about delegating events to the parent component, because we currently memoize on a per listitem basis, which is not ideal. We can simply pass the handlers as props from the parent component and memoize them
-//
-const useHandlers = ({ endpoint, publish }: Props) => {
-  //
-  const selectFn = React.useCallback(
-    () => publish(selectEndpointRequested(endpoint.id)),
-    [publish, endpoint]
-  );
-
-  const updateFn = React.useCallback(
-    (value: string) =>
-      void publish(updateEndpointRequested({ id: endpoint.id, url: value })),
-    [publish, endpoint]
-  );
-
-  const removeFn = React.useCallback(
-    () => void publish(removeEndpointRequested(endpoint.id)),
-    [publish, endpoint]
-  );
-  return useReturn({ removeFn, selectFn, updateFn });
-};
+// const checked = React.useMemo(
+//   () => computed(() => store.selectedId.get() === endpoint.id),
+//   [store, endpoint]
+// );

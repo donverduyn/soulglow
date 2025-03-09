@@ -46,8 +46,8 @@
 	// we statically bind the dev server so external machines on the network can view it.
 	// if the firewall allows, that is.
 	"runArgs": [
-    "--device=/dev/dri:/dev/dri", 
-    "--device=/dev/snd", 
+    // "--device=/dev/dri:/dev/dri", 
+    // "--device=/dev/snd", 
     // "-p=0.0.0.0:4173:4173",
     // "-p=0.0.0.0:6006:6006",
     // "-p=0.0.0.0:9222:9222",

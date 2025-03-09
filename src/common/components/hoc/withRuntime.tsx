@@ -20,18 +20,20 @@ type InferProps<C> = C extends React.FC<infer P> ? P : never;
 type FallbackProps<C, P> =
   IsAny<InferProps<C>> extends false ? InferProps<C> : P;
 
-export function WithRuntime<TTarget, TProps extends Record<string, unknown>>(
+export function WithRuntime<TTarget, TProps extends Record<string, unknown>, C extends React.FC<any>>(
   Context: RuntimeContext<TTarget>,
-  getSource: (runtime: ManagedRuntime.ManagedRuntime<TTarget, never>) => TProps
+  getSource: (runtime: ManagedRuntime.ManagedRuntime<TTarget, never>) => TProps,
+  Component?: C
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): <C extends React.FC<any>>(
   Component?: C
 ) => React.FC<Simplify<Omit<FallbackProps<C, Props>, keyof TProps>>> &
   Simplify<ExtractMeta<C>>;
 
-export function WithRuntime<TTarget>(
+export function WithRuntime<TTarget, C extends React.FC<any>>(
   Context: RuntimeContext<TTarget>,
-  getSource?: (runtime: ManagedRuntime.ManagedRuntime<TTarget, never>) => void
+  getSource?: (runtime: ManagedRuntime.ManagedRuntime<TTarget, never>) => void,
+  Component?: C
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): <C extends React.FC<any>>(
   Component?: C
@@ -43,33 +45,43 @@ export function WithRuntime<TTarget>(
 export function WithRuntime<
   TTarget,
   TProps extends Record<string, unknown> | undefined,
+  C extends React.FC<any>
 >(
   Context: RuntimeContext<TTarget>,
-  getSource?: (runtime: ManagedRuntime.ManagedRuntime<TTarget, never>) => TProps
+  getSource?: (runtime: ManagedRuntime.ManagedRuntime<TTarget, never>) => TProps,
+  Component?: C
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <C extends React.FC<any>>(Component?: C) => {
+  const createWrapper = <C extends React.FC<any>>(Component?: C) => {
     const Wrapped: React.FC<Simplify<FallbackProps<C, Props>>> = (props) => {
       const { layer } = Context as unknown as {
         layer: Layer.Layer<TTarget>;
       };
-
+  
       const runtime = useRuntimeFactory(layer);
       const mergedProps = getSource
         ? Object.assign(getSource(runtime) ?? {}, props)
         : props;
-
+  
       const children =
         createElement(Component, mergedProps) ??
         (props.children as React.ReactNode) ??
         null;
-
+  
       return <Context.Provider value={runtime}>{children}</Context.Provider>;
     };
     Wrapped.displayName = getDisplayName(Component, 'WithRuntime');
     const meta = Component ? extractMeta(Component) : {};
     return Object.assign(Wrapped, meta);
-  };
+  }
+
+  if(Component !== undefined) {
+    return createWrapper(Component);
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return <C extends React.FC<any>>(Component?: C) => {
+      return createWrapper(Component);
+    };
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -62,12 +62,15 @@ export const EndpointPanelRuntime = pipe(
     Layer.scopedDiscard(
       Effect.gen(function* () {
         const count = yield* Tags.CountRef;
-        const pubsub = yield* Tags.Inbound;
-        const queue = yield* PubSub.subscribe(pubsub);
-        const item = yield* Queue.take(queue);
-        yield* Ref.update(count, (n) => n + 1);
-        yield* Console.log('[EndpointPanel/InboundQueue]', item);
-      }).pipe(Effect.forever, Effect.forkScoped)
+        const inbound = yield* Tags.Inbound;
+        const dequeue = yield* PubSub.subscribe(inbound);
+
+        while (true) {
+          const item = yield* Queue.take(dequeue);
+          yield* Ref.update(count, (n) => n + 1);
+          yield* Console.log('[EndpointPanel/InboundQueue]', item);
+        }
+      }).pipe(Effect.forkScoped)
     )
   ),
   Layer.provideMerge(
