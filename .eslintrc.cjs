@@ -250,10 +250,10 @@ module.exports = {
         'react-hooks',
         'react-refresh',
         'react-perf',
-        '@emotion',
+        // '@emotion',
       ],
       rules: {
-        '@emotion/syntax-preference': ['warn', 'string'],
+        // '@emotion/syntax-preference': ['warn', 'string'],
         'no-restricted-imports': [
           'error',
           {
