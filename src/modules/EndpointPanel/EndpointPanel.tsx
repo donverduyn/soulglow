@@ -12,11 +12,13 @@ import {
   useRuntimeFn,
 } from 'common/hooks/useRuntimeFn/useRuntimeFn';
 import { useTranslation } from 'common/hooks/useTranslation/useTranslation';
+import type { CommandType } from 'common/utils/command';
 import type { RuntimeType } from 'common/utils/context';
 import type { EventType } from 'common/utils/event';
 import { createLabels } from 'common/utils/i18n';
 import type { Labels, Locales } from 'common/utils/i18n';
 import { memoize } from 'common/utils/memoize';
+import type { QueryType } from 'common/utils/query';
 import { createEndpoint } from 'models/endpoint/Endpoint';
 import { addEndpointRequested } from 'models/endpoint/EndpointEvents';
 import { AppRuntime } from 'modules/App/context';
@@ -25,8 +27,6 @@ import { EndpointListItem } from './components/EndpointListItem';
 import { EndpointPanelRuntime } from './context';
 import styles from './EndpointPanel.module.css';
 import * as Tags from './tags';
-import type { QueryType } from 'common/utils/query';
-import type { CommandType } from 'common/utils/command';
 
 interface Props {
   readonly publish: <R>(msg: EventType<unknown>) => Promise<R>;
@@ -44,6 +44,8 @@ const registerInboundQueue = memoize(
     })
 );
 
+// TODO: think about how to reause this stuff between components
+
 const publishToEventBus = (msg: EventType<unknown>) =>
   Effect.andThen(AppTags.EventBus, (bus) => bus.publish(msg));
 
@@ -53,22 +55,19 @@ const publishToQueryBus = (msg: QueryType<unknown>) =>
 const publishToCommandBus = (msg: CommandType<unknown>) =>
   Effect.andThen(AppTags.CommandBus, (bus) => bus.publish(msg));
 
-
 export const EndpointPanel = pipe(
   observer(EndpointPanelView),
   WithLabels(labels),
-  (c) => WithRuntime(EndpointPanelRuntime, (runtime) => {
+  WithRuntime(EndpointPanelRuntime, (runtime, props: Props) => {
     const store = runtime.runSync(Tags.EndpointStore);
 
     const publishEvent = useRuntimeFn(AppRuntime, publishToEventBus);
     const publishQuery = useRuntimeFn(AppRuntime, publishToQueryBus);
     const publishCommand = useRuntimeFn(AppRuntime, publishToCommandBus);
-    // TODO: think about how we can reuse this. Is it possible to have class with methods and use it with useRef? if the class gets instantiated but the methods are on the prototype, we avoid instance methods being recreated between instantiations.
-    
+
     useRuntime(AppRuntime, registerInboundQueue(runtime), [runtime]);
-    // TODO: Use request/response to avoid stale reads, before dispatching actions
     return useReturn({ publish: publishEvent, store });
-  }, c)
+  })
 );
 
 /**

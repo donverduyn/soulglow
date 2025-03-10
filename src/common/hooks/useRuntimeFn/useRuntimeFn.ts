@@ -19,6 +19,8 @@ This hook returns a function that can be called to trigger an effect.
 It returns a promise that resolves to the value of the effect.
 */
 
+// TODO: consider using useRef to share the stream between instances, because it is agnostic to the effect. However, there are considerations here, because we currently allow for backpressure for each indidivual stream.
+
 export function useRuntimeFn<A, E, R, T>(
   context: RuntimeContext<R>,
   fn:
