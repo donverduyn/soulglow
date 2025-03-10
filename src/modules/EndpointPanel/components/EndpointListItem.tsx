@@ -7,7 +7,6 @@ import { IconButton } from 'common/components/IconButton/IconButton';
 import { Radio } from 'common/components/Radio/Radio';
 import { Stack } from 'common/components/Stack/Stack';
 import { TextInput } from 'common/components/TextInput/TextInput';
-import { useReturn } from 'common/hooks/useReturn/useReturn';
 import type { Publishable } from 'common/utils/event';
 import {
   updateEndpointRequested,
@@ -39,8 +38,7 @@ export const EndpointListItem = pipe(observer(EndpointListItemView), withSugar);
  * It also provides a way to select, update, and remove the endpoint.
  */
 export function EndpointListItemView(props: Props) {
-  const { checked, url, select, update, remove } =
-    useEndpointListItem(props);
+  const { checked, url, select, update, remove } = useEndpointListItem(props);
 
   return (
     <Stack
@@ -48,24 +46,24 @@ export function EndpointListItemView(props: Props) {
       component='li'
     >
       <Radio
+        data-id={props.endpoint.id}
         getValue={checked}
         name={`select_${props.endpoint.id}`}
         onChange={select}
-        data-id={props.endpoint.id}
       />
       <TextInput
         className={styles.TextField}
+        data-id={props.endpoint.id}
         getValue={url}
         onChange={update}
-        data-id={props.endpoint.id}
       />
       <IconButton
         aria-label='delete'
         className={styles.Button}
+        data-id={props.endpoint.id}
         onClick={remove}
         size='xl'
         variant='subtle'
-        data-id={props.endpoint.id}
       >
         <MdOutlineDelete size={28} />
       </IconButton>
@@ -74,19 +72,20 @@ export function EndpointListItemView(props: Props) {
 }
 
 const useEndpointListItem = ({ publish, endpoint }: Props) => {
-  const vmRef = React.useRef<EndpointListItemVM>(null as never);
-  return vmRef.current ?? (vmRef.current = new EndpointListItemVM(publish, endpoint));
+  const vm = React.useRef<EndpointListItemVM>(null as never);
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  return vm.current ?? (vm.current = new EndpointListItemVM(publish, endpoint));
 };
-
 
 // TODO: think about an abstract VM class as well as separating the methods from the properties, because the methods only rely on publish and threfore it makes more sense to share a single class instance between all list item components.
 class EndpointListItemVM {
-  private static publish: Publishable["publish"];
+  private static publish: Publishable['publish'];
 
   constructor(
-    publish: Publishable["publish"], 
-    private readonly endpoint: EndpointEntity) 
-  {
+    publish: Publishable['publish'],
+    private readonly endpoint: EndpointEntity
+  ) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!EndpointListItemVM.publish) {
       EndpointListItemVM.publish = publish;
     }
@@ -102,16 +101,21 @@ class EndpointListItemVM {
   }
 
   public select(e: React.ChangeEvent<HTMLInputElement>) {
-    const id = e.currentTarget.dataset.id;
-    id && EndpointListItemVM.publish(selectEndpointRequested(id));
+    const id = e.currentTarget.dataset.id!;
+    EndpointListItemVM.publish(selectEndpointRequested(id));
   }
-  public update(e: React.ChangeEvent<HTMLInputElement> | React.KeyboardEvent<HTMLInputElement>, url: string) {
-    const id = e.currentTarget.dataset.id;
-    id && void EndpointListItemVM.publish(updateEndpointRequested({ id, url }));
+  public update(
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.KeyboardEvent<HTMLInputElement>,
+    url: string
+  ) {
+    const id = e.currentTarget.dataset.id!;
+    EndpointListItemVM.publish(updateEndpointRequested({ id, url }));
   }
   public remove(e: React.MouseEvent<HTMLButtonElement>) {
-    const id = e.currentTarget.dataset.id;
-    id && void EndpointListItemVM.publish(removeEndpointRequested(id));
+    const id = e.currentTarget.dataset.id!;
+    EndpointListItemVM.publish(removeEndpointRequested(id));
   }
 }
 
