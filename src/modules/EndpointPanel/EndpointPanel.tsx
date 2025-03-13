@@ -49,21 +49,22 @@ const registerInboundQueue = memoize(
 const publishToEventBus = (msg: EventType<unknown>) =>
   Effect.andThen(AppTags.EventBus, (bus) => bus.publish(msg));
 
-const publishToQueryBus = (msg: QueryType<unknown>) =>
-  Effect.andThen(AppTags.QueryBus, (bus) => bus.publish(msg));
+// const publishToQueryBus = (msg: QueryType<unknown>) =>
+//   Effect.andThen(AppTags.QueryBus, (bus) => bus.publish(msg));
 
-const publishToCommandBus = (msg: CommandType<unknown>) =>
-  Effect.andThen(AppTags.CommandBus, (bus) => bus.publish(msg));
+// const publishToCommandBus = (msg: CommandType<unknown>) =>
+//   Effect.andThen(AppTags.CommandBus, (bus) => bus.publish(msg));
 
 export const EndpointPanel = pipe(
   observer(EndpointPanelView),
   WithLabels(labels),
   WithRuntime(EndpointPanelRuntime, (runtime, props) => {
+    // configure({ shared: true, postUnmountTTL: 1000 });
     const store = runtime.runSync(Tags.EndpointStore);
 
     const publishEvent = useRuntimeFn(AppRuntime, publishToEventBus);
-    const publishQuery = useRuntimeFn(AppRuntime, publishToQueryBus);
-    const publishCommand = useRuntimeFn(AppRuntime, publishToCommandBus);
+    // const publishQuery = useRuntimeFn(AppRuntime, publishToQueryBus);
+    // const publishCommand = useRuntimeFn(AppRuntime, publishToCommandBus);
 
     useRuntime(AppRuntime, registerInboundQueue(runtime), [runtime]);
     return useReturn({ publish: publishEvent, store });

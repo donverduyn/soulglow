@@ -1,6 +1,5 @@
 {
   "editor.fontFamily": "'Monaspace Neon', monospace",
-  "editor.fontSize": 12,
   "editor.fontWeight": "400",
   "editor.fontLigatures": "'calt', 'liga', 'dlig', 'ss01', 'ss02', 'ss03', 'ss04', 'ss05', 'ss06', 'ss07', 'ss08'",
   "editor.codeActionsOnSave": {
@@ -85,5 +84,8 @@
   ],
   "typescript.preferences.importModuleSpecifierEnding": "index",
   // "remote.autoForwardPortsFallback": 0,
-  "remote.localPortHost": "allInterfaces"
+  "remote.localPortHost": "allInterfaces",
+  "window.zoomLevel": -1,
+  "editor.fontSize": 14,
+  "terminal.integrated.fontSize": 14,
 }
