@@ -58,7 +58,7 @@ const publishToCommandBus = (msg: CommandType<unknown>) =>
 export const EndpointPanel = pipe(
   observer(EndpointPanelView),
   WithLabels(labels),
-  WithRuntime(EndpointPanelRuntime, (runtime, props: Props) => {
+  WithRuntime(EndpointPanelRuntime, (runtime, props) => {
     const store = runtime.runSync(Tags.EndpointStore);
 
     const publishEvent = useRuntimeFn(AppRuntime, publishToEventBus);

@@ -23,24 +23,27 @@ type FallbackProps<C, P> =
 export function WithRuntime<
   TTarget,
   TProps extends Record<string, unknown>,
-  P extends TProps,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  C extends React.FC<any>,
 >(
   Context: RuntimeContext<TTarget>,
   getSource: (
     runtime: ManagedRuntime.ManagedRuntime<TTarget, never>,
-    props: P
+    props: React.ComponentProps<C>
   ) => TProps
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): <C extends React.FC<any>>(
+): (
   Component?: C
 ) => React.FC<Simplify<Omit<FallbackProps<C, Props>, keyof TProps>>> &
   Simplify<ExtractMeta<C>>;
 
-export function WithRuntime<TTarget>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function WithRuntime<TTarget, C extends React.FC<any>>(
   Context: RuntimeContext<TTarget>,
-  getSource?: (runtime: ManagedRuntime.ManagedRuntime<TTarget, never>) => void
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): <C extends React.FC<any>>(
+  getSource?: (
+    runtime: ManagedRuntime.ManagedRuntime<TTarget, never>,
+    props: React.ComponentProps<C>
+  ) => void
+): (
   Component?: C
 ) => React.FC<Simplify<FallbackProps<C, Props>>> & Simplify<ExtractMeta<C>>;
 
