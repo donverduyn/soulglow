@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "bootstrap": "hasura update-cli && yarn hasura:start && wait-on http-get://hasura:8080/healthz && yarn hasura:setup && yarn hasura:seed && yarn codegen:api && yarn compose:dev stop",
-    "bootstrap:ci": "hasura update-cli && yarn hasura:start:ci && wait-on http-get://localhost:8080/healthz && yarn hasura:setup:ci && yarn codegen:api && yarn compose:ci stop",
+    "bootstrap:ci": "hasura update-cli && yarn hasura:start:ci && wait-on http-get://localhost:8080/healthz && yarn hasura:setup:ci && yarn codegen:api:ci && yarn compose:ci stop",
     "test": "echo \"no test runner configured for package api\" && exit 0",
     "lint": "echo \"no linter configured for package api\"",
     "lint:ci": "echo \"no linter configured for package api\"",
@@ -22,7 +22,8 @@
     "hasura:metadata:apply": "yarn hasura:start && wait-on http-get://hasura:8080/healthz && hasura metadata apply --endpoint http://hasura:8080 && hasura metadata reload --endpoint http://hasura:8080",
     "hasura:console": "yarn hasura:console:open & yarn hasura:autogen & dotenvx run -f .env -- hasura console --endpoint http://hasura:8080 --no-browser --address localhost --console-hge-endpoint http://localhost:8080; kill %%",
     "hasura:console:open": "wait-on http-get://localhost:9695 && $BROWSER http://localhost:9695",
-    "codegen:api": "graphql-codegen --config ./codegen.api.ts"
+    "codegen:api": "graphql-codegen --config ./codegen.api.ts --host hasura",
+    "codegen:api:ci": "graphql-codegen --config ./codegen.api.ts --host localhost"
   },
   "devDependencies": {
     "graphql": "^16.10.0"
