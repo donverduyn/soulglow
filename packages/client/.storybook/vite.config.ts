@@ -20,12 +20,13 @@ export default defineConfig((viteConfig: ViteUserConfig) => {
         configOverride: { generates: internalPlugins, hooks: internalHooks },
         runOnBuild: process.env.CI !== 'true',
       }),
-      createIpcNotifierPlugin({
-        name: 'codegen',
-        onStartMessage: 'pause',
-        onStopMessage: 'resume',
-        // silent: false, // enable to see errors in logs
-      }),
+      viteConfig.mode === 'development' &&
+        createIpcNotifierPlugin({
+          name: 'codegen',
+          onStartMessage: 'pause',
+          onStopMessage: 'resume',
+          // silent: false, // enable to see errors in logs
+        }),
       removeExtraFontsPlugin(),
     ],
     // TODO: storybook refs only work using localhost, not 127.0.0.1?

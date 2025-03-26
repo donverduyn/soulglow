@@ -47,6 +47,14 @@ export default defineConfig(async ({ mode }) => {
     );
     devPlugins.push(inspect({}));
     devPlugins.push(browser(mode));
+    devPlugins.push(
+      createIpcNotifierPlugin({
+        name: 'codegen',
+        onStartMessage: 'pause',
+        onStopMessage: 'resume',
+        // silent: false, // enable to see errors in logs
+      })
+    );
   }
   return {
     build: {
@@ -93,12 +101,6 @@ export default defineConfig(async ({ mode }) => {
         config,
         configOverride: { generates: internalPlugins, hooks: internalHooks },
         runOnBuild: process.env.CI !== 'true',
-      }),
-      createIpcNotifierPlugin({
-        name: 'codegen',
-        onStartMessage: 'pause',
-        onStopMessage: 'resume',
-        // silent: false, // enable to see errors in logs
       }),
       react(),
       ...devPlugins,
