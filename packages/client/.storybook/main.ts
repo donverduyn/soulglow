@@ -65,6 +65,13 @@ const config: StorybookConfig = {
   ],
   typescript: {
     reactDocgen: 'react-docgen',
+    // reactDocgenTypescriptOptions: {
+    //   shouldExtractLiteralValuesFromEnum: true,
+    //   shouldRemoveUndefinedFromOptional: true,
+    //   // EXPERIMENTAL_useWatchProgram: true,
+    //   propFilter: (prop) =>
+    //     prop.parent ? !/node_modules/.test(prop.parent.fileName) : true,
+    // }
   },
   viteFinal: async (config) => {
     const { mergeConfig } = await import('vite');
@@ -113,7 +120,9 @@ const config: StorybookConfig = {
           },
         },
       },
-      plugins: [...devPlugins],
+      plugins: [
+        ...devPlugins,   
+      ],
       server: {
         headers: noCacheHeaders,
       },

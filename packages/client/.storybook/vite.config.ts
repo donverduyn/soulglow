@@ -8,6 +8,8 @@ import { mergeConfig, type ViteUserConfig } from 'vitest/config';
 import { createIpcNotifierPlugin } from './../.vite/plugins/vite-plugin-codegen-ipc';
 import removeExtraFontsPlugin from './../.vite/plugins/vite-plugin-remove-fonts';
 import { config, internalHooks, internalPlugins } from './../codegen.client';
+// import { visualizer } from 'rollup-plugin-visualizer';
+import dayjs from 'dayjs';
 
 export default defineConfig((viteConfig: ViteUserConfig) => {
   return mergeConfig(viteConfig, {
@@ -28,6 +30,14 @@ export default defineConfig((viteConfig: ViteUserConfig) => {
           // silent: false, // enable to see errors in logs
         }),
       removeExtraFontsPlugin(),
+      // visualizer({
+      //   brotliSize: true,
+      //   filename: `./.analyzer/analysis_${dayjs().format('DDMMYYYY_HHmmss')}.html`,
+      //   gzipSize: true,
+      //   projectRoot: process.cwd(),
+      //   template: 'treemap',
+      //   title: 'Vite Visualizer',
+      // })
     ],
     // TODO: storybook refs only work using localhost, not 127.0.0.1?
     resolve: {

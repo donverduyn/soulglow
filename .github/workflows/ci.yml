@@ -65,3 +65,14 @@ jobs:
 
     - name: Deploy
       run: yarn deploy
+
+    - name: Publish
+      uses: cloudflare/pages-action@v1
+      with:
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        projectName: soulglow
+        directory: packages/client/dist
+        gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+

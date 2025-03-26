@@ -75,7 +75,7 @@ export default defineConfig(async ({ mode }) => {
               '@mantine/notifications',
             ],
             '@mobx': ['mobx', 'mobx-react-lite', 'mobx-utils'],
-            '@react': ['react', 'react-dom'],
+            // '@react': ['react', 'react-dom'],
             '@utils': ['moize', 'uuid', '@hey-api/client-fetch'],
           },
         },
