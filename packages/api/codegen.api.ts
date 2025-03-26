@@ -11,24 +11,24 @@ process.argv.forEach((arg, i) => {
   }
 });
 
+const isCI = process.env.CI === 'true';
+
 const address = `http://${host}:8080/v1/graphql`;
 
 export const config: CodegenConfig = {
   documents: ['../../**/*.gql', '!**/node_modules/**'],
   generates: {
-    'metadata/query_collections.yaml': {
-      plugins: ['hasura-allow-list'],
-    },
     '__generated/introspection.json': {
       plugins: ['introspection'],
     },
+    'metadata/query_collections.yaml': {
+      plugins: ['hasura-allow-list'],
+    },
   },
   hooks: {
-    beforeDone: [
-      'yarn hasura:metadata:apply',
-      // 'prettier --write src/__generated/gql/**/*.ts src/__generated/gql/**/*.json src/__generated/gql/**/*.yml',
-    ],
+    beforeDone: isCI ? [] : ['yarn hasura:metadata:apply'],
   },
+  overwrite: true,
   schema: [
     {
       [address]: {
@@ -38,7 +38,6 @@ export const config: CodegenConfig = {
       },
     },
   ],
-  overwrite: true,
   watch: false,
 };
 
