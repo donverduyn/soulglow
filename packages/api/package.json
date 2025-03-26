@@ -10,7 +10,7 @@
     "lint": "echo \"no linter configured for package api\"",
     "lint:ci": "echo \"no linter configured for package api\"",
     "reset": "yarn dev:compose down && (docker volume inspect api_postgres_data >/dev/null 2>&1 && docker volume rm api_postgres_data || true) && rm -rf __generated/* && rm -rf metadata/query_collections.yaml",
-    "dev:compose": "docker-compose -f compose.yml -f compose.dev.yml",
+    "dev:compose": "docker compose -f compose.yml -f compose.dev.yml",
     "dev": "yarn hasura:start && wait-on http-get://hasura:8080/healthz && yarn hasura:console",
     "hasura:start": "ENSURE_SERVICE=hasura ENSURE_COMMAND='yarn dev:compose up -d' tsx ./scripts/ensure-service.ts",
     "hasura:setup": "./hasura.setup.sh",
