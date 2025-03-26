@@ -1,0 +1,14 @@
+services:
+  soulglow_devcontainer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    user: vscode
+    
+    volumes:
+      - ..:/workspaces/soulglow:cached
+      - node_modules:/workspaces/soulglow/node_modules
+
+volumes:
+  node_modules:

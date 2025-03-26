@@ -1,0 +1,167 @@
+<!-- <script src="http://localhost:8097"></script> -->
+<link rel="preload" href="/fonts/ProximaNova-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="/fonts/ProximaNova-Semibold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<style>
+  /* body.dark {
+    background: #1B1C1D;
+  }
+  body.light {
+    background: #fff;
+  } */
+  .sb-show-main {
+    transition: none !important; /* !important needed to counter inline style */
+  }
+  .sb-preparing-story,
+  .sb-preparing-docs {
+    background: inherit;
+  }
+  .sb-errordisplay {
+    background: inherit;
+    word-wrap: break-word;
+    z-index: 0;
+  }
+  .sb-errordisplay_main {
+    background: rgb(204 130 071 / 8%);
+    color: #cc8247;
+    border-color: #cc8247;
+    min-height: fit-content;
+  }
+  .sb-errordisplay p, .sb-errordisplay ol, .sb-errordisplay h1 {
+    font-family: inherit;
+  }
+  .sb-errordisplay h1::before {
+    background: #cc8247;
+  }
+  .sb-previewBlock, .sb-argstableBlock {
+    display: none;
+  }
+  .docs-story > div:first-child > div:first-child {
+    width: -webkit-fill-available;
+  }
+  :root .docblock-argstable-body .rejt-value-node > .rejt-value {
+    font-size: 0.9rem;
+    margin-left: 0.25rem;
+    word-break: break-word;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding: 0 0.25em;
+    min-width: 5rem;
+    max-width: 15rem;
+    width: 0;
+    flex-basis: content;
+  }
+  :root .docblock-argstable-body .rejt-value-node > .rejt-minus-menu {
+    flex-shrink: 0;
+  }
+  :root .docblock-argstable .docblock-argstable-body .rejt-tree ul {
+    gap: 0;
+    line-height: initial;
+  }
+  :root .docblock-argstable .docblock-argstable-body .rejt-name {
+    white-space: nowrap;
+  }
+  :root .docblock-argstable .docblock-argstable-body .rejt-tree,
+  :root .docblock-argstable .docblock-argstable-body td > div:first-child,
+  :root .docblock-argstable .docblock-argstable-body .rejt-object-node {
+    flex-grow: 1;
+  }
+  :root .docblock-argstable .docblock-argstable-body .rejt-tree li {
+    font-size: initial;
+    display: inline-flex;
+    align-items: center;
+  }
+  :root .docblock-argstable .docblock-argstable-body tr td,
+  :root .docblock-argstable .docblock-argstable-head tr th {
+    width: inherit;
+  }
+  :root .docblock-argstable .docblock-argstable-body .rejt-edit-form {
+    width: 0;
+    flex: 1 1 auto;
+    margin-left: 0.25rem;
+  }
+  :root .docblock-argstable .docblock-argstable-body .rejt-add-value-node input {
+    font-size: 0.9rem;
+  }
+  :root .docblock-argstable .docblock-argstable-body .rejt-edit-form * { 
+    width: 100%;
+    outline: 0;
+    padding: 0;
+    font-size: 0.9rem;
+  }
+  body.dark .docblock-argstable-body .rejt-value-node:hover > .rejt-value {
+    background: #2a2c2e;
+  }
+  :where(p:not(.sb-anchor, .sb-unstyled, .sb-unstyled p)),
+  :where(li:not(.sb-anchor, .sb-unstyled, .sb-unstyled li)) {
+    font-size: initial;
+  }
+  body.dark .sbdocs-content #panel-tab-content {
+    color: rgb(201, 205, 207);
+  }
+  :root .sbdocs-content {
+    flex-grow: 1;
+    width: 0;
+  }
+  .sbdocs-content:not(.sb-unstyled) p,
+  .sbdocs-content:not(.sb-unstyled) li {
+    font-size: 1.1rem;
+    line-height: inherit;
+  }
+  .sbdocs-content:not(.sb-unstyled) div,
+  .sbdocs-content:not(.sb-unstyled) table,
+  .sbdocs-content:not(.sb-unstyled) span {
+    font-size: inherit;
+    line-height: inherit;
+    font-weight: inherit;
+  }
+  /* .sbdocs-content:not(.sb-unstyled) button {
+    font-size: 0.9rem;
+    line-height: 1.5rem;
+  } */
+  .sbdocs-content ul {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75em;
+  }
+  .sbdocs-content h1 a,
+  .sbdocs-content h2 a,
+  .sbdocs-content h3 a,
+  .sbdocs-content h4 a,
+  .sbdocs-content h5 a,
+  .sbdocs-content h6 a {
+    float: right;
+    line-height: inherit;
+  }
+
+  :root .prismjs {
+    font-size: 0.9rem;
+  }
+  #storybook-root {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+  }
+  #storybook-root > *:last-child {
+    /* flex-grow: 1; */
+  }
+  .sb-story > div {
+    display: flex;
+    /* flex: 1;
+    justify-content: center; */
+  }
+  .sb-story > div > div:last-child {
+    display: inline-flex;
+    /* flex: 1; */
+  }
+  .docblock-colorpalette div:last-child:has(> div[title]) {
+    display: flex;
+    gap: 0.5rem;
+  }
+  /* .docblock-colorpalette div[title] {
+    row-gap: 0.5rem;
+    display: flex;
+  } */
+</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />

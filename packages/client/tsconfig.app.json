@@ -1,0 +1,35 @@
+{
+  "extends": "./tsconfig.options.json",
+  "compilerOptions": {
+    "target": "ES2020",
+    "moduleResolution": "bundler",
+    "lib": [
+      "ESNext",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "outDir": ".cache/tsc/app",
+    "noErrorTruncation": true,
+  },
+  "include": [
+    "src/**/*",
+    "src/**/*.json",
+    "types/app/**/*",
+    "public/**/*",
+    "public/**/*.json",
+    ".urql/**/*",
+  ],
+  "exclude": [
+    "**/node_modules/**/*",
+    "dist/**/*",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/.*/**/*.test.ts",
+    "**/.*/**/*.test.tsx",
+    "./src/**/*.stories.ts",
+    "./src/**/*.stories.tsx",
+    "**/.storybook/**/*",
+    "./stories/**/*",
+  ],
+}

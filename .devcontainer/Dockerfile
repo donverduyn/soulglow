@@ -54,6 +54,7 @@ RUN apt-get update \
     alsa-utils \ 
     pulseaudio \
     mesa-utils-extra \
+    inotify-tools \
     # libflite.so.1 \
     # libflite_usenglish.so.1 \     
     # libflite_cmu_grapheme_lang.so.1 \
@@ -91,7 +92,14 @@ RUN echo '{}' > /tmp/mantine-storybook/metadata.json \
   && echo '{}' > /tmp/mantine-storybook/stories.json
 
 # Add Node binaries to PATH
-ENV PATH=./node_modules/.bin:$PATH
+ENV PATH=/home/vscode/.yarn/bin:/node_modules/.bin:$PATH
+
+# Copy the script into the container
+COPY ./shell.sh /usr/local/bin/shell.sh
+
+# Append the script to bashrc and zshrc
+RUN echo "source /usr/local/bin/shell.sh" >> /etc/bash.bashrc \
+    && echo "source /usr/local/bin/shell.sh" >> /etc/zsh/zshrc
 
 # If you want to use Java runtime
 # ENV JAVA_HOME=/opt/java/openjdk

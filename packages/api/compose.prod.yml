@@ -1,0 +1,57 @@
+version: "3.8"
+
+services:
+  traefik:
+    image: traefik:v2.10
+    restart: always
+    container_name: traefik
+    command:
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=your-email@example.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./letsencrypt:/letsencrypt"
+
+  hasura:
+    image: hasura/graphql-engine:v2.37.0
+    restart: always
+    container_name: hasura
+    depends_on:
+      - postgres
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://hasura:hasura@postgres:5432/hasura
+      HASURA_GRAPHQL_ADMIN_SECRET: mysupersecret
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "false"
+      HASURA_GRAPHQL_JWT_SECRET: '{"type": "RS256", "key": "<your-public-key>"}'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hasura.rule=Host(`hasura.yourdomain.com`)"
+      - "traefik.http.routers.hasura.entrypoints=websecure"
+      - "traefik.http.routers.hasura.tls.certresolver=myresolver"
+
+      # Restrict access to admin APIs
+      - "traefik.http.middlewares.hasura-admin-restrict.ipwhitelist.sourcerange=192.168.1.0/24,203.0.113.50"
+      - "traefik.http.routers.hasura-admin.rule=Host(`hasura.yourdomain.com`) && (PathPrefix(`/v1/query`) || PathPrefix(`/v1/metadata`))"
+      - "traefik.http.routers.hasura-admin.middlewares=hasura-admin-restrict"
+
+  postgres:
+    image: postgres:15
+    restart: always
+    container_name: postgres
+    environment:
+      POSTGRES_USER: hasura
+      POSTGRES_PASSWORD: hasura
+      POSTGRES_DB: hasura
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

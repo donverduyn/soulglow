@@ -1,0 +1,59 @@
+{/* Colors.mdx */}
+
+import { Meta, ColorPalette } from '@storybook/blocks';
+import { ColorItem } from '\_storybook/blocks/ColorItem';
+import { capitalize } from 'common/utils/string';
+import { theme } from 'config/theme';
+
+<Meta title='Colors' />
+
+# Colors
+
+<ColorPalette>
+  {Object.entries(theme.colors).map(([key, color]) => (
+    <ColorItem
+      key={`theme.colors.${key}`}
+      title={`theme.colors.${key}`}
+      subtitle={`${capitalize(key)} palette`}
+      colors={color}
+    />
+  ))}
+  <ColorItem
+    title='theme.color.greyscale'
+    subtitle='Some of the greys'
+    colors={{ Alabaster: '#F8F8F8', Concrete: '#F3F3F3', White: '#FFFFFF' }}
+  />
+  <ColorItem
+    title='theme.color.primary'
+    subtitle='Coral'
+    colors={{ WildWatermelon: '#FF4785' }}
+  />
+  <ColorItem
+    title='theme.color.secondary'
+    subtitle='Ocean'
+    colors={{ DodgerBlue: '#1EA7FD' }}
+  />
+  <ColorItem
+    title='theme.color.positive'
+    subtitle='Green'
+    colors={{
+      Apple: 'rgba(102,191,60,1)',
+      Apple30: 'rgba(102,191,60,.3)',
+      Apple60: 'rgba(102,191,60,.6)',
+      Apple80: 'rgba(102,191,60,.8)',
+    }}
+  />
+  <ColorItem
+    title='gradient'
+    subtitle='Grayscale'
+    colors={{
+      Gradient: 'linear-gradient(to right,white,black)',
+    }}
+  />
+  <ColorItem
+    title='gradient'
+    subtitle='Grayscale'
+    colors={['linear-gradient(65deg,white,black)']}
+  />
+</ColorPalette>
+{}

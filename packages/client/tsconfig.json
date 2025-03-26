@@ -1,0 +1,13 @@
+{
+  // "files": [],
+  "compilerOptions": {
+    "composite": true,
+  },
+  "include": [],
+  // "exclude": ["node_modules", "dist", "coverage", "build"],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.test.json" },
+    { "path": "./tsconfig.storybook.json" }
+  ]
+}

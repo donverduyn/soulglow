@@ -4,14 +4,11 @@
     "target": "ES2022",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "outDir": "dist/test",
+    "outDir": ".cache/tsc/workspace/test",
     "moduleResolution": "Bundler",
-    "emitDeclarationOnly": true,
     "types": [
       "node",
       "vitest/globals",
-      "@vitest/browser/matchers",
-      "@vitest/browser/providers/playwright"
     ],
   },
   "exclude": [
@@ -19,21 +16,13 @@
     "dist/**/*",
   ],
   "include": [
-    "src/**/*.test.ts",
-    "src/**/*.test.tsx",
-    "**/.*/**/*.test.ts",
-    "**/.*/**/*.test.tsx",
+    ".*/**/*.test.ts",
+    ".*/**/*.test.tsx",
     "tests/**/*",
   ],
   "references": [
     {
-      "path": "./tsconfig.app.json"
-    },
-    {
       "path": "./tsconfig.node.json"
     },
-    {
-      "path": "./tsconfig.storybook.json"
-    }
   ]
 }

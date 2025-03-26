@@ -1,0 +1,39 @@
+{
+  "extends": "./tsconfig.options.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "outDir": ".cache/tsc/test",
+    "moduleResolution": "Bundler",
+    "types": [
+      "node",
+      "vitest/globals",
+      "@vitest/browser/matchers",
+      "@vitest/browser/providers/playwright"
+    ],
+  },
+  "exclude": [
+    "**/node_modules/**/*",
+    "dist/**/*",
+  ],
+  "include": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    ".*/**/*.test.ts",
+    ".*/**/*.test.tsx",
+    "tests/**/*",
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      // TODO: find out why we need this, because it seems to be redundant
+      "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./tsconfig.storybook.json"
+    }
+  ]
+}

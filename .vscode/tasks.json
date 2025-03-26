@@ -31,6 +31,22 @@
         }
       },
       {
+        "label": "codegen-ipc-daemon",
+        "type": "npm",
+        "script": "codegen:daemon",
+        "isBackground": true,
+        "problemMatcher": [],
+        "options": {
+          "cwd": "${workspaceFolder}/packages/client"
+        },
+        "presentation": {
+          "echo": true,
+          "reveal": "never",
+          "focus": false,
+          "panel": "dedicated"
+        }
+      },
+      {
         "label": "wait-for-port",
         "type": "shell",
         "command": "NODE_NO_WARNINGS=1 wait-on tcp:9222",

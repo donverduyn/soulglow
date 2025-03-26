@@ -10,7 +10,7 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     isolate: false,
-    maxConcurrency: 20,
+    maxConcurrency: 1,
     open: false,
     // pool: 'vmThreads',
     // poolOptions: { threads: { singleThread: true } },

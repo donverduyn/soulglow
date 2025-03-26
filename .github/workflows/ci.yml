@@ -9,7 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: mcr.microsoft.com/playwright:v1.50.1-jammy
 
     steps:
     - uses: actions/checkout@v4
@@ -19,23 +18,50 @@ jobs:
       with:
         node-version: '20'
         cache: 'yarn'
-    
-    - name: Cache Eslint dependencies
+
+    - name: Cache node_modules
+      id: cache-node-modules
+      uses: actions/cache@v3
+      with:
+        path: |
+          **/node_modules
+        key: ${{ runner.os }}-node-modules-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-node-modules-
+
+    - name: Cache ESLint dependencies
       uses: actions/cache@v3
       with: 
-        path: ./.cache/eslint
-        key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}-${{ hashFiles('**/.eslintrc.cjs') }}
+        path: ./packages/client/.cache/eslint
+        key: ${{ runner.os }}-eslint-${{ hashFiles('yarn.lock') }}-${{ hashFiles('**/.eslintrc.cjs') }}
         restore-keys: |
           ${{ runner.os }}-eslint-
 
+    - name: Cache Playwright browsers
+      id: cache-playwright
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/ms-playwright
+        key: ${{ runner.os }}-playwright-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-playwright-
+
     - name: Install dependencies
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
       run: yarn install --frozen-lockfile
+
+    - name: Install Playwright browsers
+      if: steps.cache-playwright.outputs.cache-hit != 'true'
+      run: yarn bootstrap:ci
 
     - name: Lint
       run: yarn lint:ci
 
     - name: Test
-      run: yarn test  # Playwright is already installed in the container
+      run: yarn test
 
     - name: Build
       run: yarn build
+
+    - name: Deploy
+      run: yarn deploy

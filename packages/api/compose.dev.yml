@@ -1,0 +1,8 @@
+services:
+  hasura:
+    networks:
+      - devcontainer-network
+
+networks:
+  devcontainer-network:
+    external: true

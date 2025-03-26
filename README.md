@@ -59,10 +59,10 @@ Note that the any warnings and errors are also displayed in the left corner of t
 If you like to contribute to this project, please reach out to me. I am happy to help you get started.
 
 ## Editing files
-To edit files in VScode that are opened in preview mode, press `Ctrl + Shift + V`. Don't click on the page before pressing the shortcut.
+To edit files in VScode that are opened in preview mode, press `Cmd + Shift + V`. Don't click on the page before pressing the shortcut.
 
 ## Patches
-Currently, the project is using a patched version of vite-plugin-checker, because it is incompatible with the ESM version of meow.
+- no patches yet
 
 # License
 This project is licensed under the MIT License - see the LICENSE.md file for details.

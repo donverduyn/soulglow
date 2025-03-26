@@ -2,10 +2,13 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
 {
 	"name": "Node.js & GitHub Actions",
-	"build": {
-		"dockerfile": "Dockerfile",
-		"context": "."
-	},
+	// "build": {
+	// 	"dockerfile": "Dockerfile",
+	// 	"context": "."
+	// },
+  "dockerComposeFile": "compose.yml",
+  "service": "soulglow_devcontainer",
+  "workspaceFolder": "/workspaces/soulglow",
 	"features": {
 		"ghcr.io/devcontainers/features/node:1": {
 			"nodeGypDependencies": true,
@@ -22,8 +25,6 @@
 			"version": "latest"
 		},
 		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
-			"moby": true,
-			"enableNonRootDocker": true,
 			"version": "latest"
 		},
 		"ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
@@ -37,15 +38,18 @@
 	],
 	"mounts": [
 		"source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached"
+    // "source=node_modules,target=node_modules,type=volume"
 		// "source=/run/user/1000/bus,target=/run/user/1000/bus,type=bind,consistency=cached"
 		// "source=${localEnv:HOME}/.kube,target=/tmp/.kube,type=bind,consistency=cached",
 		// "source=${localEnv:HOME}/.minikube,target=/tmp/.minikube,type=bind,consistency=cached"
 	],
+  "forwardPorts": [9695, 9693, 63315, 6006],
   // "forwardPorts": [4173, 9222, 6006, 8080, 63315],
   // "appPort": [4173, 6006, 8080, 9222, 63315],
 	// we statically bind the dev server so external machines on the network can view it.
 	// if the firewall allows, that is.
-	"runArgs": [
+	// "runArgs": [
+    // "--network=devcontainer-network",
     // "--device=/dev/dri:/dev/dri", 
     // "--device=/dev/snd", 
     // "-p=0.0.0.0:4173:4173",
@@ -58,14 +62,17 @@
     // "--sysctl", "fs.inotify.max_user_instances=8192",
     // "--sysctl", "fs.inotify.max_user_watches=524288",
     // "--ulimit", "nofile=65536:65536"
-  ], // "--network=minikube"],
+  // ], // "--network=minikube"],
 	
 	"postCreateCommand": {
-		"yarn": "yarn install",
-    "playwright": "yarn playwright install --with-deps",
-    "nvm": "bash -i -c 'nvm i 22 && nvm alias default 22 && nvm use default'"
+		"yarn": "yarn install && yarn bootstrap",
+    "nvm": "bash -i -c 'nvm i 22 && nvm alias default 22 && nvm use default'",
+    "docker:network": "docker network inspect devcontainer-network >/dev/null 2>&1 || docker network create devcontainer-network && docker network connect devcontainer-network $(hostname)",
+    "chown": "sudo chown vscode node_modules"
 	},
-	"postStartCommand": {
+	"postAttachCommand": {
+    // "codegen:daemon": "yarn codegen:daemon",
+
 		// "gpu": "sudo chown root:video /dev/dri/renderD128 && sudo usermod -aG video $USER"
 		// If we consider cross-platform we should run dbus in the container
 		// and create mappings for windows and mac by investigating what is communicated
@@ -104,6 +111,7 @@
     "NODE_NO_WARNINGS": "1",
 		"EDITOR": "code",
 		"DISPLAY": "${localEnv:DISPLAY}",
+    // "BROWSER": "chromium",
 		// "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
 		// "DBUS_SESSION_BUS_ADDRESS": "disabled",
 		"XDG_RUNTIME_DIR": "/tmp/runtime-vscode",
@@ -119,7 +127,6 @@
 				"ms-azuretools.vscode-docker",
 				"searKing.preview-vscode",
 				"github.vscode-github-actions",
-				"styled-components.vscode-styled-components",
 				"gabrielgrinberg.auto-run-command",
 				"stylelint.vscode-stylelint",
 				"effectful-tech.effect-vscode",
@@ -132,7 +139,8 @@
 				"redhat.vscode-yaml",
 				"GitHub.vscode-pull-request-github",
 				"GitHub.copilot-chat",
-				"GitHub.copilot"
+				"GitHub.copilot",
+				"GraphQL.vscode-graphql"
 			]
 		}
 	}

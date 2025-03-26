@@ -1,0 +1,44 @@
+
+services:
+  postgres:
+    image: postgres:15
+    restart: always
+    container_name: postgres
+    networks:
+      - server-network
+    environment:
+      POSTGRES_USER: hasura
+      POSTGRES_PASSWORD: hasura
+      POSTGRES_DB: hasura
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  hasura:
+    image: hasura/graphql-engine:latest
+    restart: always
+    container_name: hasura
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+      - server-network
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://hasura:hasura@postgres:5432/hasura
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "false"
+      HASURA_GRAPHQL_ADMIN_SECRET: admin_secret
+      HASURA_GRAPHQL_ENABLE_ALLOWLIST: "true"
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+
+volumes:
+  postgres_data:
+
+networks:
+  server-network:
+    driver: bridge
+  app-network:
+    driver: bridge

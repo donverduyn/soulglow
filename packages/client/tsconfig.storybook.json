@@ -1,0 +1,45 @@
+{
+  "extends": "./tsconfig.options.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2023",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "outDir": ".cache/tsc/storybook",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "types": [
+      "node",
+      "vite/client",
+      "@vitest/browser/matchers",
+      "@vitest/browser/providers/playwright"
+    ],
+  },
+  "exclude": [
+    "**/node_modules/**/*",
+    "dist/**/*",
+  ],
+  "include": [
+    "src/**/*.stories.ts",
+    "src/**/*.stories.tsx",
+    "**/.storybook/**/*",
+    "stories/**/*",
+    "**/*.mdx"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      // vitest.workspace.ts and vite.config.ts
+      "path": "./tsconfig.node.json"
+    }
+  ]
+}

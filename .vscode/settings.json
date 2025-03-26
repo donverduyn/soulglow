@@ -15,6 +15,9 @@
       "mode": "auto"
     }
   ],
+  "eslint.validate": [
+    "graphql"
+  ],
   "workbench.editorAssociations": {
     "*.md": "vscode.markdown.preview.editor",
   },
@@ -50,22 +53,25 @@
       "event": "onFileDelete",
       "command": "typescript.restartTsServer"
     },
+    // {
+    //   "command": "workbench.action.terminal.new",
+    //   "condition": [
+    //     "isRunningInContainer"
+    //   ]
+    // },
     {
-      "command": "workbench.action.terminal.new",
+      "command": "workbench.action.tasks.runTask codegen-ipc-daemon",
       "condition": [
         "isRunningInContainer"
       ]
-    },
+    }
   ],
   "javascript.preferGoToSourceDefinition": true,
   "typescript.tsdk": "./node_modules/typescript/lib",
   // "typescript.tsc.autoDetect": "off", 
-  "typescript.experimental.expandableHover": true,
   "css.validate": false,
   "stylelint.validate": [
-    "css",
-    "typescript",
-    "typescriptreact"
+    "css"
   ],
   "search.exclude": {
     "**/.git": true,
@@ -86,6 +92,6 @@
   // "remote.autoForwardPortsFallback": 0,
   "remote.localPortHost": "allInterfaces",
   "window.zoomLevel": -1,
-  "editor.fontSize": 14,
-  "terminal.integrated.fontSize": 14,
+  "editor.fontSize": 13,
+  "terminal.integrated.fontSize": 13,
 }

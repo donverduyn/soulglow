@@ -1,0 +1,9 @@
+services:
+  web:
+    build: ./
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

@@ -1,0 +1,12 @@
+{
+  // "files": [],
+  "compilerOptions": {
+    "composite": true,
+  },
+  "include": [],
+  // "exclude": ["node_modules", "dist", "coverage", "build"],
+  "references": [
+    { "path": "./tsconfig.node.json" },
+    { "path": "./tsconfig.test.json" }
+  ]
+}
