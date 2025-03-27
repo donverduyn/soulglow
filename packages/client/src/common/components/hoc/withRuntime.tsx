@@ -9,11 +9,11 @@ This HOC creates a runtime for the context and provides it to the component.
 It allows any downstream components to access the runtime using the context.
 */
 
-// TODO: think about assigning a method to the function, to obtain the provided react context objects in the hoc as an array, for testing purposes. We can separate the hoc from the pipe function and export the method as a named export.
-
 type Props = {
   readonly children?: React.ReactNode;
 };
+
+type Config = { postUnmountTTL: number; shared: boolean };
 
 type InferProps<C> = C extends React.FC<infer P> ? P : never;
 
@@ -22,14 +22,16 @@ type FallbackProps<C, P> =
 
 export function WithRuntime<
   TTarget,
-  TProps extends Record<string, unknown>,
+  TProps,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   C extends React.FC<any>,
 >(
   Context: RuntimeContext<TTarget>,
   getSource: (
-    runtime: ManagedRuntime.ManagedRuntime<TTarget, never>,
-    props: React.ComponentProps<C>
+    runtimeFactory: (
+      config?: Partial<Config>
+    ) => ManagedRuntime.ManagedRuntime<TTarget, never>,
+    props: Simplify<Partial<React.ComponentProps<C>>>
   ) => TProps
 ): (
   Component?: C
@@ -40,8 +42,10 @@ export function WithRuntime<
 export function WithRuntime<TTarget, C extends React.FC<any>>(
   Context: RuntimeContext<TTarget>,
   getSource?: (
-    runtime: ManagedRuntime.ManagedRuntime<TTarget, never>,
-    props: React.ComponentProps<C>
+    runtimeFactory: (
+      config?: Partial<Config>
+    ) => ManagedRuntime.ManagedRuntime<TTarget, never>,
+    props: Simplify<Partial<React.ComponentProps<C>>>
   ) => void
 ): (
   Component?: C
@@ -51,28 +55,50 @@ export function WithRuntime<TTarget, C extends React.FC<any>>(
 // the goal is to have a utility that allows us to reuse the logic between the withRuntime hoc and the Runtime component that takes the runtime as a prop. Later on we might want to consider the Runtime component to be used in JSX in more scenarios, but for now it is limited to usage in storybook decorators
 
 export function WithRuntime<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  C extends React.FC<any>,
   TTarget,
   TProps extends Record<string, unknown> | undefined,
-  P extends TProps,
 >(
   Context: RuntimeContext<TTarget>,
   getSource?: (
-    runtime: ManagedRuntime.ManagedRuntime<TTarget, never>,
-    props: P
+    runtimeFactory: (
+      config?: Partial<Config>
+    ) => ManagedRuntime.ManagedRuntime<TTarget, never>,
+    props: Partial<FallbackProps<C, Props>>
   ) => TProps
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <C extends React.FC<any>>(Component?: C) => {
-    const Wrapped: React.FC<Simplify<FallbackProps<C, Props>>> = (props) => {
+  return (Component?: C) => {
+    const Wrapped: React.FC<Partial<FallbackProps<C, Props>>> = (props) => {
       const { layer } = Context as unknown as {
         layer: Layer.Layer<TTarget>;
       };
 
-      const runtime = useRuntimeFactory(layer);
-      const mergedProps = getSource
-        ? Object.assign(getSource(runtime, props as P) ?? {}, props)
-        : props;
+      const createSource = React.useCallback(() => {
+        const config: Config = { postUnmountTTL: 1000, shared: false };
+        let runtimeRef: ManagedRuntime.ManagedRuntime<TTarget, never> =
+          null as never;
 
+        const source = getSource
+          ? getSource((overrides) => {
+              const safeConfig = Object.assign(config, overrides ?? {});
+              // eslint-disable-next-line react-hooks/rules-of-hooks
+              const runtime = useRuntimeFactory(layer, safeConfig);
+              runtimeRef = runtime;
+              return runtime;
+            }, props)
+          : undefined;
+
+        if (!getSource) {
+          // eslint-disable-next-line react-hooks/rules-of-hooks
+          runtimeRef = useRuntimeFactory(layer, config);
+        }
+
+        return [source ?? {}, runtimeRef] as const;
+      }, [layer, props]);
+
+      const [source, runtime] = createSource();
+      const mergedProps = getSource ? Object.assign(source, props) : props;
       const children =
         createElement(Component, mergedProps) ??
         (props.children as React.ReactNode) ??
@@ -115,7 +141,9 @@ It is used by withRuntime to create a runtime for the context.
 This is both compatible with strict mode and fast refresh. 🚀
 */
 
-const useRuntimeFactory = <T,>(layer: Layer.Layer<T>) => {
+const useRuntimeFactory = <T,>(layer: Layer.Layer<T>, config: Config) => {
+  // TODO: use useSyncExternalStore to keep track of runtime instances and dispose them based on postUnmountTTL. Rehydrate the runtime instances on mount (maybe we need a component name/id combo here)
+
   const layerRef = React.useRef(layer);
   const shouldCreate = React.useRef(false);
   const [runtime, setRuntime] = React.useState(() =>

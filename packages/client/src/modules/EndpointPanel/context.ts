@@ -1,23 +1,9 @@
 import { Client, type AnyVariables } from '@urql/core';
 import { fetchExchange } from '@urql/core';
 import { cacheExchange } from '@urql/exchange-graphcache';
-import {
-  Console,
-  Effect,
-  Layer,
-  ManagedRuntime,
-  pipe,
-  PubSub,
-  Queue,
-  Ref,
-  Stream,
-  SubscriptionRef,
-} from 'effect';
+import { Effect, Layer, ManagedRuntime, pipe } from 'effect';
 import { DocumentNode } from 'graphql';
 import schema from '__generated/gql/introspection.urql.json';
-import { createRuntimeContext } from 'common/utils/context';
-import type { EventType } from 'common/utils/event';
-import { endpointStoreLayer } from './effect/layers/EndpointStoreLayer';
 import * as Tags from './tags';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -52,42 +38,6 @@ function test() {
   const result = Effect.runSync(fromParent);
   console.log(result); // prints foobar
 }
-
-export const EndpointPanelRuntime = pipe(
-  endpointStoreLayer,
-  Layer.provide(
-    Layer.scopedDiscard(
-      Effect.gen(function* () {
-        const ref = yield* Tags.CountRef;
-        yield* Stream.runDrain(
-          ref.changes.pipe(
-            Stream.tap((a) => Console.log('[EndpointPanelRuntime/CountRef]', a))
-          )
-        );
-      }).pipe(Effect.forkScoped)
-    )
-  ),
-  Layer.provide(
-    Layer.scopedDiscard(
-      Effect.gen(function* () {
-        const count = yield* Tags.CountRef;
-        const inbound = yield* Tags.Inbound;
-        const dequeue = yield* PubSub.subscribe(inbound);
-
-        while (true) {
-          const item = yield* Queue.take(dequeue);
-          yield* Ref.update(count, (n) => n + 1);
-          yield* Console.log('[EndpointPanel/InboundQueue]', item);
-        }
-      }).pipe(Effect.forkScoped)
-    )
-  ),
-  Layer.provideMerge(
-    Layer.effect(Tags.Inbound, PubSub.unbounded<EventType<unknown>>())
-  ),
-  Layer.provideMerge(Layer.effect(Tags.CountRef, SubscriptionRef.make(0))),
-  createRuntimeContext
-);
 
 type QueryFactory = <
   TDocumentNode extends DocumentNode,

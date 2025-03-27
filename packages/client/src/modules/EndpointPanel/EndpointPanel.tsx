@@ -22,12 +22,12 @@ import { addEndpointRequested } from 'models/endpoint/EndpointEvents';
 import { AppRuntime } from 'modules/App/context';
 import * as AppTags from 'modules/App/tags';
 import { EndpointListItem } from './components/EndpointListItem';
-import { EndpointPanelRuntime } from './context';
 import styles from './EndpointPanel.module.css';
+import { EndpointPanelRuntime } from './EndpointPanel.runtime';
 import * as Tags from './tags';
 
 interface Props {
-  readonly publish: <R>(msg: EventType<unknown>) => Promise<R>;
+  readonly publish: (msg: EventType<unknown>) => Promise<void>;
   readonly store: Context.Tag.Service<typeof Tags.EndpointStore>;
 }
 const labels = createLabels(['addEndpointLabel']);
@@ -56,21 +56,15 @@ const publishToEventBus = (msg: EventType<unknown>) =>
 export const EndpointPanel = pipe(
   observer(EndpointPanelView),
   WithLabels(labels),
-  WithRuntime(
-    EndpointPanelRuntime, //(config) => {
-    // config({ shared: true, postUnmountTTL: 1000 });
-    (runtime, props) => {
-      // configure({ shared: true, postUnmountTTL: 1000 });
-      const store = runtime.runSync(Tags.EndpointStore);
+  WithRuntime(EndpointPanelRuntime, (configure, props) => {
+    const runtime = configure({ shared: true });
+    const store = runtime.runSync(Tags.EndpointStore);
 
-      const publishEvent = useRuntimeFn(AppRuntime, publishToEventBus);
-      // const publishQuery = useRuntimeFn(AppRuntime, publishToQueryBus);
-      // const publishCommand = useRuntimeFn(AppRuntime, publishToCommandBus);
+    const publishEvent = useRuntimeFn(AppRuntime, publishToEventBus);
 
-      useRuntime(AppRuntime, registerInboundQueue(runtime), [runtime]);
-      return useReturn({ publish: publishEvent, store });
-    }
-  )
+    useRuntime(AppRuntime, registerInboundQueue(runtime), [runtime]);
+    return { publish: publishEvent, store };
+  })
 );
 
 /**
