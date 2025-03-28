@@ -1,7 +1,7 @@
 import { Effect, Fiber, pipe, PubSub, Queue } from 'effect';
-import { type RuntimeFiber, isFiber } from 'effect/Fiber';
+import { isFiber, type RuntimeFiber } from 'effect/Fiber';
 
-export class BusProviderBase<T> {
+export abstract class BusService<T> {
   constructor(public readonly eventBus: PubSub.PubSub<T>) {}
 
   publish(event: T) {
@@ -11,16 +11,17 @@ export class BusProviderBase<T> {
   register<A, E, R>(
     fn: (event: T) => Effect.Effect<A, E, R> | RuntimeFiber<A, E>
   ) {
+    // console.log('[BusService/register]', fn);
     return pipe(
       this.eventBus,
       PubSub.subscribe,
-      Effect.andThen((sub) =>
-        sub.pipe(
+      Effect.andThen((queue) =>
+        queue.pipe(
           Queue.take,
-          Effect.andThen((event) => fn(event)),
-          Effect.andThen((result) => {
-            return isFiber(result) ? Fiber.join(result) : result;
-          }),
+          Effect.map(fn),
+          Effect.andThen((result) =>
+            isFiber(result) ? Fiber.join(result) : result
+          ),
           Effect.forever
         )
       ),

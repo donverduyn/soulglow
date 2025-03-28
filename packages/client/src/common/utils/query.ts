@@ -1,9 +1,6 @@
-export type QueryType<R> = {
-  name: string;
-  payload: R;
-  source: string;
-  timestamp: number;
-};
+import type { EventType } from './event';
+
+export type QueryType<R> = EventType<R>;
 
 type QueryObject = {
   entity: string;

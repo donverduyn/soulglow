@@ -16,6 +16,7 @@
     "test": "yarn ws api test run && yarn ws client test run && vitest --no-isolate --pool=threads run",
     "lint:tsc": "tsc -b tsconfig.json",
     "lint": "yarn ws api lint && yarn ws client lint",
+    "lint:fix": "yarn ws api lint:fix && yarn ws client lint:fix",
     "lint:ci": "yarn ws api lint:ci && yarn ws client lint:ci",
     "build": "yarn ws api build && yarn ws client build",
     "deploy": "echo \"TODO: client dist -> cloudflare pages | -> docker image create -> docker compose push -> kubectl\""

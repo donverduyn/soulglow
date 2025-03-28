@@ -1,20 +1,48 @@
 import type { ComponentType } from 'react';
-import type { Meta, StoryObj, StoryContext } from '@storybook/react';
+import { faker } from '@faker-js/faker';
+import type { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent } from '@storybook/test';
-// import type { Simplify } from 'type-fest';
-// import * as AppTags from 'modules/App/tags';
 import type { i18n } from 'i18next';
+import { HttpResponse } from 'msw';
+import { v4 as uuid } from 'uuid';
+import { defineEndpointFactory, dynamic } from '__generated/gql/fabbrica';
+import { mockEndpointPanelEndpointByIdQuery } from '__generated/gql/mocks.msw';
 import { ColorSchemeDecorator } from '_storybook/decorators/ColorSchemeDecorator';
 import { RuntimeDecorator } from '_storybook/decorators/RuntimeDecorator';
 import { ThemeDecorator } from '_storybook/decorators/ThemeDecorator';
 import type { ExtendArgs } from '_storybook/utils/args';
-import { AppRuntime } from 'modules/App/context';
+import { prettierForSourceInDev } from '_storybook/utils/parameters';
+import { AppRuntime } from 'modules/App/App.runtime';
 import { EndpointListItemView } from './components/EndpointListItem';
 import { EndpointPanel, EndpointPanelView } from './EndpointPanel';
 
-const isDev = process.env.NODE_ENV === 'development';
+// TODO: move this to a shared location, because it is domain agnostic
+const endpointFactory = defineEndpointFactory({
+  defaultFields: {
+    __typename: 'endpoint',
+    id: dynamic(() => uuid()),
+    name: dynamic(({ seq }) => `Endpoint-${String(seq)}`),
+    url: dynamic(() => faker.internet.url()),
 
-// TODO: we need to think about how we want to spy on effectful deps
+    // eslint-disable-next-line sort-keys-fix/sort-keys-fix
+    created_at: dynamic(() => faker.date.recent().toISOString()),
+    updated_at: dynamic(async ({ get }) => {
+      const date = faker.date.between({
+        from: (await get('created_at')) as string,
+        to: new Date(),
+      });
+      return date.toISOString();
+    }),
+  },
+});
+
+const endpointSuccess = mockEndpointPanelEndpointByIdQuery(async (info) => {
+  console.log(info);
+  // TODO: filter out fields that are not part of the query
+  return HttpResponse.json({
+    data: { endpoint_by_pk: await endpointFactory.build() },
+  });
+});
 
 const meta: Meta<ExtendArgs<typeof EndpointPanel>> = {
   argTypes: {
@@ -31,19 +59,7 @@ const meta: Meta<ExtendArgs<typeof EndpointPanel>> = {
   decorators: [RuntimeDecorator(AppRuntime)],
   parameters: {
     a11y: { test: 'todo' },
-    docs: {
-      canvas: isDev ? {} : { sourceState: 'none' },
-      source: isDev
-        ? {
-            transform: async (code: string, storyContext: StoryContext) => {
-              const { unwrapAndFixMemoJSX } = await import(
-                '_storybook/utils/source'
-              );
-              return unwrapAndFixMemoJSX(code, storyContext);
-            },
-          }
-        : { sourceShown: null },
-    },
+    docs: prettierForSourceInDev(),
     layout: 'centered',
   },
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment

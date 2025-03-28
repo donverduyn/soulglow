@@ -12,6 +12,7 @@ export const internalPlugins: NonNullable<CodegenConfig['generates']> = {
         enumValues: 'change-case-all#upperCase',
         typeNames: 'change-case-all#pascalCase',
       },
+      nonOptionalDefaultFields: true,
       typesFile: './types',
     },
     plugins: ['@mizdra/graphql-codegen-typescript-fabbrica'],
@@ -36,6 +37,8 @@ export const internalPlugins: NonNullable<CodegenConfig['generates']> = {
   },
   'src/__generated/gql/types.ts': {
     config: {
+      avoidOptionals: true,
+      enumsAsTypes: true,
       namingConvention: {
         enumValues: 'change-case-all#upperCase',
         typeNames: 'change-case-all#pascalCase',
@@ -54,7 +57,10 @@ export const internalPlugins: NonNullable<CodegenConfig['generates']> = {
 };
 
 export const internalHooks: NonNullable<CodegenConfig['hooks']> = {
-  beforeAllFileWrite: ['rm -rf src/__generated/gql/*'],
+  // beforeAllFileWrite: ['rm -rf src/__generated/gql/*'],
+  afterAllFileWrite: [
+    'npx jscodeshift -t ./.codegen/transforms/strip-document-suffix.ts ./src/__generated/gql/operations.ts --parser=ts',
+  ],
 };
 
 export const externalPlugins: NonNullable<CodegenConfig['generates']> = {

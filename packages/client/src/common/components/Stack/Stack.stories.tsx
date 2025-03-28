@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ColorSchemeDecorator } from '_storybook/decorators/ColorSchemeDecorator';
 import { RuntimeDecorator } from '_storybook/decorators/RuntimeDecorator';
 import { ThemeDecorator } from '_storybook/decorators/ThemeDecorator';
-import { AppRuntime } from 'modules/App/context';
+import { AppRuntime } from 'modules/App/App.runtime';
 import { Stack } from './Stack';
 
 const meta: Meta<typeof Stack> = {

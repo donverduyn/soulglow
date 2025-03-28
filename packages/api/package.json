@@ -8,6 +8,7 @@
     "bootstrap:ci": "hasura update-cli && yarn hasura:start:ci && wait-on http-get://localhost:8080/healthz && yarn hasura:setup:ci && yarn codegen:api:ci && yarn compose:ci stop",
     "test": "echo \"no test runner configured for package api\" && exit 0",
     "lint": "echo \"no linter configured for package api\"",
+    "lint:fix": "echo \"no linter configured for package api\"",
     "lint:ci": "echo \"no linter configured for package api\"",
     "build": "echo \"no build step configured for package api\"",
     "reset": "yarn compose:dev down && (docker volume inspect api_postgres_data >/dev/null 2>&1 && docker volume rm api_postgres_data || true) && rm -rf __generated/* && rm -rf metadata/query_collections.yaml",

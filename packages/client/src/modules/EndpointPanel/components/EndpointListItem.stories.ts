@@ -4,7 +4,7 @@ import { RuntimeDecorator } from '_storybook/decorators/RuntimeDecorator';
 import { ThemeDecorator } from '_storybook/decorators/ThemeDecorator';
 import { theme } from 'config/theme';
 import { createEndpoint } from 'models/endpoint/Endpoint';
-import { AppRuntime } from 'modules/App/context';
+import { AppRuntime } from 'modules/App/App.runtime';
 import { EndpointListItem } from './EndpointListItem';
 
 const meta: Meta<typeof EndpointListItem> = {

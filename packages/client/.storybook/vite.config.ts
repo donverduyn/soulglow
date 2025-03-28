@@ -9,7 +9,6 @@ import { createIpcNotifierPlugin } from './../.vite/plugins/vite-plugin-codegen-
 import removeExtraFontsPlugin from './../.vite/plugins/vite-plugin-remove-fonts';
 import { config, internalHooks, internalPlugins } from './../codegen.client';
 // import { visualizer } from 'rollup-plugin-visualizer';
-import dayjs from 'dayjs';
 
 export default defineConfig((viteConfig: ViteUserConfig) => {
   return mergeConfig(viteConfig, {
@@ -42,6 +41,10 @@ export default defineConfig((viteConfig: ViteUserConfig) => {
     // TODO: storybook refs only work using localhost, not 127.0.0.1?
     resolve: {
       alias: [
+        {
+          find: /(.+)\.gql$/,
+          replacement: '/src/__generated/gql/operations.ts',
+        },
         {
           // TODO: Remove this alias once the issue is fixed
           // https://github.com/tabler/tabler-icons/issues/1233

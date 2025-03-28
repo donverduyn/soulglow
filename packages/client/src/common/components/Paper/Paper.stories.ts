@@ -4,8 +4,8 @@ import { within, expect } from '@storybook/test';
 import { ColorSchemeDecorator } from '_storybook/decorators/ColorSchemeDecorator';
 import { RuntimeDecorator } from '_storybook/decorators/RuntimeDecorator';
 import { ThemeDecorator } from '_storybook/decorators/ThemeDecorator';
+import { AppRuntime } from 'modules/App/App.runtime';
 // import { theme } from 'config/theme';
-import { AppRuntime } from 'modules/App/context';
 import { Paper } from './Paper';
 
 const meta: Meta<typeof Paper> = {

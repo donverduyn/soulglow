@@ -24,6 +24,7 @@
     ".vite/**/*",
     ".eslint/**/*",
     ".postcss/**/*",
+    ".codegen/**/*",
     "*.base.ts",
     "*.config.ts",
     "*.workspace.ts",

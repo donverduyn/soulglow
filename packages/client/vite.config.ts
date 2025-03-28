@@ -25,11 +25,11 @@ export default defineConfig(async ({ mode }) => {
     devPlugins.push(i18nextHMRPlugin({ localesDir: './public/locales' }));
     devPlugins.push(
       checker({
-        eslint: {
-          dev: { logLevel: ['error', 'warning'] },
-          lintCommand: 'eslint ./**/*.{js,cjs,ts,tsx,mdx,gql}',
-          useFlatConfig: false,
-        },
+        // eslint: {
+        //   dev: { logLevel: ['error', 'warning'] },
+        //   lintCommand: 'eslint ./**/*.{js,cjs,ts,tsx,mdx,gql}',
+        //   useFlatConfig: false,
+        // },
         overlay: {
           badgeStyle:
             'background-color: white; font-size: 0.75em; color: black;',
@@ -37,12 +37,12 @@ export default defineConfig(async ({ mode }) => {
           panelStyle: 'height: 100%; background-color: #232125;',
         },
         root: process.cwd(),
-        stylelint: {
-          dev: { logLevel: ['error', 'warning'] },
-          lintCommand: 'stylelint "src/**/*.{css,tsx}"',
-        },
+        // stylelint: {
+        //   dev: { logLevel: ['error', 'warning'] },
+        //   lintCommand: 'stylelint "src/**/*.{css,tsx}"',
+        // },
         terminal: true,
-        typescript: { buildMode: true, tsconfigPath: './tsconfig.app.json' },
+        // typescript: { buildMode: true, tsconfigPath: './tsconfig.app.json' },
       })
     );
     devPlugins.push(inspect({}));
@@ -157,13 +157,18 @@ export default defineConfig(async ({ mode }) => {
       },
     },
     resolve: {
-      alias: {
-        // TODO: find out why this won't work
-        // '.vite': path.resolve(__dirname, '.vite'),
-        // TODO: Remove this alias once the issue is fixed
-        // https://github.com/tabler/tabler-icons/issues/1233
-        '@tabler/icons-react': '@tabler/icons-react/dist/esm/icons/index.mjs',
-      },
+      alias: [
+        {
+          find: /(.+)\.gql$/,
+          replacement: '/src/__generated/gql/operations.ts',
+        },
+        {
+          // TODO: Remove this alias once the issue is fixed
+          // https://github.com/tabler/tabler-icons/issues/1233
+          find: '@tabler/icons-react',
+          replacement: '@tabler/icons-react/dist/esm/icons/index.mjs',
+        },
+      ],
       extensions: ['.js', '.ts', '.tsx'],
     },
     server: {

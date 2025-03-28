@@ -120,9 +120,7 @@ const config: StorybookConfig = {
           },
         },
       },
-      plugins: [
-        ...devPlugins,   
-      ],
+      plugins: [...devPlugins],
       server: {
         headers: noCacheHeaders,
       },

@@ -33,6 +33,7 @@ export function WithRuntime<
     ) => ManagedRuntime.ManagedRuntime<TTarget, never>,
     props: Simplify<Partial<React.ComponentProps<C>>>
   ) => TProps
+  // fn: (props: Simplify<Omit<FallbackProps<C, Props>, keyof TProps>>) => void
 ): (
   Component?: C
 ) => React.FC<Simplify<Omit<FallbackProps<C, Props>, keyof TProps>>> &
@@ -76,8 +77,10 @@ export function WithRuntime<
 
       const createSource = React.useCallback(() => {
         const config: Config = { postUnmountTTL: 1000, shared: false };
-        let runtimeRef: ManagedRuntime.ManagedRuntime<TTarget, never> =
-          null as never;
+        let runtimeRef = null as ManagedRuntime.ManagedRuntime<
+          TTarget,
+          never
+        > | null;
 
         const source = getSource
           ? getSource((overrides) => {
@@ -89,7 +92,7 @@ export function WithRuntime<
             }, props)
           : undefined;
 
-        if (!getSource) {
+        if (!getSource || runtimeRef === null) {
           // eslint-disable-next-line react-hooks/rules-of-hooks
           runtimeRef = useRuntimeFactory(layer, config);
         }
@@ -141,6 +144,7 @@ It is used by withRuntime to create a runtime for the context.
 This is both compatible with strict mode and fast refresh. 🚀
 */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useRuntimeFactory = <T,>(layer: Layer.Layer<T>, config: Config) => {
   // TODO: use useSyncExternalStore to keep track of runtime instances and dispose them based on postUnmountTTL. Rehydrate the runtime instances on mount (maybe we need a component name/id combo here)
 

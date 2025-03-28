@@ -5,20 +5,18 @@ import {
   convertOkhsvToOklab,
   convertOklabToRgb,
 } from 'culori/fn';
-import { Console, Effect, flow, pipe } from 'effect';
+import { flow, pipe } from 'effect';
 import { observable } from 'mobx';
 import { Observer } from 'mobx-react-lite';
 import { Container } from 'common/components/Container/Container';
 import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { useMobx } from 'common/hooks/useMobx/useMobx';
-import { useRuntime } from 'common/hooks/useRuntimeFn/useRuntimeFn';
-import { AppRuntime } from 'modules/App/context';
+import { AppRuntime } from 'modules/App/App.runtime';
 import { EndpointPanel } from 'modules/EndpointPanel/EndpointPanel';
 import { LightBulb } from 'modules/LightBulb/LightBulb';
 import PaletteViewer from 'modules/PaletteViewer/PaletteViewer';
 import styles from './App.module.css';
 import { EndpointVisibilitySwitch } from './components/EndpointVisibilitySwitch';
-import * as Tags from './tags';
 
 const baseColor: Okhsv = {
   h: 0,
@@ -38,11 +36,6 @@ function AppComponent() {
     color: observable.ref,
   });
 
-  useRuntime(
-    AppRuntime,
-    Effect.andThen(Tags.EventBus, (bus) => bus.register(Console.log))
-  );
-
   // TODO: When this toggles one of the entity stores does not become unobserved. the next cycle it is unobserved. This keeps alternating. Find out why.
   const panel = useMobx(() => ({ isVisible: true }));
 
@@ -54,7 +47,7 @@ function AppComponent() {
       />
       <Observer
         render={panel.lazyGet('isVisible', (isVisible) =>
-          isVisible ? <EndpointPanel /> : null
+          isVisible ? <EndpointPanel id='endpoint:1' /> : null
         )}
       />
       <LightBulb

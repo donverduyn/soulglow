@@ -1,7 +1,7 @@
 import { Context, type Queue } from 'effect';
 import type { Device } from 'models/device/Device';
 import type { DeviceRepoImpl } from '../../models/device/DeviceRepo';
-import type { ColorServiceImpl } from './effect/providers/ColorProvider';
+import type { ColorServiceImpl } from './effect/services/Color.service';
 
 class ApiThrottler extends Context.Tag('@Lightbulb/Throttler')<
   ApiThrottler,

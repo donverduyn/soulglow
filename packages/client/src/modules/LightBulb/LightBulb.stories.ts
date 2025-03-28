@@ -4,7 +4,7 @@ import { ColorSchemeDecorator } from '_storybook/decorators/ColorSchemeDecorator
 import { RuntimeDecorator } from '_storybook/decorators/RuntimeDecorator';
 import { ThemeDecorator } from '_storybook/decorators/ThemeDecorator';
 import type { ExtendArgs } from '_storybook/utils/args';
-import { AppRuntime } from 'modules/App/context';
+import { AppRuntime } from 'modules/App/App.runtime';
 import { LightBulb } from './LightBulb';
 
 const meta: Meta<ExtendArgs<typeof LightBulb>> = {

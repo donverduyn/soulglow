@@ -11,10 +11,10 @@ import styles from './TextInput.module.css';
 interface Props extends Omit<TextInputProps, 'onChange'> {
   readonly getValue: () => string;
   readonly onChange: (
+    value: string,
     e:
       | React.ChangeEvent<HTMLInputElement>
-      | React.KeyboardEvent<HTMLInputElement>,
-    value: string
+      | React.KeyboardEvent<HTMLInputElement>
   ) => void;
 }
 
@@ -48,7 +48,7 @@ export const TextInput: React.FC<Props> = observer(function TextField(props) {
         start
       );
       setOptimistic(newValue);
-      onChange(e, newValue);
+      onChange(newValue, e);
     },
     [onChange]
   );
@@ -75,7 +75,7 @@ export const TextInput: React.FC<Props> = observer(function TextField(props) {
 
       if (newValue !== undefined) {
         setOptimistic(newValue);
-        onChange(e, newValue);
+        onChange(newValue, e);
         e.preventDefault();
       }
     },

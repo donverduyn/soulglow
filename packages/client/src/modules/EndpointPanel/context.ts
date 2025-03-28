@@ -1,69 +1,44 @@
-import { Client, type AnyVariables } from '@urql/core';
-import { fetchExchange } from '@urql/core';
-import { cacheExchange } from '@urql/exchange-graphcache';
-import { Effect, Layer, ManagedRuntime, pipe } from 'effect';
-import { DocumentNode } from 'graphql';
-import schema from '__generated/gql/introspection.urql.json';
-import * as Tags from './tags';
+// import { Effect, Layer, ManagedRuntime, pipe } from 'effect';
+// import * as Tags from './tags';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function test() {
-  const layerParent = Layer.succeed(Tags.Foo, 'foo');
-  const runtimeParent = ManagedRuntime.make(layerParent);
+// export function test() {
+//   const layerParent = Layer.succeed(Tags.Foo, 'foo');
+//   const runtimeParent = ManagedRuntime.make(layerParent);
 
-  // TODO: think about the consequence of having Foo in Foobar Service type, maybe this is actually what we want, because we do provide our dependencies on the service level, not only at construction level.
+//   // TODO: think about the consequence of having Foo in Foobar Service type, maybe this is actually what we want, because we do provide our dependencies on the service level, not only at construction level.
 
-  // TODO: try to use layer project etc, link the service of a tag
-  Layer.service(Tags.Foo);
+//   // TODO: try to use layer project etc, link the service of a tag
+//   const test = Layer.service(Tags.Foo);
+//   const test2 = Layer.project(Tags.Foo, Tags.Foobar, (a) =>
+//     Effect.sync(() => a + 'bar')
+//   );
+//   const test44 = Layer.function(Tags.Foo, Tags.Foobar, (a) =>
+//     Effect.sync(() => a + 'bar')
+//   );
+//   const test4 = Layer.passthrough(test);
 
-  const layerChild = pipe(
-    Layer.succeed(
-      Tags.Foobar,
-      // Effect.gen(function* () {
-      // const s = yield* Foo;
-      Effect.andThen(Tags.Foo, (s) => s + 'bar')
-      // })
-    )
-  );
-  const runtimeChild = ManagedRuntime.make(layerChild);
+//   const test3 = test2(test);
 
-  const program = Effect.gen(function* () {
-    const effect = yield* Tags.Foobar;
-    return effect;
-  });
+//   const layerChild = pipe(
+//     Layer.succeed(
+//       Tags.Foobar,
+//       Effect.andThen(Tags.Foo, (s) => s + 'bar')
+//     )
+//   );
+//   const runtimeChild = ManagedRuntime.make(layerChild);
 
-  const fromChild = Effect.runSync(Effect.provide(program, runtimeChild));
-  const fromParent = Effect.provide(fromChild, runtimeParent);
+//   const program = Effect.gen(function* () {
+//     const effect = yield* Tags.Foobar;
+//     return effect;
+//   });
 
-  const result = Effect.runSync(fromParent);
-  console.log(result); // prints foobar
-}
+//   const fromChild = Effect.runSync(Effect.provide(program, runtimeChild));
+//   const fromParent = Effect.provide(fromChild, runtimeParent);
 
-type QueryFactory = <
-  TDocumentNode extends DocumentNode,
-  TVariables extends AnyVariables,
-  TResponse,
->(
-  query: TDocumentNode,
-  variables: TVariables
-) => Promise<TResponse>;
-
-const client = new Client({
-  exchanges: [cacheExchange({ schema }), fetchExchange],
-  fetchOptions: () => ({
-    headers: {
-      'X-Hasura-Admin-Secret': 'admin_secret',
-    },
-  }),
-  url: 'http://localhost:8080/v1/graphql',
-});
-
-// Generic query factory function
-const queryFactory: QueryFactory = async (query, variables) => {
-  const result = await client.query(query, variables).toPromise();
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return result.data; // Automatically inferred as TResponse
-};
+//   const result = Effect.runSync(fromParent);
+//   console.log(result); // prints foobar
+//   return result;
+// }
 
 // TODO: each runtime, takes an optional configuration. Based on the shared property, before the runtime is created we check if there is already a runtime available based on the component name and required id as key. A map is used outside of react, to store the runtimes. The property postUnmountTTL is used to determine how long the runtime waits before it is disposed and removed from the map. Whenever a component remounts, it checks if there is a runtime available in the map, if so it uses that runtime, otherwise it creates a new one. This also stops the postUnmountTTL timer.
 

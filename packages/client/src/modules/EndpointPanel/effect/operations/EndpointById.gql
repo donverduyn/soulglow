@@ -1,5 +1,5 @@
-query EndpointPanel_EndpointById {
-  endpoint {
+query EndpointPanel_EndpointById($id: uuid!) {
+  endpoint_by_pk(id: $id) {
     id
     name
     url

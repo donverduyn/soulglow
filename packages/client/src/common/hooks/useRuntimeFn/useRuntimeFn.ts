@@ -1,12 +1,5 @@
 import * as React from 'react';
-import {
-  Effect,
-  pipe,
-  Fiber,
-  FiberId,
-  Stream,
-  type ManagedRuntime,
-} from 'effect';
+import { Effect, pipe, Fiber, FiberId, Stream, ManagedRuntime } from 'effect';
 import type { IsUnknown } from 'type-fest';
 import { v4 as uuidv4 } from 'uuid';
 import type { RuntimeContext } from 'common/utils/context';
@@ -22,14 +15,22 @@ It returns a promise that resolves to the value of the effect.
 // TODO: consider using useRef to share the stream between instances, because it is agnostic to the effect. However, there are considerations here, because we currently allow for backpressure for each indidivual stream.
 
 export function useRuntimeFn<A, E, R, T>(
-  context: RuntimeContext<R>,
+  context: RuntimeContext<R> | ManagedRuntime.ManagedRuntime<R, never>,
   fn:
     | ((value: T) => Effect.Effect<A, E, NoInfer<R>>)
     | Effect.Effect<A, E, NoInfer<R>>,
   deps: React.DependencyList = []
 ) {
-  const runtime = React.use(context);
+  const fnRef = React.useRef(fn);
+
+  const runtime = ManagedRuntime.isManagedRuntime(context)
+    ? context
+    : React.use(context as RuntimeContext<R>);
   const finalDeps = [runtime, ...deps];
+
+  React.useEffect(() => {
+    fnRef.current = fn;
+  }, [finalDeps]);
 
   const emitter = React.useMemo(() => new EventEmitter<T, A>(), finalDeps);
   const effect = React.useMemo(
@@ -38,7 +39,11 @@ export function useRuntimeFn<A, E, R, T>(
         Stream.fromAsyncIterable(createAsyncIterator(emitter), () => {}),
         Stream.mapEffect(({ data, eventId }) => {
           return pipe(
-            Effect.sync(() => (Effect.isEffect(fn) ? fn : fn(data))),
+            Effect.sync(() =>
+              Effect.isEffect(fnRef.current)
+                ? fnRef.current
+                : fnRef.current(data)
+            ),
             Effect.andThen(Effect.tap(emitter.resolve(eventId)))
           );
         }),
@@ -93,11 +98,14 @@ It takes a context and an effect and runs the effect in the runtime provided by 
 */
 
 export const useRuntimeSync = <A, E, R>(
-  context: RuntimeContext<R>,
+  context: RuntimeContext<R> | ManagedRuntime.ManagedRuntime<R, never>,
   effect: Effect.Effect<A, E, NoInfer<R>>,
   deps: React.DependencyList = []
 ) => {
-  const runtime = React.use(context);
+  const runtime = ManagedRuntime.isManagedRuntime(context)
+    ? context
+    : React.use(context as RuntimeContext<R>);
+
   if (runtime === undefined) throw new Error(noRuntimeMessage);
   return React.useMemo(() => runtime.runSync(effect), [...deps, runtime]);
 };

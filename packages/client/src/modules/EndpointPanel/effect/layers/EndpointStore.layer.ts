@@ -6,11 +6,12 @@ import { EntityStore } from 'common/utils/entity';
 import type { EventType } from 'common/utils/event';
 // import { createEndpoint } from 'models/endpoint/Endpoint';
 import * as Tags from '../../tags';
-import { EndpointEntity } from '../entities/EndpointEntity';
+import { EndpointEntity } from '../entities/Endpoint.entity';
 
 const processEvents =
   (store: Context.Tag.Service<typeof Tags.EndpointStore>) =>
   (event: EventType<unknown>) => {
+    // console.log('EndpointStoreLayer', event, store.id);
     Mobx.runInAction(() => {
       // TODO: use XState to handle side effects.
       if (event.name === 'ADD_ENDPOINT_REQUESTED') {
@@ -41,7 +42,7 @@ export const endpointStoreLayer = Layer.scoped(
     // const EndpointStore = WithSelected(EntityStore<EndpointEntity>)
     const store = new EntityStore<EndpointEntity>();
     const consumer = pipe(
-      Stream.fromPubSub(yield* Tags.Inbound),
+      Stream.fromPubSub(yield* Tags.InboundBusChannel),
       Stream.map(processEvents(store)),
       Stream.runDrain
     );

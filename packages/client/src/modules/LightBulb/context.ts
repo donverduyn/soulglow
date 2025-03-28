@@ -4,7 +4,7 @@ import { v4 as uuid } from 'uuid';
 import { createRuntimeContext } from 'common/utils/context';
 import { Device } from 'models/device/Device';
 import { DeviceRepoImpl } from '../../models/device/DeviceRepo';
-import { ColorServiceImpl } from './effect/providers/ColorProvider';
+import { ColorServiceImpl } from './effect/services/Color.service';
 import * as Tags from './tags';
 
 export enum LightMode {
