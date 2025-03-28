@@ -131,6 +131,8 @@ export const AppRuntime = pipe(
   createRuntimeContext
 );
 
+const isCI = process.env.CI === 'true';
+
 const client = new Client({
   exchanges: [cacheExchange({ schema }), fetchExchange],
   fetchOptions: () => ({
@@ -138,7 +140,7 @@ const client = new Client({
       'X-Hasura-Admin-Secret': 'admin_secret',
     },
   }),
-  url: 'http://hasura:8080/v1/graphql',
+  url: `http://${isCI ? 'localhost' : 'hasura'}:8080/v1/graphql`,
 });
 
 export const runQuery = async () => {
