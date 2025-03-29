@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "bootstrap": "yarn playwright install --with-deps --only-shell chromium && patch-package && yarn api:generate && yarn codegen:client --no-external",
-    "bootstrap:ci": "yarn playwright install --with-deps && patch-package && yarn api:generate && yarn codegen:client --no-external",
+    "bootstrap": "yarn playwright:install && patch-package && yarn api:generate && yarn codegen:client --no-external",
+    "bootstrap:ci": "patch-package && yarn api:generate && yarn codegen:client --no-external",
+    "playwright:install": "yarn playwright install --with-deps --only-shell chromium",
     "api:generate": "rm -rf ./src/__generated && tsx -e \"import { generate } from './scripts/api-gen'; generate('./openapi.yml', './src/__generated/api');\"",
     "dev": "vite --open",
     "debug": "INTERNAL_CHROMIUM=true vite --debug",
