@@ -29,8 +29,9 @@ export const getDisplayName = <C extends React.FC<any> | undefined>(
   Component: C,
   prefix: string
 ) => {
-  const extraField = (Component as unknown as { type?: { name?: string } }).type
-    ?.name;
+  const extraField = (
+    Component as unknown as { type?: { name?: string } } | undefined
+  )?.type?.name;
   return `${prefix}(${(Component && (Component.displayName || Component.name || extraField)) || 'Component'})`;
 };
 
