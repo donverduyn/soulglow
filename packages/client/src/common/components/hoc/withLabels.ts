@@ -11,5 +11,5 @@ export function WithLabels<L extends Record<any, any>>(labels: L) {
   return <C extends React.FC<any>>(Component: C) => {
     copyStaticProperties({ labels }, Component);
     return Component;
-  }
+  };
 }

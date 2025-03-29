@@ -29,26 +29,33 @@ export const getDisplayName = <C extends React.FC<any> | undefined>(
   Component: C,
   prefix: string
 ) => {
-  const extraField = (Component as unknown as { type?: { name?: string }})?.type?.name;
+  const extraField = (Component as unknown as { type?: { name?: string } }).type
+    ?.name;
   return `${prefix}(${(Component && (Component.displayName || Component.name || extraField)) || 'Component'})`;
 };
 
 // based on https://github.com/mridgway/hoist-non-react-statics/blob/master/src/index.js
-const hoistBlackList: any = {
+const hoistBlackList = {
   $$typeof: true,
-  render: true,
   compare: true,
-  type: true,
   // Don't redefine `displayName`,
   // it's defined as getter-setter pair on `memo` (see #3192).
-  displayName: true
-}
+  displayName: true,
+  render: true,
+  type: true,
+};
 
-export function copyStaticProperties(base: any, target: any) {
-  Object.keys(base).forEach(function(key) {
-    if (!hoistBlackList[key]) {
-      // @ts-expect-error wrong return type
-      Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(base, key));
+export function copyStaticProperties(
+  base: Record<string, unknown>,
+  target: Record<string, unknown>
+) {
+  Object.keys(base).forEach(function (key) {
+    if (!hoistBlackList[key as keyof typeof hoistBlackList]) {
+      Object.defineProperty(
+        target,
+        key,
+        Object.getOwnPropertyDescriptor(base, key)
+      );
     }
   });
 }
