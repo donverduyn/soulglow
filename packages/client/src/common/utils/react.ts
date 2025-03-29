@@ -54,6 +54,8 @@ export function copyStaticProperties(
       Object.defineProperty(
         target,
         key,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error not allowed
         Object.getOwnPropertyDescriptor(base, key)
       );
     }
