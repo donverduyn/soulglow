@@ -131,7 +131,7 @@ export const AppRuntime = pipe(
   createRuntimeContext
 );
 
-const isCI = process.env.CI === 'true';
+const isCI = import.meta.env.CI === 'true';
 
 const client = new Client({
   exchanges: [cacheExchange({ schema }), fetchExchange],

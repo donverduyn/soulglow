@@ -105,7 +105,6 @@ export function EndpointPanelView({ store, publish }: Props) {
   return (
     <Stack className={styles.EndpointPanel}>
       <List render={renderList} />
-      sdfdsf
       <Button onClick={addEndpoint}>{text(labels.addEndpointLabel)}</Button>
     </Stack>
   );
