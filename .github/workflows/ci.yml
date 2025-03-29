@@ -55,7 +55,7 @@ jobs:
 
     - name: Install Playwright browsers
       if: steps.cache-playwright.outputs.cache-hit != 'true'
-      run: yarn playwright:install
+      run: yarn ws client playwright:install
 
     - name: Bootstrap
       run: yarn bootstrap:ci
