@@ -1,8 +1,11 @@
 import * as React from 'react';
 import { Layer, ManagedRuntime } from 'effect';
+import memoize from 'moize';
 import type { Simplify, IsAny } from 'type-fest';
+import { v4 as uuid } from 'uuid';
 import { type RuntimeContext } from 'common/utils/context';
 import { type ExtractMeta, getDisplayName } from 'common/utils/react';
+import { copyStaticProperties } from 'common/utils/react';
 
 /*
 This HOC creates a runtime for the context and provides it to the component.
@@ -13,7 +16,12 @@ type Props = {
   readonly children?: React.ReactNode;
 };
 
-type Config = { postUnmountTTL: number; shared: boolean };
+type Config = {
+  componentName: string;
+  debug: boolean;
+  postUnmountTTL: number;
+  shared: boolean;
+};
 
 type InferProps<C> = C extends React.FC<infer P> ? P : never;
 
@@ -76,7 +84,12 @@ export function WithRuntime<
       };
 
       const createSource = React.useCallback(() => {
-        const config: Config = { postUnmountTTL: 1000, shared: false };
+        const config: Config = {
+          componentName: getDisplayName(Component, 'WithRuntime'),
+          debug: false,
+          postUnmountTTL: 1000,
+          shared: false,
+        };
         let runtimeRef = null as ManagedRuntime.ManagedRuntime<
           TTarget,
           never
@@ -111,6 +124,7 @@ export function WithRuntime<
     };
     Wrapped.displayName = getDisplayName(Component, 'WithRuntime');
     const meta = Component ? extractMeta(Component) : {};
+    copyStaticProperties(meta, Wrapped);
     return Object.assign(Wrapped, meta);
   };
 }
@@ -144,23 +158,49 @@ It is used by withRuntime to create a runtime for the context.
 This is both compatible with strict mode and fast refresh. 🚀
 */
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const printLog = (config: Config, message: string) => {
+  if (!config.debug) return;
+  console.log(`[${config.componentName}] ${message}`);
+};
+
+const createRuntime = memoize(
+  <T,>(layer: Layer.Layer<T>, runtimeId: string, config: Config) => {
+    printLog(config, `create runtime ${runtimeId}`);
+    return ManagedRuntime.make(layer);
+  },
+  // this buffers against react fast refresh and strict mode
+  { isShallowEqual: true, maxAge: 100, maxArgs: 2 }
+);
+
 const useRuntimeFactory = <T,>(layer: Layer.Layer<T>, config: Config) => {
   // TODO: use useSyncExternalStore to keep track of runtime instances and dispose them based on postUnmountTTL. Rehydrate the runtime instances on mount (maybe we need a component name/id combo here)
 
   const layerRef = React.useRef(layer);
   const shouldCreate = React.useRef(false);
+  const runtimeId = React.useRef(uuid());
+  const hasMounted = React.useRef(false);
+
   const [runtime, setRuntime] = React.useState(() =>
-    ManagedRuntime.make(layer)
+    createRuntime(layer, runtimeId.current, config)
   );
+
+  if (!hasMounted.current) {
+    hasMounted.current = true;
+  } else {
+    printLog(config, `reuse runtime  ${runtimeId.current}`);
+  }
 
   React.useEffect(() => {
     if (shouldCreate.current || layerRef.current !== layer) {
+      layerRef.current = layer;
+      runtimeId.current = uuid();
+      printLog(config, `recreating runtime ${runtimeId.current}`);
       const newRuntime = ManagedRuntime.make(layer);
       setRuntime(() => newRuntime);
     }
 
     return () => {
+      printLog(config, `disposing runtime ${runtimeId.current}`);
       void runtime.dispose();
       shouldCreate.current = true;
     };

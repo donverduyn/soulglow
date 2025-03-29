@@ -8,6 +8,7 @@ import {
 import { flow, pipe } from 'effect';
 import { observable } from 'mobx';
 import { Observer } from 'mobx-react-lite';
+import { v4 as uuid } from 'uuid';
 import { Container } from 'common/components/Container/Container';
 import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { useMobx } from 'common/hooks/useMobx/useMobx';
@@ -38,6 +39,7 @@ function AppComponent() {
 
   // TODO: When this toggles one of the entity stores does not become unobserved. the next cycle it is unobserved. This keeps alternating. Find out why.
   const panel = useMobx(() => ({ isVisible: true }));
+  const endpointId = React.useRef(uuid()).current;
 
   return (
     <Container className={styles.App}>
@@ -47,7 +49,7 @@ function AppComponent() {
       />
       <Observer
         render={panel.lazyGet('isVisible', (isVisible) =>
-          isVisible ? <EndpointPanel id='endpoint:1' /> : null
+          isVisible ? <EndpointPanel id={`endpoint:${endpointId}`} /> : null
         )}
       />
       <LightBulb

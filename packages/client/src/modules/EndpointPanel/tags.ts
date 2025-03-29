@@ -17,7 +17,7 @@ export type InitializerState = {
   publishQuery: (event: QueryType<unknown>) => Promise<boolean>;
   register: (
     fn: (event: EventType<unknown>) => RuntimeFiber<boolean>
-  ) => Promise<boolean>;
+  ) => Promise<() => Promise<boolean>>;
 };
 
 const defaultInitializerState: Nullable<InitializerState> = {

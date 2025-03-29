@@ -81,7 +81,7 @@ export const AppRuntime = pipe(
       yield* pipe(
         streams,
         Stream.mergeAll({ concurrency: 'unbounded' }),
-        Stream.tap((message) => Console.log('[AppRuntimeChannels]', message)),
+        Stream.tap((message) => Console.log('[AppRuntime] Received', message)),
         Stream.runDrain,
         Effect.forkScoped
       );
@@ -96,7 +96,7 @@ export const AppRuntime = pipe(
 
         while (true) {
           const item = yield* Queue.take(dequeue);
-          yield* Console.log('[AppRuntime/ResponseBus]', item);
+          yield* Console.log('[AppRuntime] Published to ResponseBus', item);
         }
       }).pipe(Effect.forkScoped)
     )
@@ -111,7 +111,7 @@ export const AppRuntime = pipe(
 
         while (true) {
           const item = yield* Queue.take(dequeue);
-          yield* Console.log('[AppRuntime/QueryBus]', item);
+          yield* Console.log('[AppRuntime] Received on QueryBus', item);
           yield* responseBus.pipe(PubSub.publish(item));
         }
       }).pipe(Effect.forkScoped)

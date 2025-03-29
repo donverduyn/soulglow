@@ -120,7 +120,18 @@ const config: StorybookConfig = {
           },
         },
       },
-      plugins: [...devPlugins],
+      plugins: [
+        ...devPlugins,
+        config.mode === 'production' &&
+          viteStaticCopy({
+            targets: [
+              {
+                dest: '',
+                src: path.resolve(__dirname, './../src/assets/locales/**/*'),
+              },
+            ],
+          }),
+      ],
       server: {
         headers: noCacheHeaders,
       },

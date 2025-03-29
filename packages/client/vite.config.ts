@@ -1,3 +1,4 @@
+import path from 'node:path';
 import react from '@vitejs/plugin-react-swc';
 import dayjs from 'dayjs';
 import postcssPresetEnv from 'postcss-preset-env';
@@ -8,6 +9,7 @@ import codegen from 'vite-plugin-graphql-codegen';
 import graphqlLoader from 'vite-plugin-graphql-loader';
 import inspect from 'vite-plugin-inspect';
 import { VitePWA } from 'vite-plugin-pwa';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { noCacheHeaders } from './.vite/config/header';
 import { browser } from './.vite/plugins/vite-plugin-browser';
@@ -134,6 +136,15 @@ export default defineConfig(async ({ mode }) => {
         srcDir: 'src',
         strategies: 'injectManifest',
       }),
+      mode === 'production' &&
+        viteStaticCopy({
+          targets: [
+            {
+              dest: '',
+              src: path.resolve(__dirname, './src/assets/locales/**/*'),
+            },
+          ],
+        }),
       visualizer({
         brotliSize: true,
         filename: `./.analyzer/analysis_${dayjs().format('DDMMYYYY_HHmmss')}.html`,
@@ -158,6 +169,14 @@ export default defineConfig(async ({ mode }) => {
     },
     resolve: {
       alias: [
+        ...(mode === 'development'
+          ? [
+              {
+                find: 'i18n',
+                replacement: path.resolve(__dirname, './src/i18n.dev.ts'),
+              },
+            ]
+          : []),
         {
           find: /(.+)\.gql$/,
           replacement: '/src/__generated/gql/operations.ts',

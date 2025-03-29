@@ -59,15 +59,23 @@ export const EndpointPanelRuntime = pipe(
               (state): state is Tags.InitializerState =>
                 state.initialized === true
             ),
-            Stream.tap((info) =>
-              Console.log('EndpointPanel/InitializerRef', info)
-            ),
+            Stream.tap((info) => {
+              console.log('[EndpointPanelRuntime] Initialize', info.id);
+              return Effect.void;
+            }),
             Stream.tap(({ register }) =>
-              Effect.sync(() => {
-                void register((e) =>
-                  runFork(inboundBus.pipe(PubSub.publish(e)))
-                ).then((r) => console.log('from register', r));
-                return Effect.succeed(true);
+              Effect.gen(function* () {
+                yield* Effect.promise(() =>
+                  register((incoming) =>
+                    runFork(inboundBus.pipe(PubSub.publish(incoming)))
+                  )
+                ).pipe(Effect.fork);
+
+                // yield* Effect.addFinalizer(() =>
+                // fiber.pipe(Effect.andThen((a) => Effect.promise(() => a()))).pipe(
+                // Console.log('BOOM')
+                // )
+                // );
               })
             )
           )
@@ -101,7 +109,10 @@ export const EndpointPanelRuntime = pipe(
 
         while (true) {
           const item = yield* Queue.take(dequeue);
-          yield* Console.log('[EndpointPanel/EventBus]', item);
+          yield* Console.log(
+            '[EndpointPanelRuntime] Received on EventBus',
+            item
+          );
         }
       }).pipe(Effect.forkScoped)
     )
@@ -115,9 +126,28 @@ export const EndpointPanelRuntime = pipe(
 
         while (true) {
           const item = yield* Queue.take(dequeue);
-          yield* Console.log('[EndpointPanel/InboundBus]', item);
+          yield* Console.log(
+            '[EndpointPanelRuntime] Received on InboundBus',
+            item
+          );
         }
       }).pipe(Effect.forkScoped)
+    )
+  ),
+
+  Layer.provide(
+    Layer.scopedDiscard(
+      Effect.gen(function* () {
+        const ref = yield* Tags.InitializerRef;
+        yield* Effect.addFinalizer(() =>
+          pipe(
+            Ref.get(ref),
+            Effect.tap(({ id }) =>
+              Console.log('[EndpointPanelRuntime] Finalize', id)
+            )
+          )
+        );
+      })
     )
   ),
 

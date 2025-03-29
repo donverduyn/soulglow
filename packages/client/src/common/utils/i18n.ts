@@ -1,6 +1,6 @@
 import type { Simplify } from 'type-fest';
-import type { default as DataTypeEN } from 'public/locales/en/translation.json';
-import type { default as DataTypeNL } from 'public/locales/nl/translation.json';
+import type { default as DataTypeEN } from 'assets/locales/en/translation.json';
+import type { default as DataTypeNL } from 'assets/locales/nl/translation.json';
 
 // TODO: think about moving this closer to the translation files.
 export type Locales = [typeof DataTypeEN, typeof DataTypeNL];

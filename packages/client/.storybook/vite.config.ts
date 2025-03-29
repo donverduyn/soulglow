@@ -41,6 +41,14 @@ export default defineConfig((viteConfig: ViteUserConfig) => {
     // TODO: storybook refs only work using localhost, not 127.0.0.1?
     resolve: {
       alias: [
+        ...(viteConfig.mode === 'development'
+          ? [
+              {
+                find: 'i18n',
+                replacement: path.resolve(__dirname, './src/i18n.dev.ts'),
+              },
+            ]
+          : []),
         {
           find: /(.+)\.gql$/,
           replacement: '/src/__generated/gql/operations.ts',

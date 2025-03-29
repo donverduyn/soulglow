@@ -38,7 +38,7 @@ export const EndpointPanel = pipe(
   observer(EndpointPanelView),
   WithLabels(labels),
   WithRuntime(EndpointPanelRuntime, (configure, props) => {
-    const runtime = configure({ shared: true });
+    const runtime = configure();
     const store = useRuntimeSync(runtime, Tags.EndpointStore, [runtime]);
 
     const publish = useRuntimeFn(runtime, (e: EventType<unknown>) =>
@@ -64,6 +64,8 @@ export const EndpointPanel = pipe(
     );
 
     React.useEffect(() => {
+      // console.clear();
+      // console.log('[EndpointPanel] useEffect', props.id);
       runtime.runFork(
         Effect.andThen(
           Tags.InitializerRef,

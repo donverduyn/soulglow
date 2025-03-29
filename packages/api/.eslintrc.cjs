@@ -10,13 +10,7 @@ module.exports = {
     'plugin:import/recommended',
     'plugin:eslint-comments/recommended',
   ],
-  ignorePatterns: [
-    'node_modules',
-    'dist',
-    'dev-dist',
-    '!**/.*',
-    '!**/.*/**/.*',
-  ],
+  ignorePatterns: ['node_modules', 'dist', '!**/.*', '!**/.*/**/.*'],
   overrides: [
     {
       files: ['./**/*.{js,cjs,mjs}'],
@@ -27,12 +21,11 @@ module.exports = {
     // test environment
     {
       files: [
-        '.*/**/*.test.{ts,tsx}',
-        './tests/**/*.{ts,tsx}',
-        './src/**/*.test.{ts,tsx}',
+        '.*/**/*.test.ts',
+        './tests/**/*.ts',
+        './src/**/*.test.ts',
         './src/*.test-d.ts',
-        'postcss.config.cjs',
-        '**/*.ts',
+        '**/*.test.ts',
       ],
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       env: { node: true },
@@ -62,6 +55,7 @@ module.exports = {
     {
       files: [
         './*.ts',
+        './src/**/*.ts',
         // Maybe remove this if not needed
         './.*/**/*.ts',
         './scripts/**/*.ts',
@@ -88,7 +82,7 @@ module.exports = {
     },
     {
       // all TypeScript files
-      files: ['./**/*.ts'],
+      files: ['./**/*.ts', './.*/**/*.ts'],
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       extends: [
         'plugin:@typescript-eslint/strict-type-checked',
@@ -165,7 +159,6 @@ module.exports = {
   ],
   parser: '@typescript-eslint/parser',
   plugins: ['import', 'unused-imports', 'sort-keys-fix', 'rulesdir'],
-  // root: true,
   rules: {
     'eslint-comments/no-unused-disable': 'warn',
     'import/no-named-as-default-member': 'off',

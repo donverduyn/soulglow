@@ -15,6 +15,8 @@ import './index.css';
 import './font.css';
 // import '@dotenvx/dotenvx/config';
 
+const StrictMode = React.StrictMode;
+
 const i18n = initializeI18N();
 client.setConfig({ baseUrl: '/api' });
 
@@ -23,7 +25,7 @@ configure(mobxConfig);
 // enableStaticRendering(true)
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
+  <StrictMode>
     <ThemeProvider
       prefix={prefix}
       theme={theme}
@@ -32,5 +34,5 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         <App />
       </I18nextProvider>
     </ThemeProvider>
-  </React.StrictMode>
+  </StrictMode>
 );

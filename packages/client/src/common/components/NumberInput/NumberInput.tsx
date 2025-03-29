@@ -40,7 +40,7 @@ export const NumberInput: React.FC<Props> = observer(
       }
     }, []);
 
-    const ref = useEventListener('wheel', onWheelHandler);
+    const ref = useEventListener('wheel', onWheelHandler, { passive: true });
 
     return (
       <MantineNumberInput

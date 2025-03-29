@@ -9,11 +9,7 @@ export const initializeI18N = memoize(
     const i18nInstance = i18next.createInstance();
     void i18nInstance.use(Backend).use(LanguageDetector).use(initReactI18next);
 
-    void (async () => {
-      if (import.meta.env.MODE === 'development') {
-        const { HMRPlugin } = await import('i18next-hmr/plugin');
-        i18nInstance.use(new HMRPlugin({ vite: { client: true } }));
-      }
+    (() => {
       void i18nInstance.init(
         {
           backend: { loadPath: '/locales/{{lng}}/{{ns}}.json' },
