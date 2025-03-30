@@ -38,7 +38,7 @@ export const EndpointPanel = pipe(
   observer(EndpointPanelView),
   WithLabels(labels),
   WithRuntime(EndpointPanelRuntime, (configure, props) => {
-    const runtime = configure();
+    const runtime = configure({ debug: true });
     const store = useRuntimeSync(runtime, Tags.EndpointStore, [runtime]);
 
     const publish = useRuntimeFn(runtime, (e: EventType<unknown>) =>
@@ -58,19 +58,18 @@ export const EndpointPanel = pipe(
     );
     const register = useRuntimeFn(
       AppRuntime,
-      (handler: (e: EventType<unknown>) => RuntimeFiber<boolean>) =>
+      (handler: (e: EventType<unknown>) => RuntimeFiber<boolean | string>) =>
         Effect.andThen(AppTags.ResponseBus, (bus) => bus.register(handler)),
       [runtime]
     );
 
     React.useEffect(() => {
-      // console.clear();
-      // console.log('[EndpointPanel] useEffect', props.id);
       runtime.runFork(
         Effect.andThen(
           Tags.InitializerRef,
-          Ref.update(({ id }) => ({
-            id: props.id ?? id,
+          Ref.update(({ componentId }) => ({
+            componentId: props.id ?? componentId,
+            runtimeId: runtime.id,
             initialized: true,
             publishCommand,
             publishQuery,

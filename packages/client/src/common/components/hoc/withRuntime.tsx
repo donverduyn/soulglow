@@ -38,7 +38,7 @@ export function WithRuntime<
   getSource: (
     runtimeFactory: (
       config?: Partial<Config>
-    ) => ManagedRuntime.ManagedRuntime<TTarget, never>,
+    ) => ManagedRuntime.ManagedRuntime<TTarget, never> & { id: string },
     props: Simplify<Partial<React.ComponentProps<C>>>
   ) => TProps
   // fn: (props: Simplify<Omit<FallbackProps<C, Props>, keyof TProps>>) => void
@@ -53,7 +53,7 @@ export function WithRuntime<TTarget, C extends React.FC<any>>(
   getSource?: (
     runtimeFactory: (
       config?: Partial<Config>
-    ) => ManagedRuntime.ManagedRuntime<TTarget, never>,
+    ) => ManagedRuntime.ManagedRuntime<TTarget, never> & { id: string },
     props: Simplify<Partial<React.ComponentProps<C>>>
   ) => void
 ): (
@@ -73,7 +73,7 @@ export function WithRuntime<
   getSource?: (
     runtimeFactory: (
       config?: Partial<Config>
-    ) => ManagedRuntime.ManagedRuntime<TTarget, never>,
+    ) => ManagedRuntime.ManagedRuntime<TTarget, never> & { id: string },
     props: Partial<FallbackProps<C, Props>>
   ) => TProps
 ) {
@@ -90,10 +90,9 @@ export function WithRuntime<
           postUnmountTTL: 1000,
           shared: false,
         };
-        let runtimeRef = null as ManagedRuntime.ManagedRuntime<
-          TTarget,
-          never
-        > | null;
+        let runtimeRef = null as
+          | (ManagedRuntime.ManagedRuntime<TTarget, never> & { id: string })
+          | null;
 
         const source = getSource
           ? getSource((overrides) => {
@@ -165,10 +164,12 @@ const printLog = (config: Config, message: string) => {
 
 const createRuntime = memoize(
   <T,>(layer: Layer.Layer<T>, runtimeId: string, config: Config) => {
-    printLog(config, `create runtime ${runtimeId}`);
-    return ManagedRuntime.make(layer);
+    printLog(config, `creating runtime ${runtimeId}`);
+    return Object.assign(ManagedRuntime.make(layer), {
+      id: runtimeId,
+    }) as ManagedRuntime.ManagedRuntime<T, never> & { id: string };
   },
-  // this buffers against react fast refresh and strict mode
+  // this prevents a second instantiation in strict mode inside the useEffect function, which gets disposed immediately, and it since it has no side effects, we are safe.
   { isShallowEqual: true, maxAge: 100, maxArgs: 2 }
 );
 
@@ -181,26 +182,31 @@ const useRuntimeFactory = <T,>(layer: Layer.Layer<T>, config: Config) => {
   const hasMounted = React.useRef(false);
 
   const [runtime, setRuntime] = React.useState(() =>
-    createRuntime(layer, runtimeId.current, config)
+    createRuntime(layerRef.current, runtimeId.current, config)
   );
 
   if (!hasMounted.current) {
     hasMounted.current = true;
   } else {
-    printLog(config, `reuse runtime  ${runtimeId.current}`);
+    printLog(config, `reusing runtime  ${runtimeId.current}`);
   }
 
   React.useEffect(() => {
+    // printLog(config, `useEffect ${runtimeId.current}`);
     if (shouldCreate.current || layerRef.current !== layer) {
       layerRef.current = layer;
       runtimeId.current = uuid();
+      shouldCreate.current = false;
       printLog(config, `recreating runtime ${runtimeId.current}`);
-      const newRuntime = ManagedRuntime.make(layer);
+      const newRuntime = Object.assign(ManagedRuntime.make(layer), {
+        id: runtimeId.current,
+      });
       setRuntime(() => newRuntime);
     }
 
     return () => {
       printLog(config, `disposing runtime ${runtimeId.current}`);
+      // console.log(runtime)
       void runtime.dispose();
       shouldCreate.current = true;
     };

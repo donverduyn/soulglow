@@ -9,10 +9,12 @@ import {
   Cause,
   Scope,
   Exit,
+  Ref
 } from 'effect';
 import { isFiber, type RuntimeFiber } from 'effect/Fiber';
 
 export abstract class BusService<T> {
+  private count = Effect.runSync(Ref.make(0));
   constructor(
     private readonly bus: PubSub.PubSub<T>,
     private readonly name: string
@@ -27,40 +29,53 @@ export abstract class BusService<T> {
   ) {
     const bus = this.bus;
     const name = this.name;
+    const count = this.count;
 
     return Effect.gen(function* () {
       const runtime = yield* Effect.runtime();
       const scope = yield* Scope.make();
-
-      yield* Effect.gen(function* () {
+  
+      const fiber = yield* Effect.gen(function* () {
         const queue = yield* PubSub.subscribe(bus);
-        yield* Console.log(`[${name}/BusService] Register`);
+        yield* Ref.updateAndGet(count, (c) => c + 1)
+        .pipe(Effect.andThen((count) => Console.log(
+          `[${name}] registering subscriber, count: ${count}`
+        )));
 
         yield* Effect.addFinalizer(() =>
-          Console.log(`[${name}/BusService] Unregister`)
+          Effect.gen(function* () { 
+            const count2 = yield* Ref.updateAndGet(count, (c) => c - 1)
+            ;
+            yield* Console.log(
+              `[${name}] unregistering subscriber, count: ${yield* Ref.get(count)}`
+            );
+          })
         );
         while (true) {
           const item = yield* Queue.take(queue);
           const effect = fn(item);
           const value = yield* isFiber(effect) ? Fiber.join(effect) : effect;
           yield* Console.log(
-            `[${name}/BusService] Confirmation: ${value ? 'Succeeded' : 'Failed'}:`,
+            `[${name}] confirmation ${!value ? 'failed' : value}`,
             item
           );
         }
       }).pipe(Effect.forkScoped, Scope.extend(scope));
 
+      // yield* Fiber.join(fiber)
+
       return () =>
         Runtime.runPromise(
           runtime,
           pipe(
-            Scope.close(scope, Exit.void),
+            Fiber.interrupt(fiber),
+            Effect.zipRight(Scope.close(scope, Exit.void)),
             Effect.andThen(Effect.succeed(true)),
             Effect.catchAllCause((e) =>
               Effect.succeed(Cause.isInterruptedOnly(e))
             )
           )
         );
-    });
+    })
   }
 }

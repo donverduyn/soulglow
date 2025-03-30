@@ -1,6 +1,15 @@
 // eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Effect, Layer, pipe, Stream, type Context, Console } from 'effect';
+import {
+  Effect,
+  Layer,
+  pipe,
+  Stream,
+  type Context,
+  Console,
+  Ref,
+  Fiber,
+} from 'effect';
 import * as Mobx from 'mobx';
 import { EntityStore } from 'common/utils/entity';
 import type { EventType } from 'common/utils/event';
@@ -39,14 +48,28 @@ const processEvents =
 export const endpointStoreLayer = Layer.scoped(
   Tags.EndpointStore,
   Effect.gen(function* () {
+    const config = yield* Tags.InitializerRef;
     const store = new EntityStore<EndpointEntity>();
     const consumer = pipe(
       Stream.fromPubSub(yield* Tags.InboundBusChannel),
       Stream.map(processEvents(store)),
       Stream.runDrain,
-      Effect.ensuring(Console.log('[EndpointStore] Stopped'))
+      Effect.ensuring(
+        Effect.gen(function* () {
+          const runtimeId = yield* Ref.get(config).pipe(
+            Effect.map(({ runtimeId }) => runtimeId),
+            Effect.fork,
+            Effect.andThen(Fiber.join)
+          );
+          yield* Console.log(
+            '[EndpointPanelRuntime/EndpointStore] finalizing',
+            runtimeId
+          );
+        })
+      )
     );
 
+    yield* Console.log('[EndpointPanelRuntime/EndpointStore] starting');
     yield* Effect.forkScoped(consumer);
     return store;
   })

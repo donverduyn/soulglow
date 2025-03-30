@@ -15,7 +15,7 @@ It returns a promise that resolves to the value of the effect.
 // TODO: consider using useRef to share the stream between instances, because it is agnostic to the effect. However, there are considerations here, because we currently allow for backpressure for each indidivual stream.
 
 export function useRuntimeFn<A, E, R, T>(
-  context: RuntimeContext<R> | ManagedRuntime.ManagedRuntime<R, never>,
+  context: RuntimeContext<R> | ManagedRuntime.ManagedRuntime<R, never> & { id: string },
   fn:
     | ((value: T) => Effect.Effect<A, E, NoInfer<R>>)
     | Effect.Effect<A, E, NoInfer<R>>,
@@ -74,7 +74,7 @@ type UpcastSubType<T, U> = U extends T ? U : never;
 
 export const useRuntime = <A, E, REffect, RContext>(
   context:
-    | ManagedRuntime.ManagedRuntime<RContext, never>
+    | ManagedRuntime.ManagedRuntime<RContext, never> & { id: string }
     | RuntimeContext<RContext>,
   effect: Effect.Effect<A, E, UpcastSubType<RContext, REffect>>,
   deps: React.DependencyList = []
@@ -98,7 +98,7 @@ It takes a context and an effect and runs the effect in the runtime provided by 
 */
 
 export const useRuntimeSync = <A, E, R>(
-  context: RuntimeContext<R> | ManagedRuntime.ManagedRuntime<R, never>,
+  context: RuntimeContext<R> | ManagedRuntime.ManagedRuntime<R, never> & { id: string },
   effect: Effect.Effect<A, E, NoInfer<R>>,
   deps: React.DependencyList = []
 ) => {

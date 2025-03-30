@@ -9,13 +9,13 @@ import {
 
 export const createRuntimeContext = <T>(layer: Layer.Layer<T>) => {
   const context = React.createContext<
-    ManagedRuntime.ManagedRuntime<T, never> | undefined
+    ManagedRuntime.ManagedRuntime<T, never> & { id: string } | undefined
   >(undefined);
   return Object.assign(context, { layer });
 };
 
 export type RuntimeContext<T> = React.Context<
-  ManagedRuntime.ManagedRuntime<T, never> | undefined
+  ManagedRuntime.ManagedRuntime<T, never> & { id: string } | undefined
 >;
 
 export type RuntimeType<T> =

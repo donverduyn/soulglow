@@ -11,25 +11,27 @@ import type { InboundBusService } from './effect/services/InboundBus.service';
 const NAME = '@EndpointPanel';
 
 export type InitializerState = {
-  id: string;
+  componentId: string;
   initialized: boolean;
   publishCommand: (event: CommandType<unknown>) => Promise<boolean>;
   publishQuery: (event: QueryType<unknown>) => Promise<boolean>;
   register: (
-    fn: (event: EventType<unknown>) => RuntimeFiber<boolean>
+    fn: (event: EventType<unknown>) => RuntimeFiber<boolean | string>
   ) => Promise<() => Promise<boolean>>;
+  runtimeId: string;
 };
 
 const defaultInitializerState: Nullable<InitializerState> = {
-  id: '',
+  componentId: null,
   initialized: false,
   publishCommand: null,
   publishQuery: null,
   register: null,
+  runtimeId: null,
 };
 
 export const createInitializerState = (
-  overrides: Partial<InitializerState>
+  overrides?: Partial<InitializerState>
 ): Nullable<InitializerState> => {
   return Object.assign({}, defaultInitializerState, overrides);
 };

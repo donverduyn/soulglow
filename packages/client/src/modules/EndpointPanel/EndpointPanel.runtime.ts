@@ -52,27 +52,44 @@ export const EndpointPanelRuntime = pipe(
         const inboundBus = yield* Tags.InboundBusChannel;
         const runtime = yield* Effect.runtime<Tags.InboundBusChannel>();
         const runFork = Runtime.runFork(runtime);
+        const unsubscribeRef = yield* Ref.make(
+          () => Promise.resolve(false)
+        );
 
-        yield* Stream.runDrain(
-          ref.changes.pipe(
-            Stream.filter(
-              (state): state is Tags.InitializerState =>
-                state.initialized === true
-            ),
-            Stream.tap((info) =>
-              Console.log('[EndpointPanelRuntime] Initialize', info.id)
-            ),
-            Stream.tap(({ register }) =>
-              Effect.gen(function* () {
-                yield* Effect.promise(() =>
-                  register((e) => runFork(inboundBus.pipe(PubSub.publish(e))))
-                );
-
-                // yield* Effect.sleep(4000);
-                // yield* Effect.promise(unsubscribe);
-              })
+        yield* ref.changes.pipe(
+          Stream.filter(
+            (state): state is Tags.InitializerState =>
+              state.initialized === true
+          ),
+          Stream.tap((info) =>
+            Console.log(
+              '[EndpointPanelRuntime] initializing runtime',
+              info.runtimeId
             )
-          )
+          ),
+          Stream.tap(() => 
+            Ref.get(unsubscribeRef).pipe(Effect.andThen((unsubscribe) => {
+              unsubscribe();
+            }))
+          ),
+          Stream.mapEffect(({ register }) =>
+            Effect.promise(() =>
+              register((e) => runFork(
+                pipe(
+                  inboundBus, 
+                  PubSub.publish(e), 
+                  Effect.zipRight(
+                    Ref.get(ref).pipe(
+                      Effect.map(({ runtimeId }) => runtimeId as string)
+                    )
+                  )
+                )
+              ))
+            )
+          ),
+          Stream.mapEffect((v) => Ref.updateAndGet(unsubscribeRef, () => v)),
+          Stream.runDrain
+          // Effect.ensuring(Console.log('[EndpointPanelRuntime] stopped', d))
         );
       }).pipe(Effect.forkScoped)
     )
@@ -100,12 +117,14 @@ export const EndpointPanelRuntime = pipe(
       Effect.gen(function* () {
         const inbound = yield* Tags.EventBusChannel;
         const dequeue = yield* PubSub.subscribe(inbound);
+        const ref = yield* Tags.InitializerRef;
 
         while (true) {
           const item = yield* Queue.take(dequeue);
+          const { runtimeId } = yield* Ref.get(ref);
           yield* Console.log(
-            '[EndpointPanelRuntime] Received on EventBus',
-            item
+            `[EndpointPanelRuntime] receiving on EventBus ${runtimeId}`,
+            item,
           );
         }
       }).pipe(Effect.forkScoped)
@@ -117,11 +136,13 @@ export const EndpointPanelRuntime = pipe(
       Effect.gen(function* () {
         const inbound = yield* Tags.InboundBusChannel;
         const dequeue = yield* PubSub.subscribe(inbound);
+        const ref = yield* Tags.InitializerRef;
 
         while (true) {
           const item = yield* Queue.take(dequeue);
+          const { runtimeId } = yield* Ref.get(ref);
           yield* Console.log(
-            '[EndpointPanelRuntime] Received on InboundBus',
+            `[EndpointPanelRuntime] receiving on InboundBus ${runtimeId}`,
             item
           );
         }
@@ -136,8 +157,8 @@ export const EndpointPanelRuntime = pipe(
         yield* Effect.addFinalizer(() =>
           pipe(
             Ref.get(ref),
-            Effect.tap(({ id }) =>
-              Console.log('[EndpointPanelRuntime] Finalize', id)
+            Effect.tap(({ runtimeId }) =>
+              Console.log('[EndpointPanelRuntime] finalizing', runtimeId)
             )
           )
         );
@@ -154,7 +175,7 @@ export const EndpointPanelRuntime = pipe(
   Layer.provideMerge(
     Layer.effect(
       Tags.InitializerRef,
-      SubscriptionRef.make(Tags.createInitializerState({ id: 'Endpoint' }))
+      SubscriptionRef.make(Tags.createInitializerState())
     )
   ),
   createRuntimeContext

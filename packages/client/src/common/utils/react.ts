@@ -27,12 +27,15 @@ export type ExtractMeta<T> =
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getDisplayName = <C extends React.FC<any> | undefined>(
   Component: C,
-  prefix: string
+  prefix?: string
 ) => {
   const extraField = (
     Component as unknown as { type?: { name?: string } } | undefined
   )?.type?.name;
-  return `${prefix}(${(Component && (Component.displayName || Component.name || extraField)) || 'Component'})`;
+  const componentName =
+    (Component && (Component.displayName || Component.name || extraField)) ||
+    'Component';
+  return prefix ? `${prefix}(${componentName})` : componentName;
 };
 
 // based on https://github.com/mridgway/hoist-non-react-statics/blob/master/src/index.js

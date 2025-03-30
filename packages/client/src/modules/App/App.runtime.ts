@@ -32,7 +32,7 @@ const responseBusChannel = Layer.effect(
 const responseBus = Layer.effect(
   Tags.ResponseBus,
   Effect.andThen(Tags.ResponseBusChannel, (bus) => {
-    return new ResponseBusService(bus, 'AppRuntime');
+    return new ResponseBusService(bus, 'AppRuntime/ResponseBus');
   })
 );
 
@@ -44,7 +44,7 @@ const queryBusChannel = Layer.effect(
 const queryBus = Layer.effect(
   Tags.QueryBus,
   Effect.andThen(Tags.QueryBusChannel, (bus) => {
-    return new QueryBusService(bus, 'AppRuntime');
+    return new QueryBusService(bus, 'AppRuntime/QueryBus');
   })
 );
 
@@ -56,7 +56,7 @@ const commandBusChannel = Layer.effect(
 const commandBus = Layer.effect(
   Tags.CommandBus,
   Effect.andThen(Tags.CommandBusChannel, (bus) => {
-    return new CommandBusService(bus, 'AppRuntime');
+    return new CommandBusService(bus, 'AppRuntime/CommandBus');
   })
 );
 
