@@ -59,23 +59,17 @@ export const EndpointPanelRuntime = pipe(
               (state): state is Tags.InitializerState =>
                 state.initialized === true
             ),
-            Stream.tap((info) => {
-              console.log('[EndpointPanelRuntime] Initialize', info.id);
-              return Effect.void;
-            }),
+            Stream.tap((info) =>
+              Console.log('[EndpointPanelRuntime] Initialize', info.id)
+            ),
             Stream.tap(({ register }) =>
               Effect.gen(function* () {
                 yield* Effect.promise(() =>
-                  register((incoming) =>
-                    runFork(inboundBus.pipe(PubSub.publish(incoming)))
-                  )
-                ).pipe(Effect.fork);
+                  register((e) => runFork(inboundBus.pipe(PubSub.publish(e))))
+                );
 
-                // yield* Effect.addFinalizer(() =>
-                // fiber.pipe(Effect.andThen((a) => Effect.promise(() => a()))).pipe(
-                // Console.log('BOOM')
-                // )
-                // );
+                // yield* Effect.sleep(4000);
+                // yield* Effect.promise(unsubscribe);
               })
             )
           )

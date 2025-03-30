@@ -1,6 +1,6 @@
 // eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Effect, Fiber, Layer, pipe, Stream, type Context } from 'effect';
+import { Effect, Layer, pipe, Stream, type Context, Console } from 'effect';
 import * as Mobx from 'mobx';
 import { EntityStore } from 'common/utils/entity';
 import type { EventType } from 'common/utils/event';
@@ -39,20 +39,15 @@ const processEvents =
 export const endpointStoreLayer = Layer.scoped(
   Tags.EndpointStore,
   Effect.gen(function* () {
-    // const EndpointStore = WithSelected(EntityStore<EndpointEntity>)
     const store = new EntityStore<EndpointEntity>();
     const consumer = pipe(
       Stream.fromPubSub(yield* Tags.InboundBusChannel),
       Stream.map(processEvents(store)),
-      Stream.runDrain
+      Stream.runDrain,
+      Effect.ensuring(Console.log('[EndpointStore] Stopped'))
     );
 
-    const consumerFiber = yield* Effect.forkScoped(consumer);
-    yield* Effect.addFinalizer(() => Fiber.interrupt(consumerFiber));
-
-    // const endpoint = createEndpoint();
-    // store.add(new EndpointEntity(endpoint));
-    // store.selectById(endpoint.id);
+    yield* Effect.forkScoped(consumer);
     return store;
   })
 );

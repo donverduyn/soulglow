@@ -7,60 +7,60 @@ import {
   Runtime,
   Console,
   Cause,
+  Scope,
+  Exit,
 } from 'effect';
 import { isFiber, type RuntimeFiber } from 'effect/Fiber';
 
 export abstract class BusService<T> {
-  constructor(public readonly eventBus: PubSub.PubSub<T>) {}
+  constructor(
+    private readonly bus: PubSub.PubSub<T>,
+    private readonly name: string
+  ) {}
 
   publish(event: T) {
-    return this.eventBus.pipe(PubSub.publish(event));
+    return this.bus.pipe(PubSub.publish(event));
   }
 
   register<A, E, R>(
     fn: (event: T) => Effect.Effect<A, E, R> | RuntimeFiber<A, E>
   ) {
-    return pipe(
-      this.eventBus,
-      PubSub.subscribe,
-      Effect.tap(() => Console.log('[AppRuntime/BusService] Subscribe')),
-      Effect.andThen((queue) =>
-        queue.pipe(
-          Queue.take,
-          Effect.map(fn),
-          Effect.andThen((result) =>
-            isFiber(result) ? Fiber.join(result) : result
-          ),
-          Effect.forever,
-          Effect.forkScoped,
-          Effect.tap(
-            Effect.addFinalizer(() =>
-              Console.log('[AppRuntime/BusService] Unsubscribe')
+    const bus = this.bus;
+    const name = this.name;
+
+    return Effect.gen(function* () {
+      const runtime = yield* Effect.runtime();
+      const scope = yield* Scope.make();
+
+      yield* Effect.gen(function* () {
+        const queue = yield* PubSub.subscribe(bus);
+        yield* Console.log(`[${name}/BusService] Register`);
+
+        yield* Effect.addFinalizer(() =>
+          Console.log(`[${name}/BusService] Unregister`)
+        );
+        while (true) {
+          const item = yield* Queue.take(queue);
+          const effect = fn(item);
+          const value = yield* isFiber(effect) ? Fiber.join(effect) : effect;
+          yield* Console.log(
+            `[${name}/BusService] Confirmation: ${value ? 'Succeeded' : 'Failed'}:`,
+            item
+          );
+        }
+      }).pipe(Effect.forkScoped, Scope.extend(scope));
+
+      return () =>
+        Runtime.runPromise(
+          runtime,
+          pipe(
+            Scope.close(scope, Exit.void),
+            Effect.andThen(Effect.succeed(true)),
+            Effect.catchAllCause((e) =>
+              Effect.succeed(Cause.isInterruptedOnly(e))
             )
           )
-        )
-      ),
-      Effect.andThen(Fiber.join),
-      Effect.scoped,
-      Effect.andThen((fiber) =>
-        Effect.gen(function* () {
-          console.log('[AppRuntime/BusService] Finalize', fiber);
-          const runtime = yield* Effect.runtime();
-          return () =>
-            Runtime.runPromise(
-              runtime,
-              pipe(
-                Fiber.interrupt(fiber),
-                Effect.andThen(Effect.succeed(true)),
-                Effect.catchAllCause((e) =>
-                  Effect.succeed(Cause.isInterruptedOnly(e))
-                )
-              )
-            );
-        })
-      )
-    );
+        );
+    });
   }
-
-  // TODO: think about using addFinalizer to shutdown the bus, or at least investigate the consequences of not doing so.
 }
