@@ -44,10 +44,10 @@ describe('useRuntimeFn', () => {
   });
   it('should return and run the effect correctly', async () => {
     expect.hasAssertions();
-    const runtime = ManagedRuntime.make(Layer.empty);
+    const runtime = Object.assign(ManagedRuntime.make(Layer.empty), { id: uuid() });
     const RuntimeContext = React.createContext(
       runtime as typeof runtime | undefined
-    );
+    )
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <RuntimeContext.Provider value={runtime}>
