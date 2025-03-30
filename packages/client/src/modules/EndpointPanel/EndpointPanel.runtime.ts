@@ -52,9 +52,7 @@ export const EndpointPanelRuntime = pipe(
         const inboundBus = yield* Tags.InboundBusChannel;
         const runtime = yield* Effect.runtime<Tags.InboundBusChannel>();
         const runFork = Runtime.runFork(runtime);
-        const unsubscribeRef = yield* Ref.make(
-          () => Promise.resolve(false)
-        );
+        const unsubscribeRef = yield* Ref.make(() => Promise.resolve(false));
 
         yield* ref.changes.pipe(
           Stream.filter(
@@ -67,24 +65,28 @@ export const EndpointPanelRuntime = pipe(
               info.runtimeId
             )
           ),
-          Stream.tap(() => 
-            Ref.get(unsubscribeRef).pipe(Effect.andThen((unsubscribe) => {
-              unsubscribe();
-            }))
+          Stream.tap(() =>
+            Ref.get(unsubscribeRef).pipe(
+              Effect.andThen((unsubscribe) => {
+                unsubscribe();
+              })
+            )
           ),
           Stream.mapEffect(({ register }) =>
             Effect.promise(() =>
-              register((e) => runFork(
-                pipe(
-                  inboundBus, 
-                  PubSub.publish(e), 
-                  Effect.zipRight(
-                    Ref.get(ref).pipe(
-                      Effect.map(({ runtimeId }) => runtimeId as string)
+              register((e) =>
+                runFork(
+                  pipe(
+                    inboundBus,
+                    PubSub.publish(e),
+                    Effect.zipRight(
+                      Ref.get(ref).pipe(
+                        Effect.map(({ runtimeId }) => runtimeId as string)
+                      )
                     )
                   )
                 )
-              ))
+              )
             )
           ),
           Stream.mapEffect((v) => Ref.updateAndGet(unsubscribeRef, () => v)),
@@ -123,8 +125,8 @@ export const EndpointPanelRuntime = pipe(
           const item = yield* Queue.take(dequeue);
           const { runtimeId } = yield* Ref.get(ref);
           yield* Console.log(
-            `[EndpointPanelRuntime] receiving on EventBus ${runtimeId}`,
-            item,
+            `[EndpointPanelRuntime] receiving on EventBus ${String(runtimeId)}`,
+            item
           );
         }
       }).pipe(Effect.forkScoped)
@@ -142,7 +144,7 @@ export const EndpointPanelRuntime = pipe(
           const item = yield* Queue.take(dequeue);
           const { runtimeId } = yield* Ref.get(ref);
           yield* Console.log(
-            `[EndpointPanelRuntime] receiving on InboundBus ${runtimeId}`,
+            `[EndpointPanelRuntime] receiving on InboundBus ${String(runtimeId)}`,
             item
           );
         }

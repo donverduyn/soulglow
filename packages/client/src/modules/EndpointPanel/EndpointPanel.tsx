@@ -69,11 +69,11 @@ export const EndpointPanel = pipe(
           Tags.InitializerRef,
           Ref.update(({ componentId }) => ({
             componentId: props.id ?? componentId,
-            runtimeId: runtime.id,
             initialized: true,
             publishCommand,
             publishQuery,
             register,
+            runtimeId: runtime.id,
           }))
         )
       );

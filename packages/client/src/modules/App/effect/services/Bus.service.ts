@@ -9,7 +9,7 @@ import {
   Cause,
   Scope,
   Exit,
-  Ref
+  Ref,
 } from 'effect';
 import { isFiber, type RuntimeFiber } from 'effect/Fiber';
 
@@ -34,20 +34,22 @@ export abstract class BusService<T> {
     return Effect.gen(function* () {
       const runtime = yield* Effect.runtime();
       const scope = yield* Scope.make();
-  
+
       const fiber = yield* Effect.gen(function* () {
         const queue = yield* PubSub.subscribe(bus);
-        yield* Ref.updateAndGet(count, (c) => c + 1)
-        .pipe(Effect.andThen((count) => Console.log(
-          `[${name}] registering subscriber, count: ${count}`
-        )));
+        yield* Ref.updateAndGet(count, (c) => c + 1).pipe(
+          Effect.andThen((count) =>
+            Console.log(
+              `[${name}] registering subscriber, count: ${String(count)}`
+            )
+          )
+        );
 
         yield* Effect.addFinalizer(() =>
-          Effect.gen(function* () { 
-            const count2 = yield* Ref.updateAndGet(count, (c) => c - 1)
-            ;
+          Effect.gen(function* () {
+            yield* Ref.updateAndGet(count, (c) => c - 1);
             yield* Console.log(
-              `[${name}] unregistering subscriber, count: ${yield* Ref.get(count)}`
+              `[${name}] unregistering subscriber, count: ${String(yield* Ref.get(count))}`
             );
           })
         );
@@ -56,7 +58,7 @@ export abstract class BusService<T> {
           const effect = fn(item);
           const value = yield* isFiber(effect) ? Fiber.join(effect) : effect;
           yield* Console.log(
-            `[${name}] confirmation ${!value ? 'failed' : value}`,
+            `[${name}] confirmation ${String(!value ? 'failed' : value)}`,
             item
           );
         }
@@ -76,6 +78,6 @@ export abstract class BusService<T> {
             )
           )
         );
-    })
+    });
   }
 }
