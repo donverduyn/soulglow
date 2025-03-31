@@ -156,6 +156,7 @@
     "workbox-routing": "^7.3.0",
     "workbox-strategies": "^7.3.0",
     "workbox-window": "^7.3.0",
+    "wrangler": "^4.6.0",
     "yargs": "^17.7.2"
   },
   "workspaces": [
