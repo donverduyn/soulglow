@@ -82,7 +82,7 @@ jobs:
 
     - name: Save Docker images used by compose
       if: steps.docker-cache-restore.outputs.cache-hit != 'true'
-      run: yarn docker:cache
+      run: yarn ws api docker:cache
 
     - name: Lint
       run: yarn lint:ci
