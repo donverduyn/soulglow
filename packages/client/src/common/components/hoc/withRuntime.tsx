@@ -207,7 +207,9 @@ const useRuntimeFactory = <T,>(layer: Layer.Layer<T>, config: Config) => {
     return () => {
       printLog(config, `disposing runtime ${runtimeId.current}`);
       // console.log(runtime)
-      void runtime.dispose();
+      setTimeout(() => {
+        void runtime.dispose();
+      }, 0);
       shouldCreate.current = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

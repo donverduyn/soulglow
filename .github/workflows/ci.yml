@@ -12,6 +12,8 @@ jobs:
     permissions:
       contents: write
       deployments: write
+    env:
+      DOCKER_CACHE_VERSION: ""
 
     steps:
     - uses: actions/checkout@v4

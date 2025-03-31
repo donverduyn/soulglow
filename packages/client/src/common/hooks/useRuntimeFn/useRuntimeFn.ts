@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Effect, pipe, Fiber, FiberId, Stream, ManagedRuntime } from 'effect';
+import { Effect, pipe, Stream, ManagedRuntime, Scope, Exit } from 'effect';
 import type { IsUnknown } from 'type-fest';
 import { v4 as uuidv4 } from 'uuid';
 import type { RuntimeContext } from 'common/utils/context';
@@ -19,8 +19,8 @@ export function useRuntimeFn<A, E, R, T>(
     | RuntimeContext<R>
     | (ManagedRuntime.ManagedRuntime<R, never> & { id: string }),
   fn:
-    | ((value: T) => Effect.Effect<A, E, NoInfer<R>>)
-    | Effect.Effect<A, E, NoInfer<R>>,
+    | ((value: T) => Effect.Effect<A, E, NoInfer<R> | Scope.Scope>)
+    | Effect.Effect<A, E, NoInfer<R> | Scope.Scope>,
   deps: React.DependencyList = []
 ) {
   const fnRef = React.useRef(fn);
@@ -37,20 +37,20 @@ export function useRuntimeFn<A, E, R, T>(
   const emitter = React.useMemo(() => new EventEmitter<T, A>(), finalDeps);
   const effect = React.useMemo(
     () =>
-      pipe(
-        Stream.fromAsyncIterable(createAsyncIterator(emitter), () => {}),
-        Stream.mapEffect(({ data, eventId }) => {
-          return pipe(
-            Effect.sync(() =>
+      Effect.gen(function* () {
+        yield* pipe(
+          Stream.fromAsyncIterable(createAsyncIterator(emitter), () => {}),
+          Stream.mapEffect(({ data, eventId }) => {
+            return pipe(
               Effect.isEffect(fnRef.current)
                 ? fnRef.current
-                : fnRef.current(data)
-            ),
-            Effect.andThen(Effect.tap(emitter.resolve(eventId)))
-          );
-        }),
-        Stream.runDrain
-      ),
+                : fnRef.current(data),
+              Effect.tap(emitter.resolve(eventId))
+            );
+          }),
+          Stream.runDrain
+        );
+      }),
     finalDeps
   );
 
@@ -78,7 +78,7 @@ export const useRuntime = <A, E, REffect, RContext>(
   context:
     | (ManagedRuntime.ManagedRuntime<RContext, never> & { id: string })
     | RuntimeContext<RContext>,
-  effect: Effect.Effect<A, E, UpcastSubType<RContext, REffect>>,
+  effect: Effect.Effect<A, E, UpcastSubType<RContext, REffect> | Scope.Scope>,
   deps: React.DependencyList = []
 ) => {
   let runtime = context as React.ContextType<RuntimeContext<RContext>>;
@@ -88,9 +88,11 @@ export const useRuntime = <A, E, REffect, RContext>(
   }
 
   React.useEffect(() => {
-    // console.log('useEffect useRuntime');
-    const F = runtime!.runFork(effect);
-    return () => Effect.runSync(F.pipe(Fiber.interruptAsFork(FiberId.none)));
+    const scope = Effect.runSync(Scope.make());
+    runtime!.runFork(effect.pipe(Effect.forkScoped, Scope.extend(scope)));
+    return () => {
+      runtime!.runFork(Scope.close(scope, Exit.void));
+    };
   }, [runtime, ...deps]);
 };
 

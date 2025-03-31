@@ -52,7 +52,6 @@ export const EndpointPanelRuntime = pipe(
         const inboundBus = yield* Tags.InboundBusChannel;
         const runtime = yield* Effect.runtime<Tags.InboundBusChannel>();
         const runFork = Runtime.runFork(runtime);
-        const unsubscribeRef = yield* Ref.make(() => Promise.resolve(false));
 
         yield* ref.changes.pipe(
           Stream.filter(
@@ -63,13 +62,6 @@ export const EndpointPanelRuntime = pipe(
             Console.log(
               '[EndpointPanelRuntime] initializing runtime',
               info.runtimeId
-            )
-          ),
-          Stream.tap(() =>
-            Ref.get(unsubscribeRef).pipe(
-              Effect.andThen((unsubscribe) => {
-                unsubscribe();
-              })
             )
           ),
           Stream.mapEffect(({ register }) =>
@@ -89,9 +81,13 @@ export const EndpointPanelRuntime = pipe(
               )
             )
           ),
-          Stream.mapEffect((v) => Ref.updateAndGet(unsubscribeRef, () => v)),
+          // Stream.tap((v) => {
+          //   return Effect.gen(function* () {
+          //     yield* Effect.sleep(3000);
+          //     yield* Effect.promise(v);
+          //   })
+          // }),
           Stream.runDrain
-          // Effect.ensuring(Console.log('[EndpointPanelRuntime] stopped', d))
         );
       }).pipe(Effect.forkScoped)
     )

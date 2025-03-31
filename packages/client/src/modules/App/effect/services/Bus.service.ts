@@ -7,9 +7,9 @@ import {
   Runtime,
   Console,
   Cause,
+  Ref,
   Scope,
   Exit,
-  Ref,
 } from 'effect';
 import { isFiber, type RuntimeFiber } from 'effect/Fiber';
 
@@ -35,7 +35,7 @@ export abstract class BusService<T> {
       const runtime = yield* Effect.runtime();
       const scope = yield* Scope.make();
 
-      const fiber = yield* Effect.gen(function* () {
+      yield* Effect.gen(function* () {
         const queue = yield* PubSub.subscribe(bus);
         yield* Ref.updateAndGet(count, (c) => c + 1).pipe(
           Effect.andThen((count) =>
@@ -44,7 +44,6 @@ export abstract class BusService<T> {
             )
           )
         );
-
         yield* Effect.addFinalizer(() =>
           Effect.gen(function* () {
             yield* Ref.updateAndGet(count, (c) => c - 1);
@@ -63,15 +62,13 @@ export abstract class BusService<T> {
           );
         }
       }).pipe(Effect.forkScoped, Scope.extend(scope));
-
-      // yield* Fiber.join(fiber)
+      yield* Effect.addFinalizer(() => Scope.close(scope, Exit.void));
 
       return () =>
         Runtime.runPromise(
           runtime,
           pipe(
-            Fiber.interrupt(fiber),
-            Effect.zipRight(Scope.close(scope, Exit.void)),
+            Scope.close(scope, Exit.void),
             Effect.andThen(Effect.succeed(true)),
             Effect.catchAllCause((e) =>
               Effect.succeed(Cause.isInterruptedOnly(e))
