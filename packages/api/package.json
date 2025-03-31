@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "bootstrap": "hasura update-cli && yarn hasura:start && wait-on http-get://hasura:8080/healthz && yarn hasura:setup && yarn hasura:seed && yarn codegen:api && yarn compose:dev stop",
-    "bootstrap:ci": "hasura update-cli && yarn hasura:start:ci && wait-on http-get://localhost:8080/healthz && yarn hasura:setup:ci && yarn codegen:api:ci && yarn compose:ci stop",
+    "bootstrap:ci": "hasura update-cli && yarn hasura:start:ci && wait-on http-get://localhost:8080/healthz && yarn hasura:setup:ci && yarn codegen:api:ci && yarn compose:ci stop && yarn docker:cache",
+    "docker:cache": "DOCKER_COMPOSE_CMD='yarn compose:ci' ./scripts/cache-docker-images.sh",
     "test": "echo \"no test runner configured for package api\" && exit 0",
     "lint": "echo \"no linter configured for package api\"",
     "lint:fix": "echo \"no linter configured for package api\"",

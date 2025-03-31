@@ -38,7 +38,7 @@ export const EndpointPanel = pipe(
   observer(EndpointPanelView),
   WithLabels(labels),
   WithRuntime(EndpointPanelRuntime, (configure, props) => {
-    const runtime = configure({ debug: true });
+    const runtime = configure();
     const store = useRuntimeSync(runtime, Tags.EndpointStore, [runtime]);
 
     const publish = useRuntimeFn(runtime, (e: EventType<unknown>) =>
