@@ -13,14 +13,12 @@ import { v4 as uuidv4 } from 'uuid';
 import type { RuntimeContext } from 'common/utils/context';
 import { isReactContext } from 'common/utils/react';
 
-//* It is important to note that the runtime of the host component should always be provided to the dependency array, if runtimes higher up the tree are accessed using useRuntimeFn, useRuntime or useRuntimeSync.
-
 /*
 This hook returns a function that can be called to trigger an effect.
 It returns a promise that resolves to the value of the effect.
 */
 
-// TODO: consider using useRef to share the stream between instances, because it is agnostic to the effect. However, there are considerations here, because we currently allow for backpressure for each indidivual stream.
+// TODO: these hooks shouldn't be public, as they are not used outside of withRuntime, because of architectural decisions. Since Effect-TS doesn't belong inside react, we should limit it's exposure as much as possible and create a safe space without demons, to make their usage intuitive and easy to understand.
 
 export const useRuntimeFn =
   <R>(

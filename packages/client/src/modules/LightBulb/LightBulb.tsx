@@ -1,7 +1,7 @@
 import * as React from 'react';
 import cy from 'clsx';
 import type { Okhsv } from 'culori/fn';
-import { identity, flow, Queue } from 'effect';
+import { identity, pipe, Queue } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { State } from '__generated/api';
 import { Group } from 'common/components/Group/Group';
@@ -18,7 +18,6 @@ import {
   useAutorun,
 } from 'common/hooks/useMobx/useMobx';
 import { useReturn } from 'common/hooks/useReturn/useReturn';
-import { useRuntimeFn } from 'common/hooks/useRuntimeFn/useRuntimeFn';
 import { fromLayer } from 'common/utils/context';
 import { createLabels } from 'common/utils/i18n';
 import { merge } from 'common/utils/object';
@@ -48,6 +47,7 @@ const defaultState: LightBulbState = {
 
 interface Props extends DefaultProps {
   readonly getStyle: () => React.CSSProperties;
+  readonly handle: (body: Partial<Device>) => void;
   readonly onChange: (value: Okhsv) => void;
 }
 
@@ -68,13 +68,21 @@ const colorInputs = [
   { key: 'hue', label: 'hue', props: { max: 360 } },
 ] as const;
 
-const Component = flow(
-  observer<Props>,
+export const LightBulb = pipe(
+  observer(LightBulbView),
   WithLabels(labels),
-  WithRuntime(LightBulbRuntime)
+  WithRuntime(LightBulbRuntime, (configure) => {
+    const runtime = configure();
+
+    const handle = runtime.fn(LightBulbRuntime, (body: Partial<Device>) =>
+      fromLayer(Tags.ApiThrottler, Queue.offer(body))
+    );
+
+    return { handle };
+  })
 );
 
-export const LightBulb = Component(function LightBulb(props) {
+function LightBulbView(props: Props) {
   const { bulb, inputs } = useLightBulb(props);
   const { className, getStyle } = merge(props, defaultProps);
 
@@ -122,16 +130,13 @@ export const LightBulb = Component(function LightBulb(props) {
       </Stack>
     </Paper>
   );
-});
+}
 
 const useLightBulb = (props: Props) => {
   const bulb = useMobx(() => defaultState);
   const inputs = bulb.bulb_mode === LightMode.WHITE ? whiteInputs : colorInputs;
 
   // TODO: convert to event and use runtime to handle the event
-  const handle = useRuntimeFn(LightBulbRuntime, (body: Partial<Device>) =>
-    fromLayer(Tags.ApiThrottler, Queue.offer(body))
-  );
 
   // TODO: think about how to model a lightbulb such that we can manage state in the form of an entity store, using the same patterns as endpoint.
 
@@ -156,9 +161,9 @@ const useLightBulb = (props: Props) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         [change.name]: change.newValue,
       } as Partial<Device>;
-      void handle(body);
+      props.handle(body);
     },
-    [handle]
+    [props.handle]
   );
 
   return useReturn({ bulb, inputs });
