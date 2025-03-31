@@ -53,7 +53,7 @@ export function WithRuntime<
     ) => RuntimeObject<
       ManagedRuntime.ManagedRuntime<TTarget, never> & { id: string },
       ReturnType<typeof useRuntimeSync<TTarget>>,
-      typeof useRuntimeFn,
+      ReturnType<typeof useRuntimeFn<TTarget>>,
       ReturnType<typeof useRuntime<TTarget>>
     >,
     props: Simplify<Partial<React.ComponentProps<C>>>
@@ -73,7 +73,7 @@ export function WithRuntime<TTarget, C extends React.FC<any>>(
     ) => RuntimeObject<
       ManagedRuntime.ManagedRuntime<TTarget, never> & { id: string },
       ReturnType<typeof useRuntimeSync<TTarget>>,
-      typeof useRuntimeFn,
+      ReturnType<typeof useRuntimeFn<TTarget>>,
       ReturnType<typeof useRuntime<TTarget>>
     >,
     props: Simplify<Partial<React.ComponentProps<C>>>
@@ -98,7 +98,7 @@ export function WithRuntime<
     ) => RuntimeObject<
       ManagedRuntime.ManagedRuntime<TTarget, never> & { id: string },
       ReturnType<typeof useRuntimeSync<TTarget>>,
-      typeof useRuntimeFn,
+      ReturnType<typeof useRuntimeFn<TTarget>>,
       ReturnType<typeof useRuntime<TTarget>>
     >,
     props: Partial<FallbackProps<C, Props>>
@@ -128,7 +128,8 @@ export function WithRuntime<
               const runtime = useRuntimeFactory(layer, safeConfig);
               runtimeRef = runtime;
               return {
-                fn: useRuntimeFn,
+                // eslint-disable-next-line react-hooks/rules-of-hooks
+                fn: useRuntimeFn(Context, runtime),
                 // eslint-disable-next-line react-hooks/rules-of-hooks
                 run: useRuntime(Context, runtime),
                 runtime,

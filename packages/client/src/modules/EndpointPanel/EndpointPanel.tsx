@@ -8,7 +8,6 @@ import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { List } from 'common/components/List/List';
 import { Stack } from 'common/components/Stack/Stack';
 import { useReturn } from 'common/hooks/useReturn/useReturn';
-import { useRuntimeFn } from 'common/hooks/useRuntimeFn/useRuntimeFn';
 import { useTranslation } from 'common/hooks/useTranslation/useTranslation';
 import type { CommandType } from 'common/utils/command';
 import type { EventType } from 'common/utils/event';
@@ -38,44 +37,35 @@ export const EndpointPanel = pipe(
     const runtime = configure();
     const store = runtime.use(Tags.EndpointStore);
 
-    const publish = runtime.fn(runtime.runtime, (e: EventType<unknown>) =>
+    const publish = runtime.fn((e: EventType<unknown>) =>
       Effect.andThen(Tags.EventBus, (bus) => bus.publish(e))
     );
-
-    const publishQuery = useRuntimeFn(
-      AppRuntime,
-      (e: QueryType<unknown>) =>
-        Effect.andThen(AppTags.QueryBus, (bus) => bus.publish(e)),
-      [runtime]
+    const publishQuery = runtime.fn(AppRuntime, (e: QueryType<unknown>) =>
+      Effect.andThen(AppTags.QueryBus, (bus) => bus.publish(e))
     );
-    const publishCommand = useRuntimeFn(
-      AppRuntime,
-      (e: CommandType<unknown>) =>
-        Effect.andThen(AppTags.CommandBus, (bus) => bus.publish(e)),
-      [runtime]
+    const publishCommand = runtime.fn(AppRuntime, (e: CommandType<unknown>) =>
+      Effect.andThen(AppTags.CommandBus, (bus) => bus.publish(e))
     );
-    const register = useRuntimeFn(
+    const register = runtime.fn(
       AppRuntime,
       (handler: (e: EventType<unknown>) => RuntimeFiber<boolean | string>) =>
-        Effect.andThen(AppTags.ResponseBus, (bus) => bus.register(handler)),
-      [runtime]
+        Effect.andThen(AppTags.ResponseBus, (bus) => bus.register(handler))
     );
 
-    React.useEffect(() => {
-      runtime.runtime.runFork(
-        Effect.andThen(
-          Tags.InitializerRef,
-          Ref.update(({ componentId }) => ({
-            componentId: props.id ?? componentId,
-            initialized: true,
-            publishCommand,
-            publishQuery,
-            register,
-            runtimeId: runtime.runtime.id,
-          }))
-        )
-      );
-    }, [props.id, publishCommand, publishQuery, register, runtime]);
+    runtime.run(
+      Effect.andThen(
+        Tags.InitializerRef,
+        Ref.update(({ componentId }) => ({
+          componentId: props.id ?? componentId,
+          initialized: true,
+          publishCommand,
+          publishQuery,
+          register,
+          runtimeId: runtime.runtime.id,
+        }))
+      ),
+      [props.id, publishCommand, publishQuery, register, runtime]
+    );
     return { publish, store };
   })
 );
@@ -86,7 +76,6 @@ export const EndpointPanel = pipe(
  */
 export function EndpointPanelView({ store, publish }: Props) {
   const { addEndpoint, endpoints } = useEndpointPanel(store, publish);
-  // TODO: export type from utils to get a union of labels available in every lng
   const { text } = useTranslation<Labels<Locales>>();
 
   const renderList = React.useCallback(
