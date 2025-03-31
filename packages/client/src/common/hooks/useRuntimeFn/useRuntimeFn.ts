@@ -1,5 +1,13 @@
 import * as React from 'react';
-import { Effect, pipe, Stream, ManagedRuntime, Scope, Exit } from 'effect';
+import {
+  Effect,
+  pipe,
+  Stream,
+  ManagedRuntime,
+  Scope,
+  Exit,
+  type Runtime,
+} from 'effect';
 import type { IsUnknown } from 'type-fest';
 import { v4 as uuidv4 } from 'uuid';
 import type { RuntimeContext } from 'common/utils/context';
@@ -23,11 +31,13 @@ export function useRuntimeFn<A, E, R, T>(
     | Effect.Effect<A, E, NoInfer<R> | Scope.Scope>,
   deps: React.DependencyList = []
 ) {
-  const fnRef = React.useRef(fn);
+  let runtime = context as React.ContextType<RuntimeContext<R>>;
+  if (isReactContext<RuntimeContext<R>>(context)) {
+    runtime = React.use(context);
+    if (runtime === undefined) throw new Error(noRuntimeMessage);
+  }
 
-  const runtime = ManagedRuntime.isManagedRuntime(context)
-    ? context
-    : React.use(context as RuntimeContext<R>);
+  const fnRef = React.useRef(fn);
   const finalDeps = [runtime, ...deps];
 
   React.useEffect(() => {
@@ -37,26 +47,30 @@ export function useRuntimeFn<A, E, R, T>(
   const emitter = React.useMemo(() => new EventEmitter<T, A>(), finalDeps);
   const effect = React.useMemo(
     () =>
-      Effect.gen(function* () {
-        yield* pipe(
-          Stream.fromAsyncIterable(createAsyncIterator(emitter), () => {}),
-          Stream.mapEffect(({ data, eventId }) => {
-            return pipe(
-              Effect.isEffect(fnRef.current)
-                ? fnRef.current
-                : fnRef.current(data),
-              Effect.tap(emitter.resolve(eventId))
-            );
-          }),
-          Stream.runDrain
-        );
-      }),
+      pipe(
+        Stream.fromAsyncIterable(createAsyncIterator(emitter), () => {}),
+        Stream.mapEffect(({ data, eventId }) =>
+          pipe(
+            Effect.isEffect(fnRef.current)
+              ? fnRef.current
+              : fnRef.current(data),
+            Effect.tap(emitter.resolve(eventId))
+          )
+        ),
+        Stream.runDrain
+      ),
     finalDeps
   );
 
-  // emitter is added to deps, because it is unstable on fast refresh.
-  // We cannot pass fn directly as a dep, because it would recreate a stream on every rerender when it's accidentally unstable (with inline declared effects)
-  useRuntime(context, effect, [emitter, ...deps]);
+  React.useEffect(() => {
+    const scope = Effect.runSync(Scope.make());
+    runtime!.runFork(effect.pipe(Effect.forkScoped, Scope.extend(scope)));
+    return () => {
+      runtime!.runFork(Scope.close(scope, Exit.void));
+    };
+    // emitter is added to deps, because it is unstable on fast refresh.
+    // We cannot pass fn directly as a dep, because it would recreate a stream on every rerender when it's accidentally unstable (with inline declared effects)
+  }, [runtime, emitter, ...deps]);
 
   return emitter.emit as IsUnknown<T> extends true
     ? () => Promise<A>
@@ -68,53 +82,138 @@ This hook is used to run an effect in a runtime.
 It takes a context and an effect and runs the effect in the runtime provided by the context. It is used by useRuntimeFn. Assumes createRuntimeContext is used to create the context, because it expects a Layer when withRuntime is missing.
 */
 
+const noEffectMessage = `No effect provided.`;
+
 const noRuntimeMessage = `No runtime available. 
   Did you forget to wrap your component using WithRuntime?
   `;
 
-type UpcastSubType<T, U> = U extends T ? U : never;
+// type UpcastSubType<T, U> = U extends T ? U : never;
 
-export const useRuntime = <A, E, REffect, RContext>(
-  context:
-    | (ManagedRuntime.ManagedRuntime<RContext, never> & { id: string })
-    | RuntimeContext<RContext>,
-  effect: Effect.Effect<A, E, UpcastSubType<RContext, REffect> | Scope.Scope>,
-  deps: React.DependencyList = []
-) => {
-  let runtime = context as React.ContextType<RuntimeContext<RContext>>;
-  if (isReactContext<RuntimeContext<RContext>>(context)) {
-    runtime = React.use(context);
-    if (runtime === undefined) throw new Error(noRuntimeMessage);
-  }
+export const useRuntime =
+  <R>(
+    context: RuntimeContext<R>,
+    runtime: ManagedRuntime.ManagedRuntime<R, never> & { id: string }
+  ) =>
+  <A, A1, E, E1, R1>(
+    targetOrEffect:
+      | Effect.Effect<A, E, R | Scope.Scope>
+      | (ManagedRuntime.ManagedRuntime<R1, never> & { id: string })
+      | RuntimeContext<R1>,
+    depsOrEffect?:
+      | React.DependencyList
+      | Effect.Effect<A1, E1, R1 | Scope.Scope>,
+    deps?: React.DependencyList
+  ) => {
+    const rnt = ManagedRuntime.isManagedRuntime(targetOrEffect)
+      ? (targetOrEffect as ManagedRuntime.ManagedRuntime<R1, never> & {
+          id: string;
+        })
+      : Effect.isEffect(targetOrEffect)
+        ? runtime
+        : isReactContext(targetOrEffect)
+          ? targetOrEffect === context
+            ? runtime
+            : React.use(targetOrEffect)
+          : undefined;
 
-  React.useEffect(() => {
-    const scope = Effect.runSync(Scope.make());
-    runtime!.runFork(effect.pipe(Effect.forkScoped, Scope.extend(scope)));
-    return () => {
-      runtime!.runFork(Scope.close(scope, Exit.void));
-    };
-  }, [runtime, ...deps]);
-};
+    if (rnt === undefined) throw new Error(noRuntimeMessage);
+
+    const effect =
+      !ManagedRuntime.isManagedRuntime(targetOrEffect) &&
+      !isReactContext(targetOrEffect)
+        ? (targetOrEffect as Effect.Effect<A, E, R | Scope.Scope>)
+        : Effect.isEffect(depsOrEffect)
+          ? depsOrEffect
+          : undefined;
+
+    if (effect === undefined) throw new Error(noEffectMessage);
+
+    const finalDeps =
+      (Effect.isEffect(depsOrEffect) ? deps : depsOrEffect) ?? [];
+
+    React.useEffect(() => {
+      const scope = Effect.runSync(Scope.make());
+      rnt.runFork(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (effect as Effect.Effect<any, any, any>).pipe(
+          Effect.forkScoped,
+          Scope.extend(scope)
+        )
+      );
+      return () => {
+        rnt.runFork(Scope.close(scope, Exit.void));
+      };
+    }, [runtime, rnt, ...finalDeps]);
+  };
 
 /*
 This hook is used to run an effect synchronously in a runtime and return the value of the effect.
 It takes a context and an effect and runs the effect in the runtime provided by the context.
 */
 
-export const useRuntimeSync = <A, E, R>(
-  context:
-    | RuntimeContext<R>
-    | (ManagedRuntime.ManagedRuntime<R, never> & { id: string }),
-  effect: Effect.Effect<A, E, NoInfer<R>>,
-  deps: React.DependencyList = []
-) => {
-  const runtime = ManagedRuntime.isManagedRuntime(context)
-    ? context
-    : React.use(context as RuntimeContext<R>);
+export function useRuntimeSync<R>(
+  context: RuntimeContext<R>,
+  runtime: ManagedRuntime.ManagedRuntime<R, never>
+) {
+  // rationale:
+  // targetOrEffect -> context, runtime or effect
+  // depsOrEffect -> dependency list or effect (when targetOrEffect is not an effect)
+  // deps -> dependency list (when depsOrEffect is an effect)
+  return <A, A1, E, E1, R1>(
+    targetOrEffect:
+      | Effect.Effect<A, E, R>
+      | RuntimeContext<R1>
+      | (ManagedRuntime.ManagedRuntime<R1, never> & { id: string }),
+    depsOrEffect?: React.DependencyList | Effect.Effect<A1, E1, R1>,
+    deps?: React.DependencyList
+  ) => {
+    const rnt = ManagedRuntime.isManagedRuntime(targetOrEffect)
+      ? (targetOrEffect as ManagedRuntime.ManagedRuntime<R1, never> & {
+          id: string;
+        })
+      : Effect.isEffect(targetOrEffect)
+        ? runtime
+        : isReactContext(targetOrEffect)
+          ? targetOrEffect === context
+            ? runtime
+            : React.use(targetOrEffect)
+          : undefined;
 
-  if (runtime === undefined) throw new Error(noRuntimeMessage);
-  return React.useMemo(() => runtime.runSync(effect), [...deps, runtime]);
-};
+    const effect =
+      !ManagedRuntime.isManagedRuntime(targetOrEffect) &&
+      !isReactContext(targetOrEffect)
+        ? (targetOrEffect as Effect.Effect<A, E, R>)
+        : Effect.isEffect(depsOrEffect)
+          ? depsOrEffect
+          : undefined;
+
+    const finalDeps =
+      (Effect.isEffect(depsOrEffect) ? deps : depsOrEffect) ?? [];
+
+    if (rnt === undefined) throw new Error(noRuntimeMessage);
+    if (effect === undefined) throw new Error(noEffectMessage);
+    return React.useMemo(
+      () =>
+        rnt.runSync(
+          effect as Effect.Effect<A, E, R> & Effect.Effect<A, E, R1>
+        ) as UseRuntimeSyncResult<typeof effect>,
+      [...finalDeps, runtime, rnt]
+    );
+  };
+}
+
+type UseRuntimeSyncResult<T> =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends Effect.Effect<infer A, any, any>
+    ? IsUnknown<A> extends true
+      ? never
+      : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        A extends Runtime.Runtime<any>
+        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          any
+        : A
+    : never;
 
 /* 
 This is converting push based events to a pull based stream, 

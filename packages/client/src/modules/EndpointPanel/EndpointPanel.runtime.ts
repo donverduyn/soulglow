@@ -66,19 +66,7 @@ export const EndpointPanelRuntime = pipe(
           ),
           Stream.mapEffect(({ register }) =>
             Effect.promise(() =>
-              register((e) =>
-                runFork(
-                  pipe(
-                    inboundBus,
-                    PubSub.publish(e),
-                    Effect.zipRight(
-                      Ref.get(ref).pipe(
-                        Effect.map(({ runtimeId }) => runtimeId as string)
-                      )
-                    )
-                  )
-                )
-              )
+              register((e) => runFork(pipe(inboundBus, PubSub.publish(e))))
             )
           ),
           // Stream.tap((v) => {

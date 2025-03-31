@@ -8,10 +8,7 @@ import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { List } from 'common/components/List/List';
 import { Stack } from 'common/components/Stack/Stack';
 import { useReturn } from 'common/hooks/useReturn/useReturn';
-import {
-  useRuntimeFn,
-  useRuntimeSync,
-} from 'common/hooks/useRuntimeFn/useRuntimeFn';
+import { useRuntimeFn } from 'common/hooks/useRuntimeFn/useRuntimeFn';
 import { useTranslation } from 'common/hooks/useTranslation/useTranslation';
 import type { CommandType } from 'common/utils/command';
 import type { EventType } from 'common/utils/event';
@@ -39,11 +36,12 @@ export const EndpointPanel = pipe(
   WithLabels(labels),
   WithRuntime(EndpointPanelRuntime, (configure, props) => {
     const runtime = configure();
-    const store = useRuntimeSync(runtime, Tags.EndpointStore, [runtime]);
+    const store = runtime.use(Tags.EndpointStore);
 
-    const publish = useRuntimeFn(runtime, (e: EventType<unknown>) =>
+    const publish = runtime.fn(runtime.runtime, (e: EventType<unknown>) =>
       Effect.andThen(Tags.EventBus, (bus) => bus.publish(e))
     );
+
     const publishQuery = useRuntimeFn(
       AppRuntime,
       (e: QueryType<unknown>) =>
@@ -64,7 +62,7 @@ export const EndpointPanel = pipe(
     );
 
     React.useEffect(() => {
-      runtime.runFork(
+      runtime.runtime.runFork(
         Effect.andThen(
           Tags.InitializerRef,
           Ref.update(({ componentId }) => ({
@@ -73,7 +71,7 @@ export const EndpointPanel = pipe(
             publishCommand,
             publishQuery,
             register,
-            runtimeId: runtime.id,
+            runtimeId: runtime.runtime.id,
           }))
         )
       );

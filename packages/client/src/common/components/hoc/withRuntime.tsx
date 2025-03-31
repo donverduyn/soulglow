@@ -3,6 +3,11 @@ import { Layer, ManagedRuntime } from 'effect';
 import memoize from 'moize';
 import type { Simplify, IsAny } from 'type-fest';
 import { v4 as uuid } from 'uuid';
+import {
+  useRuntime,
+  useRuntimeFn,
+  useRuntimeSync,
+} from 'common/hooks/useRuntimeFn/useRuntimeFn';
 import { type RuntimeContext } from 'common/utils/context';
 import { type ExtractMeta, getDisplayName } from 'common/utils/react';
 import { copyStaticProperties } from 'common/utils/react';
@@ -23,6 +28,13 @@ type Config = {
   shared: boolean;
 };
 
+type RuntimeObject<TRuntime, TUse, TFn, TRun> = {
+  fn: TFn;
+  run: TRun;
+  runtime: TRuntime;
+  use: TUse;
+};
+
 type InferProps<C> = C extends React.FC<infer P> ? P : never;
 
 type FallbackProps<C, P> =
@@ -38,7 +50,12 @@ export function WithRuntime<
   getSource: (
     runtimeFactory: (
       config?: Partial<Config>
-    ) => ManagedRuntime.ManagedRuntime<TTarget, never> & { id: string },
+    ) => RuntimeObject<
+      ManagedRuntime.ManagedRuntime<TTarget, never> & { id: string },
+      ReturnType<typeof useRuntimeSync<TTarget>>,
+      typeof useRuntimeFn,
+      ReturnType<typeof useRuntime<TTarget>>
+    >,
     props: Simplify<Partial<React.ComponentProps<C>>>
   ) => TProps
   // fn: (props: Simplify<Omit<FallbackProps<C, Props>, keyof TProps>>) => void
@@ -53,7 +70,12 @@ export function WithRuntime<TTarget, C extends React.FC<any>>(
   getSource?: (
     runtimeFactory: (
       config?: Partial<Config>
-    ) => ManagedRuntime.ManagedRuntime<TTarget, never> & { id: string },
+    ) => RuntimeObject<
+      ManagedRuntime.ManagedRuntime<TTarget, never> & { id: string },
+      ReturnType<typeof useRuntimeSync<TTarget>>,
+      typeof useRuntimeFn,
+      ReturnType<typeof useRuntime<TTarget>>
+    >,
     props: Simplify<Partial<React.ComponentProps<C>>>
   ) => void
 ): (
@@ -73,7 +95,12 @@ export function WithRuntime<
   getSource?: (
     runtimeFactory: (
       config?: Partial<Config>
-    ) => ManagedRuntime.ManagedRuntime<TTarget, never> & { id: string },
+    ) => RuntimeObject<
+      ManagedRuntime.ManagedRuntime<TTarget, never> & { id: string },
+      ReturnType<typeof useRuntimeSync<TTarget>>,
+      typeof useRuntimeFn,
+      ReturnType<typeof useRuntime<TTarget>>
+    >,
     props: Partial<FallbackProps<C, Props>>
   ) => TProps
 ) {
@@ -100,7 +127,14 @@ export function WithRuntime<
               // eslint-disable-next-line react-hooks/rules-of-hooks
               const runtime = useRuntimeFactory(layer, safeConfig);
               runtimeRef = runtime;
-              return runtime;
+              return {
+                fn: useRuntimeFn,
+                // eslint-disable-next-line react-hooks/rules-of-hooks
+                run: useRuntime(Context, runtime),
+                runtime,
+                // eslint-disable-next-line react-hooks/rules-of-hooks
+                use: useRuntimeSync(Context, runtime),
+              };
             }, props)
           : undefined;
 
