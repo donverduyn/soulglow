@@ -52,8 +52,9 @@ jobs:
     - name: Set Docker cache version
       run: echo "DOCKER_CACHE_VERSION=v1-$(( ${{ github.run_number }} % 7 ))" >> $GITHUB_ENV
 
-    - name: Restore Docker image cache
+    - name: Cache Docker image cache
       uses: actions/cache@v4
+      id: docker-cache-restore
       with:
         path: /tmp/docker-cache
         key: docker-images-${{ runner.os }}-${{ env.DOCKER_CACHE_VERSION }}
@@ -78,6 +79,10 @@ jobs:
 
     - name: Bootstrap
       run: yarn bootstrap:ci
+
+    - name: Save Docker images used by compose
+      if: steps.docker-cache-restore.outputs.cache-hit != 'true'
+      run: yarn docker:cache
 
     - name: Lint
       run: yarn lint:ci
