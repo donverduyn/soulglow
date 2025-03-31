@@ -49,14 +49,17 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-playwright-
 
+    - name: Set Docker cache version
+      run: echo "DOCKER_CACHE_VERSION=v1-$(( ${{ github.run_number }} % 7 ))" >> $GITHUB_ENV
+
     - name: Restore Docker image cache
       uses: actions/cache@v4
       with:
         path: /tmp/docker-cache
-        key: docker-images-${{ runner.os }}
+        key: docker-images-${{ runner.os }}-${{ env.DOCKER_CACHE_VERSION }}
         restore-keys: |
-          docker-images-
-    
+          docker-images-${{ runner.os }}-
+
     - name: Load cached Docker images
       run: |
         if [ -d /tmp/docker-cache ]; then
@@ -64,6 +67,7 @@ jobs:
             docker load -i "$img"
           done
         fi
+
 
     - name: Install dependencies
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
@@ -96,5 +100,3 @@ jobs:
         projectName: soulglow
         directory: packages/client/dist
         gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-
-
