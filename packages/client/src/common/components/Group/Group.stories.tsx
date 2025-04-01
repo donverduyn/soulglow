@@ -75,7 +75,6 @@ const createVariantsTemplate = <P extends React.ComponentProps<typeof Group>>(
   options: string[],
   prop: keyof P
 ) =>
-  // eslint-disable-next-line react/function-component-definition
   function VariantsTemplate(props: P) {
     return (
       <Flex

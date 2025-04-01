@@ -1,16 +1,20 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react';
-import { Layer, ManagedRuntime } from 'effect';
-import memoize from 'moize';
-import type { Simplify, IsAny } from 'type-fest';
-import { v4 as uuid } from 'uuid';
 import {
-  useRuntime,
-  useRuntimeFn,
-  useRuntimeSync,
-} from 'common/hooks/useRuntimeFn/useRuntimeFn';
-import { type RuntimeContext } from 'common/utils/context';
+  Effect,
+  pipe,
+  Stream,
+  Scope,
+  Exit,
+  Layer,
+  ManagedRuntime,
+} from 'effect';
+import memoize from 'moize';
+import type { Simplify, IsAny, IsUnknown } from 'type-fest';
+import { v4 as uuid, v4 as uuidv4 } from 'uuid';
+import { RuntimeContext, RuntimeInstance } from 'common/utils/context';
 import { type ExtractMeta, getDisplayName } from 'common/utils/react';
-import { copyStaticProperties } from 'common/utils/react';
+import { copyStaticProperties, isReactContext } from 'common/utils/react';
 
 /*
 This HOC creates a runtime for the context and provides it to the component.
@@ -28,11 +32,11 @@ type Config = {
   shared: boolean;
 };
 
-type RuntimeObject<TRuntime, TUse, TFn, TRun> = {
-  fn: TFn;
-  run: TRun;
-  runtime: TRuntime;
-  use: TUse;
+type RuntimeApi<R> = {
+  runtime: RuntimeInstance<R>;
+  use: ReturnType<typeof createUse<R>>;
+  useFn: ReturnType<typeof createFn<R>>;
+  useRun: ReturnType<typeof createRun<R>>;
 };
 
 type InferProps<C> = C extends React.FC<infer P> ? P : never;
@@ -40,22 +44,16 @@ type InferProps<C> = C extends React.FC<infer P> ? P : never;
 type FallbackProps<C, P> =
   IsAny<InferProps<C>> extends false ? InferProps<C> : P;
 
-export function WithRuntime<
-  TTarget,
-  TProps,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  C extends React.FC<any>,
->(
+type Fallback<T, U> = [T, U] extends [infer A, infer B]
+  ? unknown extends A
+    ? B
+    : A
+  : never;
+
+export function WithRuntime<TTarget, TProps, C extends React.FC<any>>(
   Context: RuntimeContext<TTarget>,
   getSource: (
-    runtimeFactory: (
-      config?: Partial<Config>
-    ) => RuntimeObject<
-      ManagedRuntime.ManagedRuntime<TTarget, never> & { id: string },
-      ReturnType<typeof useRuntimeSync<TTarget>>,
-      ReturnType<typeof useRuntimeFn<TTarget>>,
-      ReturnType<typeof useRuntime<TTarget>>
-    >,
+    runtimeFactory: (config?: Partial<Config>) => RuntimeApi<TTarget>,
     props: Simplify<Partial<React.ComponentProps<C>>>
   ) => TProps
   // fn: (props: Simplify<Omit<FallbackProps<C, Props>, keyof TProps>>) => void
@@ -64,18 +62,10 @@ export function WithRuntime<
 ) => React.FC<Simplify<Omit<FallbackProps<C, Props>, keyof TProps>>> &
   Simplify<ExtractMeta<C>>;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function WithRuntime<TTarget, C extends React.FC<any>>(
   Context: RuntimeContext<TTarget>,
   getSource?: (
-    runtimeFactory: (
-      config?: Partial<Config>
-    ) => RuntimeObject<
-      ManagedRuntime.ManagedRuntime<TTarget, never> & { id: string },
-      ReturnType<typeof useRuntimeSync<TTarget>>,
-      ReturnType<typeof useRuntimeFn<TTarget>>,
-      ReturnType<typeof useRuntime<TTarget>>
-    >,
+    runtimeFactory: (config?: Partial<Config>) => RuntimeApi<TTarget>,
     props: Simplify<Partial<React.ComponentProps<C>>>
   ) => void
 ): (
@@ -86,21 +76,13 @@ export function WithRuntime<TTarget, C extends React.FC<any>>(
 // the goal is to have a utility that allows us to reuse the logic between the withRuntime hoc and the Runtime component that takes the runtime as a prop. Later on we might want to consider the Runtime component to be used in JSX in more scenarios, but for now it is limited to usage in storybook decorators
 
 export function WithRuntime<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   C extends React.FC<any>,
   TTarget,
   TProps extends Record<string, unknown> | undefined,
 >(
   Context: RuntimeContext<TTarget>,
   getSource?: (
-    runtimeFactory: (
-      config?: Partial<Config>
-    ) => RuntimeObject<
-      ManagedRuntime.ManagedRuntime<TTarget, never> & { id: string },
-      ReturnType<typeof useRuntimeSync<TTarget>>,
-      ReturnType<typeof useRuntimeFn<TTarget>>,
-      ReturnType<typeof useRuntime<TTarget>>
-    >,
+    runtimeFactory: (config?: Partial<Config>) => RuntimeApi<TTarget>,
     props: Partial<FallbackProps<C, Props>>
   ) => TProps
 ) {
@@ -117,31 +99,26 @@ export function WithRuntime<
           postUnmountTTL: 1000,
           shared: false,
         };
-        let runtimeRef = null as
-          | (ManagedRuntime.ManagedRuntime<TTarget, never> & { id: string })
-          | null;
+        let runtimeRef = null as RuntimeInstance<TTarget> | null;
 
         const source = getSource
           ? getSource((overrides) => {
               const safeConfig = Object.assign(config, overrides ?? {});
               // eslint-disable-next-line react-hooks/rules-of-hooks
-              const runtime = useRuntimeFactory(layer, safeConfig);
+              const runtime = useRuntimeInstance(layer, safeConfig);
               runtimeRef = runtime;
               return {
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                fn: useRuntimeFn(Context, runtime),
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                run: useRuntime(Context, runtime),
                 runtime,
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                use: useRuntimeSync(Context, runtime),
+                use: createUse(Context, runtime),
+                useFn: createFn(Context, runtime),
+                useRun: createRun(Context, runtime),
               };
             }, props)
           : undefined;
 
         if (!getSource || runtimeRef === null) {
           // eslint-disable-next-line react-hooks/rules-of-hooks
-          runtimeRef = useRuntimeFactory(layer, config);
+          runtimeRef = useRuntimeInstance(layer, config);
         }
 
         return [source ?? {}, runtimeRef] as const;
@@ -163,16 +140,14 @@ export function WithRuntime<
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createElement = <C extends React.FC<any> | undefined>(
   Component: C,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   mergedProps: C extends React.FC<any>
     ? React.ComponentProps<C>
     : Record<never, never>
 ) => (Component ? <Component {...mergedProps} /> : null);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const extractMeta = <C extends React.FC<any>>(Component: C) =>
   Object.getOwnPropertyNames(Component)
     .filter(
@@ -202,13 +177,13 @@ const createRuntime = memoize(
     printLog(config, `creating runtime ${runtimeId}`);
     return Object.assign(ManagedRuntime.make(layer), {
       id: runtimeId,
-    }) as ManagedRuntime.ManagedRuntime<T, never> & { id: string };
+    }) as RuntimeInstance<T>;
   },
   // this prevents a second instantiation in strict mode inside the useEffect function, which gets disposed immediately, and it since it has no side effects, we are safe.
   { isShallowEqual: true, maxAge: 100, maxArgs: 2 }
 );
 
-const useRuntimeFactory = <T,>(layer: Layer.Layer<T>, config: Config) => {
+const useRuntimeInstance = <T,>(layer: Layer.Layer<T>, config: Config) => {
   // TODO: use useSyncExternalStore to keep track of runtime instances and dispose them based on postUnmountTTL. Rehydrate the runtime instances on mount (maybe we need a component name/id combo here)
 
   const layerRef = React.useRef(layer);
@@ -227,7 +202,6 @@ const useRuntimeFactory = <T,>(layer: Layer.Layer<T>, config: Config) => {
   }
 
   React.useEffect(() => {
-    // printLog(config, `useEffect ${runtimeId.current}`);
     if (shouldCreate.current || layerRef.current !== layer) {
       layerRef.current = layer;
       runtimeId.current = uuid();
@@ -241,10 +215,7 @@ const useRuntimeFactory = <T,>(layer: Layer.Layer<T>, config: Config) => {
 
     return () => {
       printLog(config, `disposing runtime ${runtimeId.current}`);
-      // console.log(runtime)
-      setTimeout(() => {
-        void runtime.dispose();
-      }, 0);
+      setTimeout(() => void runtime.dispose(), 0);
       shouldCreate.current = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -252,3 +223,284 @@ const useRuntimeFactory = <T,>(layer: Layer.Layer<T>, config: Config) => {
 
   return runtime;
 };
+
+/*
+This hook returns a function that can be called to trigger an effect.
+It returns a promise that resolves to the value of the effect.
+*/
+
+const createFn =
+  <R,>(localContext: RuntimeContext<R>, localRuntime: RuntimeInstance<R>) =>
+  <T, T1, A, A1, E, R1>(
+    targetOrEffect:
+      | RuntimeInstance<R1>
+      | RuntimeContext<R1>
+      | ((value: T) => Effect.Effect<A, E, R | Scope.Scope>),
+    effectOrDeps?:
+      | ((value: T1) => Effect.Effect<A1, E, Fallback<R1, R> | Scope.Scope>)
+      | React.DependencyList,
+    deps: React.DependencyList = []
+  ) =>
+    pipe(
+      Array.isArray(effectOrDeps) ? effectOrDeps : deps,
+      pipe(
+        (!ManagedRuntime.isManagedRuntime(targetOrEffect) &&
+        !Effect.isEffect(targetOrEffect) &&
+        !isReactContext(targetOrEffect)
+          ? targetOrEffect
+          : typeof effectOrDeps === 'function'
+            ? effectOrDeps
+            : undefined) as (value: T | T1) => Effect.Effect<A | A1, E, R | R1>,
+        pipe(
+          (isReactContext<RuntimeContext<R1>>(targetOrEffect)
+            ? targetOrEffect !== localContext
+              ? React.use(targetOrEffect)
+              : localRuntime
+            : ManagedRuntime.isManagedRuntime(targetOrEffect)
+              ? targetOrEffect
+              : localRuntime) as RuntimeInstance<R | R1>,
+          // pipe(
+          //   localRuntime as RuntimeInstance<R | R1>,
+          createHook((runtime, fn, finalDeps) => {
+            const fnRef = React.useRef(fn);
+
+            React.useEffect(() => {
+              fnRef.current = fn;
+              // eslint-disable-next-line react-hooks/exhaustive-deps
+            }, [localRuntime, runtime, ...finalDeps]);
+
+            const emitter = React.useMemo(
+              () => new EventEmitter<T, A | A1>(),
+              // eslint-disable-next-line react-hooks/exhaustive-deps
+              [localRuntime, runtime, ...finalDeps]
+            );
+            const stream = React.useMemo(
+              () =>
+                pipe(
+                  Stream.fromAsyncIterable(
+                    createAsyncIterator(emitter),
+                    () => {}
+                  ),
+                  Stream.mapEffect(({ data, eventId }) =>
+                    pipe(
+                      fnRef.current(data),
+                      Effect.tap((v) => emitter.resolve(eventId)(v))
+                    )
+                  ),
+                  Stream.runDrain
+                ),
+              // eslint-disable-next-line react-hooks/exhaustive-deps
+              [localRuntime, runtime, ...finalDeps]
+            );
+
+            React.useEffect(() => {
+              const scope = Effect.runSync(Scope.make());
+              runtime.runFork(
+                stream.pipe(Effect.forkScoped, Scope.extend(scope))
+              );
+              return () => {
+                runtime.runFork(Scope.close(scope, Exit.void));
+              };
+              // eslint-disable-next-line react-hooks/exhaustive-deps
+            }, [localRuntime, runtime, emitter, ...finalDeps]);
+
+            // return null as unknown as 
+            return emitter.emit as IsUnknown<T> extends true
+              ? () => Promise<Fallback<A1, A>>
+              : (value: Fallback<T1, T>) => Promise<Fallback<A1, A>>;
+          })
+          // )
+        )
+      )
+    );
+
+/*
+This hook is used to run an effect in a runtime.
+It takes a context and an effect and runs the effect in the runtime provided by the context. It is used by useRuntimeFn. Assumes createRuntimeContext is used to create the context, because it expects a Layer when withRuntime is missing.
+*/
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const noRuntimeMessage = `No runtime available. 
+  Did you forget to wrap your component using WithRuntime?
+  `;
+
+const createRun =
+  <R,>(localContext: RuntimeContext<R>, localRuntime: RuntimeInstance<R>) =>
+  <A, E, R1>(
+    targetOrEffect:
+      | RuntimeInstance<R1>
+      | RuntimeContext<R1>
+      | Effect.Effect<A, E, R | Scope.Scope>,
+    effectOrDeps?:
+      | Effect.Effect<A, E, Fallback<R1, R> | Scope.Scope>
+      | React.DependencyList,
+    deps: React.DependencyList = []
+  ) =>
+    pipe(
+      Array.isArray(effectOrDeps) ? effectOrDeps : deps,
+      pipe(
+        (Effect.isEffect(targetOrEffect) &&
+        !ManagedRuntime.isManagedRuntime(targetOrEffect)
+          ? targetOrEffect
+          : Effect.isEffect(effectOrDeps)
+            ? effectOrDeps
+            : Effect.void) as Effect.Effect<A, E, R | R1>,
+        pipe(
+          (isReactContext<RuntimeContext<R1>>(targetOrEffect)
+            ? targetOrEffect !== localContext
+              ? React.use(targetOrEffect)
+              : localRuntime
+            : ManagedRuntime.isManagedRuntime(targetOrEffect)
+              ? targetOrEffect
+              : localRuntime) as RuntimeInstance<R | R1>,
+          // pipe(
+          //   localRuntime as RuntimeInstance<R | R1>,
+          createHook((runtime, effect, finalDeps) => {
+            React.useEffect(() => {
+              const scope = Effect.runSync(Scope.make());
+              runtime.runFork(
+                effect.pipe(Effect.forkScoped, Scope.extend(scope))
+              );
+              return () => {
+                runtime.runFork(Scope.close(scope, Exit.void));
+              };
+              // eslint-disable-next-line react-hooks/exhaustive-deps
+            }, [localRuntime, runtime, ...finalDeps]);
+          })
+          // )
+        )
+      )
+    );
+
+const createUse =
+  <R,>(localContext: RuntimeContext<R>, localRuntime: RuntimeInstance<R>) =>
+  <A, E, R1>(
+    targetOrEffect:
+      | RuntimeInstance<R1>
+      | RuntimeContext<R1>
+      | Effect.Effect<A, E, R>,
+    effectOrDeps?: Effect.Effect<A, E, Fallback<R1, R>> | React.DependencyList,
+    deps: React.DependencyList = []
+  ) =>
+    pipe(
+      Array.isArray(effectOrDeps) ? effectOrDeps : deps,
+      pipe(
+        (Effect.isEffect(targetOrEffect) &&
+        !ManagedRuntime.isManagedRuntime(targetOrEffect)
+          ? targetOrEffect
+          : Effect.isEffect(effectOrDeps)
+            ? effectOrDeps
+            : Effect.void) as Effect.Effect<A, E, R | R1>,
+        pipe(
+          (isReactContext<RuntimeContext<R1>>(targetOrEffect)
+            ? targetOrEffect !== localContext
+              ? React.use(targetOrEffect)
+              : localRuntime
+            : ManagedRuntime.isManagedRuntime(targetOrEffect)
+              ? targetOrEffect
+              : localRuntime) as RuntimeInstance<R | R1>,
+          // pipe(
+          // localRuntime as RuntimeInstance<R | R1>,
+          createHook((runtime, effect, finalDeps) => {
+            return React.useMemo(
+              () => runtime.runSync(effect),
+              // eslint-disable-next-line react-hooks/exhaustive-deps
+              [localRuntime, runtime, ...finalDeps]
+            );
+          })
+          // )
+        )
+      )
+    );
+
+function createHook<
+  R,
+  R1,
+  TResult,
+  TEffect extends
+    | Effect.Effect<any, any, any>
+    | ((...args: any[]) => Effect.Effect<any, any, any>),
+>(
+  operation: (
+    runtime: RuntimeInstance<R> | RuntimeInstance<R1>,
+    effect: TEffect,
+    deps: React.DependencyList
+  ) => TResult
+) {
+  // return (localRuntime: RuntimeInstance<R>) => {
+  return (runtime: RuntimeInstance<R> | RuntimeInstance<R1>) =>
+    (effect: TEffect) =>
+    (deps: React.DependencyList) => {
+      return operation(runtime, effect, deps);
+    };
+  // };
+}
+
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
+/* 
+This is converting push based events to a pull based stream, 
+where the consumer has control through the provided effect.
+*/
+
+class EventEmitter<T, A> {
+  private listeners: Array<(data: T, eventId: string) => void> = [];
+  private resolvers: Map<string, (result: A) => void> = new Map();
+  private eventQueue: Array<{ data: T; eventId: string }> = [];
+
+  emit = (data: T): Promise<A> => {
+    const eventId = uuidv4();
+    let resolver: (result: A) => void;
+    const promise = new Promise<A>((resolve) => {
+      resolver = resolve;
+    });
+    this.eventQueue.push({ data, eventId });
+    this.notifyListeners();
+    this.resolvers.set(eventId, resolver!);
+    return promise;
+  };
+
+  subscribe(listener: (data: T, eventId: string) => void): void {
+    this.listeners.push(listener);
+    this.notifyListeners();
+  }
+
+  private notifyListeners(): void {
+    while (this.eventQueue.length > 0 && this.listeners.length > 0) {
+      const event = this.eventQueue.shift()!;
+      this.listeners.forEach((listener) => listener(event.data, event.eventId));
+    }
+  }
+
+  resolve(eventId: string) {
+    return (result: A) => {
+      const resolver = this.resolvers.get(eventId);
+      if (resolver) {
+        resolver(result);
+        this.resolvers.delete(eventId);
+      }
+    };
+  }
+
+  async waitForEvent(): Promise<{ data: T; eventId: string }> {
+    if (this.eventQueue.length > 0) {
+      return Promise.resolve(this.eventQueue.shift()!);
+    }
+
+    return new Promise((resolve) => {
+      const oneTimeListener = (data: T, eventId: string) => {
+        resolve({ data, eventId });
+        this.listeners = this.listeners.filter((l) => l !== oneTimeListener);
+      };
+      this.subscribe(oneTimeListener);
+    });
+  }
+}
+
+async function* createAsyncIterator<T, A>(
+  emitter: EventEmitter<T, A>
+): AsyncGenerator<{ data: T; eventId: string }> {
+  while (true) {
+    yield await emitter.waitForEvent();
+  }
+}

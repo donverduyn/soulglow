@@ -3,8 +3,8 @@ import { Effect, pipe, Context, Ref } from 'effect';
 import type { RuntimeFiber } from 'effect/Fiber';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'common/components/Button/Button';
-import { WithLabels } from 'common/components/hoc/withLabels';
 import { WithRuntime } from 'common/components/hoc/withRuntime';
+import { WithStatic } from 'common/components/hoc/withStatic';
 import { List } from 'common/components/List/List';
 import { Stack } from 'common/components/Stack/Stack';
 import { useReturn } from 'common/hooks/useReturn/useReturn';
@@ -28,31 +28,31 @@ interface Props {
   readonly publish: (msg: EventType<unknown>) => Promise<void>;
   readonly store: Context.Tag.Service<typeof Tags.EndpointStore>;
 }
-const labels = createLabels(['addEndpointLabel']);
+const labels = createLabels<Labels<Locales>>()(['addEndpointLabel']);
 
 export const EndpointPanel = pipe(
   observer(EndpointPanelView),
-  WithLabels(labels),
+  WithStatic({ labels }),
   WithRuntime(EndpointPanelRuntime, (configure, props) => {
-    const runtime = configure();
-    const store = runtime.use(Tags.EndpointStore);
+    const λ = configure();
+    const store = λ.use(Tags.EndpointStore);
 
-    const publish = runtime.fn((e: EventType<unknown>) =>
+    const publish = λ.useFn((e: EventType<unknown>) =>
       Effect.andThen(Tags.EventBus, (bus) => bus.publish(e))
     );
-    const publishQuery = runtime.fn(AppRuntime, (e: QueryType<unknown>) =>
+    const publishQuery = λ.useFn(AppRuntime, (e: QueryType<unknown>) =>
       Effect.andThen(AppTags.QueryBus, (bus) => bus.publish(e))
     );
-    const publishCommand = runtime.fn(AppRuntime, (e: CommandType<unknown>) =>
+    const publishCommand = λ.useFn(AppRuntime, (e: CommandType<unknown>) =>
       Effect.andThen(AppTags.CommandBus, (bus) => bus.publish(e))
     );
-    const register = runtime.fn(
+    const register = λ.useFn(
       AppRuntime,
       (handler: (e: EventType<unknown>) => RuntimeFiber<boolean | string>) =>
         Effect.andThen(AppTags.ResponseBus, (bus) => bus.register(handler))
     );
 
-    runtime.run(
+    λ.useRun(
       Effect.andThen(
         Tags.InitializerRef,
         Ref.update(({ componentId }) => ({
@@ -61,10 +61,10 @@ export const EndpointPanel = pipe(
           publishCommand,
           publishQuery,
           register,
-          runtimeId: runtime.runtime.id,
+          runtimeId: λ.runtime.id,
         }))
       ),
-      [props.id, publishCommand, publishQuery, register, runtime]
+      [props.id, publishCommand, publishQuery, register, λ]
     );
     return { publish, store };
   })

@@ -9,7 +9,6 @@ import {
 import { useAwaitable } from '../hooks/useAwaitable';
 
 const CustomSource = (OriginalSource: typeof SbSource) => {
-  // eslint-disable-next-line react/function-component-definition
   return function Source(props: SourceProps) {
     const sourceContext = React.useContext(SourceContext);
     const docsContext = React.useContext(DocsContext);

@@ -28,7 +28,9 @@ type ExtractLabels<T extends readonly string[]> = {
   [K in T[number]]: K;
 };
 
-export const createLabels = <T extends string>(labelKeys: [...T[]]) =>
-  Object.fromEntries(labelKeys.map((key) => [key, key])) as Simplify<
-    ExtractLabels<typeof labelKeys>
-  >;
+export const createLabels =
+  <L extends string>() =>
+  <T extends L>(labelKeys: [...T[]]) =>
+    Object.fromEntries(labelKeys.map((key) => [key, key])) as Simplify<
+      ExtractLabels<typeof labelKeys>
+    >;

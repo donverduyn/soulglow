@@ -12,7 +12,6 @@ import {
 import { useAwaitable } from '../hooks/useAwaitable';
 
 const CustomCanvas = (OriginalCanvas: typeof SbCanvas) => {
-  // eslint-disable-next-line react/function-component-definition
   return function Canvas(props: React.ComponentProps<typeof SbCanvas>) {
     const sourceContext = React.useContext(SourceContext);
     const docsContext = React.useContext(DocsContext);

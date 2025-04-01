@@ -337,7 +337,7 @@ module.exports = {
           'warn',
           {
             namedComponents: ['function-declaration', 'arrow-function'],
-            unnamedComponents: ['arrow-function'],
+            unnamedComponents: ['arrow-function', 'function-expression'],
           },
         ],
         'react/hook-use-state': 'off',

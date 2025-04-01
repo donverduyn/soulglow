@@ -9,7 +9,6 @@ const createContainerTemplate = (fixtures: {
   readonly content: string | undefined;
   readonly title: string | undefined;
 }) =>
-  // eslint-disable-next-line react/function-component-definition
   function ContainerTemplate(props: React.ComponentProps<typeof Container>) {
     return (
       <Container {...props}>

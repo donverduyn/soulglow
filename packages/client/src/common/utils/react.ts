@@ -11,7 +11,10 @@ export function isReactContext2<T>(
   );
 }
 
-export const isReactContext = <T>(variable: unknown): variable is T => {
+export const isReactContext = <T>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  variable: any
+): variable is typeof variable extends T ? T : never => {
   return (
     isPlainObject(variable) &&
     // // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -65,3 +68,26 @@ export function copyStaticProperties(
     }
   });
 }
+
+/**
+ * Throws if called outside a React render phase.
+ * Use this in runtime-level helpers like `useFn`, `useRun`, etc.
+ * Only runs in dev mode and in the browser.
+ */
+// export function validateReactRenderPhase(callerName = 'runtime hook'): void {
+//   if (process.env.NODE_ENV !== 'production' && typeof window !== 'undefined') {
+//     const dispatcher = (
+//       React as unknown as Record<
+//         string,
+//         Record<string, Record<string, unknown> | null>
+//       >
+//     );
+
+//     console.log(dispatcher)
+//     if (!dispatcher || dispatcher.current == null) {
+//       throw new Error(
+//         `[validateReactRenderPhase] Invalid call to "${callerName}": must be called during a React render phase (e.g., inside a component or custom hook).`
+//       );
+//     }
+//   }
+// }

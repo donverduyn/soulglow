@@ -5,8 +5,8 @@ import { identity, pipe, Queue } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { State } from '__generated/api';
 import { Group } from 'common/components/Group/Group';
-import { WithLabels } from 'common/components/hoc/withLabels';
 import { WithRuntime as WithRuntime } from 'common/components/hoc/withRuntime';
+import { WithStatic } from 'common/components/hoc/withStatic';
 import { NumberInput } from 'common/components/NumberInput/NumberInput';
 import { Paper } from 'common/components/Paper/Paper';
 import { Select } from 'common/components/Select/Select';
@@ -20,6 +20,7 @@ import {
 import { useReturn } from 'common/hooks/useReturn/useReturn';
 import { fromLayer } from 'common/utils/context';
 import { createLabels } from 'common/utils/i18n';
+import type { Labels, Locales } from 'common/utils/i18n';
 import { merge } from 'common/utils/object';
 import type { Device } from 'models/device/Device';
 import { OnOffSwitch } from './components/OnOffSwitch';
@@ -55,7 +56,7 @@ const defaultProps: Partial<Props> = {
   onChange: identity,
 };
 
-const labels = createLabels([]);
+const labels = createLabels<Labels<Locales>>()([]);
 
 const whiteInputs = [
   { key: 'temperature', label: 'temp', props: { max: 100, track: false } },
@@ -70,11 +71,11 @@ const colorInputs = [
 
 export const LightBulb = pipe(
   observer(LightBulbView),
-  WithLabels(labels),
+  WithStatic({ labels }),
   WithRuntime(LightBulbRuntime, (configure) => {
     const runtime = configure();
 
-    const handle = runtime.fn(LightBulbRuntime, (body: Partial<Device>) =>
+    const handle = runtime.useFn(LightBulbRuntime, (body: Partial<Device>) =>
       fromLayer(Tags.ApiThrottler, Queue.offer(body))
     );
 

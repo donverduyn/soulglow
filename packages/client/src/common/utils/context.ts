@@ -14,10 +14,11 @@ export const createRuntimeContext = <T>(layer: Layer.Layer<T>) => {
   return Object.assign(context, { layer });
 };
 
-export type RuntimeContext<T> = React.Context<
-  (ManagedRuntime.ManagedRuntime<T, never> & { id: string }) | undefined
->;
+export type RuntimeContext<T> = React.Context<RuntimeInstance<T> | undefined>;
 
+export type RuntimeInstance<R> = ManagedRuntime.ManagedRuntime<R, never> & {
+  id: string;
+};
 export type RuntimeType<T> =
   T extends React.Context<infer U> ? NonNullable<U> : never;
 
