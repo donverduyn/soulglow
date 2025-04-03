@@ -30,7 +30,7 @@ export const EndpointListItem = pipe(observer(EndpointListItemView));
  * It normalizes the behavior of the input across OSes and browsers.
  * It also provides a way to select, update, and remove the endpoint.
  */
-function EndpointListItemView(props: Props) {
+export function EndpointListItemView(props: Props) {
   const vm = useEndpointListItem(props);
 
   return (

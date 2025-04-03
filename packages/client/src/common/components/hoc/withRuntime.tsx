@@ -29,7 +29,6 @@ type Config = {
   componentName: string;
   debug: boolean;
   postUnmountTTL: number;
-  shared: boolean;
 };
 
 type RuntimeApi<R> = {
@@ -97,7 +96,6 @@ export function WithRuntime<
           componentName: getDisplayName(Component, 'WithRuntime'),
           debug: false,
           postUnmountTTL: 1000,
-          shared: false,
         };
         let runtimeRef = null as RuntimeInstance<TTarget> | null;
 
@@ -179,7 +177,7 @@ const createRuntime = memoize(
       id: runtimeId,
     }) as RuntimeInstance<T>;
   },
-  // this prevents a second instantiation in strict mode inside the useEffect function, which gets disposed immediately, and it since it has no side effects, we are safe.
+  // this prevents a second instantiation in strict mode inside the useState function, which gets disposed immediately, and it since it has no side effects, we are safe.
   { isShallowEqual: true, maxAge: 100, maxArgs: 2 }
 );
 
