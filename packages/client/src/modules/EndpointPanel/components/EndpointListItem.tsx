@@ -1,18 +1,21 @@
 import * as React from 'react';
-import { pipe } from 'effect';
+import { Effect, pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { MdOutlineDelete } from 'react-icons/md';
+import { WithRuntime } from 'common/components/hoc/withRuntime';
 import { IconButton } from 'common/components/IconButton/IconButton';
 import { Radio } from 'common/components/Radio/Radio';
 import { Stack } from 'common/components/Stack/Stack';
 import { TextInput } from 'common/components/TextInput/TextInput';
-import type { Publishable } from 'common/utils/event';
+import type { Publishable, EventType } from 'common/utils/event';
 import {
   updateEndpointRequested as updateEndpoint,
   removeEndpointRequested as removeEndpoint,
   selectEndpointRequested as selectEndpoint,
 } from 'models/endpoint/EndpointEvents';
 import type { EndpointEntity } from '../effect/entities/Endpoint.entity';
+import { EndpointPanelRuntime } from '../EndpointPanel.runtime';
+import * as Tags from '../tags';
 import styles from './EndpointListItem.module.css';
 
 export interface Props extends Publishable {
@@ -23,7 +26,17 @@ const classNames = {
   root: styles.EndpointListItem,
 };
 
-export const EndpointListItem = pipe(observer(EndpointListItemView));
+export const EndpointListItem = pipe(
+  observer(EndpointListItemView),
+  WithRuntime(EndpointPanelRuntime, (configure) => {
+    const λ = configure();
+    return {
+      publish: λ.useFn((e: EventType<unknown>) =>
+        Effect.andThen(Tags.EventBus, (bus) => bus.publish(e))
+      ),
+    };
+  })
+);
 
 /**
  * This component is responsible for rendering a single endpoint item in the list.

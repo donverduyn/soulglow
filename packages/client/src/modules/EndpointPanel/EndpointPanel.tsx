@@ -93,10 +93,9 @@ export function EndpointPanelView({ store, publish }: Props) {
         <EndpointListItem
           key={endpoint.id}
           endpoint={endpoint}
-          publish={publish}
         />
       )),
-    [endpoints, publish]
+    [endpoints]
   );
 
   return (

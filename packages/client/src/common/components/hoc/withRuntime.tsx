@@ -92,21 +92,25 @@ export function WithRuntime<
       };
 
       const createSource = React.useCallback(() => {
+        let runtimeRef = null as RuntimeInstance<TTarget> | null;
+        let upstreamRef = null as RuntimeInstance<TTarget> | null;
         const config: Config = {
           componentName: getDisplayName(Component, 'WithRuntime'),
           debug: false,
           postUnmountTTL: 1000,
         };
-        let runtimeRef = null as RuntimeInstance<TTarget> | null;
 
         const source = getSource
           ? getSource((overrides) => {
               const safeConfig = Object.assign(config, overrides ?? {});
+              const upstream = React.use(Context);
+
               // eslint-disable-next-line react-hooks/rules-of-hooks
-              const runtime = useRuntimeInstance(layer, safeConfig);
-              runtimeRef = runtime;
+              const runtime = upstream ?? useRuntimeInstance(layer, safeConfig);
+              runtimeRef = upstream ?? runtime;
+              upstreamRef = upstream ?? null;
               return {
-                runtime,
+                runtime: upstream ?? runtime,
                 use: createUse(Context, runtime),
                 useFn: createFn(Context, runtime),
                 useRun: createRun(Context, runtime),
@@ -119,16 +123,16 @@ export function WithRuntime<
           runtimeRef = useRuntimeInstance(layer, config);
         }
 
-        return [source ?? {}, runtimeRef] as const;
+        return [source ?? {}, runtimeRef, upstreamRef !== null] as const;
       }, [layer, props]);
 
-      const [source, runtime] = createSource();
+      const [source, runtime, hasUpstreamInstance] = createSource();
       const mergedProps = getSource ? Object.assign(source, props) : props;
       const children =
         createElement(Component, mergedProps) ??
         (props.children as React.ReactNode) ??
         null;
-
+      if (hasUpstreamInstance) return children;
       return <Context.Provider value={runtime}>{children}</Context.Provider>;
     };
     Wrapped.displayName = getDisplayName(Component, 'WithRuntime');
@@ -401,6 +405,10 @@ const createUse =
       [localRuntime, runtime, ...finalDeps]
     );
   };
+
+// const createMergeFn = () => {}
+// const createExhaustFn = () => {}
+// const createSwitchFn = () => {}
 
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
