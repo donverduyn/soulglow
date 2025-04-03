@@ -34,8 +34,17 @@ export const EndpointPanel = pipe(
   observer(EndpointPanelView),
   WithStatic({ labels }),
   WithRuntime(EndpointPanelRuntime, (configure, props) => {
-    const λ = configure();
+    const λ = configure({ debug: true });
     const store = λ.use(Tags.EndpointStore);
+
+    // const logProps = λ.useFn(
+    //   () =>
+    //     Effect.gen(function* () {
+    //       yield* Effect.sleep(1000);
+    //       yield* Console.log(props);
+    //     }).pipe(Effect.forkScoped),
+    //   [props]
+    // );
 
     const publish = λ.useFn((e: EventType<unknown>) =>
       Effect.andThen(Tags.EventBus, (bus) => bus.publish(e))
@@ -48,7 +57,7 @@ export const EndpointPanel = pipe(
     );
     const register = λ.useFn(
       AppRuntime,
-      (handler: (e: EventType<unknown>) => RuntimeFiber<boolean | string>) =>
+      (handler: (e: EventType<unknown>) => RuntimeFiber<boolean>) =>
         Effect.andThen(AppTags.ResponseBus, (bus) => bus.register(handler))
     );
 
@@ -102,9 +111,7 @@ function useEndpointPanel(
   store: Context.Tag.Service<typeof Tags.EndpointStore>,
   publish: (msg: EventType<unknown>) => Promise<void>
 ) {
-  // TODO: use normalized cache for entity collections and create mobx entity stores inside view models.
   const endpoints = store.list;
-
   const addEndpoint = React.useCallback(() => {
     void publish(addEndpointRequested(createEndpoint()));
   }, [publish]);

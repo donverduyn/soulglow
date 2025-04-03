@@ -229,90 +229,110 @@ This hook returns a function that can be called to trigger an effect.
 It returns a promise that resolves to the value of the effect.
 */
 
+type InvalidShapes =
+  | React.ProviderProps<any>
+  | React.Context<any>
+  | { Provider: unknown }
+  | undefined;
+
+type Sanitize<T> = T extends InvalidShapes ? unknown : T;
+
+const getDeps = (input: any, deps: React.DependencyList) =>
+  (Effect.isEffect(input)
+    ? deps
+    : Array.isArray(input)
+      ? input
+      : deps) as React.DependencyList;
+
+const getRuntime = <R, R1>(input: any, localContext: any, localRuntime: any) =>
+  (isReactContext<RuntimeContext<R1>>(input)
+    ? input !== localContext
+      ? // eslint-disable-next-line react-hooks/rules-of-hooks
+        React.use(input)
+      : localRuntime
+    : ManagedRuntime.isManagedRuntime(input)
+      ? input
+      : localRuntime) as RuntimeInstance<R | R1>;
+
+const getEffectFn = <T,>(input: any, fnOrDeps: any) =>
+  (!ManagedRuntime.isManagedRuntime(input) &&
+  !Effect.isEffect(input) &&
+  !isReactContext(input)
+    ? input
+    : typeof fnOrDeps === 'function'
+      ? fnOrDeps
+      : undefined) as T;
+
+const getEffect = <T,>(input: any, effectOrDeps: any) =>
+  (Effect.isEffect(input) && !ManagedRuntime.isManagedRuntime(input)
+    ? input
+    : Effect.isEffect(effectOrDeps)
+      ? effectOrDeps
+      : Effect.void) as T;
+
 const createFn =
   <R,>(localContext: RuntimeContext<R>, localRuntime: RuntimeInstance<R>) =>
-  <T, T1, A, A1, E, R1>(
+  <T, T1, A, A1, E, E1, R1>(
     targetOrEffect:
       | RuntimeInstance<R1>
       | RuntimeContext<R1>
       | ((value: T) => Effect.Effect<A, E, R | Scope.Scope>),
-    effectOrDeps?:
-      | ((value: T1) => Effect.Effect<A1, E, Fallback<R1, R> | Scope.Scope>)
+    fnOrDeps?:
+      | ((value: T1) => Effect.Effect<A1, E1, Fallback<R1, R> | Scope.Scope>)
       | React.DependencyList,
     deps: React.DependencyList = []
-  ) =>
-    pipe(
-      Array.isArray(effectOrDeps) ? effectOrDeps : deps,
-      pipe(
-        (!ManagedRuntime.isManagedRuntime(targetOrEffect) &&
-        !Effect.isEffect(targetOrEffect) &&
-        !isReactContext(targetOrEffect)
-          ? targetOrEffect
-          : typeof effectOrDeps === 'function'
-            ? effectOrDeps
-            : undefined) as (value: T | T1) => Effect.Effect<A | A1, E, R | R1>,
-        pipe(
-          (isReactContext<RuntimeContext<R1>>(targetOrEffect)
-            ? targetOrEffect !== localContext
-              ? React.use(targetOrEffect)
-              : localRuntime
-            : ManagedRuntime.isManagedRuntime(targetOrEffect)
-              ? targetOrEffect
-              : localRuntime) as RuntimeInstance<R | R1>,
-          // pipe(
-          //   localRuntime as RuntimeInstance<R | R1>,
-          createHook((runtime, fn, finalDeps) => {
-            const fnRef = React.useRef(fn);
+  ) => {
+    const finalDeps = getDeps(fnOrDeps, deps);
+    const effectFn = getEffectFn<
+      (value: Sanitize<T> | T1) => Effect.Effect<A | A1, E | E1, R | R1>
+    >(targetOrEffect, fnOrDeps);
 
-            React.useEffect(() => {
-              fnRef.current = fn;
-              // eslint-disable-next-line react-hooks/exhaustive-deps
-            }, [localRuntime, runtime, ...finalDeps]);
-
-            const emitter = React.useMemo(
-              () => new EventEmitter<T, A | A1>(),
-              // eslint-disable-next-line react-hooks/exhaustive-deps
-              [localRuntime, runtime, ...finalDeps]
-            );
-            const stream = React.useMemo(
-              () =>
-                pipe(
-                  Stream.fromAsyncIterable(
-                    createAsyncIterator(emitter),
-                    () => {}
-                  ),
-                  Stream.mapEffect(({ data, eventId }) =>
-                    pipe(
-                      fnRef.current(data),
-                      Effect.tap((v) => emitter.resolve(eventId)(v))
-                    )
-                  ),
-                  Stream.runDrain
-                ),
-              // eslint-disable-next-line react-hooks/exhaustive-deps
-              [localRuntime, runtime, ...finalDeps]
-            );
-
-            React.useEffect(() => {
-              const scope = Effect.runSync(Scope.make());
-              runtime.runFork(
-                stream.pipe(Effect.forkScoped, Scope.extend(scope))
-              );
-              return () => {
-                runtime.runFork(Scope.close(scope, Exit.void));
-              };
-              // eslint-disable-next-line react-hooks/exhaustive-deps
-            }, [localRuntime, runtime, emitter, ...finalDeps]);
-
-            // return null as unknown as 
-            return emitter.emit as IsUnknown<T> extends true
-              ? () => Promise<Fallback<A1, A>>
-              : (value: Fallback<T1, T>) => Promise<Fallback<A1, A>>;
-          })
-          // )
-        )
-      )
+    const runtime = getRuntime<R, R1>(
+      targetOrEffect,
+      localContext,
+      localRuntime
     );
+    const fnRef = React.useRef(effectFn);
+
+    React.useEffect(() => {
+      fnRef.current = effectFn;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [localRuntime, runtime, ...finalDeps]);
+
+    const emitter = React.useMemo(
+      () => new EventEmitter<Sanitize<T> | T1, A | A1>(),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [localRuntime, runtime, ...finalDeps]
+    );
+    const stream = React.useMemo(
+      () =>
+        pipe(
+          Stream.fromAsyncIterable(createAsyncIterator(emitter), () => {}),
+          Stream.mapEffect(({ data, eventId }) =>
+            pipe(
+              fnRef.current(data),
+              Effect.tap((v) => emitter.resolve(eventId)(v))
+            )
+          ),
+          Stream.runDrain
+        ),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [localRuntime, runtime, ...finalDeps]
+    );
+
+    React.useEffect(() => {
+      const scope = Effect.runSync(Scope.make());
+      runtime.runFork(stream.pipe(Effect.forkScoped, Scope.extend(scope)));
+      return () => {
+        runtime.runFork(Scope.close(scope, Exit.void));
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [localRuntime, runtime, emitter, ...finalDeps]);
+
+    return emitter.emit as IsUnknown<Fallback<T1, Sanitize<T>>> extends true
+      ? () => Promise<Fallback<A1, A>>
+      : (value: Fallback<T1, Sanitize<T>>) => Promise<Fallback<A1, A>>;
+  };
 
 /*
 This hook is used to run an effect in a runtime.
@@ -335,42 +355,27 @@ const createRun =
       | Effect.Effect<A, E, Fallback<R1, R> | Scope.Scope>
       | React.DependencyList,
     deps: React.DependencyList = []
-  ) =>
-    pipe(
-      Array.isArray(effectOrDeps) ? effectOrDeps : deps,
-      pipe(
-        (Effect.isEffect(targetOrEffect) &&
-        !ManagedRuntime.isManagedRuntime(targetOrEffect)
-          ? targetOrEffect
-          : Effect.isEffect(effectOrDeps)
-            ? effectOrDeps
-            : Effect.void) as Effect.Effect<A, E, R | R1>,
-        pipe(
-          (isReactContext<RuntimeContext<R1>>(targetOrEffect)
-            ? targetOrEffect !== localContext
-              ? React.use(targetOrEffect)
-              : localRuntime
-            : ManagedRuntime.isManagedRuntime(targetOrEffect)
-              ? targetOrEffect
-              : localRuntime) as RuntimeInstance<R | R1>,
-          // pipe(
-          //   localRuntime as RuntimeInstance<R | R1>,
-          createHook((runtime, effect, finalDeps) => {
-            React.useEffect(() => {
-              const scope = Effect.runSync(Scope.make());
-              runtime.runFork(
-                effect.pipe(Effect.forkScoped, Scope.extend(scope))
-              );
-              return () => {
-                runtime.runFork(Scope.close(scope, Exit.void));
-              };
-              // eslint-disable-next-line react-hooks/exhaustive-deps
-            }, [localRuntime, runtime, ...finalDeps]);
-          })
-          // )
-        )
-      )
+  ) => {
+    const finalDeps = getDeps(effectOrDeps, deps);
+    const effect = getEffect<Effect.Effect<A, E, R | R1>>(
+      targetOrEffect,
+      effectOrDeps
     );
+    const runtime = getRuntime<R, R1>(
+      targetOrEffect,
+      localContext,
+      localRuntime
+    );
+
+    React.useEffect(() => {
+      const scope = Effect.runSync(Scope.make());
+      runtime.runFork(effect.pipe(Effect.forkScoped, Scope.extend(scope)));
+      return () => {
+        runtime.runFork(Scope.close(scope, Exit.void));
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [localRuntime, runtime, ...finalDeps]);
+  };
 
 const createUse =
   <R,>(localContext: RuntimeContext<R>, localRuntime: RuntimeInstance<R>) =>
@@ -381,60 +386,23 @@ const createUse =
       | Effect.Effect<A, E, R>,
     effectOrDeps?: Effect.Effect<A, E, Fallback<R1, R>> | React.DependencyList,
     deps: React.DependencyList = []
-  ) =>
-    pipe(
-      Array.isArray(effectOrDeps) ? effectOrDeps : deps,
-      pipe(
-        (Effect.isEffect(targetOrEffect) &&
-        !ManagedRuntime.isManagedRuntime(targetOrEffect)
-          ? targetOrEffect
-          : Effect.isEffect(effectOrDeps)
-            ? effectOrDeps
-            : Effect.void) as Effect.Effect<A, E, R | R1>,
-        pipe(
-          (isReactContext<RuntimeContext<R1>>(targetOrEffect)
-            ? targetOrEffect !== localContext
-              ? React.use(targetOrEffect)
-              : localRuntime
-            : ManagedRuntime.isManagedRuntime(targetOrEffect)
-              ? targetOrEffect
-              : localRuntime) as RuntimeInstance<R | R1>,
-          // pipe(
-          // localRuntime as RuntimeInstance<R | R1>,
-          createHook((runtime, effect, finalDeps) => {
-            return React.useMemo(
-              () => runtime.runSync(effect),
-              // eslint-disable-next-line react-hooks/exhaustive-deps
-              [localRuntime, runtime, ...finalDeps]
-            );
-          })
-          // )
-        )
-      )
+  ) => {
+    const finalDeps = getDeps(effectOrDeps, deps);
+    const effect = getEffect<Effect.Effect<A, E, R | R1>>(
+      targetOrEffect,
+      effectOrDeps
     );
-
-function createHook<
-  R,
-  R1,
-  TResult,
-  TEffect extends
-    | Effect.Effect<any, any, any>
-    | ((...args: any[]) => Effect.Effect<any, any, any>),
->(
-  operation: (
-    runtime: RuntimeInstance<R> | RuntimeInstance<R1>,
-    effect: TEffect,
-    deps: React.DependencyList
-  ) => TResult
-) {
-  // return (localRuntime: RuntimeInstance<R>) => {
-  return (runtime: RuntimeInstance<R> | RuntimeInstance<R1>) =>
-    (effect: TEffect) =>
-    (deps: React.DependencyList) => {
-      return operation(runtime, effect, deps);
-    };
-  // };
-}
+    const runtime = getRuntime<R, R1>(
+      targetOrEffect,
+      localContext,
+      localRuntime
+    );
+    return React.useMemo(
+      () => runtime.runSync(effect),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [localRuntime, runtime, ...finalDeps]
+    );
+  };
 
 /* eslint-enable @typescript-eslint/no-explicit-any */
 

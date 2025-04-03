@@ -1,19 +1,17 @@
 import * as React from 'react';
+import { pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { MdOutlineDelete } from 'react-icons/md';
 import { IconButton } from 'common/components/IconButton/IconButton';
 import { Radio } from 'common/components/Radio/Radio';
 import { Stack } from 'common/components/Stack/Stack';
 import { TextInput } from 'common/components/TextInput/TextInput';
-// import { useRuntimeFn } from 'common/hooks/useRuntimeFn/useRuntimeFn';
 import type { Publishable } from 'common/utils/event';
 import {
   updateEndpointRequested as updateEndpoint,
   removeEndpointRequested as removeEndpoint,
   selectEndpointRequested as selectEndpoint,
 } from 'models/endpoint/EndpointEvents';
-// import { AppRuntime } from 'modules/App/App.runtime';
-// import * as AppTags from 'modules/App/tags';
 import type { EndpointEntity } from '../effect/entities/Endpoint.entity';
 import styles from './EndpointListItem.module.css';
 
@@ -25,18 +23,15 @@ const classNames = {
   root: styles.EndpointListItem,
 };
 
-export const EndpointListItem = observer(EndpointListItemView);
+export const EndpointListItem = pipe(observer(EndpointListItemView));
 
 /**
  * This component is responsible for rendering a single endpoint item in the list.
  * It normalizes the behavior of the input across OSes and browsers.
  * It also provides a way to select, update, and remove the endpoint.
  */
-export function EndpointListItemView({ endpoint, publish }: Props) {
-  const { getChecked, getUrl, select, update, remove } = useEndpointListItem({
-    endpoint,
-    publish,
-  });
+function EndpointListItemView(props: Props) {
+  const vm = useEndpointListItem(props);
 
   return (
     <Stack
@@ -44,19 +39,19 @@ export function EndpointListItemView({ endpoint, publish }: Props) {
       component='li'
     >
       <Radio
-        getValue={getChecked}
-        name={`select_${endpoint.id}`}
-        onChange={select}
+        getValue={vm.getChecked}
+        name={`select_${vm.id}`}
+        onChange={vm.select}
       />
       <TextInput
         className={styles.TextField}
-        getValue={getUrl}
-        onChange={update}
+        getValue={vm.getUrl}
+        onChange={vm.update}
       />
       <IconButton
         aria-label='delete'
         className={styles.Button}
-        onClick={remove}
+        onClick={vm.remove}
         size='xl'
         variant='subtle'
       >
@@ -66,7 +61,8 @@ export function EndpointListItemView({ endpoint, publish }: Props) {
   );
 }
 
-const useEndpointListItem = ({ endpoint: { id, url }, publish }: Props) => {
+const useEndpointListItem = ({ endpoint, publish }: Props) => {
+  const { id } = endpoint;
   const remove = React.useCallback(
     () => publish(removeEndpoint(id)),
     [publish, id]
@@ -82,12 +78,12 @@ const useEndpointListItem = ({ endpoint: { id, url }, publish }: Props) => {
     [publish, id]
   );
 
-  const getUrl = React.useCallback(() => url, [url]);
+  // properties that change cannot be dereferenced outside of the callback
+  // this is not a problem because we never destroy the proxies so the references are stable
+  const getUrl = React.useCallback(() => endpoint.url, [endpoint]);
   const getChecked = React.useCallback(() => false, []);
-  return { getChecked, getUrl, remove, select, update };
+  return { getChecked, getUrl, id, remove, select, update };
 };
-
-// TODO: think about an abstract VM class as well as separating the methods from the properties, because the methods only rely on publish and threfore it makes more sense to share a single class instance between all list item components.
 
 // const store = useRuntimeSync(EndpointPanelRuntime, Tags.EndpointStore);
 //
