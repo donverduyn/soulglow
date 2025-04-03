@@ -1,15 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { ColorSchemeDecorator } from '_storybook/decorators/ColorSchemeDecorator';
-import { RuntimeDecorator } from '_storybook/decorators/RuntimeDecorator';
 import { ThemeDecorator } from '_storybook/decorators/ThemeDecorator';
 import { theme } from 'config/theme';
 import { createEndpoint } from 'models/endpoint/Endpoint';
-import { AppRuntime } from 'modules/App/App.runtime';
 import { EndpointListItem } from './EndpointListItem';
 
 const meta: Meta<typeof EndpointListItem> = {
   component: EndpointListItem,
-  decorators: [RuntimeDecorator(AppRuntime)],
   parameters: {
     a11y: { test: 'todo' },
     layout: 'centered',

@@ -54,8 +54,18 @@ const hoistBlackList = {
 
 export function copyStaticProperties(
   base: Record<string, unknown>,
-  target: Record<string, unknown>
+  target: unknown
 ) {
+  // const properties = Object.entries(base).reduce<Record<string, unknown>>(
+  //   (acc, [key, value]) => {
+  //     if (!hoistBlackList[key as keyof typeof hoistBlackList]) {
+  //       acc[key] = value;
+  //     }
+  //     return acc;
+  //   },
+  //   {}
+  // );
+  // Object.assign(target, properties);
   Object.keys(base).forEach(function (key) {
     if (!hoistBlackList[key as keyof typeof hoistBlackList]) {
       Object.defineProperty(

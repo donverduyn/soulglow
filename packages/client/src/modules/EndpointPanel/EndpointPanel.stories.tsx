@@ -8,11 +8,9 @@ import { v4 as uuid } from 'uuid';
 import { defineEndpointFactory, dynamic } from '__generated/gql/fabbrica';
 import { mockEndpointPanelEndpointByIdQuery } from '__generated/gql/mocks.msw';
 import { ColorSchemeDecorator } from '_storybook/decorators/ColorSchemeDecorator';
-import { RuntimeDecorator } from '_storybook/decorators/RuntimeDecorator';
 import { ThemeDecorator } from '_storybook/decorators/ThemeDecorator';
 import type { ExtendArgs } from '_storybook/utils/args';
 import { prettierForSourceInDev } from '_storybook/utils/parameters';
-import { AppRuntime } from 'modules/App/App.runtime';
 import { EndpointListItemView } from './components/EndpointListItem';
 import { EndpointPanel, EndpointPanelView } from './EndpointPanel';
 
@@ -54,17 +52,15 @@ const meta: Meta<ExtendArgs<typeof EndpointPanel>> = {
     labels: { table: { disable: true } },
   },
 
-  args: { labels: EndpointPanel.labels },
+  args: { id: 'endpoint:1', labels: EndpointPanel.labels },
   component: EndpointPanelView,
-  decorators: [RuntimeDecorator(AppRuntime)],
+  // decorators: [RuntimeDecorator(AppRuntime)],
   parameters: {
     a11y: { test: 'todo' },
     docs: prettierForSourceInDev(),
     layout: 'centered',
   },
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error since storybook 8.6
-  render: EndpointPanel,
+  render: ({ id }) => <EndpointPanel id={id} />,
   subcomponents: { EndpointListItemView } as Record<
     string,
     ComponentType<unknown>

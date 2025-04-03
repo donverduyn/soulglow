@@ -45,7 +45,6 @@ export const EndpointListItem = pipe(
  */
 export function EndpointListItemView(props: Props) {
   const vm = useEndpointListItem(props);
-
   return (
     <Stack
       classNames={classNames}

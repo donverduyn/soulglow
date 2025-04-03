@@ -28,6 +28,7 @@ type Props = {
 type Config = {
   componentName: string;
   debug: boolean;
+  factory: <T>(layer: Layer.Layer<T>, id: string) => RuntimeInstance<T> | null;
   postUnmountTTL: number;
 };
 
@@ -48,6 +49,63 @@ type Fallback<T, U> = [T, U] extends [infer A, infer B]
     ? B
     : A
   : never;
+
+const UPSTREAM_KEY = '__runtimes';
+
+export const WithUpstream =
+  <R,>(Context: RuntimeContext<R>) =>
+  <C extends React.FC<any>>(Component: C): C => {
+    const { layer } = Context as unknown as {
+      layer: Layer.Layer<R>;
+    };
+
+    const meta = extractMeta(Component);
+    const existing = (meta[UPSTREAM_KEY as keyof typeof meta] ??
+      []) as RuntimeContext<any>[];
+    const base = Object.assign({}, meta, {
+      [UPSTREAM_KEY]: existing.concat(Context),
+    });
+
+    const Wrapper = (
+      props: React.ComponentProps<C> & {
+        readonly __render: (cmp: C) => React.ElementType | null;
+      }
+    ) => {
+      const { __render, ...rest } = props;
+      const finalRender = (__render ?? (() => null)) as (
+        cmp: C,
+        props: React.ComponentProps<C>
+      ) => React.ReactNode | null;
+
+      const upstream = React.use(Context);
+      const config: Config = {
+        componentName: getDisplayName(Component, 'WithUpStream'),
+        debug: false,
+        factory: upstream
+          ? () => null
+          : (layer, id) => Object.assign(ManagedRuntime.make(layer), { id }),
+        postUnmountTTL: 1000,
+      };
+
+      // we always create a new runtime, but use an inert factory to prevent instantiation
+      // because we can't guarantee the number of hook calls otherwise.
+      const runtime = useRuntimeInstance(layer, config);
+      const Result = finalRender(Component, props);
+
+      return upstream ? (
+        (Result ?? <Component {...(rest as React.ComponentProps<C>)} />)
+      ) : (
+        // this is the fallback for testing/storybook
+        <Context.Provider value={runtime!}>
+          {Result ?? <Component {...(rest as React.ComponentProps<C>)} />}
+        </Context.Provider>
+      );
+    };
+
+    copyStaticProperties(base, Wrapper);
+    Wrapper.displayName = getDisplayName(Component, 'WithUpstream');
+    return Wrapper as C;
+  };
 
 export function WithRuntime<TTarget, TProps, C extends React.FC<any>>(
   Context: RuntimeContext<TTarget>,
@@ -85,8 +143,10 @@ export function WithRuntime<
     props: Partial<FallbackProps<C, Props>>
   ) => TProps
 ) {
-  return (Component?: C) => {
-    const Wrapped: React.FC<Partial<FallbackProps<C, Props>>> = (props) => {
+  return (Component?: C & { __runtimes?: RuntimeContext<any>[] }) => {
+    const Wrapper: React.FC<Partial<FallbackProps<C, Props>>> = (props) => {
+      // const contexts = Component?.__runtimes ?? [];
+      const withUpstreamCtx = Component?.__runtimes !== undefined;
       const { layer } = Context as unknown as {
         layer: Layer.Layer<TTarget>;
       };
@@ -97,6 +157,10 @@ export function WithRuntime<
         const config: Config = {
           componentName: getDisplayName(Component, 'WithRuntime'),
           debug: false,
+          factory: (layer, id) =>
+            Object.assign(ManagedRuntime.make(layer), {
+              id,
+            }),
           postUnmountTTL: 1000,
         };
 
@@ -110,10 +174,10 @@ export function WithRuntime<
               runtimeRef = upstream ?? runtime;
               upstreamRef = upstream ?? null;
               return {
-                runtime: upstream ?? runtime,
-                use: createUse(Context, runtime),
-                useFn: createFn(Context, runtime),
-                useRun: createRun(Context, runtime),
+                runtime: upstream ?? runtime!,
+                use: createUse(Context, runtime!),
+                useFn: createFn(Context, runtime!),
+                useRun: createRun(Context, runtime!),
               };
             }, props)
           : undefined;
@@ -127,18 +191,41 @@ export function WithRuntime<
       }, [layer, props]);
 
       const [source, runtime, hasUpstreamInstance] = createSource();
-      const mergedProps = getSource ? Object.assign(source, props) : props;
+
+      // this allows context injection when withUpstreamCtx is true
+      const __render = React.useCallback(
+        (Previous: C, props: React.ComponentProps<C>) => {
+          // nothing to inject from withRuntime
+          if (hasUpstreamInstance) return <Previous {...props} />;
+          return (
+            <Context.Provider value={runtime!}>
+              <Previous {...props} />
+            </Context.Provider>
+          );
+        },
+        [hasUpstreamInstance, runtime]
+      );
+
+      const mergedProps = getSource
+        ? Object.assign(source, props, { __render })
+        : Object.assign({}, props, { __render });
+
       const children =
         createElement(Component, mergedProps) ??
         (props.children as React.ReactNode) ??
         null;
+
+      // we already render the context inside the __render function
+      // whenever withUpstreamCtx is true
+      if (withUpstreamCtx) return children;
       if (hasUpstreamInstance) return children;
-      return <Context.Provider value={runtime}>{children}</Context.Provider>;
+      return <Context.Provider value={runtime!}>{children}</Context.Provider>;
     };
-    Wrapped.displayName = getDisplayName(Component, 'WithRuntime');
     const meta = Component ? extractMeta(Component) : {};
-    copyStaticProperties(meta, Wrapped as unknown as Record<string, unknown>);
-    return React.memo(Object.assign(Wrapped, meta));
+    const MemoWrapper = React.memo(Wrapper);
+    MemoWrapper.displayName = getDisplayName(Component, 'WithRuntime');
+    copyStaticProperties(meta, MemoWrapper);
+    return MemoWrapper;
   };
 }
 
@@ -177,9 +264,10 @@ const printLog = (config: Config, message: string) => {
 const createRuntime = memoize(
   <T,>(layer: Layer.Layer<T>, runtimeId: string, config: Config) => {
     printLog(config, `creating runtime ${runtimeId}`);
-    return Object.assign(ManagedRuntime.make(layer), {
-      id: runtimeId,
-    }) as RuntimeInstance<T>;
+    const instance = config.factory(layer, runtimeId);
+    return instance
+      ? (Object.assign(instance, { id: runtimeId }) as RuntimeInstance<T>)
+      : null;
   },
   // this prevents a second instantiation in strict mode inside the useState function, which gets disposed immediately, and it since it has no side effects, we are safe.
   { isShallowEqual: true, maxAge: 100, maxArgs: 2 }
@@ -217,7 +305,7 @@ const useRuntimeInstance = <T,>(layer: Layer.Layer<T>, config: Config) => {
 
     return () => {
       printLog(config, `disposing runtime ${runtimeId.current}`);
-      setTimeout(() => void runtime.dispose(), 0);
+      setTimeout(() => runtime && void runtime.dispose(), 0);
       shouldCreate.current = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -324,9 +412,10 @@ const createFn =
 
     React.useEffect(() => {
       const scope = Effect.runSync(Scope.make());
-      runtime.runFork(stream.pipe(Effect.forkScoped, Scope.extend(scope)));
+      if (runtime)
+        runtime.runFork(stream.pipe(Effect.forkScoped, Scope.extend(scope)));
       return () => {
-        runtime.runFork(Scope.close(scope, Exit.void));
+        if (runtime) runtime.runFork(Scope.close(scope, Exit.void));
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [localRuntime, runtime, emitter, ...finalDeps]);

@@ -3,7 +3,7 @@ import { Effect, pipe, Context } from 'effect';
 import type { RuntimeFiber } from 'effect/Fiber';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'common/components/Button/Button';
-import { WithRuntime } from 'common/components/hoc/withRuntime';
+import { WithRuntime, WithUpstream } from 'common/components/hoc/withRuntime';
 import { WithStatic } from 'common/components/hoc/withStatic';
 import { List } from 'common/components/List/List';
 import { Stack } from 'common/components/Stack/Stack';
@@ -33,6 +33,7 @@ const labels = createLabels<Labels<Locales>>()(['addEndpointLabel']);
 export const EndpointPanel = pipe(
   observer(EndpointPanelView),
   WithStatic({ labels }),
+  WithUpstream(AppRuntime),
   WithRuntime(EndpointPanelRuntime, (configure, props) => {
     const λ = configure({ debug: true });
     const store = λ.use(Tags.EndpointStore);
