@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Effect, pipe, Context, Ref } from 'effect';
+import { Effect, pipe, Context } from 'effect';
 import type { RuntimeFiber } from 'effect/Fiber';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'common/components/Button/Button';
@@ -37,15 +37,6 @@ export const EndpointPanel = pipe(
     const λ = configure({ debug: true });
     const store = λ.use(Tags.EndpointStore);
 
-    // const logProps = λ.useFn(
-    //   () =>
-    //     Effect.gen(function* () {
-    //       yield* Effect.sleep(1000);
-    //       yield* Console.log(props);
-    //     }).pipe(Effect.forkScoped),
-    //   [props]
-    // );
-
     const publish = λ.useFn((e: EventType<unknown>) =>
       Effect.andThen(Tags.EventBus, (bus) => bus.publish(e))
     );
@@ -62,16 +53,14 @@ export const EndpointPanel = pipe(
     );
 
     λ.useRun(
-      Effect.andThen(
-        Tags.InitializerRef,
-        Ref.update(({ componentId }) => ({
-          componentId: props.id ?? componentId,
-          initialized: true,
+      Effect.andThen(Tags.Initializer, (initializer) =>
+        initializer.setup({
+          componentId: props.id,
           publishCommand,
           publishQuery,
           register,
           runtimeId: λ.runtime.id,
-        }))
+        })
       ),
       [props.id, publishCommand, publishQuery, register, λ]
     );
@@ -86,22 +75,22 @@ export const EndpointPanel = pipe(
 export function EndpointPanelView({ store, publish }: Props) {
   const { addEndpoint, endpoints } = useEndpointPanel(store, publish);
   const { text } = useTranslation<Labels<Locales>>();
-
-  const renderList = React.useCallback(
-    () =>
-      endpoints.map((endpoint) => (
-        <EndpointListItem
-          key={endpoint.id}
-          endpoint={endpoint}
-        />
-      )),
-    [endpoints]
-  );
-
   return (
     <Stack className={styles.EndpointPanel}>
-      <List render={renderList} />
-      <Button onClick={addEndpoint}>{text(labels.addEndpointLabel)}</Button>
+      <List>
+        {endpoints.map((endpoint) => (
+          <EndpointListItem
+            key={endpoint.id}
+            endpoint={endpoint}
+          />
+        ))}
+      </List>
+      <Button
+        color='gray.0'
+        onClick={addEndpoint}
+      >
+        {text(labels.addEndpointLabel)}
+      </Button>
     </Stack>
   );
 }

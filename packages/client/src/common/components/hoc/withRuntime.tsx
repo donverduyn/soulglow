@@ -138,7 +138,7 @@ export function WithRuntime<
     Wrapped.displayName = getDisplayName(Component, 'WithRuntime');
     const meta = Component ? extractMeta(Component) : {};
     copyStaticProperties(meta, Wrapped as unknown as Record<string, unknown>);
-    return Object.assign(Wrapped, meta);
+    return React.memo(Object.assign(Wrapped, meta));
   };
 }
 

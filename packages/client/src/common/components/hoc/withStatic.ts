@@ -2,9 +2,15 @@ import type { Simplify } from 'type-fest';
 import { copyStaticProperties } from 'common/utils/react';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function WithStatic<T extends Record<any, any>>(staticProperties: T) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <C extends React.FC<any>>(Component: C) => {
+type WithStaticFn<T, C extends React.FC<any>> = (
+  Component: C
+) => React.FC<Simplify<React.ComponentProps<C>>> & T;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function WithStatic<C extends React.FC<any>, T extends Record<any, any>>(
+  staticProperties: T
+): WithStaticFn<T, C> {
+  return (Component: C) => {
     copyStaticProperties(
       staticProperties,
       Component as Record<string, unknown>

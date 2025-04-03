@@ -7,6 +7,7 @@ import type { QueryType } from 'common/utils/query';
 import type { EndpointEntity } from './effect/entities/Endpoint.entity';
 import type { EventBusService } from './effect/services/EventBus.service';
 import type { InboundBusService } from './effect/services/InboundBus.service';
+import type { InitializerService } from './effect/services/Initializer.service';
 
 const NAME = '@EndpointPanel';
 
@@ -36,13 +37,20 @@ export const createInitializerState = (
   return Object.assign({}, defaultInitializerState, overrides);
 };
 
-type Nullable<T> = {
-  [K in keyof T]: T[K] extends object ? Nullable<T[K]> | null : T[K] | null;
+export type Nullable<T> = {
+  [K in keyof T]: T[K] extends object
+    ? Nullable<T[K]> | null
+    : T[K] | null | undefined;
 };
 
 export class InitializerRef extends Context.Tag(`${NAME}/InitializerRef`)<
   InitializerRef,
   SubscriptionRef.SubscriptionRef<InitializerState | Nullable<InitializerState>>
+>() {}
+
+export class Initializer extends Context.Tag(`${NAME}/Initializer`)<
+  Initializer,
+  InitializerService
 >() {}
 
 export class InboundBus extends Context.Tag(`${NAME}/InboundBus`)<

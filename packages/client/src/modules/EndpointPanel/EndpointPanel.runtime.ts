@@ -15,6 +15,7 @@ import type { EventType } from 'common/utils/event';
 import { endpointStoreLayer } from './effect/layers/EndpointStore.layer';
 import { EventBusService } from './effect/services/EventBus.service';
 import { InboundBusService } from './effect/services/InboundBus.service';
+import { InitializerService } from './effect/services/Initializer.service';
 import * as Tags from './tags';
 
 const eventBusChannel = Layer.effect(
@@ -158,7 +159,16 @@ export const EndpointPanelRuntime = pipe(
   Layer.merge(inboundBus),
   Layer.provide(inboundBusChannel),
 
-  Layer.provideMerge(
+  Layer.merge(
+    Layer.effect(
+      Tags.Initializer,
+      Effect.gen(function* () {
+        const ref = yield* Tags.InitializerRef;
+        return new InitializerService(ref);
+      })
+    )
+  ),
+  Layer.provide(
     Layer.effect(
       Tags.InitializerRef,
       SubscriptionRef.make(Tags.createInitializerState())
