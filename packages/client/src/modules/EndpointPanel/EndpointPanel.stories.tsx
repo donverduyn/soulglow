@@ -8,11 +8,13 @@ import { v4 as uuid } from 'uuid';
 import { defineEndpointFactory, dynamic } from '__generated/gql/fabbrica';
 import { mockEndpointPanelEndpointByPkQuery } from '__generated/gql/mocks.msw';
 import { ColorSchemeDecorator } from '_storybook/decorators/ColorSchemeDecorator';
+import { RuntimeDecorator } from '_storybook/decorators/RuntimeDecorator';
 import { ThemeDecorator } from '_storybook/decorators/ThemeDecorator';
 import type { ExtendArgs } from '_storybook/utils/args';
 import { prettierForSourceInDev } from '_storybook/utils/parameters';
 import { EndpointListItemView } from './components/EndpointListItem';
 import { EndpointPanel, EndpointPanelView } from './EndpointPanel';
+import { AppRuntime } from 'modules/App/App.runtime';
 
 // TODO: move this to a shared location, because it is domain agnostic
 const endpointFactory = defineEndpointFactory({
@@ -54,7 +56,7 @@ const meta: Meta<ExtendArgs<typeof EndpointPanel>> = {
 
   args: { id: 'endpoint:1', labels: EndpointPanel.labels },
   component: EndpointPanelView,
-  // decorators: [RuntimeDecorator(AppRuntime)],
+  decorators: [RuntimeDecorator(AppRuntime)],
   parameters: {
     a11y: { test: 'todo' },
     docs: prettierForSourceInDev(),
