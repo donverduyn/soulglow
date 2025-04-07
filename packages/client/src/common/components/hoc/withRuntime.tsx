@@ -28,7 +28,7 @@ type Props = {
 type Config = {
   componentName: string;
   debug: boolean;
-  factory: <T>(layer: Layer.Layer<T>, id: string) => RuntimeInstance<T> | null;
+  // factory: <T>(layer: Layer.Layer<T>, id: string) => RuntimeInstance<T>;
   postUnmountTTL: number;
 };
 
@@ -133,10 +133,6 @@ export function withRuntime<TTarget, C extends React.FC<any>>(
 //
 // the goal is to have a utility that allows us to reuse the logic between the withRuntime hoc and the Runtime component that takes the runtime as a prop. Later on we might want to consider the Runtime component to be used in JSX in more scenarios, but for now it is limited to usage in storybook decorators
 
-type RenderFn<C extends React.FC<any>> = {
-  __render?: (cmp: C, props: React.ComponentProps<C>) => React.ReactNode | null;
-};
-
 export function withRuntime<
   C extends React.FC<any>,
   TTarget,
@@ -148,10 +144,8 @@ export function withRuntime<
     props: Partial<FallbackProps<C, Props>>
   ) => TProps
 ) {
-  return (Component?: C & { __runtimes?: RuntimeContext<any>[] }) => {
-    const Wrapper: React.FC<Partial<FallbackProps<C, Props> & RenderFn<C>>> = (
-      props
-    ) => {
+  return (Component?: C) => {
+    const Wrapper: React.FC<Partial<FallbackProps<C, Props>>> = (props) => {
       // const contexts = Component?.__runtimes ?? [];
       // const currentRender = props.__render as RenderFn<C>['__render'];
       // const withUpstreamCtx = Component?.__runtimes !== undefined;
@@ -165,10 +159,6 @@ export function withRuntime<
         const config: Config = {
           componentName: getDisplayName(Component, 'WithRuntime'),
           debug: false,
-          factory: (layer, id) =>
-            Object.assign(ManagedRuntime.make(layer), {
-              id,
-            }),
           postUnmountTTL: 1000,
         };
 
@@ -179,14 +169,13 @@ export function withRuntime<
 
               // eslint-disable-next-line react-hooks/rules-of-hooks
               const runtime = upstream ?? useRuntimeInstance(layer, safeConfig);
-              // console.log('withRuntime', config.componentName, runtime.id);
               runtimeRef = upstream ?? runtime;
               upstreamRef = upstream ?? null;
               return {
-                runtime: upstream ?? runtime!,
-                use: createUse(Context, runtime!),
-                useFn: createFn(Context, runtime!),
-                useRun: createRun(Context, runtime!),
+                runtime: upstream ?? runtime,
+                use: createUse(Context, runtime),
+                useFn: createFn(Context, runtime),
+                useRun: createRun(Context, runtime),
               };
             }, props)
           : undefined;
@@ -244,14 +233,9 @@ export function withRuntime<
         createElement(Component, mergedProps) ??
         (props.children as React.ReactNode) ??
         null;
-
-      // we already render the context inside the __render function
-      // whenever withUpstreamCtx is true
-      // console.log('withUpstreamCtx', withUpstreamCtx);
-      // if (withUpstreamCtx) return children;
       if (hasUpstreamInstance) return children;
       // return children;
-      return <Context.Provider value={runtime!}>{children}</Context.Provider>;
+      return <Context.Provider value={runtime}>{children}</Context.Provider>;
     };
     const meta = Component ? extractMeta(Component) : {};
     const MemoWrapper = React.memo(Wrapper);
@@ -296,10 +280,8 @@ const printLog = (config: Config, message: string) => {
 const createRuntime = memoize(
   <T,>(layer: Layer.Layer<T>, runtimeId: string, config: Config) => {
     printLog(config, `creating runtime ${runtimeId}`);
-    const instance = config.factory(layer, runtimeId);
-    return instance
-      ? (Object.assign(instance, { id: runtimeId }) as RuntimeInstance<T>)
-      : null;
+    const instance = ManagedRuntime.make(layer);
+    return Object.assign(instance, { id: runtimeId }) as RuntimeInstance<T>;
   },
   // this prevents a second instantiation in strict mode inside the useState function, which gets disposed immediately, and it since it has no side effects, we are safe.
   { isShallowEqual: true, maxAge: 100, maxArgs: 2 }
@@ -337,7 +319,7 @@ const useRuntimeInstance = <T,>(layer: Layer.Layer<T>, config: Config) => {
 
     return () => {
       printLog(config, `disposing runtime ${runtimeId.current}`);
-      setTimeout(() => runtime && void runtime.dispose(), 0);
+      setTimeout(() => void runtime.dispose(), 0);
       shouldCreate.current = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -419,7 +401,7 @@ const createFn =
     React.useEffect(() => {
       fnRef.current = effectFn;
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [localRuntime, runtime, ...finalDeps]);
+    }, [localRuntime, runtime, effectFn, ...finalDeps]);
 
     const emitter = React.useMemo(
       () => new EventEmitter<Sanitize<T> | T1, A | A1>(),
@@ -444,10 +426,9 @@ const createFn =
 
     React.useEffect(() => {
       const scope = Effect.runSync(Scope.make());
-      if (runtime)
-        runtime.runFork(stream.pipe(Effect.forkScoped, Scope.extend(scope)));
+      runtime.runFork(stream.pipe(Effect.forkScoped, Scope.extend(scope)));
       return () => {
-        if (runtime) runtime.runFork(Scope.close(scope, Exit.void));
+        runtime.runFork(Scope.close(scope, Exit.void));
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [localRuntime, runtime, emitter, ...finalDeps]);
@@ -492,11 +473,9 @@ const createRun =
 
     React.useEffect(() => {
       const scope = Effect.runSync(Scope.make());
-      if (!runtime) console.log('no runtime useRun');
-      if (runtime)
-        runtime.runFork(effect.pipe(Effect.forkScoped, Scope.extend(scope)));
+      runtime.runFork(effect.pipe(Effect.forkScoped, Scope.extend(scope)));
       return () => {
-        if (runtime) runtime.runFork(Scope.close(scope, Exit.void));
+        runtime.runFork(Scope.close(scope, Exit.void));
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [localRuntime, runtime, ...finalDeps]);
