@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as Storybook from '_storybook/utils/decorator';
-import { WithRuntime } from 'common/components/hoc/withRuntime';
+import { withRuntime } from 'common/components/hoc/withRuntime';
 import { createRuntimeContext } from 'common/utils/context';
 
 // TODO: think about the right place to couple the WithRuntime HOC to the storybook specific implementations.
@@ -11,7 +11,7 @@ export const RuntimeDecorator = <
 >(
   runtime: R
 ) => {
-  const Enhanced = WithRuntime(runtime)();
+  const Enhanced = withRuntime(runtime)();
   return Storybook.createDecorator((Story) => (
     <Enhanced>
       <Story />

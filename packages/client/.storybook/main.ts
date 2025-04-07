@@ -39,7 +39,7 @@ const config: StorybookConfig = {
     name: getAbsolutePath('@storybook/react-vite'),
     options: {
       builder: { viteConfigPath: './.storybook/vite.config.ts' },
-      strictMode: true,
+      strictMode: false,
     },
   },
   // logLevel: 'debug',
@@ -126,7 +126,7 @@ const config: StorybookConfig = {
           viteStaticCopy({
             targets: [
               {
-                dest: '',
+                dest: 'locales',
                 src: path.resolve(__dirname, './../src/assets/locales/**/*'),
               },
             ],

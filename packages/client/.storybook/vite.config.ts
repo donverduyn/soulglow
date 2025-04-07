@@ -1,6 +1,6 @@
 import path from 'node:path';
 import react from '@vitejs/plugin-react-swc';
-import { defineConfig, UserConfig } from 'vite';
+import { defineConfig, UserConfig, type AliasOptions } from 'vite';
 import codegen from 'vite-plugin-graphql-codegen';
 import graphqlLoader from 'vite-plugin-graphql-loader';
 import tsconfigPaths from 'vite-tsconfig-paths';
@@ -11,6 +11,7 @@ import { config, internalHooks, internalPlugins } from './../codegen.client';
 // import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig((viteConfig: ViteUserConfig) => {
+  const isDev = viteConfig.mode === 'development';
   return mergeConfig(viteConfig, {
     plugins: [
       react(),
@@ -41,14 +42,10 @@ export default defineConfig((viteConfig: ViteUserConfig) => {
     // TODO: storybook refs only work using localhost, not 127.0.0.1?
     resolve: {
       alias: [
-        ...(viteConfig.mode === 'development'
-          ? [
-              {
-                find: 'i18n',
-                replacement: path.resolve(__dirname, './src/i18n.dev.ts'),
-              },
-            ]
-          : []),
+        isDev && {
+          find: 'i18n',
+          replacement: path.resolve(__dirname, '../src/i18n.dev.ts'),
+        },
         {
           find: /(.+)\.gql$/,
           replacement: '/src/__generated/gql/operations.ts',
@@ -59,7 +56,7 @@ export default defineConfig((viteConfig: ViteUserConfig) => {
           find: '@tabler/icons-react',
           replacement: '@tabler/icons-react/dist/esm/icons/index.mjs',
         },
-      ],
+      ].filter(Boolean) as AliasOptions,
     },
     server: {
       // host: '0.0.0.0',

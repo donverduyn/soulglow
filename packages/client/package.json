@@ -46,6 +46,7 @@
     "@tabler/icons-react": "3.31.0",
     "@urql/core": "^5.1.1",
     "@urql/exchange-graphcache": "^7.2.3",
+    "@urql/exchange-populate": "^1.2.1",
     "clsx": "^2.1.1",
     "culori": "^4.0.1",
     "dayjs": "^1.11.11",
@@ -69,6 +70,7 @@
     "recharts": "^2.15.1",
     "remeda": "^2.21.0",
     "scheduler": "^0.25.0",
+    "urql": "^4.2.2",
     "uuid": "^11.1.0",
     "ws": "^8.18.1"
   },

@@ -1,0 +1,7 @@
+query EndpointPanel_EndpointByPk($id: uuid!) {
+  endpointByPk(id: $id) {
+    id
+    name
+    url
+  }
+}

@@ -1,0 +1,4 @@
+"""
+Directive for @urql/populate-exchange
+"""
+directive @populate on FIELD

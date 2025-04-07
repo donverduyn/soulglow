@@ -5,7 +5,7 @@ import { identity, pipe, Queue } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { State } from '__generated/api';
 import { Group } from 'common/components/Group/Group';
-import { WithRuntime as WithRuntime } from 'common/components/hoc/withRuntime';
+import { withRuntime as withRuntime } from 'common/components/hoc/withRuntime';
 import { WithStatic } from 'common/components/hoc/withStatic';
 import { NumberInput } from 'common/components/NumberInput/NumberInput';
 import { Paper } from 'common/components/Paper/Paper';
@@ -72,7 +72,7 @@ const colorInputs = [
 export const LightBulb = pipe(
   observer(LightBulbView),
   WithStatic({ labels }),
-  WithRuntime(LightBulbRuntime, (configure) => {
+  withRuntime(LightBulbRuntime, (configure) => {
     const runtime = configure();
 
     const handle = runtime.useFn(LightBulbRuntime, (body: Partial<Device>) =>

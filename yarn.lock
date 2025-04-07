@@ -4354,6 +4354,14 @@
     "@urql/core" "^5.1.1"
     wonka "^6.3.2"
 
+"@urql/exchange-populate@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@urql/exchange-populate/-/exchange-populate-1.2.1.tgz#7469b4f6eafa8fb5cce432b54dca02de166d7dd9"
+  integrity sha512-Wwnyi2MwEG6ZY2SQoaOyG1M/3hOhOPiuXIDt1ALE8gzlUxeTY1gZCQ/BaQt8UwIRWL+KVFUtrmlnO6Mk877xSQ==
+  dependencies:
+    "@urql/core" "^5.1.1"
+    wonka "^6.3.2"
+
 "@urql/introspection@^0.3.2":
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/@urql/introspection/-/introspection-0.3.3.tgz#5bcedfebd515161eecf9b193169c2765bf5674f1"
@@ -13462,6 +13470,14 @@ urlpattern-polyfill@^10.0.0:
   version "10.0.0"
   resolved "https://registry.yarnpkg.com/urlpattern-polyfill/-/urlpattern-polyfill-10.0.0.tgz#f0a03a97bfb03cdf33553e5e79a2aadd22cac8ec"
   integrity sha512-H/A06tKD7sS1O1X2SshBVeA5FLycRpjqiBeqGKmBwBDBy28EnRjORxTNe269KSSr5un5qyWi1iL61wLxpd+ZOg==
+
+urql@^4.2.2:
+  version "4.2.2"
+  resolved "https://registry.yarnpkg.com/urql/-/urql-4.2.2.tgz#e0852fe3bea377edaa616e6175dd39be2d4bf1da"
+  integrity sha512-3GgqNa6iF7bC4hY/ImJKN4REQILcSU9VKcKL8gfELZM8mM5BnLH1BsCc8kBdnVGD1LIFOs4W3O2idNHhON1r0w==
+  dependencies:
+    "@urql/core" "^5.1.1"
+    wonka "^6.3.2"
 
 use-callback-ref@^1.3.3:
   version "1.3.3"

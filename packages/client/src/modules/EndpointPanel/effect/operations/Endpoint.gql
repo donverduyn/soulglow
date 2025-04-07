@@ -1,4 +1,4 @@
-query EndpointPanel_EndpointList {
+query EndpointPanel_Endpoint {
   endpoint {
     id
     name

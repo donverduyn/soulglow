@@ -1,11 +1,13 @@
 import { Client, type AnyVariables, type TypedDocumentNode } from '@urql/core';
 import { fetchExchange } from '@urql/core';
 import { cacheExchange } from '@urql/exchange-graphcache';
+import { populateExchange } from '@urql/exchange-populate';
 import { pipe, Layer, Effect, PubSub, Stream, Console, Queue } from 'effect';
-import schema from '__generated/gql/introspection.urql.json';
+import type { IntrospectionQuery } from 'graphql';
+import schema from '__generated/gql/introspection.client.json';
 import {
-  EndpointPanel_EndpointById,
-  EndpointPanel_EndpointList,
+  EndpointPanel_EndpointByPk,
+  EndpointPanel_Endpoint,
 } from '__generated/gql/operations';
 import type { CommandType } from 'common/utils/command';
 import { createRuntimeContext } from 'common/utils/context';
@@ -131,20 +133,28 @@ export const AppRuntime = pipe(
   createRuntimeContext
 );
 
-const isCI = import.meta.env.CI === 'true';
+// const isCI = import.meta.env.CI === 'true';
+const inDev =
+  typeof process !== 'undefined' && process.env.REMOTE_CONTAINERS === 'true';
 
-const client = new Client({
-  exchanges: [cacheExchange({ schema }), fetchExchange],
+export const client = new Client({
+  exchanges: [
+    populateExchange({
+      schema: schema as unknown as IntrospectionQuery,
+    }),
+    cacheExchange({ schema }),
+    fetchExchange,
+  ],
   fetchOptions: () => ({
     headers: {
       'X-Hasura-Admin-Secret': 'admin_secret',
     },
   }),
-  url: `http://${isCI ? 'localhost' : 'hasura'}:8080/v1/graphql`,
+  url: `http://${inDev ? 'hasura' : 'localhost'}:8080/v1/graphql`,
 });
 
 export const runQuery = async () => {
-  const result = await client.query(EndpointPanel_EndpointList, {}).toPromise();
+  const result = await client.query(EndpointPanel_Endpoint, {}).toPromise();
   return result.data?.endpoint;
 };
 
@@ -163,6 +173,6 @@ const createMessage: MessageFactory = (document, variables) => ({
 });
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const test = createMessage(EndpointPanel_EndpointById, {
+const test = createMessage(EndpointPanel_EndpointByPk, {
   id: '123',
 });

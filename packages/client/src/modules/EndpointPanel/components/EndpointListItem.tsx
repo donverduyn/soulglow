@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Effect, pipe } from 'effect';
 import { observer } from 'mobx-react-lite';
 import { MdOutlineDelete } from 'react-icons/md';
-import { WithRuntime } from 'common/components/hoc/withRuntime';
+import { withRuntime } from 'common/components/hoc/withRuntime';
 import { IconButton } from 'common/components/IconButton/IconButton';
 import { Radio } from 'common/components/Radio/Radio';
 import { Stack } from 'common/components/Stack/Stack';
@@ -28,7 +28,7 @@ const classNames = {
 
 export const EndpointListItem = pipe(
   observer(EndpointListItemView),
-  WithRuntime(EndpointPanelRuntime, (configure) => {
+  withRuntime(EndpointPanelRuntime, (configure) => {
     const λ = configure();
     return {
       publish: λ.useFn((e: EventType<unknown>) =>

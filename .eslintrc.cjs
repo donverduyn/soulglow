@@ -17,7 +17,7 @@ module.exports = {
     // test environment
     {
       excludedFiles: ['./packages/**/*'],
-      files: ['.*/**/*.test.ts', './tests/**/*.ts}'],
+      files: ['.*/**/*.test.ts', './tests/**/*.ts}', '*.test.ts'],
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix
       env: { node: true },
       parserOptions: {

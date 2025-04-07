@@ -52,62 +52,63 @@ type Fallback<T, U> = [T, U] extends [infer A, infer B]
 
 const UPSTREAM_KEY = '__runtimes';
 
-export const WithUpstream =
-  <R,>(Context: RuntimeContext<R>) =>
-  <C extends React.FC<any>>(Component: C): C => {
-    const { layer } = Context as unknown as {
-      layer: Layer.Layer<R>;
-    };
+// export const WithUpstream =
+//   <R,>(Context: RuntimeContext<R>) =>
+//   <C extends React.FC<any>>(Component: C): C => {
+//     const { layer } = Context as unknown as {
+//       layer: Layer.Layer<R>;
+//     };
 
-    const meta = extractMeta(Component);
-    const existing = (meta[UPSTREAM_KEY as keyof typeof meta] ??
-      []) as RuntimeContext<any>[];
-    const base = Object.assign({}, meta, {
-      [UPSTREAM_KEY]: existing.concat(Context),
-    });
+//     const meta = extractMeta(Component);
+//     const existing = (meta[UPSTREAM_KEY as keyof typeof meta] ??
+//       []) as RuntimeContext<any>[];
+//     const base = Object.assign({}, meta, {
+//       [UPSTREAM_KEY]: existing.concat(Context),
+//     });
 
-    const Wrapper = (
-      props: React.ComponentProps<C> & {
-        readonly __render: (cmp: C) => React.ElementType | null;
-      }
-    ) => {
-      const { __render, ...rest } = props;
-      const finalRender = (__render ?? (() => null)) as (
-        cmp: C,
-        props: React.ComponentProps<C>
-      ) => React.ReactNode | null;
+//     const Wrapper = (
+//       props: React.ComponentProps<C> & {
+//         readonly __render: (cmp: C) => React.ElementType | null;
+//       }
+//     ) => {
+//       // console.log('withUpstream', props);
+//       const { __render, ...rest } = props;
+//       const finalRender = (__render ?? (() => null)) as (
+//         cmp: C,
+//         props: React.ComponentProps<C>
+//       ) => React.ReactNode | null;
 
-      const upstream = React.use(Context);
-      const config: Config = {
-        componentName: getDisplayName(Component, 'WithUpStream'),
-        debug: false,
-        factory: upstream
-          ? () => null
-          : (layer, id) => Object.assign(ManagedRuntime.make(layer), { id }),
-        postUnmountTTL: 1000,
-      };
+//       const upstream = React.use(Context);
+//       const config: Config = {
+//         componentName: getDisplayName(Component, 'WithUpStream'),
+//         debug: true,
+//         factory: upstream !== undefined
+//           ? () => null
+//           : (layer, id) => Object.assign(ManagedRuntime.make(layer), { id }),
+//         postUnmountTTL: 1000,
+//       };
 
-      // we always create a new runtime, but use an inert factory to prevent instantiation
-      // because we can't guarantee the number of hook calls otherwise.
-      const runtime = useRuntimeInstance(layer, config);
-      const Result = finalRender(Component, props);
+//       // we always create a new runtime, but use an inert factory to prevent instantiation
+//       // because we can't guarantee the number of hook calls otherwise.
+//       const runtime = useRuntimeInstance(layer, config);
+//       const Result = finalRender(Component, props);
 
-      return upstream ? (
-        (Result ?? <Component {...(rest as React.ComponentProps<C>)} />)
-      ) : (
-        // this is the fallback for testing/storybook
-        <Context.Provider value={runtime!}>
-          {Result ?? <Component {...(rest as React.ComponentProps<C>)} />}
-        </Context.Provider>
-      );
-    };
+//       return upstream !== undefined ? (
+//         (Result ?? <Component {...(rest as React.ComponentProps<C>)} />)
+//       ) : (
+//         // this is the fallback for testing/storybook
+//         <Context.Provider value={runtime!}>
+//           {Result ?? <Component {...(rest as React.ComponentProps<C>)} />}
+//         </Context.Provider>
+//       );
+//     };
 
-    copyStaticProperties(base, Wrapper);
-    Wrapper.displayName = getDisplayName(Component, 'WithUpstream');
-    return Wrapper as C;
-  };
+//     copyStaticProperties(base, Wrapper);
+//     Wrapper.displayName = getDisplayName(Component, 'WithUpstream');
+//     return Wrapper as C;
+//   };
 
-export function WithRuntime<TTarget, TProps, C extends React.FC<any>>(
+export function withRuntime<TTarget, TProps, C extends React.FC<any>>(
   Context: RuntimeContext<TTarget>,
   getSource: (
     runtimeFactory: (config?: Partial<Config>) => RuntimeApi<TTarget>,
@@ -119,7 +120,7 @@ export function WithRuntime<TTarget, TProps, C extends React.FC<any>>(
 ) => React.FC<Simplify<Omit<FallbackProps<C, Props>, keyof TProps>>> &
   Simplify<ExtractMeta<C>>;
 
-export function WithRuntime<TTarget, C extends React.FC<any>>(
+export function withRuntime<TTarget, C extends React.FC<any>>(
   Context: RuntimeContext<TTarget>,
   getSource?: (
     runtimeFactory: (config?: Partial<Config>) => RuntimeApi<TTarget>,
@@ -132,7 +133,11 @@ export function WithRuntime<TTarget, C extends React.FC<any>>(
 //
 // the goal is to have a utility that allows us to reuse the logic between the withRuntime hoc and the Runtime component that takes the runtime as a prop. Later on we might want to consider the Runtime component to be used in JSX in more scenarios, but for now it is limited to usage in storybook decorators
 
-export function WithRuntime<
+type RenderFn<C extends React.FC<any>> = {
+  __render?: (cmp: C, props: React.ComponentProps<C>) => React.ReactNode | null;
+};
+
+export function withRuntime<
   C extends React.FC<any>,
   TTarget,
   TProps extends Record<string, unknown> | undefined,
@@ -144,9 +149,12 @@ export function WithRuntime<
   ) => TProps
 ) {
   return (Component?: C & { __runtimes?: RuntimeContext<any>[] }) => {
-    const Wrapper: React.FC<Partial<FallbackProps<C, Props>>> = (props) => {
+    const Wrapper: React.FC<Partial<FallbackProps<C, Props> & RenderFn<C>>> = (
+      props
+    ) => {
       // const contexts = Component?.__runtimes ?? [];
-      const withUpstreamCtx = Component?.__runtimes !== undefined;
+      // const currentRender = props.__render as RenderFn<C>['__render'];
+      // const withUpstreamCtx = Component?.__runtimes !== undefined;
       const { layer } = Context as unknown as {
         layer: Layer.Layer<TTarget>;
       };
@@ -171,6 +179,7 @@ export function WithRuntime<
 
               // eslint-disable-next-line react-hooks/rules-of-hooks
               const runtime = upstream ?? useRuntimeInstance(layer, safeConfig);
+              // console.log('withRuntime', config.componentName, runtime.id);
               runtimeRef = upstream ?? runtime;
               upstreamRef = upstream ?? null;
               return {
@@ -193,22 +202,43 @@ export function WithRuntime<
       const [source, runtime, hasUpstreamInstance] = createSource();
 
       // this allows context injection when withUpstreamCtx is true
-      const __render = React.useCallback(
-        (Previous: C, props: React.ComponentProps<C>) => {
-          // nothing to inject from withRuntime
-          if (hasUpstreamInstance) return <Previous {...props} />;
-          return (
-            <Context.Provider value={runtime!}>
-              <Previous {...props} />
-            </Context.Provider>
-          );
-        },
-        [hasUpstreamInstance, runtime]
-      );
+      // const __render = React.useCallback(
+      //   (Previous: C, props: React.ComponentProps<C>) => {
+      // nothing to inject from withRuntime
+      // return currentRender
+      //   ? currentRender(
+      //       (() => {
+      //         if (hasUpstreamInstance) return <Previous {...props} />;
+      //         return (
+      //           <Context.Provider value={runtime!}>
+      //             <Previous {...props} />
+      //           </Context.Provider>
+      //         );
+      //       }) as unknown as C,
+      //       props
+      //     )
+      //   : null;
+      // return <Previous {...props} />
+      // return null;
+      // if (hasUpstreamInstance) return <Previous {...props} />;
+      //     return (
+      //       <Context.Provider value={runtime!}>
+      //         <div style={{ background: 'red' }}>
+      //           <Previous {...props} />
+      //         </div>
+      //       </Context.Provider>
+      //     );
+      //   },
+      //   [hasUpstreamInstance, runtime]
+      // );
+
+      // const mergedProps = getSource
+      //   ? Object.assign(source, props, { __render })
+      //   : Object.assign({}, props, { __render });
 
       const mergedProps = getSource
-        ? Object.assign(source, props, { __render })
-        : Object.assign({}, props, { __render });
+        ? Object.assign(source, props)
+        : Object.assign({}, props);
 
       const children =
         createElement(Component, mergedProps) ??
@@ -217,8 +247,10 @@ export function WithRuntime<
 
       // we already render the context inside the __render function
       // whenever withUpstreamCtx is true
-      if (withUpstreamCtx) return children;
+      // console.log('withUpstreamCtx', withUpstreamCtx);
+      // if (withUpstreamCtx) return children;
       if (hasUpstreamInstance) return children;
+      // return children;
       return <Context.Provider value={runtime!}>{children}</Context.Provider>;
     };
     const meta = Component ? extractMeta(Component) : {};
@@ -351,7 +383,7 @@ const getEffectFn = <T,>(input: any, fnOrDeps: any) =>
     ? input
     : typeof fnOrDeps === 'function'
       ? fnOrDeps
-      : undefined) as T;
+      : () => Effect.void) as T;
 
 const getEffect = <T,>(input: any, effectOrDeps: any) =>
   (Effect.isEffect(input) && !ManagedRuntime.isManagedRuntime(input)
@@ -460,9 +492,11 @@ const createRun =
 
     React.useEffect(() => {
       const scope = Effect.runSync(Scope.make());
-      runtime.runFork(effect.pipe(Effect.forkScoped, Scope.extend(scope)));
+      if (!runtime) console.log('no runtime useRun');
+      if (runtime)
+        runtime.runFork(effect.pipe(Effect.forkScoped, Scope.extend(scope)));
       return () => {
-        runtime.runFork(Scope.close(scope, Exit.void));
+        if (runtime) runtime.runFork(Scope.close(scope, Exit.void));
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [localRuntime, runtime, ...finalDeps]);
@@ -488,6 +522,7 @@ const createUse =
       localContext,
       localRuntime
     );
+
     return React.useMemo(
       () => runtime.runSync(effect),
       // eslint-disable-next-line react-hooks/exhaustive-deps

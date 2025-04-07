@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react-swc';
 import dayjs from 'dayjs';
 import postcssPresetEnv from 'postcss-preset-env';
 import { visualizer } from 'rollup-plugin-visualizer';
-import { defineConfig } from 'vite';
+import { defineConfig, type AliasOptions } from 'vite';
 import { checker } from 'vite-plugin-checker';
 import codegen from 'vite-plugin-graphql-codegen';
 import graphqlLoader from 'vite-plugin-graphql-loader';
@@ -21,6 +21,7 @@ import { config, internalPlugins, internalHooks } from './codegen.client';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error vite version mismatch
 export default defineConfig(async ({ mode }) => {
+  const isDev = mode === 'development';
   const devPlugins = [];
   if (mode === 'development') {
     const { i18nextHMRPlugin } = await import('i18next-hmr/vite');
@@ -169,14 +170,10 @@ export default defineConfig(async ({ mode }) => {
     },
     resolve: {
       alias: [
-        ...(mode === 'development'
-          ? [
-              {
-                find: 'i18n',
-                replacement: path.resolve(__dirname, './src/i18n.dev.ts'),
-              },
-            ]
-          : []),
+        isDev && {
+          find: 'i18n',
+          replacement: path.resolve(__dirname, './src/i18n.dev.ts'),
+        },
         {
           find: /(.+)\.gql$/,
           replacement: '/src/__generated/gql/operations.ts',
@@ -187,7 +184,7 @@ export default defineConfig(async ({ mode }) => {
           find: '@tabler/icons-react',
           replacement: '@tabler/icons-react/dist/esm/icons/index.mjs',
         },
-      ],
+      ].filter(Boolean) as AliasOptions,
       extensions: ['.js', '.ts', '.tsx'],
     },
     server: {

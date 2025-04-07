@@ -1,3 +1,4 @@
+import path from 'node:path';
 import type { CodegenConfig } from '@graphql-codegen/cli';
 // import { api as api } from 'api/public';
 import { api as clientApi } from './public';
@@ -17,7 +18,7 @@ export const internalPlugins: NonNullable<CodegenConfig['generates']> = {
     },
     plugins: ['@mizdra/graphql-codegen-typescript-fabbrica'],
   },
-  'src/__generated/gql/introspection.urql.json': {
+  'src/__generated/gql/introspection.client.json': {
     plugins: ['urql-introspection'],
   },
   'src/__generated/gql/mocks.msw.ts': {
@@ -57,9 +58,9 @@ export const internalPlugins: NonNullable<CodegenConfig['generates']> = {
 };
 
 export const internalHooks: NonNullable<CodegenConfig['hooks']> = {
-  // beforeAllFileWrite: ['rm -rf src/__generated/gql/*'],
   afterAllFileWrite: [
     'npx jscodeshift -t ./.codegen/transforms/strip-document-suffix.ts ./src/__generated/gql/operations.ts --parser=ts',
+    'npx jscodeshift -t ./.codegen/transforms/strip-input-fields.ts ./src/__generated/gql/types.ts --parser=ts',
   ],
 };
 
@@ -70,7 +71,9 @@ export const externalPlugins: NonNullable<CodegenConfig['generates']> = {
 };
 
 export const externalHooks: NonNullable<CodegenConfig['hooks']> = {
-  beforeDone: ['cd ./../api && yarn hasura:metadata:apply'],
+  beforeDone: [
+    `cd ${path.resolve(__dirname, './../api && yarn hasura:metadata:apply')}`,
+  ],
 };
 
 export const config: CodegenConfig = {
@@ -83,7 +86,10 @@ export const config: CodegenConfig = {
     ? internalHooks
     : Object.assign({}, internalHooks, externalHooks),
   overwrite: true,
-  schema: './../api/__generated/introspection.json',
+  schema: [
+    './../api/__generated/introspection.json',
+    './.codegen/local-schema.gql',
+  ],
   watch: false, //process.env.NODE_ENV === 'development',
 };
 

@@ -1,0 +1,10 @@
+mutation EndpointPanel_EndpointByPkUpdate(
+  $id: uuid!
+  $input: endpointSetInput!
+) {
+  # TODO: use @populate from @urql/populate-exchange (seems to not act on the directive right now)
+  updateEndpointByPk(pkColumns: { id: $id }, _set: $input) {
+    id
+    name
+  }
+}

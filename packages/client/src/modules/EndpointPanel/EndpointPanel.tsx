@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { Effect, pipe, Context } from 'effect';
+import { Effect, pipe, Context, Console } from 'effect';
 import type { RuntimeFiber } from 'effect/Fiber';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'common/components/Button/Button';
-import { WithRuntime, WithUpstream } from 'common/components/hoc/withRuntime';
+import { withRuntime } from 'common/components/hoc/withRuntime';
 import { WithStatic } from 'common/components/hoc/withStatic';
 import { List } from 'common/components/List/List';
 import { Stack } from 'common/components/Stack/Stack';
@@ -32,38 +32,43 @@ const labels = createLabels<Labels<Locales>>()(['addEndpointLabel']);
 
 export const EndpointPanel = pipe(
   observer(EndpointPanelView),
-  WithStatic({ labels }),
-  WithUpstream(AppRuntime),
-  WithRuntime(EndpointPanelRuntime, (configure, props) => {
-    const λ = configure({ debug: true });
-    const store = λ.use(Tags.EndpointStore);
 
-    const publish = λ.useFn((e: EventType<unknown>) =>
+  WithStatic({ labels }),
+  // WithUpstream(AppRuntime),
+  withRuntime(EndpointPanelRuntime, (configure, props) => {
+    const R = configure({ debug: false });
+    const store = R.use(Tags.EndpointStore);
+
+    const publish = R.useFn((e: EventType<unknown>) =>
       Effect.andThen(Tags.EventBus, (bus) => bus.publish(e))
     );
-    const publishQuery = λ.useFn(AppRuntime, (e: QueryType<unknown>) =>
+    const publishQuery = R.useFn(AppRuntime, (e: QueryType<unknown>) =>
       Effect.andThen(AppTags.QueryBus, (bus) => bus.publish(e))
     );
-    const publishCommand = λ.useFn(AppRuntime, (e: CommandType<unknown>) =>
+    const publishCommand = R.useFn(AppRuntime, (e: CommandType<unknown>) =>
       Effect.andThen(AppTags.CommandBus, (bus) => bus.publish(e))
     );
-    const register = λ.useFn(
+    const register = R.useFn(
       AppRuntime,
       (handler: (e: EventType<unknown>) => RuntimeFiber<boolean>) =>
         Effect.andThen(AppTags.ResponseBus, (bus) => bus.register(handler))
     );
 
-    λ.useRun(
+    console.log('react use appruntime', React.use(AppRuntime));
+    R.useRun(Console.log('test EndpointPanelRuntime'));
+    R.useRun(AppRuntime, Console.log('test AppRuntime'));
+
+    R.useRun(
       Effect.andThen(Tags.Initializer, (initializer) =>
         initializer.setup({
           componentId: props.id,
           publishCommand,
           publishQuery,
           register,
-          runtimeId: λ.runtime.id,
+          runtimeId: R.runtime.id,
         })
       ),
-      [props.id, publishCommand, publishQuery, register, λ]
+      [props.id, publishCommand, publishQuery, register, R]
     );
     return { publish, store };
   })
@@ -76,6 +81,7 @@ export const EndpointPanel = pipe(
 export function EndpointPanelView({ store, publish }: Props) {
   const { addEndpoint, endpoints } = useEndpointPanel(store, publish);
   const { text } = useTranslation<Labels<Locales>>();
+  console.log('react use appruntime', React.use(AppRuntime));
   return (
     <Stack className={styles.EndpointPanel}>
       <List>

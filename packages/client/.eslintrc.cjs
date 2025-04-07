@@ -49,6 +49,12 @@ module.exports = {
       },
     },
     {
+      extends: ['plugin:@graphql-eslint/schema-all'],
+      files: ['./.codegen/local-schema.gql'],
+      parser: '@graphql-eslint/eslint-plugin',
+      plugins: ['@graphql-eslint'],
+    },
+    {
       extends: ['plugin:@graphql-eslint/operations-all'],
       files: ['./src/**/*.gql'],
       parser: '@graphql-eslint/eslint-plugin',
@@ -69,9 +75,11 @@ module.exports = {
               ignorePattern: '^[A-Z][a-zA-Z0-9]+_[A-Z][a-zA-Z0-9]+$',
               style: 'PascalCase', // skip validation if this matches
             },
+            allowLeadingUnderscore: true,
           },
         ],
         'rulesdir/enforce-gql-prefix': 'error',
+        // '@graphql-eslint/scalar-leafs': 'off'
       },
     },
     {
@@ -105,6 +113,7 @@ module.exports = {
         './tests/**/*.{ts,tsx}',
         './src/**/*.test.{ts,tsx}',
         './src/*.test-d.ts',
+        './**/*.test.{ts,tsx}',
         'postcss.config.cjs',
       ],
       // eslint-disable-next-line sort-keys-fix/sort-keys-fix

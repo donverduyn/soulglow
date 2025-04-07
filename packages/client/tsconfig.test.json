@@ -22,6 +22,8 @@
     "src/**/*.test.tsx",
     ".*/**/*.test.ts",
     ".*/**/*.test.tsx",
+    "**/*.test.ts",
+    "**/*.test.tsx",
     "tests/**/*",
   ],
   "references": [

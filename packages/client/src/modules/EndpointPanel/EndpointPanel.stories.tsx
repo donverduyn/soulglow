@@ -6,7 +6,7 @@ import type { i18n } from 'i18next';
 import { HttpResponse } from 'msw';
 import { v4 as uuid } from 'uuid';
 import { defineEndpointFactory, dynamic } from '__generated/gql/fabbrica';
-import { mockEndpointPanelEndpointByIdQuery } from '__generated/gql/mocks.msw';
+import { mockEndpointPanelEndpointByPkQuery } from '__generated/gql/mocks.msw';
 import { ColorSchemeDecorator } from '_storybook/decorators/ColorSchemeDecorator';
 import { ThemeDecorator } from '_storybook/decorators/ThemeDecorator';
 import type { ExtendArgs } from '_storybook/utils/args';
@@ -23,10 +23,10 @@ const endpointFactory = defineEndpointFactory({
     url: dynamic(() => faker.internet.url()),
 
     // eslint-disable-next-line sort-keys-fix/sort-keys-fix
-    created_at: dynamic(() => faker.date.recent().toISOString()),
-    updated_at: dynamic(async ({ get }) => {
+    createdAt: dynamic(() => faker.date.recent().toISOString()),
+    updatedAt: dynamic(async ({ get }) => {
       const date = faker.date.between({
-        from: (await get('created_at')) as string,
+        from: (await get('createdAt')) as string,
         to: new Date(),
       });
       return date.toISOString();
@@ -34,11 +34,11 @@ const endpointFactory = defineEndpointFactory({
   },
 });
 
-const endpointSuccess = mockEndpointPanelEndpointByIdQuery(async (info) => {
+const endpointSuccess = mockEndpointPanelEndpointByPkQuery(async (info) => {
   console.log(info);
   // TODO: filter out fields that are not part of the query
   return HttpResponse.json({
-    data: { endpoint_by_pk: await endpointFactory.build() },
+    data: { endpointByPk: await endpointFactory.build() },
   });
 });
 
