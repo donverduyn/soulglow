@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Effect, pipe, Context, Console } from 'effect';
+import { Effect, pipe, Context } from 'effect';
 import type { RuntimeFiber } from 'effect/Fiber';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'common/components/Button/Button';
@@ -9,13 +9,11 @@ import { List } from 'common/components/List/List';
 import { Stack } from 'common/components/Stack/Stack';
 import { useReturn } from 'common/hooks/useReturn/useReturn';
 import { useTranslation } from 'common/hooks/useTranslation/useTranslation';
-import type { CommandType } from 'common/utils/command';
 import type { EventType } from 'common/utils/event';
 import { createLabels } from 'common/utils/i18n';
 import type { Labels, Locales } from 'common/utils/i18n';
-import type { QueryType } from 'common/utils/query';
 import { createEndpoint } from 'models/endpoint/Endpoint';
-import { addEndpointRequested } from 'models/endpoint/EndpointEvents';
+import { addEndpoint } from 'models/endpoint/EndpointEvents';
 import { AppRuntime } from 'modules/App/App.runtime';
 import * as AppTags from 'modules/App/tags';
 import { EndpointListItem } from './components/EndpointListItem';
@@ -26,7 +24,7 @@ import * as Tags from './tags';
 interface Props {
   readonly id: string;
   readonly publish: (msg: EventType<unknown>) => Promise<void>;
-  readonly store: Context.Tag.Service<typeof Tags.EndpointStore>;
+  readonly store: Context.Tag.Service<typeof Tags.EntityStore>;
 }
 const labels = createLabels<Labels<Locales>>()(['addEndpointLabel']);
 
@@ -37,26 +35,31 @@ export const EndpointPanel = pipe(
   // WithUpstream(AppRuntime),
   withRuntime(EndpointPanelRuntime, (configure, props) => {
     const R = configure({ debug: false });
-    const store = R.use(Tags.EndpointStore);
+    const store = R.use(Tags.EntityStore);
 
     const publish = R.useFn((e: EventType<unknown>) =>
       Effect.andThen(Tags.EventBus, (bus) => bus.publish(e))
     );
-    const publishQuery = R.useFn(AppRuntime, (e: QueryType<unknown>) =>
+    const publishQuery = R.useFn(AppRuntime, (e: EventType<unknown>) =>
       Effect.andThen(AppTags.QueryBus, (bus) => bus.publish(e))
     );
-    const publishCommand = R.useFn(AppRuntime, (e: CommandType<unknown>) =>
+    const publishCommand = R.useFn(AppRuntime, (e: EventType<unknown>) =>
       Effect.andThen(AppTags.CommandBus, (bus) => bus.publish(e))
     );
     const register = R.useFn(
       AppRuntime,
-      (handler: (e: EventType<unknown>) => RuntimeFiber<boolean>) =>
-        Effect.andThen(AppTags.ResponseBus, (bus) => bus.register(handler))
+      (
+        topic: string,
+        handler: (e: EventType<unknown>) => RuntimeFiber<boolean>
+      ) =>
+        Effect.andThen(AppTags.ResponseBus, (bus) =>
+          bus.register(topic, handler)
+        )
     );
 
-    console.log('react use appruntime', React.use(AppRuntime));
-    R.useRun(Console.log('test EndpointPanelRuntime'));
-    R.useRun(AppRuntime, Console.log('test AppRuntime'));
+    // console.log('react use appruntime', React.use(AppRuntime));
+    // R.useRun(Console.log('test EndpointPanelRuntime'));
+    // R.useRun(AppRuntime, Console.log('test AppRuntime'));
 
     R.useRun(
       Effect.andThen(Tags.Initializer, (initializer) =>
@@ -79,9 +82,9 @@ export const EndpointPanel = pipe(
  * It displays a list of endpoints and allows the user to add new endpoints.
  */
 export function EndpointPanelView({ store, publish }: Props) {
-  const { addEndpoint, endpoints } = useEndpointPanel(store, publish);
+  const { add, endpoints } = useEndpointPanel(store, publish);
   const { text } = useTranslation<Labels<Locales>>();
-  console.log('react use appruntime', React.use(AppRuntime));
+  // console.log('react use appruntime', React.use(AppRuntime));
   return (
     <Stack className={styles.EndpointPanel}>
       <List>
@@ -94,7 +97,7 @@ export function EndpointPanelView({ store, publish }: Props) {
       </List>
       <Button
         color='gray.0'
-        onClick={addEndpoint}
+        onClick={add}
       >
         {text(labels.addEndpointLabel)}
       </Button>
@@ -103,13 +106,13 @@ export function EndpointPanelView({ store, publish }: Props) {
 }
 
 function useEndpointPanel(
-  store: Context.Tag.Service<typeof Tags.EndpointStore>,
+  collection: Context.Tag.Service<typeof Tags.EntityStore>,
   publish: (msg: EventType<unknown>) => Promise<void>
 ) {
-  const endpoints = store.list;
-  const addEndpoint = React.useCallback(() => {
-    void publish(addEndpointRequested(createEndpoint()));
+  const endpoints = collection.getStore('endpoint').list;
+  const add = React.useCallback(() => {
+    void publish(addEndpoint(createEndpoint()));
   }, [publish]);
 
-  return useReturn({ addEndpoint, endpoints });
+  return useReturn({ add, endpoints });
 }

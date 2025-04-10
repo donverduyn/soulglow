@@ -5,9 +5,17 @@ import {
   GraphQLSchema,
   isObjectType,
   isInputObjectType,
+  OperationTypeNode,
 } from 'graphql';
 import memoize from 'moize';
-import { type AnyVariables, type TypedDocumentNode, createRequest } from 'urql';
+import {
+  type AnyVariables,
+  type OperationResult,
+  type TypedDocumentNode,
+  createRequest,
+  Client,
+  type GraphQLRequest,
+} from 'urql';
 import { createEventFactory } from './event';
 
 const getOperation = memoize((doc: DocumentNode) => {
@@ -46,7 +54,7 @@ export function getSchemaFromJson(
   return buildClientSchema(rawJson as unknown as IntrospectionQuery);
 }
 
-export const createGraphQLEvent = createEventFactory(
+export const createGraphQLRequestEvent = createEventFactory(
   'GraphQLRequest',
   <TData, TVariables extends AnyVariables>(
     query: TypedDocumentNode<TData, TVariables>,
@@ -61,3 +69,33 @@ export const createGraphQLEvent = createEventFactory(
     return { request, topic };
   }
 );
+
+export const createGraphQLResponseEvent = createEventFactory(
+  'GraphQLResponse',
+  <TData, TVariables extends AnyVariables>(
+    operationResult: OperationResult<TData, TVariables>,
+    topic: string
+  ) => {
+    return { operationResult, topic };
+  }
+);
+
+export const executeRequest = <TData, TVariables extends AnyVariables>(
+  client: Client,
+  request: GraphQLRequest<TData, TVariables>,
+  context: Record<string, unknown> = {}
+) => {
+  const type = getOperationType(request.query);
+  return type === OperationTypeNode.QUERY
+    ? client.executeQuery(request, context)
+    : type === OperationTypeNode.MUTATION
+      ? client.executeMutation(request, context)
+      : client.executeSubscription(request, context);
+  // const op = client.createRequestOperation(
+  //   getOperationType(request.query),
+  //   request,
+  //   context
+  // );
+  // const source = client.executeRequestOperation(op);
+  // return source;
+};

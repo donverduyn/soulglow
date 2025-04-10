@@ -24,7 +24,7 @@
     ".*/**/*.test.tsx",
     "**/*.test.ts",
     "**/*.test.tsx",
-    "tests/**/*",
+    "tests/**/*", "src/common/hooks/useExternalStore/useExternalStore.integration.test.tsx",
   ],
   "references": [
     {

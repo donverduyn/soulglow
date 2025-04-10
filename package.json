@@ -29,6 +29,7 @@
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.39.0",
     "@faker-js/faker": "^9.5.0",
+    "@graphql-codegen/add": "^5.0.3",
     "@graphql-codegen/cli": "^5.0.5",
     "@graphql-codegen/hasura-allow-list": "^3.1.0",
     "@graphql-codegen/import-types-preset": "^3.0.0",
@@ -74,6 +75,7 @@
     "@types/ws": "^8.5.14",
     "@typescript-eslint/eslint-plugin": "^8.28.0",
     "@typescript-eslint/parser": "^8.28.0",
+    "@urql/devtools": "^2.0.3",
     "@vite-pwa/assets-generator": "^0.2.4",
     "@vitejs/plugin-react": "^4.3.4",
     "@vitejs/plugin-react-swc": "^3.8.0",

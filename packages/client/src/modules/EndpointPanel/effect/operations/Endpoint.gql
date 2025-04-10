@@ -1,7 +1,0 @@
-query EndpointPanel_Endpoint {
-  endpoint {
-    id
-    name
-    url
-  }
-}

@@ -1,15 +1,16 @@
 import * as Mobx from 'mobx';
 import { v4 as uuid } from 'uuid';
 
-export interface Crudable<T extends Identifiable> {
+export interface Crudable<T extends Identifiable & { updatedAt: string }> {
   add: (entity: T) => void;
   count: Mobx.IComputedValue<number>;
   get: (id: string) => T | null;
   id: string;
   indexOf: (id: string) => number;
   list: Mobx.IComputedValue<T[]>;
+  purge: (validIds: string[]) => void;
   remove: (id: string) => void;
-  update: (id: string, map: (current: T) => void) => void;
+  update: (id: string, newProperties: Partial<T>) => void;
 }
 
 // TODO: we might want to consider a composable crud mapper, that allows to map actions on a certain entity to a store instance using an effect. This way, if we need to share state between different modules, we can fetch and populate from a single source. By combining this with global event replays, we can restore previous state on a component remount, if this is not synced on the backend.
@@ -46,9 +47,28 @@ export class EntityStore<T extends Identifiable> {
     this.store.delete(id);
   }
 
-  update(id: string, mapFn: (entity: T) => void) {
+  // Example of a method that could be used to update specific properties of an entity
+  update(id: string, newProperties: Partial<T>) {
     const entity = this.store.get(id);
-    if (entity) mapFn(entity);
+    if (entity) {
+      // Only update properties that are different
+      Object.keys(newProperties).forEach((key) => {
+        if (entity[key as keyof T] !== newProperties[key as keyof T]) {
+          entity[key as keyof T] = newProperties[key as keyof T]!; // Update the property
+        }
+      });
+    }
+  }
+
+  // Purge entities that are not in the provided list of IDs
+  purge(validIds: string[]) {
+    const allEntities = this.list; // Get all entities
+    const entitiesToRemove = allEntities.filter(
+      (entity) => !validIds.includes(entity.id)
+    );
+
+    // Remove the entities that are no longer valid
+    entitiesToRemove.forEach((entity) => this.remove(entity.id));
   }
 
   merge(other: EntityStore<T>) {
@@ -97,7 +117,7 @@ export const WithSelected = <
     }
   };
 };
-// export const withSelected = <T extends Identifiable, U>(
+// export const withSelected = <T extends Identifiable & { updatedAt: string }, U>(
 //   createStore: () => Crudable<T> & Mergable<U>
 // ) => {
 //   return () => {
@@ -129,7 +149,7 @@ export type Selectable<T> = {
   selectedItem: Mobx.IComputedValue<T | null>;
 };
 
-export const withFiltered = <T extends Identifiable, U>(
+export const withFiltered = <T extends Identifiable & { updatedAt: string }, U>(
   createStore: () => Crudable<T> & Mergable<U>
 ) => {
   return () => {

@@ -9,9 +9,9 @@ import { Stack } from 'common/components/Stack/Stack';
 import { TextInput } from 'common/components/TextInput/TextInput';
 import type { Publishable, EventType } from 'common/utils/event';
 import {
-  updateEndpointRequested as updateEndpoint,
-  removeEndpointRequested as removeEndpoint,
-  selectEndpointRequested as selectEndpoint,
+  updateEndpoint as updateEndpoint,
+  deleteEndpoint as removeEndpoint,
+  selectEndpoint as selectEndpoint,
 } from 'models/endpoint/EndpointEvents';
 import type { EndpointEntity } from '../effect/entities/Endpoint.entity';
 import { EndpointPanelRuntime } from '../EndpointPanel.runtime';

@@ -50,6 +50,15 @@ type Fallback<T, U> = [T, U] extends [infer A, infer B]
     : A
   : never;
 
+type Fallback2<T extends unknown[], U extends unknown[]> = [T, U] extends [
+  infer A extends unknown[],
+  infer B extends unknown[],
+]
+  ? unknown[] extends A
+    ? B
+    : A
+  : never;
+
 const UPSTREAM_KEY = '__runtimes';
 
 // export const WithUpstream =
@@ -339,7 +348,11 @@ type InvalidShapes =
   | { Provider: unknown }
   | undefined;
 
-type Sanitize<T> = T extends InvalidShapes ? unknown : T;
+type Sanitize<T> = T extends InvalidShapes
+  ? unknown
+  : T extends [infer Head, ...infer Tail]
+    ? [Sanitize<Head>, ...Sanitize<Tail>]
+    : T;
 
 const getDeps = (input: any, deps: React.DependencyList) =>
   (Effect.isEffect(input)
@@ -348,15 +361,28 @@ const getDeps = (input: any, deps: React.DependencyList) =>
       ? input
       : deps) as React.DependencyList;
 
-const getRuntime = <R, R1>(input: any, localContext: any, localRuntime: any) =>
-  (isReactContext<RuntimeContext<R1>>(input)
-    ? input !== localContext
-      ? // eslint-disable-next-line react-hooks/rules-of-hooks
-        React.use(input)
-      : localRuntime
-    : ManagedRuntime.isManagedRuntime(input)
-      ? input
-      : localRuntime) as RuntimeInstance<R | R1>;
+const getRuntime = <R, R1>(
+  input: any,
+  localContext: any,
+  localRuntime: any
+) => {
+  const result = (
+    isReactContext<RuntimeContext<R1>>(input)
+      ? input !== localContext
+        ? // eslint-disable-next-line react-hooks/rules-of-hooks
+          React.use(input)
+        : localRuntime
+      : ManagedRuntime.isManagedRuntime(input)
+        ? input
+        : localRuntime
+  ) as RuntimeInstance<R | R1> | undefined;
+
+  if (result === undefined) {
+    throw new Error(noRuntimeMessage);
+  } else {
+    return result;
+  }
+};
 
 const getEffectFn = <T,>(input: any, fnOrDeps: any) =>
   (!ManagedRuntime.isManagedRuntime(input) &&
@@ -376,19 +402,19 @@ const getEffect = <T,>(input: any, effectOrDeps: any) =>
 
 const createFn =
   <R,>(localContext: RuntimeContext<R>, localRuntime: RuntimeInstance<R>) =>
-  <T, T1, A, A1, E, E1, R1>(
+  <T extends unknown[], T1 extends unknown[], A, A1, E, E1, R1>(
     targetOrEffect:
       | RuntimeInstance<R1>
       | RuntimeContext<R1>
-      | ((value: T) => Effect.Effect<A, E, R | Scope.Scope>),
+      | ((...args: T) => Effect.Effect<A, E, R | Scope.Scope>),
     fnOrDeps?:
-      | ((value: T1) => Effect.Effect<A1, E1, Fallback<R1, R> | Scope.Scope>)
+      | ((...args: T1) => Effect.Effect<A1, E1, Fallback<R1, R> | Scope.Scope>)
       | React.DependencyList,
     deps: React.DependencyList = []
   ) => {
     const finalDeps = getDeps(fnOrDeps, deps);
     const effectFn = getEffectFn<
-      (value: Sanitize<T> | T1) => Effect.Effect<A | A1, E | E1, R | R1>
+      (...args: Sanitize<T> | T1) => Effect.Effect<A | A1, E | E1, R | R1>
     >(targetOrEffect, fnOrDeps);
 
     const runtime = getRuntime<R, R1>(
@@ -404,7 +430,7 @@ const createFn =
     }, [localRuntime, runtime, effectFn, ...finalDeps]);
 
     const emitter = React.useMemo(
-      () => new EventEmitter<Sanitize<T> | T1, A | A1>(),
+      () => new EventEmitter<[...(Sanitize<T> | T1)], A | A1>(),
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [localRuntime, runtime, ...finalDeps]
     );
@@ -414,7 +440,7 @@ const createFn =
           Stream.fromAsyncIterable(createAsyncIterator(emitter), () => {}),
           Stream.mapEffect(({ data, eventId }) =>
             pipe(
-              fnRef.current(data),
+              fnRef.current(...data),
               Effect.tap((v) => emitter.resolve(eventId)(v))
             )
           ),
@@ -435,7 +461,7 @@ const createFn =
 
     return emitter.emit as IsUnknown<Fallback<T1, Sanitize<T>>> extends true
       ? () => Promise<Fallback<A1, A>>
-      : (value: Fallback<T1, Sanitize<T>>) => Promise<Fallback<A1, A>>;
+      : (...args: Fallback2<T1, Sanitize<T>>) => Promise<Fallback<A1, A>>;
   };
 
 /*
@@ -443,7 +469,6 @@ This hook is used to run an effect in a runtime.
 It takes a context and an effect and runs the effect in the runtime provided by the context. It is used by useRuntimeFn. Assumes createRuntimeContext is used to create the context, because it expects a Layer when withRuntime is missing.
 */
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const noRuntimeMessage = `No runtime available. 
   Did you forget to wrap your component using WithRuntime?
   `;
@@ -471,11 +496,27 @@ const createRun =
       localRuntime
     );
 
+    const hasRun = React.useRef(false);
+    const scope = React.useRef<Scope.CloseableScope>(null as never);
+
+    if (!hasRun.current) {
+      scope.current = Effect.runSync(Scope.make());
+      runtime.runFork(
+        effect.pipe(Effect.forkScoped, Scope.extend(scope.current))
+      );
+      hasRun.current = true;
+    }
+
     React.useEffect(() => {
-      const scope = Effect.runSync(Scope.make());
-      runtime.runFork(effect.pipe(Effect.forkScoped, Scope.extend(scope)));
+      if (!hasRun.current) {
+        scope.current = Effect.runSync(Scope.make());
+        runtime.runFork(
+          effect.pipe(Effect.forkScoped, Scope.extend(scope.current))
+        );
+      }
       return () => {
-        runtime.runFork(Scope.close(scope, Exit.void));
+        runtime.runFork(Scope.close(scope.current, Exit.void));
+        hasRun.current = false;
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [localRuntime, runtime, ...finalDeps]);
@@ -520,18 +561,18 @@ This is converting push based events to a pull based stream,
 where the consumer has control through the provided effect.
 */
 
-class EventEmitter<T, A> {
+class EventEmitter<T extends unknown[], A> {
   private listeners: Array<(data: T, eventId: string) => void> = [];
   private resolvers: Map<string, (result: A) => void> = new Map();
   private eventQueue: Array<{ data: T; eventId: string }> = [];
 
-  emit = (data: T): Promise<A> => {
+  emit = (...args: T): Promise<A> => {
     const eventId = uuidv4();
     let resolver: (result: A) => void;
     const promise = new Promise<A>((resolve) => {
       resolver = resolve;
     });
-    this.eventQueue.push({ data, eventId });
+    this.eventQueue.push({ data: args, eventId });
     this.notifyListeners();
     this.resolvers.set(eventId, resolver!);
     return promise;
@@ -574,7 +615,7 @@ class EventEmitter<T, A> {
   }
 }
 
-async function* createAsyncIterator<T, A>(
+async function* createAsyncIterator<T extends unknown[], A>(
   emitter: EventEmitter<T, A>
 ): AsyncGenerator<{ data: T; eventId: string }> {
   while (true) {

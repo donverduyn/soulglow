@@ -31,7 +31,7 @@ describe('entityStoreCollection', () => {
 
   it('normalizes a single object', () => {
     const raw = { __typename: 'endpoint', id: '1' };
-    const result = store.normalize(raw);
+    const result = store.normalizeWithPurge(raw);
 
     expect(result).toBeInstanceOf(EndpointEntity);
     expect(store.get('endpoint', '1')).toBeInstanceOf(EndpointEntity);
@@ -42,7 +42,7 @@ describe('entityStoreCollection', () => {
       { __typename: 'endpoint', id: 'a' },
       { __typename: 'user', id: 'u1' },
     ];
-    const result = store.normalize(raw);
+    const result = store.normalizeWithPurge(raw);
 
     expect(Array.isArray(result)).toBeTruthy();
     expect(store.get('endpoint', 'a')).toBeInstanceOf(EndpointEntity);
@@ -57,7 +57,7 @@ describe('entityStoreCollection', () => {
       ],
     };
 
-    const result = store.normalize(nested) as {
+    const result = store.normalizeWithPurge(nested) as {
       list: (EndpointEntity | UserEntity)[];
     };
 
@@ -68,7 +68,7 @@ describe('entityStoreCollection', () => {
   });
 
   it('ignores unknown typenames', () => {
-    const result = store.normalize({
+    const result = store.normalizeWithPurge({
       __typename: 'unknown',
       id: 'x',
     });
@@ -77,7 +77,7 @@ describe('entityStoreCollection', () => {
   });
 
   it('can fetch all instances of a type', () => {
-    store.normalize([
+    store.normalizeWithPurge([
       { __typename: 'endpoint', id: 'e1' },
       { __typename: 'endpoint', id: 'e2' },
     ]);

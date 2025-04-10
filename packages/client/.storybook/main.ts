@@ -39,7 +39,7 @@ const config: StorybookConfig = {
     name: getAbsolutePath('@storybook/react-vite'),
     options: {
       builder: { viteConfigPath: './.storybook/vite.config.ts' },
-      strictMode: false,
+      strictMode: true,
     },
   },
   // logLevel: 'debug',

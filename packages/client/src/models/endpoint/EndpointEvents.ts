@@ -1,22 +1,18 @@
+import {
+  EndpointSetInput,
+  type EndpointInsertInput,
+} from '__generated/gql/types';
 import { createEvent } from 'common/utils/event';
-import type { Endpoint } from './Endpoint';
 
-export const addEndpointRequested = createEvent(
-  'ADD_ENDPOINT_REQUESTED',
-  (endpoint: Endpoint) => ({ endpoint })
+export const addEndpoint = createEvent<EndpointInsertInput>(
+  'ADD_ENDPOINT_REQUESTED'
 );
-
-export const removeEndpointRequested = createEvent(
-  'REMOVE_ENDPOINT_REQUESTED',
-  (id: string) => ({ id })
+export const deleteEndpoint = createEvent<{ id: string }>(
+  'REMOVE_ENDPOINT_REQUESTED'
 );
-
-export const updateEndpointRequested = createEvent(
-  'UPDATE_ENDPOINT_REQUESTED',
-  (endpoint: Partial<Endpoint>) => ({ endpoint })
+export const updateEndpoint = createEvent<EndpointSetInput>(
+  'UPDATE_ENDPOINT_REQUESTED'
 );
-
-export const selectEndpointRequested = createEvent(
-  'SELECT_ENDPOINT_REQUESTED',
-  (id: string) => ({ id })
+export const selectEndpoint = createEvent<{ id: string }>(
+  'SELECT_ENDPOINT_REQUESTED'
 );

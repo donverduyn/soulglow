@@ -1,5 +1,6 @@
 query EndpointPanel_EndpointList {
   endpoint {
+    __typename
     id
     name
     url

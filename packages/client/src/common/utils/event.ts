@@ -18,17 +18,29 @@ export const createEventMetadata = (source: string): EventMetadata => ({
 });
 
 export const createEvent =
-  <S extends string, T, R>(name: S, fn: (arg: T, event: EventMetadata) => R) =>
-  (arg: T, meta?: EventMetadata) => {
-    const eventMetadata = meta ?? createEventMetadata('unknown');
+  <T extends Record<string, unknown>>(type: string) =>
+  <E extends EventMetadata>(payload: T, event?: E): EventType<T> => {
     return {
-      name,
-      // eslint-disable-next-line sort-keys-fix/sort-keys-fix
-      event: eventMetadata,
-      payload: fn(arg, eventMetadata),
+      event: event ?? createEventMetadata('unknown'),
+      payload,
+      type,
     };
   };
 
-export type EventType<R, T = never, S extends string = string> = ReturnType<
-  ReturnType<typeof createEvent<S, T, R>>
->;
+export const createEventFactory =
+  <T1 extends unknown[], T2 extends Record<string, unknown>>(
+    type: string,
+    fn: (...args: T1) => T2
+  ) =>
+  (...args: Parameters<typeof fn>) =>
+    createEvent(type)(fn(...args)) as EventType<T2>;
+
+export type EventType<TPayload> = {
+  event: EventMetadata;
+  payload: TPayload;
+  type: string;
+};
+
+// export type EventType<R, T = never, S extends string = string> = ReturnType<
+//   ReturnType<typeof createEvent<S, T, R>>
+// >;

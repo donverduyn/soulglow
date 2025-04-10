@@ -1,10 +1,10 @@
-import { Context, type PubSub, type SubscriptionRef } from 'effect';
-import type { RuntimeFiber } from 'effect/Fiber';
-import type { CommandType } from 'common/utils/command';
-import type { EntityStore } from 'common/utils/entity';
+import { Context, type PubSub, type SubscriptionRef, Effect } from 'effect';
+import type {
+  EntityMapping,
+  EntityStoreCollection,
+} from 'common/utils/collection';
 import type { EventType } from 'common/utils/event';
-import type { QueryType } from 'common/utils/query';
-import type { EndpointEntity } from './effect/entities/Endpoint.entity';
+import { EndpointEntity } from './effect/entities/Endpoint.entity';
 import type { EventBusService } from './effect/services/EventBus.service';
 import type { InboundBusService } from './effect/services/InboundBus.service';
 import type { InitializerService } from './effect/services/Initializer.service';
@@ -14,10 +14,14 @@ const NAME = '@EndpointPanel';
 export type InitializerState = {
   componentId: string;
   initialized: boolean;
-  publishCommand: (event: CommandType<unknown>) => Promise<boolean>;
-  publishQuery: (event: QueryType<unknown>) => Promise<boolean>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  publishCommand: (event: EventType<any>) => Promise<boolean>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  publishQuery: (event: EventType<any>) => Promise<boolean>;
   register: (
-    fn: (event: EventType<unknown>) => RuntimeFiber<boolean | string>
+    topic: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fn: (event: EventType<any>) => Effect.Effect<any, any, any>
   ) => Promise<() => Promise<boolean>>;
   runtimeId: string;
 };
@@ -75,9 +79,13 @@ export class InboundBusChannel extends Context.Tag(`${NAME}/InboundBusChannel`)<
 //   Effect.Effect<string, never, Foo>
 // >() {}
 
-export class EndpointStore extends Context.Tag(`${NAME}/EndpointStore`)<
-  EndpointStore,
-  EntityStore<EndpointEntity>
+export const entityMapping = {
+  endpoint: EndpointEntity,
+} satisfies EntityMapping<'EndpointPanel'>;
+
+export class EntityStore extends Context.Tag(`${NAME}/EntityStore`)<
+  EntityStore,
+  EntityStoreCollection<typeof entityMapping>
 >() {}
 
 export class EventBus extends Context.Tag(`${NAME}/EventBus`)<

@@ -1,6 +1,8 @@
 import { makeAutoObservable } from 'mobx';
 
-interface EndpointContract extends Identifiable, Nameable, Resolvable {}
+interface EndpointContract extends Identifiable, Nameable, Resolvable {
+  updatedAt: string;
+}
 
 export class EndpointEntity {
   private endpoint: EndpointContract;
@@ -16,6 +18,10 @@ export class EndpointEntity {
 
   get url() {
     return this.endpoint.url;
+  }
+
+  get updatedAt() {
+    return this.endpoint.updatedAt;
   }
 
   set url(value: string) {

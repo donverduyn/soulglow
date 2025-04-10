@@ -13,7 +13,9 @@ import {
 } from 'effect';
 import { isFiber, type RuntimeFiber } from 'effect/Fiber';
 
-export abstract class BusService<T> {
+export abstract class BusService<
+  T extends { payload: { action?: string }; topic?: string; type: string },
+> {
   private count = Effect.runSync(Ref.make(0));
   constructor(
     private readonly bus: PubSub.PubSub<T>,
@@ -25,6 +27,7 @@ export abstract class BusService<T> {
   }
 
   register<A, E, R>(
+    topic: string = '*',
     fn: (event: T) => Effect.Effect<A, E, R> | RuntimeFiber<A, E>
   ) {
     const bus = this.bus;
@@ -54,12 +57,29 @@ export abstract class BusService<T> {
         );
         while (true) {
           const item = yield* Queue.take(queue);
-          const effect = fn(item);
-          const value = yield* isFiber(effect) ? Fiber.join(effect) : effect;
-          yield* Console.log(
-            `[${name}] confirmation ${String(!value ? 'failed' : value)}`,
-            item
-          );
+          if (
+            // @ts-expect-error
+            item.payload.topic === topic ||
+            item.topic === topic ||
+            topic === '*'
+          ) {
+            if (
+              item.type === 'SystemAction' &&
+              item.payload.action === 'close'
+            ) {
+              yield* Scope.close(scope, Exit.void);
+            } else {
+              console.log(`[${name}] sending`, item, topic);
+              const effect = fn(item);
+              const value = yield* isFiber(effect)
+                ? Fiber.join(effect)
+                : effect;
+              yield* Console.log(
+                `[${name}] confirmation ${String(!value ? 'failed' : value)}`,
+                item
+              );
+            }
+          }
         }
       }).pipe(Effect.forkScoped, Scope.extend(scope));
       yield* Effect.addFinalizer(() => Scope.close(scope, Exit.void));

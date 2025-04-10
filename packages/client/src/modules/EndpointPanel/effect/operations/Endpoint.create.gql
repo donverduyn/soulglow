@@ -1,6 +1,8 @@
 mutation EndpointPanel_EndpointCreate($input: endpointInsertInput!) {
   insertEndpointOne(object: $input) {
+    __typename
     id
     name
+    url
   }
 }
