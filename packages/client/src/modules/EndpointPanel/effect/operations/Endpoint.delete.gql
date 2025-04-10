@@ -1,0 +1,6 @@
+mutation EndpointPanel_EndpointDelete($id: uuid!) {
+  deleteEndpointByPk(id: $id) {
+    id
+    name
+  }
+}

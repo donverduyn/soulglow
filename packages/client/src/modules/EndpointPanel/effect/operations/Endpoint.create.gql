@@ -1,0 +1,6 @@
+mutation EndpointPanel_EndpointCreate($input: endpointInsertInput!) {
+  insertEndpointOne(object: $input) {
+    id
+    name
+  }
+}

@@ -1,0 +1,7 @@
+query EndpointPanel_EndpointList {
+  endpoint {
+    id
+    name
+    url
+  }
+}

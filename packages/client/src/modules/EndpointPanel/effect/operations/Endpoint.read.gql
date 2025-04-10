@@ -1,0 +1,6 @@
+query EndpointPanel_EndpointRead($id: uuid!) {
+  endpointByPk(id: $id) {
+    id
+    name
+  }
+}
