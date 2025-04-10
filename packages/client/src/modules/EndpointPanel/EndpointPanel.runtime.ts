@@ -273,8 +273,8 @@ export const EndpointPanelRuntime = pipe(
                 EndpointPanel_EndpointDelete,
                 {
                   // @ts-expect-error
-
-                  id: e.payload,
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                  id: e.payload.id,
                   // input: {
                   //   id: uuid(),
                   //   name: 'test',

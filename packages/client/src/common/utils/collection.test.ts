@@ -4,15 +4,19 @@ import { EntityStoreCollection } from './collection';
 
 class EndpointEntity {
   id: string;
-  constructor(data: { id: string }) {
+  updatedAt: string;
+  constructor(data: { id: string; updatedAt: string }) {
     this.id = data.id;
+    this.updatedAt = data.updatedAt;
   }
 }
 
 class UserEntity {
   id: string;
-  constructor(data: { id: string }) {
+  updatedAt: string;
+  constructor(data: { id: string; updatedAt: string }) {
     this.id = data.id;
+    this.updatedAt = data.updatedAt;
   }
 }
 
@@ -89,7 +93,9 @@ describe('entityStoreCollection', () => {
 
   it('getStore returns correct store instance', () => {
     const endpointStore = store.getStore('endpoint');
-    endpointStore.add(new EndpointEntity({ id: 'manual' }));
+    endpointStore.add(
+      new EndpointEntity({ id: 'manual', updatedAt: new Date().toISOString() })
+    );
 
     const result = store.get('endpoint', 'manual');
     expect(result).toBeInstanceOf(EndpointEntity);

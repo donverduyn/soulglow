@@ -1,4 +1,5 @@
-import type { QueryType } from 'common/utils/query';
+import type { EventType } from 'common/utils/event';
 import { BusService } from './Bus.service';
 
-export class QueryBusService extends BusService<QueryType<unknown>> {}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class QueryBusService extends BusService<EventType<any>> {}

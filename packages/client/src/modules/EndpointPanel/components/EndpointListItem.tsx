@@ -76,7 +76,7 @@ export function EndpointListItemView(props: Props) {
 const useEndpointListItem = ({ endpoint, publish }: Props) => {
   const { id } = endpoint;
   const remove = React.useCallback(
-    () => publish(removeEndpoint(id)),
+    () => publish(removeEndpoint({ id })),
     [publish, id]
   );
 
@@ -86,7 +86,7 @@ const useEndpointListItem = ({ endpoint, publish }: Props) => {
   );
 
   const select = React.useCallback(
-    () => publish(selectEndpoint(id)),
+    () => publish(selectEndpoint({ id })),
     [publish, id]
   );
 

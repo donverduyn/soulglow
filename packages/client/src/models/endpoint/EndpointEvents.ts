@@ -10,7 +10,7 @@ export const addEndpoint = createEvent<EndpointInsertInput>(
 export const deleteEndpoint = createEvent<{ id: string }>(
   'REMOVE_ENDPOINT_REQUESTED'
 );
-export const updateEndpoint = createEvent<EndpointSetInput>(
+export const updateEndpoint = createEvent<Partial<EndpointSetInput>>(
   'UPDATE_ENDPOINT_REQUESTED'
 );
 export const selectEndpoint = createEvent<{ id: string }>(

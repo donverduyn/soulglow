@@ -1,12 +1,13 @@
 import type { EventType } from 'common/utils/event';
 
-export const endpointAddButtonClicked = (): EventType<unknown> => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const endpointAddButtonClicked = (): EventType<any> => {
   return {
     event: {
       source: 'EndpointPanel',
       timestamp: Date.now(),
     },
-    name: 'endpointAddButtonClicked',
     payload: {},
+    type: 'endpointAddButtonClicked',
   };
 };
