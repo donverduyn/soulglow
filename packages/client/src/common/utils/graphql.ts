@@ -65,7 +65,7 @@ export const createGraphQLRequestEvent = createEventFactory(
     if (name === undefined) {
       throw new Error('Operation name is required');
     }
-    const topic = `gql/${String(name)}:${String(request.key)}`;
+    const topic = `gql/${String(name)}/${String(request.key)}`;
     return { request, topic };
   }
 );

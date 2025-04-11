@@ -16,7 +16,11 @@ import { isFiber, type RuntimeFiber } from 'effect/Fiber';
 export abstract class BusService<
   T extends { payload: { action?: string }; topic?: string; type: string },
 > {
-  private count = Effect.runSync(Ref.make(0));
+  private topicSubCount = Effect.runSync(Ref.make<Record<string, number>>({}));
+  private exitHandlers = Effect.runSync(
+    Ref.make<Record<string, (() => Effect.Effect<void>)[]>>({})
+  );
+
   constructor(
     private readonly bus: PubSub.PubSub<T>,
     private readonly name: string
@@ -26,13 +30,24 @@ export abstract class BusService<
     return this.bus.pipe(PubSub.publish(event));
   }
 
+  registerExit(topic: string, fn: () => Effect.Effect<void>) {
+    return pipe(
+      this.exitHandlers,
+      Ref.update((handlers) => ({
+        ...handlers,
+        [topic]: (handlers[topic] ?? []).concat(fn),
+      }))
+    );
+  }
+
   register<A, E, R>(
     topic: string = '*',
     fn: (event: T) => Effect.Effect<A, E, R> | RuntimeFiber<A, E>
   ) {
     const bus = this.bus;
     const name = this.name;
-    const count = this.count;
+    const topicSubCount = this.topicSubCount;
+    const exitHandlers = this.exitHandlers;
 
     return Effect.gen(function* () {
       const runtime = yield* Effect.runtime();
@@ -40,20 +55,48 @@ export abstract class BusService<
 
       yield* Effect.gen(function* () {
         const queue = yield* PubSub.subscribe(bus);
-        yield* Ref.updateAndGet(count, (c) => c + 1).pipe(
+        yield* Ref.updateAndGet(topicSubCount, (c) => ({
+          ...c,
+          [topic]: c[topic] ? c[topic] + 1 : 1,
+        })).pipe(
           Effect.andThen((count) =>
             Console.log(
-              `[${name}] registering subscriber, count: ${String(count)}`
+              `[${name}] registering subscriber on ${topic}, count: ${String(count[topic])}`
             )
           )
         );
         yield* Effect.addFinalizer(() =>
-          Effect.gen(function* () {
-            yield* Ref.updateAndGet(count, (c) => c - 1);
-            yield* Console.log(
-              `[${name}] unregistering subscriber, count: ${String(yield* Ref.get(count))}`
-            );
-          })
+          pipe(
+            Ref.updateAndGet(topicSubCount, (c) => ({
+              ...c,
+              [topic]: c[topic] - 1,
+            })),
+            Effect.tap((count) =>
+              Console.log(
+                `[${name}] unregistering subscriber for topic ${topic}, count: ${String(count[topic])}`
+              )
+            ),
+            Effect.tap((count) => {
+              return Effect.gen(function* () {
+                if (count[topic] === 0) {
+                  yield* Console.log(
+                    `[${name}] calling exit handlers for topic ${topic}`
+                  );
+                  const handlers = yield* Ref.get(exitHandlers);
+                  const exitFns = handlers[topic] ?? [];
+                  yield* Effect.forEach(exitFns, (fn) => fn());
+                  yield* Ref.update(exitHandlers, (handlers) => ({
+                    ...handlers,
+                    [topic]: [],
+                  }));
+                } else {
+                  yield* Console.log(
+                    `[${name}] no exit handlers for topic ${topic}`
+                  );
+                }
+              });
+            })
+          )
         );
         while (true) {
           const item = yield* Queue.take(queue);

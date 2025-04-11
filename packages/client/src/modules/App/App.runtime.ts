@@ -5,7 +5,17 @@ import {
   type OperationResult,
 } from '@urql/core';
 import { cacheExchange } from '@urql/exchange-graphcache';
-import { pipe, Layer, Effect, PubSub, Stream, Console, Queue } from 'effect';
+import {
+  pipe,
+  Layer,
+  Effect,
+  PubSub,
+  Stream,
+  Console,
+  Queue,
+  Deferred,
+  Ref,
+} from 'effect';
 import { toAsyncIterable } from 'wonka';
 import schema from '__generated/gql/introspection.client.json';
 import * as Operations from '__generated/gql/operations';
@@ -97,7 +107,10 @@ export const AppRuntime = pipe(
       const urql = yield* Tags.UrqlClient;
       const queryBusChannel = yield* Tags.QueryBusChannel;
       const commandBusChannel = yield* Tags.CommandBusChannel;
-      const responseBusChannel = yield* Tags.ResponseBusChannel;
+      const responseBus = yield* Tags.ResponseBus;
+
+      // Create a Ref to hold the array of active subscription keys
+      const activeSubscriptionKeysRef = yield* Ref.make<string[]>([]);
 
       const streams: Stream.Stream<
         EventType<
@@ -125,17 +138,53 @@ export const AppRuntime = pipe(
         ),
         Stream.flatMap(
           ({ source, event }) =>
-            Stream.fromAsyncIterable(
-              pipe(source, toAsyncIterable),
-              () => {}
-            ).pipe(Stream.map((result) => ({ event, result }))),
-          { concurrency: 'unbounded', switch: true }
+            Stream.unwrap(
+              Effect.gen(function* () {
+                const topic = event.payload.topic;
+
+                const activeKeys = yield* Ref.get(activeSubscriptionKeysRef);
+                if (activeKeys.includes(topic)) {
+                  console.log(
+                    `[AppRuntime] Skipping subscription for topic: ${topic} (already active)`
+                  );
+                  return Stream.empty;
+                }
+
+                yield* Ref.update(activeSubscriptionKeysRef, (keys) => {
+                  return keys.concat(topic);
+                });
+
+                const stopSignal = yield* Deferred.make<boolean>();
+                yield* responseBus.registerExit(topic, () =>
+                  Effect.gen(function* () {
+                    yield* Deferred.succeed(stopSignal, true);
+                    yield* Console.log(
+                      `[AppRuntime] Subscription ended for topic: ${topic}`
+                    );
+                    yield* Ref.update(activeSubscriptionKeysRef, (keys) => {
+                      const newKeys = keys.slice();
+                      const index = newKeys.indexOf(topic);
+                      if (index > -1) newKeys.splice(index, 1);
+                      return newKeys;
+                    });
+                  })
+                );
+
+                return pipe(
+                  Stream.fromAsyncIterable(
+                    pipe(source, toAsyncIterable),
+                    () => {}
+                  ),
+                  Stream.map((result) => ({ event, result })),
+                  Stream.interruptWhen(Deferred.await(stopSignal))
+                );
+              })
+            ),
+          { concurrency: 'unbounded' }
         ),
         Stream.tap(({ result, event }) =>
-          responseBusChannel.pipe(
-            PubSub.publish(
-              createGraphQLResponseEvent(result, event.payload.topic)
-            )
+          responseBus.publish(
+            createGraphQLResponseEvent(result, event.payload.topic)
           )
         ),
         Stream.runDrain,
@@ -230,13 +279,13 @@ export const AppRuntime = pipe(
     )
   ),
 
-  Layer.merge(queryBus),
+  Layer.provideMerge(queryBus),
   Layer.provide(queryBusChannel),
 
-  Layer.merge(commandBus),
+  Layer.provideMerge(commandBus),
   Layer.provide(commandBusChannel),
 
-  Layer.merge(responseBus),
+  Layer.provideMerge(responseBus),
   Layer.provide(responseBusChannel),
 
   Layer.merge(browserLogger),
