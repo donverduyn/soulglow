@@ -6,7 +6,10 @@ import type { i18n } from 'i18next';
 import { HttpResponse } from 'msw';
 import { v4 as uuid } from 'uuid';
 import { defineEndpointFactory, dynamic } from '__generated/gql/fabbrica';
-import { mockEndpointPanelEndpointListQuery } from '__generated/gql/mocks.msw';
+import {
+  mockEndpointPanelEndpointCreateMutation,
+  mockEndpointPanelEndpointListQuery,
+} from '__generated/gql/mocks.msw';
 import { ColorSchemeDecorator } from '_storybook/decorators/ColorSchemeDecorator';
 import { RuntimeDecorator } from '_storybook/decorators/RuntimeDecorator';
 import { ThemeDecorator } from '_storybook/decorators/ThemeDecorator';
@@ -44,6 +47,26 @@ const mockEndpointList = mockEndpointPanelEndpointListQuery(async (info) => {
   });
 });
 
+const stripNulls = <T extends Record<string, unknown>>(obj: T) => {
+  return Object.entries(obj).reduce(
+    (acc, [key, value]) => {
+      return value === null || value === undefined
+        ? acc
+        : Object.assign(acc, { [key]: value });
+    },
+    {} as { [K in keyof T]: NonNullable<T[K]> }
+  );
+};
+
+const mockEndpointCreate = mockEndpointPanelEndpointCreateMutation(
+  async (info) => {
+    const input = stripNulls(info.variables.input);
+    return HttpResponse.json({
+      data: { insertEndpointOne: await endpointFactory.build(input) },
+    });
+  }
+);
+
 const meta: Meta<ExtendArgs<typeof EndpointPanel>> = {
   argTypes: {
     // colorTheme: {
@@ -61,7 +84,7 @@ const meta: Meta<ExtendArgs<typeof EndpointPanel>> = {
     a11y: { test: 'todo' },
     docs: prettierForSourceInDev(),
     layout: 'centered',
-    msw: { handlers: { runtime: [mockEndpointList] }}
+    msw: { handlers: { runtime: [mockEndpointList, mockEndpointCreate] } },
   },
   render: ({ id }) => <EndpointPanel id={id} />,
   subcomponents: { EndpointListItemView } as Record<
