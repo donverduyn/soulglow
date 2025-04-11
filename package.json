@@ -146,7 +146,7 @@
     "vite-plugin-graphql-codegen": "^3.5.0",
     "vite-plugin-graphql-loader": "^4.0.4",
     "vite-plugin-inspect": "^11.0.0",
-    "vite-plugin-pwa": "^0.21.1",
+    "vite-plugin-pwa": "^1.0.0",
     "vite-plugin-static-copy": "^2.2.0",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.0.9",
