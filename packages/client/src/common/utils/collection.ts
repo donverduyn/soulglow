@@ -83,9 +83,11 @@ export class EntityStoreCollection<
   }
 
   normalizeWithPurge(data: unknown) {
+    let result: unknown;
     runInAction(() => {
       const idBuckets: Record<keyof T, string[]> = {} as never;
-      this._normalize(data, idBuckets);
+      const normalized = this._normalize(data, idBuckets);
+      result = normalized;
 
       // Purge all stores based on what was seen
       for (const typename in this.stores) {
@@ -94,6 +96,7 @@ export class EntityStoreCollection<
         store.purge(keepIds);
       }
     });
+    return result;
   }
 
   private loadingState: Record<keyof T, boolean> = {} as never;
