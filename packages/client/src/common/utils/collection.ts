@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 import { TypenameInModule, type ModuleName } from '__generated/gql/modules';
 import { EntityStore } from './entity';
 
@@ -31,7 +31,7 @@ export class EntityStoreCollection<
 
   private _normalize(
     data: unknown,
-    idBuckets?: { [K in keyof T]?: Set<string> }
+    idBuckets: Record<keyof T, string[]>
   ): unknown {
     if (Array.isArray(data)) {
       return data.map((item) => this._normalize(item, idBuckets));
@@ -51,10 +51,9 @@ export class EntityStoreCollection<
 
       const store = this.stores[typename];
 
-      if (idBuckets) {
-        idBuckets[typename] ??= new Set();
-        idBuckets[typename]!.add(id);
-      }
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      idBuckets[typename] ??= [];
+      idBuckets[typename].push(id);
 
       const existing = store.get(id);
       if (existing) {
@@ -83,100 +82,18 @@ export class EntityStoreCollection<
     return data;
   }
 
-  normalizeWithPurge(data: unknown): unknown {
-    const idBuckets: { [K in keyof T]?: Set<string> } = {};
-    const normalized = this._normalize(data, idBuckets);
+  normalizeWithPurge(data: unknown) {
+    runInAction(() => {
+      const idBuckets: Record<keyof T, string[]> = {} as never;
+      this._normalize(data, idBuckets);
 
-    // Purge all stores based on what was seen
-    for (const typename in this.stores) {
-      const store = this.stores[typename];
-      const keepIds = idBuckets[typename as keyof T] ?? new Set();
-      store.list.forEach((entity) => {
-        if (!keepIds.has(entity.id)) {
-          store.remove(entity.id);
-        }
-      });
-    }
-
-    return normalized;
-  }
-
-  // Normalize data and collect IDs in buckets for each type
-  private normalizeAndCollectIds(
-    data: unknown,
-    idBuckets: Record<keyof T, Set<string>>
-  ): unknown {
-    if (Array.isArray(data)) {
-      return data.map((item) => this.normalizeAndCollectIds(item, idBuckets));
-    }
-
-    if (
-      data &&
-      typeof data === 'object' &&
-      '__typename' in data &&
-      'id' in data &&
-      'updatedAt' in data
-    ) {
-      const { __typename, id } = data as {
-        __typename: string;
-        id: string;
-      };
-      const typename = __typename.toLowerCase() as keyof T;
-
-      // Normalize the entity
-      const entity = this.normalizeEntity(
-        typename,
-        data as {
-          __typename: string;
-          id: string;
-          updatedAt: string;
-        }
-      );
-
-      // Collect the ID for the entity type
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (!idBuckets[typename]) {
-        idBuckets[typename] = new Set();
+      // Purge all stores based on what was seen
+      for (const typename in this.stores) {
+        const store = this.stores[typename];
+        const keepIds = idBuckets[typename as keyof T] ?? [];
+        store.purge(keepIds);
       }
-      idBuckets[typename].add(id);
-
-      return entity;
-    }
-
-    if (data && typeof data === 'object') {
-      const result: Record<string, unknown> = {};
-      for (const key in data) {
-        result[key] = this.normalizeAndCollectIds(
-          data[key as keyof typeof data],
-          idBuckets
-        );
-      }
-      return result;
-    }
-
-    return data;
-  }
-
-  // Normalize an individual entity
-
-  private normalizeEntity(
-    typename: keyof T,
-    data: { __typename: string; id: string; updatedAt: string }
-  ) {
-    const store = this.stores[typename];
-    const existingEntity = store.get(data.id);
-
-    if (existingEntity) {
-      if (existingEntity.updatedAt !== data.updatedAt) {
-        store.update(existingEntity.id, data as InstanceType<T[keyof T]>);
-      }
-      return existingEntity;
-    }
-
-    const Ctor = this.entityMapping[typename];
-    const newEntity = new Ctor(data);
-    store.add(newEntity as InstanceType<T[keyof T]>);
-    return newEntity;
+    });
   }
 
   private loadingState: Record<keyof T, boolean> = {} as never;

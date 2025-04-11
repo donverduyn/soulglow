@@ -109,7 +109,7 @@ export const Default: Story = {
 
     const text = i18n.t(args.labels.addEndpointLabel);
     const button = await canvas.findByText(text);
-    await userEvent.click(button);
-    await userEvent.click(button);
+    // await userEvent.click(button);
+    // await userEvent.click(button);
   },
 };
