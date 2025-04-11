@@ -80,8 +80,8 @@ export const internalHooks: NonNullable<CodegenConfig['hooks']> = {
   afterAllFileWrite: [
     'npx jscodeshift -t ./.codegen/transforms/strip-document-suffix.ts ./src/__generated/gql/operations.ts --parser=ts',
     'npx jscodeshift -t ./.codegen/transforms/strip-input-fields.ts ./src/__generated/gql/types.ts --parser=ts',
-    'tsx ./.codegen/transforms/strip-client-schema.ts src/__generated/gql/introspection.client.json',
-    'tsx ./.codegen/transforms/codegen-plugin-modules.ts',
+    'npx tsx ./.codegen/transforms/strip-client-schema.ts src/__generated/gql/introspection.client.json',
+    'npx tsx ./.codegen/transforms/codegen-plugin-modules.ts',
   ],
 };
 

@@ -36,7 +36,7 @@ const endpointFactory = defineEndpointFactory({
   },
 });
 
-const endpointSuccess = mockEndpointPanelEndpointListQuery(async (info) => {
+const mockEndpointList = mockEndpointPanelEndpointListQuery(async (info) => {
   console.log(info);
   // TODO: filter out fields that are not part of the query
   return HttpResponse.json({
@@ -61,6 +61,7 @@ const meta: Meta<ExtendArgs<typeof EndpointPanel>> = {
     a11y: { test: 'todo' },
     docs: prettierForSourceInDev(),
     layout: 'centered',
+    msw: { handlers: { runtime: [mockEndpointList] }}
   },
   render: ({ id }) => <EndpointPanel id={id} />,
   subcomponents: { EndpointListItemView } as Record<

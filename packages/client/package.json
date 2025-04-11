@@ -6,7 +6,7 @@
   "scripts": {
     "bootstrap": "yarn playwright:install && patch-package && yarn api:generate && yarn codegen:client --no-external",
     "bootstrap:ci": "patch-package && yarn api:generate && yarn codegen:client --no-external",
-    "playwright:install": "yarn playwright install --with-deps --only-shell chromium",
+    "playwright:install": "yarn playwright install --with-deps chromium",
     "api:generate": "rm -rf ./src/__generated && tsx -e \"import { generate } from './scripts/api-gen'; generate('./openapi.yml', './src/__generated/api');\"",
     "dev": "vite --open",
     "debug": "INTERNAL_CHROMIUM=true vite --debug",

@@ -107,6 +107,7 @@
 		"onAutoForward": "notify"
 	},
 	"containerEnv": {
+    "TMPDIR": "/home/vscode/tmp",
 		"ESLINT_USE_FLAT_CONFIG": "false",
     "NODE_NO_WARNINGS": "1",
 		"EDITOR": "code",
